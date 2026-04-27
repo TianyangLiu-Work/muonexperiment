@@ -13,7 +13,6 @@ _os.environ['VECLIB_MAXIMUM_THREADS'] = '1'
 import sys, csv, time, json
 from pathlib import Path
 import numpy as np
-from numpy.linalg import svd
 from tqdm import tqdm
 
 PROJECT = Path(_os.environ.get("MUON_PROJECT", "/data/home/tyliu/muonexperiment"))
@@ -26,7 +25,7 @@ from muonlib.algorithms import (MuonOptimizer, SGDOptimizer, AdamOptimizer,
 # ── Detailed logging (v2) ───────────────────────────
 from muonlib.detailed_logger import DetailedLogger
 LOG_DIR = PROJECT / "logs_v2"
-RESULTS_V2 = PROJECT / "results_v2"
+RESULTS_V2 = PROJECT / "results_v3"
 RESULTS_V2.mkdir(parents=True, exist_ok=True)
 from muonlib.data import (generate_target_matrix, generate_measurement_matrices,
                            compute_gradient_matrix_sensing, compute_loss_matrix_sensing)
@@ -67,7 +66,7 @@ def run_ms(algo, d, r, lr, noise, dist, spectrum, kappa, init_scale, seed, iters
     logger = DetailedLogger(LOG_DIR, "E03_detailed", algo, {k: v for k, v in locals().items()
                              if k in ("d", "seed", "lr", "r", "noise", "dist",
                                       "spectrum", "kappa", "init_scale", "iters",
-                                      "L", "m", "n", "wd", "gamma", "p", "q")}, svd_interval=10)
+                                      "L", "m", "n", "wd", "gamma", "p", "q")})
     """运行一次 Matrix Sensing 实验，返回结果字典。"""
     X_star = generate_target_matrix(d, r=r, spectrum=spectrum, kappa=kappa, seed=seed)
     m = int(2 * d * r)
@@ -83,35 +82,35 @@ def run_ms(algo, d, r, lr, noise, dist, spectrum, kappa, init_scale, seed, iters
     t_start = time.time()
     k_epsilon = -1
 
-    for step in range(iters):
-        G = compute_gradient_matrix_sensing(X, A_matrices, y)
-        X = opt.step(X, G, lr)
-        loss = float(compute_loss_matrix_sensing(X, A_matrices, y))
-        losses.append(loss)
-                # Detailed logging (v2)
-        grad_norm = float(np.linalg.norm(G, 'fro'))
-        grad_max = float(np.max(np.abs(G)))
-        X_norm = float(np.linalg.norm(X, 'fro'))
-        extra = {"grad_max": grad_max, "X_norm": X_norm}
-        if hasattr(opt, "momentum") and opt.momentum is not None:
-            extra["momentum_norm"] = float(np.linalg.norm(opt.momentum, 'fro'))
-        if algo.startswith("Muon") and step % 10 == 0:
-            U_svd, s_svd, Vt_svd = svd(G, full_matrices=False)
-            D = U_svd @ Vt_svd
-            sv_log = s_svd
-            extra["update_norm"] = float(np.linalg.norm(D, 'fro'))
-        else:
-            sv_log = None
-        logger.log_step(step, loss, grad_norm=grad_norm, sv=sv_log, **extra)
+    try:
+        for step in range(iters):
+            loss = float(compute_loss_matrix_sensing(X, A_matrices, y))
+            losses.append(loss)
+            G = compute_gradient_matrix_sensing(X, A_matrices, y)
+            X = opt.step(X, G, lr)
+            # Detailed logging (v2)
+            grad_norm = float(np.linalg.norm(G, 'fro'))
+            grad_max = float(np.max(np.abs(G)))
+            X_norm = float(np.linalg.norm(X, 'fro'))
+            extra = {"grad_max": grad_max, "X_norm": X_norm}
+            if hasattr(opt, "momentum") and opt.momentum is not None:
+                extra["momentum_norm"] = float(np.linalg.norm(opt.momentum, 'fro'))
+            if algo.startswith("Muon") and step % 10 == 0:
+                sv_log = opt._last_singular_values
+                extra["update_norm"] = opt._last_update_norm
+            else:
+                sv_log = None
+            logger.log_step(step, loss, grad_norm=grad_norm, sv=sv_log, **extra)
 
-        if k_epsilon < 0 and loss <= EPSILON:
-            k_epsilon = step + 1
+            if k_epsilon < 0 and loss <= EPSILON:
+                k_epsilon = step + 1
 
-    elapsed = time.time() - t_start
-    if k_epsilon < 0:
-        k_epsilon = iters + 1
-    # ── Close detailed log ───────────────────────────
-    logger.close()
+        elapsed = time.time() - t_start
+        if k_epsilon < 0:
+            k_epsilon = iters + 1
+    finally:
+        # ── Close detailed log ───────────────────────────
+        logger.close()
 
 
     return {

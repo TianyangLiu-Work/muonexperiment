@@ -1,0 +1,5 @@
+E12: 2 algos x 5 seeds = 10 runs (Hessian tracked every 50 iters)
+
+E12 algo:   0%|          | 0/2 [00:00<?, ?it/s][E12 1/10] Muon-Exact seed=0
+[E12 2/10] Muon-Exact seed=1
+[E12 3/10] Muon-Exact seed=2

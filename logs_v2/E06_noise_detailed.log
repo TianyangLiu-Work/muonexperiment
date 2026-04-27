@@ -1,0 +1,116 @@
+E06: 2 algos x 4 noises x 10 seeds = 80 runs
+
+[E06 1/80] Muon-Exact noise=0 seed=0
+[E06 2/80] Muon-Exact noise=0 seed=1
+[E06 3/80] Muon-Exact noise=0 seed=2
+[E06 4/80] Muon-Exact noise=0 seed=3
+[E06 5/80] Muon-Exact noise=0 seed=4
+[E06 6/80] Muon-Exact noise=0 seed=5
+[E06 7/80] Muon-Exact noise=0 seed=6
+[E06 8/80] Muon-Exact noise=0 seed=7
+[E06 9/80] Muon-Exact noise=0 seed=8
+[E06 10/80] Muon-Exact noise=0 seed=9
+[E06 11/80] Muon-Exact noise=0.001 seed=0
+[E06 12/80] Muon-Exact noise=0.001 seed=1
+[E06 13/80] Muon-Exact noise=0.001 seed=2
+[E06 14/80] Muon-Exact noise=0.001 seed=3
+[E06 15/80] Muon-Exact noise=0.001 seed=4
+[E06 16/80] Muon-Exact noise=0.001 seed=5
+[E06 17/80] Muon-Exact noise=0.001 seed=6
+[E06 18/80] Muon-Exact noise=0.001 seed=7
+[E06 19/80] Muon-Exact noise=0.001 seed=8
+[E06 20/80] Muon-Exact noise=0.001 seed=9
+[E06 21/80] Muon-Exact noise=0.01 seed=0
+[E06 22/80] Muon-Exact noise=0.01 seed=1
+[E06 23/80] Muon-Exact noise=0.01 seed=2
+[E06 24/80] Muon-Exact noise=0.01 seed=3
+[E06 25/80] Muon-Exact noise=0.01 seed=4
+[E06 26/80] Muon-Exact noise=0.01 seed=5
+[E06 27/80] Muon-Exact noise=0.01 seed=6
+[E06 28/80] Muon-Exact noise=0.01 seed=7
+[E06 29/80] Muon-Exact noise=0.01 seed=8
+[E06 30/80] Muon-Exact noise=0.01 seed=9
+[E06 31/80] Muon-Exact noise=0.1 seed=0
+[E06 32/80] Muon-Exact noise=0.1 seed=1
+[E06 33/80] Muon-Exact noise=0.1 seed=2
+[E06 34/80] Muon-Exact noise=0.1 seed=3
+[E06 35/80] Muon-Exact noise=0.1 seed=4
+[E06 36/80] Muon-Exact noise=0.1 seed=5
+[E06 37/80] Muon-Exact noise=0.1 seed=6
+[E06 38/80] Muon-Exact noise=0.1 seed=7
+[E06 39/80] Muon-Exact noise=0.1 seed=8
+[E06 40/80] Muon-Exact noise=0.1 seed=9
+[E06 41/80] SGD noise=0 seed=0
+[E06 42/80] SGD noise=0 seed=1
+[E06 43/80] SGD noise=0 seed=2
+[E06 44/80] SGD noise=0 seed=3
+[E06 45/80] SGD noise=0 seed=4
+[E06 46/80] SGD noise=0 seed=5
+[E06 47/80] SGD noise=0 seed=6
+[E06 48/80] SGD noise=0 seed=7
+[E06 49/80] SGD noise=0 seed=8
+[E06 50/80] SGD noise=0 seed=9
+[E06 51/80] SGD noise=0.001 seed=0
+[E06 52/80] SGD noise=0.001 seed=1
+[E06 53/80] SGD noise=0.001 seed=2
+[E06 54/80] SGD noise=0.001 seed=3
+[E06 55/80] SGD noise=0.001 seed=4
+[E06 56/80] SGD noise=0.001 seed=5
+[E06 57/80] SGD noise=0.001 seed=6
+[E06 58/80] SGD noise=0.001 seed=7
+[E06 59/80] SGD noise=0.001 seed=8
+[E06 60/80] SGD noise=0.001 seed=9
+[E06 61/80] SGD noise=0.01 seed=0
+[E06 62/80] SGD noise=0.01 seed=1
+[E06 63/80] SGD noise=0.01 seed=2
+[E06 64/80] SGD noise=0.01 seed=3
+[E06 65/80] SGD noise=0.01 seed=4
+[E06 66/80] SGD noise=0.01 seed=5
+[E06 67/80] SGD noise=0.01 seed=6
+[E06 68/80] SGD noise=0.01 seed=7
+[E06 69/80] SGD noise=0.01 seed=8
+[E06 70/80] SGD noise=0.01 seed=9
+[E06 71/80] SGD noise=0.1 seed=0
+[E06 72/80] SGD noise=0.1 seed=1
+[E06 73/80] SGD noise=0.1 seed=2
+[E06 74/80] SGD noise=0.1 seed=3
+[E06 75/80] SGD noise=0.1 seed=4
+[E06 76/80] SGD noise=0.1 seed=5
+[E06 77/80] SGD noise=0.1 seed=6
+[E06 78/80] SGD noise=0.1 seed=7
+[E06 79/80] SGD noise=0.1 seed=8
+[E06 80/80] SGD noise=0.1 seed=9
+Saved E06_detailed: 80 rows → /data/home/tyliu/muonexperiment/results_v2/E06_detailed_results.csv
+
+============================================================
+E06 统计汇总
+============================================================
+
+algo              noise    n  avg K_eps     avg loss avg time_s
+------------------------------------------------------------
+Muon-Exact        0.000   10       40.9     5.22e-03      28.46
+Muon-Exact        0.001   10       40.9     5.82e-03      28.27
+Muon-Exact        0.010   10       41.0     5.60e-03      28.08
+Muon-Exact        0.100   10       40.9     5.73e-03      28.11
+SGD               0.000   10       47.4     3.59e-32      25.93
+SGD               0.001   10       47.4     4.02e-32      25.15
+SGD               0.010   10       47.4     3.81e-32      24.84
+SGD               0.100   10       47.4     3.58e-32      23.97
+
+============================================================
+配对检验: Muon-Exact vs SGD (K_epsilon)
+============================================================
+  noise=0.000: t=-29.069 p=0.0000 ✓  Cohen's d=-9.19
+  noise=0.001: t=-29.069 p=0.0000 ✓  Cohen's d=-9.19
+  noise=0.010: t=-20.949 p=0.0000 ✓  Cohen's d=-6.62
+  noise=0.100: t=-29.069 p=0.0000 ✓  Cohen's d=-9.19
+
+============================================================
+FLOPs 对比
+============================================================
+  Muon-Exact      : 8.50e+09 FLOPs
+  SGD             : 5.00e+09 FLOPs
+
+============================================================
+E06 完成
+============================================================

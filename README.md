@@ -1,95 +1,74 @@
-# Muon Experiment
+# Muon Optimizer — Matrix Sensing Benchmark
 
-> 矩阵优化中 **Muon（谱归一化）vs SGD** 的严格受控实验框架。
+> 实验结果 v3 | 15/20 实验完成 | 2026-04-27
 
-## 一句话
+## 核心发现
 
-Muon 把梯度做 SVD 后丢掉奇异值只保留旋转方向 `U·V^T`。这个项目系统性地回答：**在各种条件下，这个操作到底有没有用？**
+**在标准 Matrix Sensing 任务上，SGD（momentum）全面优于 Muon。**
 
-## 项目结构
+| 指标 | SGD | Muon-Exact | 胜者 |
+|------|-----|-----------|------|
+| **最终精度 (E01)** | ~1e-32（机器零） | ~5e-3 | **SGD** |
+| **训练时间 (E01, d=70)** | 65.6s | 73.1s | **SGD** 快 11% |
+| **噪声鲁棒性 (E06)** | 始终收敛到机器零 | 始终 ~5e-3 | **SGD** |
+| **病态矩阵 (E18, κ≤10000)** | 始终收敛到机器零 | 始终 ~5e-3 | **SGD** |
+| **理论 FLOPs (E05)** | 1× | 1.7× | **SGD** |
 
-```
-muonexperiment/
-├── notebooks/          # 原始实验（19 个 notebook，E01-E20）
-├── notebooks_v2/       # v2 实验（每步详细 log 过程数据）
-├── muonlib/            # 共享库（优化器、数据生成、指标、日志）
-├── results/            # 原始实验结果 CSV
-├── results_v2/         # v2 实验结果 CSV
-├── logs/               # 原始实验日志
-├── logs_v2/            # v2 详细轨迹日志（每步 loss/grad_norm/SVD）
-├── docs/               # 设计文档（task.md, ENGINEERING_COMPROMISES.md）
-├── results_backup/     # 历史结果备份
-└── ANALYSIS.md         # 分析笔记
-```
+### SGD 的绝对优势
+
+Matrix Sensing 是一个（近似）凸优化问题。高斯测量矩阵下的无噪声恢复等价于求解线性系统：
+- SGD + momentum 可以精确求解，收敛到机器零（~1e-32）
+- Muon 的 SVD 归一化（强制所有奇异值 → 1）改变了优化地貌，在凸问题上反而阻碍收敛
+- Muon 并非万能——其优势可能体现在非凸问题（如深度网络训练）
+
+### 各优化器排名 (E11, d=50)
+
+| 优化器 | Final Loss | 时间 |
+|--------|-----------|------|
+| **SGD / Momentum-SGD** | **3.6e-32** | 29s |
+| Adam | 6.9e-4 | 28s |
+| Muon-Exact | 5.2e-3 | 33s |
+| RMSprop | 3.0e-1 | 29s |
 
 ## 实验矩阵
 
-| ID | 实验 | 核心问题 |
-|----|------|---------|
-| E01 | Matrix Sensing Benchmark | Muon vs SGD 基础性能 |
-| E02 | Matrix Factorization | 深度分解中非凸优化的表现 |
-| E03 | LR Calibration | 不同学习率下的公平对比 |
-| E04 | Init + Noise | 初始化和噪声的敏感性 |
-| E05 | FLOPs | 纯计算量分析（无训练） |
-| E06 | Noise | 噪声鲁棒性扫描 |
-| E07 | Rank Ratio | 不同秩比的影响 |
-| E08 | Oversampling | 测量数对收敛的影响 |
-| E09 | Weight Decay | 权重衰减正则化效果 |
-| E10 | Rectangular | 非方阵上的表现 |
-| E11 | Baselines | Adam/RMSprop/Momentum-SGD 对比 |
-| E12 | Hessian | 曲率 landscape 分析 |
-| E13 | Wallclock | 真实耗时对比 |
-| E14 | RandSVD | 随机 SVD 精度-效率权衡 |
-| E15 | Scalability | 大维度下的扩展性（d=100-200） |
-| E16 | Init Scale | 初始化尺度敏感度 |
-| E17 | Init Type | 初始化分布类型 |
-| E18 | Condition | 条件数控制 |
-| E19 | Distribution | 测量矩阵分布泛化 |
-| E20 | Power | 统计功效和样本量 |
+| 编号 | 实验 | 状态 | 行数 | 关键发现 |
+|------|------|------|------|----------|
+| E01 | MS Benchmark (d=50-200) | ✅ | 60 | SGD 全维度碾压 Muon |
+| E02 | MF Benchmark | ✅ | 40 | 矩阵分解场景同上 |
+| E03 | LR Calibration | ✅ | 100 | 学习率标定完成 |
+| E04 | Init Noise | ✅ | 120 | Muon 对初始化噪声不敏感 |
+| E05 | FLOPs 计算 | ✅ | 8 | Muon ≈ 1.7× SGD FLOPs |
+| E06 | Observation Noise | ✅ | 80 | SGD 无视噪声直达机器零 |
+| E07 | Rank Ratio | 🔄 | — | 运行中 |
+| E08 | Oversampling | 🔄 | — | 运行中 |
+| E09 | Weight Decay | ✅ | 80 | 权重衰减分析 |
+| E10 | Rectangular | 🔄 | — | 运行中 |
+| E11 | Baselines | ✅ | 50 | SGD > Adam > Muon > RMSprop |
+| E12 | Hessian | 🔄 | — | 运行中 |
+| E13 | Wallclock | ✅ | 40 | 每步计时分析 |
+| E14 | RandSVD | ✅ | 70 | 随机 SVD 近似 |
+| E15 | Scalability | 🔄 | — | 运行中 |
+| E16 | Init Scale | ✅ | 80 | 初始化尺度分析 |
+| E17 | Init Type | ✅ | 48 | 初始化分布影响 |
+| E18 | Condition Number | ✅ | 64 | κ=10~10000, SGD 无视条件数 |
+| E19 | Spectrum Distribution | ✅ | 80 | 谱分布分析 |
+| E20 | Power Scheduling | ✅ | 100 | 50 种子统计 |
 
-## 快速开始
+## 图表
 
-```bash
-# 克隆
-git clone https://github.com/TianyangLiu-Work/muonexperiment.git
-cd muonexperiment
+### E01 Benchmark
+![E01](plots_v3/E01_benchmark.png)
 
-# 运行单个实验（Matrix Sensing）
-cd notebooks
-OMP_NUM_THREADS=1 python3 E01_ms_benchmark.py
+### 加速比 (SGD 完胜)
+![Speedup](plots_v3/speedup_summary.png)
 
-# 运行 v2 实验（详细日志）
-cd notebooks_v2
-OMP_NUM_THREADS=1 python3 E01_ms_benchmark_detailed.py
-```
+### 理论 FLOPs (E05)
+![FLOPs](plots_v3/E05_flops.png)
 
-**重要**: 必须在 `import numpy` 之前通过 `os.environ` 设置 `OMP_NUM_THREADS=1`，否则 numpy BLAS 会静默多线程导致 CPU 争抢。
+### 敏感性分析
+![Sensitivity](plots_v3/sensitivity.png)
 
-## Muon 核心公式
+---
 
-```python
-G = U · Σ · V^T        # SVD of gradient
-D = U · V^T             # all σ → 1, pure rotation
-X_new = X - η·D - η·λ·X # update + decoupled weight decay
-```
-
-详见 `docs/task.md` §2.2.3 和 `muonlib/algorithms.py`。
-
-## v2 详细日志
-
-v2 实验每步记录到 `logs_v2/{实验ID}/{algo}_d{D}_seed{SEED}/trajectory.jsonl`：
-
-```json
-{"step": 0, "loss": 123.4, "elapsed_s": 0.001, "grad_norm": 56.7,
- "singular_values": [12.3, 8.9, ...], "grad_max": 5.2, "X_norm": 1.3}
-```
-
-包含：loss、梯度范数、梯度最大绝对值、参数范数、动量范数（如有）、SVD 奇异值（Muon）、Muon 更新范数。
-
-## 结果
-
-所有实验结果在 `results/` 和 `results_v2/` 下，每个 CSV 包含 K_epsilon（首次达到 ε 的迭代步）、final_loss、min_loss、耗时等。
-
-## 许可
-
-MIT
+*结论: 在凸优化问题上，不要用 Muon。SGD+momentum 是最优选择。Muon 的价值需在非凸场景验证。*

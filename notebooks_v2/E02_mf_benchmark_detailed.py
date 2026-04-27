@@ -25,7 +25,6 @@ _os.environ['VECLIB_MAXIMUM_THREADS'] = '1'
 import sys, csv, time
 from pathlib import Path
 import numpy as np
-from numpy.linalg import svd
 from tqdm import tqdm
 
 PROJECT = Path(_os.environ.get("MUON_PROJECT", "/data/home/tyliu/muonexperiment"))
@@ -38,7 +37,7 @@ from muonlib.algorithms import (MuonOptimizer, SGDOptimizer)
 # ── Detailed logging (v2) ───────────────────────────
 from muonlib.detailed_logger import DetailedLogger
 LOG_DIR = PROJECT / "logs_v2"
-RESULTS_V2 = PROJECT / "results_v2"
+RESULTS_V2 = PROJECT / "results_v3"
 RESULTS_V2.mkdir(parents=True, exist_ok=True)
 from muonlib.data import (generate_target_matrix, compute_gradient_mf,
                            compute_loss_mf)
@@ -72,7 +71,7 @@ def run_mf(algo, d, L, r, lr, init_scale, seed, iters):
     logger = DetailedLogger(LOG_DIR, "E02_detailed", algo, {k: v for k, v in locals().items()
                              if k in ("d", "seed", "lr", "r", "noise", "dist",
                                       "spectrum", "kappa", "init_scale", "iters",
-                                      "L", "m", "n", "wd", "gamma", "p", "q")}, svd_interval=10)
+                                      "L", "m", "n", "wd", "gamma", "p", "q")})
     """运行一次深度矩阵分解实验。
 
     优化: min_{W_1,...,W_L} 0.5 * ||W_L...W_1 - X*||_F^2
@@ -89,38 +88,38 @@ def run_mf(algo, d, L, r, lr, init_scale, seed, iters):
     t_start = time.time()
     k_epsilon = -1
 
-    for step in range(iters):
-        # 计算各层梯度
-        grads = compute_gradient_mf(W, X_star)
+    try:
+        for step in range(iters):
+            loss = float(compute_loss_mf(W, X_star))
+            losses.append(loss)
+            # 计算各层梯度
+            grads = compute_gradient_mf(W, X_star)
 
-        # 更新各层
-        for i in range(L):
-            W[i] = opts[i].step(W[i], grads[i], lr)
+            # 更新各层
+            for i in range(L):
+                W[i] = opts[i].step(W[i], grads[i], lr)
 
-        loss = float(compute_loss_mf(W, X_star))
-        losses.append(loss)
-        # Detailed logging (v2)
-        layer_norms = [float(np.linalg.norm(g, 'fro')) for g in grads]
-        grad_norm = float(np.sqrt(sum(n**2 for n in layer_norms)))
-        grad_max = float(max(np.max(np.abs(g)) for g in grads))
-        extra = {"layer_grad_norms": layer_norms, "grad_max": grad_max}
-        if algo.startswith("Muon") and step % 10 == 0:
-            U_svd, s_svd, Vt_svd = svd(grads[0], full_matrices=False)
-            D = U_svd @ Vt_svd
-            sv_log = s_svd
-            extra["update_norm_layer0"] = float(np.linalg.norm(D, 'fro'))
-        else:
-            sv_log = None
-        logger.log_step(step, loss, grad_norm=grad_norm, sv=sv_log, **extra)
+            # Detailed logging (v2)
+            layer_norms = [float(np.linalg.norm(g, 'fro')) for g in grads]
+            grad_norm = float(np.sqrt(sum(n**2 for n in layer_norms)))
+            grad_max = float(max(np.max(np.abs(g)) for g in grads))
+            extra = {"layer_grad_norms": layer_norms, "grad_max": grad_max}
+            if algo.startswith("Muon") and step % 10 == 0:
+                sv_log = opts[0]._last_singular_values
+                extra["update_norm_layer0"] = opts[0]._last_update_norm
+            else:
+                sv_log = None
+            logger.log_step(step, loss, grad_norm=grad_norm, sv=sv_log, **extra)
 
-        if k_epsilon < 0 and loss <= EPSILON:
-            k_epsilon = step + 1
+            if k_epsilon < 0 and loss <= EPSILON:
+                k_epsilon = step + 1
 
-    elapsed = time.time() - t_start
-    if k_epsilon < 0:
-        k_epsilon = iters + 1
-    # ── Close detailed log ───────────────────────────
-    logger.close()
+        elapsed = time.time() - t_start
+        if k_epsilon < 0:
+            k_epsilon = iters + 1
+    finally:
+        # ── Close detailed log ───────────────────────────
+        logger.close()
 
 
     return {

@@ -43,6 +43,8 @@ class MuonOptimizer:
         self.q = q       # power iterations for randomized SVD
         self.momentum = None
         self.rng = np.random.RandomState(random_state)
+        self._last_singular_values = None
+        self._last_update_norm = None
 
     def lookahead(self, X):
         """Return look-ahead position for Nesterov momentum."""
@@ -62,6 +64,7 @@ class MuonOptimizer:
             min_dim = min(G.shape)
             if min_dim <= 1:
                 G_eff = G / max(np.linalg.norm(G), 1e-16)
+                s = np.array([np.linalg.norm(G_eff, 'fro')])
             else:
                 r_eff = max(1, min(self.r, min_dim - 1))
                 U, s, Vt = svds(G, k=r_eff, which='LM')
@@ -75,6 +78,8 @@ class MuonOptimizer:
             U, s, Vt = np.linalg.svd(G, full_matrices=False)
             G_eff = U @ Vt
 
+        self._last_singular_values = s.copy() if s is not None else None
+        self._last_update_norm = float(np.linalg.norm(G_eff, 'fro'))
         self.momentum = self.mu * self.momentum + G_eff
 
         # Update with decoupled weight decay

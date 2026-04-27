@@ -1,0 +1,86 @@
+E11: 5 algos x 10 seeds = 50 runs
+
+[E11 1/50] Muon-Exact seed=0
+[E11 2/50] Muon-Exact seed=1
+[E11 3/50] Muon-Exact seed=2
+[E11 4/50] Muon-Exact seed=3
+[E11 5/50] Muon-Exact seed=4
+[E11 6/50] Muon-Exact seed=5
+[E11 7/50] Muon-Exact seed=6
+[E11 8/50] Muon-Exact seed=7
+[E11 9/50] Muon-Exact seed=8
+[E11 10/50] Muon-Exact seed=9
+[E11 11/50] SGD seed=0
+[E11 12/50] SGD seed=1
+[E11 13/50] SGD seed=2
+[E11 14/50] SGD seed=3
+[E11 15/50] SGD seed=4
+[E11 16/50] SGD seed=5
+[E11 17/50] SGD seed=6
+[E11 18/50] SGD seed=7
+[E11 19/50] SGD seed=8
+[E11 20/50] SGD seed=9
+[E11 21/50] Adam seed=0
+[E11 22/50] Adam seed=1
+[E11 23/50] Adam seed=2
+[E11 24/50] Adam seed=3
+[E11 25/50] Adam seed=4
+[E11 26/50] Adam seed=5
+[E11 27/50] Adam seed=6
+[E11 28/50] Adam seed=7
+[E11 29/50] Adam seed=8
+[E11 30/50] Adam seed=9
+[E11 31/50] RMSprop seed=0
+[E11 32/50] RMSprop seed=1
+[E11 33/50] RMSprop seed=2
+[E11 34/50] RMSprop seed=3
+[E11 35/50] RMSprop seed=4
+[E11 36/50] RMSprop seed=5
+[E11 37/50] RMSprop seed=6
+[E11 38/50] RMSprop seed=7
+[E11 39/50] RMSprop seed=8
+[E11 40/50] RMSprop seed=9
+[E11 41/50] Momentum-SGD seed=0
+[E11 42/50] Momentum-SGD seed=1
+[E11 43/50] Momentum-SGD seed=2
+[E11 44/50] Momentum-SGD seed=3
+[E11 45/50] Momentum-SGD seed=4
+[E11 46/50] Momentum-SGD seed=5
+[E11 47/50] Momentum-SGD seed=6
+[E11 48/50] Momentum-SGD seed=7
+[E11 49/50] Momentum-SGD seed=8
+[E11 50/50] Momentum-SGD seed=9
+Saved E11_detailed: 50 rows → /data/home/tyliu/muonexperiment/results_v2/E11_detailed_results.csv
+
+============================================================
+E11 统计汇总
+============================================================
+
+algo                n  avg K_eps     avg loss avg time_s
+------------------------------------------------------------
+Muon-Exact         10       40.9     5.22e-03      31.67
+SGD                10       47.4     3.59e-32      27.76
+Adam               10       42.3     6.89e-04      28.33
+RMSprop            10     2001.0     2.96e-01      28.22
+Momentum-SGD       10       47.4     3.59e-32      28.54
+
+============================================================
+配对检验 (K_epsilon vs Muon-Exact)
+============================================================
+  Muon vs SGD             : t=-29.069 p=0.0000 ✓  Cohen's d=-9.19
+  Muon vs Adam            : t=-4.118 p=0.0026 ✓  Cohen's d=-1.30
+  Muon vs RMSprop         : t=-8400.429 p=0.0000 ✓  Cohen's d=-2656.45
+  Muon vs Momentum-SGD    : t=-29.069 p=0.0000 ✓  Cohen's d=-9.19
+
+============================================================
+FLOPs 对比
+============================================================
+  Muon-Exact      : 8.50e+09 FLOPs
+  SGD             : 5.00e+09 FLOPs
+  Adam            : 5.00e+09 FLOPs
+  RMSprop         : 5.00e+09 FLOPs
+  Momentum-SGD    : 5.00e+09 FLOPs
+
+============================================================
+E11 完成
+============================================================

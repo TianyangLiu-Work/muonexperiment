@@ -1,0 +1,101 @@
+E14: 1 exact x 10 + 3 p x 2 q x 10 = 70 runs
+
+[E14 1/70] Muon-Exact seed=0
+[E14 2/70] Muon-Exact seed=1
+[E14 3/70] Muon-Exact seed=2
+[E14 4/70] Muon-Exact seed=3
+[E14 5/70] Muon-Exact seed=4
+[E14 6/70] Muon-Exact seed=5
+[E14 7/70] Muon-Exact seed=6
+[E14 8/70] Muon-Exact seed=7
+[E14 9/70] Muon-Exact seed=8
+[E14 10/70] Muon-Exact seed=9
+[E14 11/70] Muon-RandSVD p=5 q=1 seed=0
+[E14 12/70] Muon-RandSVD p=5 q=1 seed=1
+[E14 13/70] Muon-RandSVD p=5 q=1 seed=2
+[E14 14/70] Muon-RandSVD p=5 q=1 seed=3
+[E14 15/70] Muon-RandSVD p=5 q=1 seed=4
+[E14 16/70] Muon-RandSVD p=5 q=1 seed=5
+[E14 17/70] Muon-RandSVD p=5 q=1 seed=6
+[E14 18/70] Muon-RandSVD p=5 q=1 seed=7
+[E14 19/70] Muon-RandSVD p=5 q=1 seed=8
+[E14 20/70] Muon-RandSVD p=5 q=1 seed=9
+[E14 21/70] Muon-RandSVD p=5 q=2 seed=0
+[E14 22/70] Muon-RandSVD p=5 q=2 seed=1
+[E14 23/70] Muon-RandSVD p=5 q=2 seed=2
+[E14 24/70] Muon-RandSVD p=5 q=2 seed=3
+[E14 25/70] Muon-RandSVD p=5 q=2 seed=4
+[E14 26/70] Muon-RandSVD p=5 q=2 seed=5
+[E14 27/70] Muon-RandSVD p=5 q=2 seed=6
+[E14 28/70] Muon-RandSVD p=5 q=2 seed=7
+[E14 29/70] Muon-RandSVD p=5 q=2 seed=8
+[E14 30/70] Muon-RandSVD p=5 q=2 seed=9
+[E14 31/70] Muon-RandSVD p=10 q=1 seed=0
+[E14 32/70] Muon-RandSVD p=10 q=1 seed=1
+[E14 33/70] Muon-RandSVD p=10 q=1 seed=2
+[E14 34/70] Muon-RandSVD p=10 q=1 seed=3
+[E14 35/70] Muon-RandSVD p=10 q=1 seed=4
+[E14 36/70] Muon-RandSVD p=10 q=1 seed=5
+[E14 37/70] Muon-RandSVD p=10 q=1 seed=6
+[E14 38/70] Muon-RandSVD p=10 q=1 seed=7
+[E14 39/70] Muon-RandSVD p=10 q=1 seed=8
+[E14 40/70] Muon-RandSVD p=10 q=1 seed=9
+[E14 41/70] Muon-RandSVD p=10 q=2 seed=0
+[E14 42/70] Muon-RandSVD p=10 q=2 seed=1
+[E14 43/70] Muon-RandSVD p=10 q=2 seed=2
+[E14 44/70] Muon-RandSVD p=10 q=2 seed=3
+[E14 45/70] Muon-RandSVD p=10 q=2 seed=4
+[E14 46/70] Muon-RandSVD p=10 q=2 seed=5
+[E14 47/70] Muon-RandSVD p=10 q=2 seed=6
+[E14 48/70] Muon-RandSVD p=10 q=2 seed=7
+[E14 49/70] Muon-RandSVD p=10 q=2 seed=8
+[E14 50/70] Muon-RandSVD p=10 q=2 seed=9
+[E14 51/70] Muon-RandSVD p=20 q=1 seed=0
+[E14 52/70] Muon-RandSVD p=20 q=1 seed=1
+[E14 53/70] Muon-RandSVD p=20 q=1 seed=2
+[E14 54/70] Muon-RandSVD p=20 q=1 seed=3
+[E14 55/70] Muon-RandSVD p=20 q=1 seed=4
+[E14 56/70] Muon-RandSVD p=20 q=1 seed=5
+[E14 57/70] Muon-RandSVD p=20 q=1 seed=6
+[E14 58/70] Muon-RandSVD p=20 q=1 seed=7
+[E14 59/70] Muon-RandSVD p=20 q=1 seed=8
+[E14 60/70] Muon-RandSVD p=20 q=1 seed=9
+[E14 61/70] Muon-RandSVD p=20 q=2 seed=0
+[E14 62/70] Muon-RandSVD p=20 q=2 seed=1
+[E14 63/70] Muon-RandSVD p=20 q=2 seed=2
+[E14 64/70] Muon-RandSVD p=20 q=2 seed=3
+[E14 65/70] Muon-RandSVD p=20 q=2 seed=4
+[E14 66/70] Muon-RandSVD p=20 q=2 seed=5
+[E14 67/70] Muon-RandSVD p=20 q=2 seed=6
+[E14 68/70] Muon-RandSVD p=20 q=2 seed=7
+[E14 69/70] Muon-RandSVD p=20 q=2 seed=8
+[E14 70/70] Muon-RandSVD p=20 q=2 seed=9
+Saved E14_detailed: 70 rows → /data/home/tyliu/muonexperiment/results_v2/E14_detailed_results.csv
+
+============================================================
+E14 统计汇总
+============================================================
+
+algo                  p    q    n avg time_s  avg K_eps     avg loss
+----------------------------------------------------------------------
+Muon-Exact            -    -   10     31.567       40.9     5.22e-03
+Muon-RandSVD          5    1   10     30.837       45.9     2.28e-03
+Muon-RandSVD          5    2   10     30.670       43.5     1.52e-03
+Muon-RandSVD         10    1   10     30.697       42.7     1.72e-03
+Muon-RandSVD         10    2   10     30.505       40.9     1.28e-03
+Muon-RandSVD         20    1   10     30.055       40.3     1.84e-03
+Muon-RandSVD         20    2   10     29.582       39.5     2.19e-03
+
+============================================================
+配对检验: Exact vs RandSVD(p,q) (K_epsilon)
+============================================================
+  Exact vs RandSVD(p=5,q=1): t=-12.677 p=0.0000 ✓  Cohen's d=-4.01
+  Exact vs RandSVD(p=5,q=2): t=-9.750 p=0.0000 ✓  Cohen's d=-3.08
+  Exact vs RandSVD(p=10,q=1): t=-5.014 p=0.0007 ✓  Cohen's d=-1.59
+  Exact vs RandSVD(p=10,q=2): t=+0.000 p=1.0000 ✗  Cohen's d=+0.00
+  Exact vs RandSVD(p=20,q=1): t=+2.714 p=0.0239 ✓  Cohen's d=+0.86
+  Exact vs RandSVD(p=20,q=2): t=+5.250 p=0.0005 ✓  Cohen's d=+1.66
+
+============================================================
+E14 完成
+============================================================

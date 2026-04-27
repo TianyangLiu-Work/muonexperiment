@@ -1,0 +1,61 @@
+E02: 2 algos × 2 layers × 10 seeds = 40 runs
+    d=50, r=5, lr=0.01, iters=2000
+
+E02 algo:   0%|          | 0/2 [00:00<?, ?it/s][E02 1/40] Muon-Exact L=2 seed=0
+[E02 2/40] Muon-Exact L=2 seed=1
+[E02 3/40] Muon-Exact L=2 seed=2
+[E02 4/40] Muon-Exact L=2 seed=3
+[E02 5/40] Muon-Exact L=2 seed=4
+[E02 6/40] Muon-Exact L=2 seed=5
+[E02 7/40] Muon-Exact L=2 seed=6
+[E02 8/40] Muon-Exact L=2 seed=7
+[E02 9/40] Muon-Exact L=2 seed=8
+[E02 10/40] Muon-Exact L=2 seed=9
+[E02 11/40] Muon-Exact L=3 seed=0
+[E02 12/40] Muon-Exact L=3 seed=1
+[E02 13/40] Muon-Exact L=3 seed=2
+[E02 14/40] Muon-Exact L=3 seed=3
+[E02 15/40] Muon-Exact L=3 seed=4
+[E02 16/40] Muon-Exact L=3 seed=5
+[E02 17/40] Muon-Exact L=3 seed=6
+[E02 18/40] Muon-Exact L=3 seed=7
+[E02 19/40] Muon-Exact L=3 seed=8
+[E02 20/40] Muon-Exact L=3 seed=9
+E02 algo:  50%|█████     | 1/2 [00:52<00:52, 52.31s/it][E02 21/40] SGD L=2 seed=0
+[E02 22/40] SGD L=2 seed=1
+[E02 23/40] SGD L=2 seed=2
+[E02 24/40] SGD L=2 seed=3
+[E02 25/40] SGD L=2 seed=4
+[E02 26/40] SGD L=2 seed=5
+[E02 27/40] SGD L=2 seed=6
+[E02 28/40] SGD L=2 seed=7
+[E02 29/40] SGD L=2 seed=8
+[E02 30/40] SGD L=2 seed=9
+[E02 31/40] SGD L=3 seed=0
+[E02 32/40] SGD L=3 seed=1
+[E02 33/40] SGD L=3 seed=2
+[E02 34/40] SGD L=3 seed=3
+[E02 35/40] SGD L=3 seed=4
+[E02 36/40] SGD L=3 seed=5
+[E02 37/40] SGD L=3 seed=6
+[E02 38/40] SGD L=3 seed=7
+[E02 39/40] SGD L=3 seed=8
+[E02 40/40] SGD L=3 seed=9
+E02 algo: 100%|██████████| 2/2 [00:57<00:00, 24.67s/it]E02 algo: 100%|██████████| 2/2 [00:57<00:00, 28.82s/it]
+Saved E02_detailed: 40 rows → /data/home/tyliu/muonexperiment/results_v2/E02_detailed_results.csv
+
+============================================================
+E02 统计汇总: K_epsilon (到达 eps=1e-10 的迭代数)
+============================================================
+  Muon-Exact     L=2  n=10  avg_K=    49.0  avg_loss=  2.10e-03  avg_t=2.08s
+  Muon-Exact     L=3  n=10  avg_K=    54.3  avg_loss=  2.85e-03  avg_t=3.14s
+  SGD            L=2  n=10  avg_K=    81.1  avg_loss=  1.60e-05  avg_t=0.20s
+  SGD            L=3  n=10  avg_K=   253.0  avg_loss=  1.75e-06  avg_t=0.33s
+
+============================================================
+配对检验: Muon-Exact vs SGD (K_epsilon)
+============================================================
+  L=2: t=-115.932 p=0.0000 ✓ SIG  Wilcoxon p=0.0020  Cohen's d=-36.66
+  L=3: t=-67.233 p=0.0000 ✓ SIG  Wilcoxon p=0.0020  Cohen's d=-21.26
+
+E02 完成

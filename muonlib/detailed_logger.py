@@ -1,13 +1,15 @@
 """
 Detailed process-data logger for muonexperiment.
-Logs per-step trajectory data (loss, gradient norm, SVD singular values, timing)
-to JSONL files organized by experiment/run.
+Logs per-step trajectory data to JSONL files organized by experiment/run.
+
+v2.1: Fixed run directory naming to include all distinguishing params,
+      overwrite mode by default, completion markers, summary.json support.
 """
 import json
 import time
 import hashlib
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, List
 
 import numpy as np
 
@@ -23,13 +25,14 @@ class DetailedLogger:
         Experiment ID (e.g. "E01_detailed")
     algo : str
         Algorithm name
-    run_params : dict
-        Per-run params: d, seed, lr, etc. — used to generate unique run directory.
+    run_id_params : dict
+        All parameters that distinguish this run (d, seed, lr, L, kappa, ...).
+        Used to build a unique, collision-free run directory name.
     log_interval : int
         Log every N steps (default 1 = every step).
-    svd_interval : int
-        Compute full SVD for logging every N steps (default 10).
-        Set to 0 to disable SVD logging entirely.
+    mode : str
+        'w' = overwrite existing trajectory file (default, safe for new runs).
+        'a' = append (use for resuming runs).
     """
 
     def __init__(
@@ -37,34 +40,37 @@ class DetailedLogger:
         log_dir,
         eid: str,
         algo: str,
-        run_params: dict,
+        run_id_params: Dict,
         log_interval: int = 1,
-        svd_interval: int = 10,
+        mode: str = "w",
     ):
         self.eid = eid
         self.algo = algo
-        self.run_params = dict(run_params)
+        self.run_id_params = run_id_params
         self.log_interval = log_interval
-        self.svd_interval = svd_interval
+        self._mode = mode
 
-        # Build unique run directory from ALL params (hash ensures no collisions)
-        param_str = json.dumps(self.run_params, sort_keys=True, default=str)
-        param_hash = hashlib.md5(param_str.encode()).hexdigest()[:8]
-        d = run_params.get("d", run_params.get("m", "?"))
-        seed = run_params.get("seed", "?")
-        run_dir_name = f"{algo}_d{d}_seed{seed}_{param_hash}"
+        # Build collision-free run directory name from ALL params
+        param_str = "_".join(
+            f"{k}{v}" for k, v in sorted(run_id_params.items())
+            if k not in ("iters", "log_interval")
+        )
+        run_dir_name = f"{algo}__{param_str}"
+        # Sanitize: replace path-unsafe chars
+        run_dir_name = run_dir_name.replace("/", "-").replace(" ", "_")
+
         self.run_dir = Path(log_dir) / eid / run_dir_name
         self.run_dir.mkdir(parents=True, exist_ok=True)
 
-        # Write params to run directory for reproducibility
-        with open(self.run_dir / "params.json", "w") as f:
-            json.dump(self.run_params, f, indent=2)
-
-        # Use 'w' mode to avoid append collisions on rerun
         self.traj_file = self.run_dir / "trajectory.jsonl"
-        self._buffer = []
+        self._buffer: List[Dict] = []
         self._start_time = time.time()
         self._completed = False
+        self._traj_fh = None
+
+        # If overwrite mode, truncate existing file
+        if mode == "w":
+            self.traj_file.write_text("")
 
     def log_step(
         self,
@@ -78,11 +84,17 @@ class DetailedLogger:
 
         Parameters
         ----------
-        step : int, 0-based iteration index.
-        loss : float, current loss value.
-        grad_norm : float, optional, Frobenius norm of gradient.
-        sv : np.ndarray, optional, singular values of gradient.
-        **extra : additional per-step data.
+        step : int
+            Iteration index (0-based).
+        loss : float
+            Loss value at the START of this step (pre-update state),
+            to be consistent with grad_norm and sv from the same state.
+        grad_norm : float, optional
+            Frobenius norm of gradient.
+        sv : np.ndarray, optional
+            Full singular values of gradient (for Muon variants).
+        **extra : dict
+            Additional per-step data (layer_grad_norms, grad_max, X_norm, etc.)
         """
         if step % self.log_interval != 0:
             return
@@ -107,11 +119,12 @@ class DetailedLogger:
 
         self._buffer.append(entry)
 
+        # Flush every 100 entries to avoid memory buildup
         if len(self._buffer) >= 100:
             self.flush()
 
     def flush(self):
-        """Write buffered entries to disk. Deduplicates across calls."""
+        """Write buffered entries to disk."""
         if not self._buffer:
             return
         with open(self.traj_file, "a") as f:
@@ -120,18 +133,28 @@ class DetailedLogger:
         self._buffer.clear()
 
     def save_summary(self, summary: dict):
-        """Save final run summary."""
+        """Save final run summary and completion marker."""
         summary["wall_time_s"] = round(time.time() - self._start_time, 2)
-        summary["params"] = self.run_params
+        summary["run_params"] = self.run_id_params
+        summary["algo"] = self.algo
+        summary["eid"] = self.eid
         summary["completed"] = True
         with open(self.run_dir / "summary.json", "w") as f:
             json.dump(summary, f, indent=2)
         self._completed = True
 
     def close(self):
-        """Flush remaining data and mark completion."""
+        """Flush remaining data and write completion marker."""
         self.flush()
         if not self._completed:
+            # Write a minimal completion marker
+            minimal = {
+                "wall_time_s": round(time.time() - self._start_time, 2),
+                "run_params": self.run_id_params,
+                "algo": self.algo,
+                "eid": self.eid,
+                "completed": False,
+                "note": "Run did not call save_summary() — may be incomplete or crashed"
+            }
             with open(self.run_dir / "summary.json", "w") as f:
-                json.dump({"completed": True, "wall_time_s": round(time.time() - self._start_time, 2)}, f)
-            self._completed = True
+                json.dump(minimal, f, indent=2)

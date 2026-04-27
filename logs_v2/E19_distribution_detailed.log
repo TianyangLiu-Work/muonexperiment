@@ -1,0 +1,99 @@
+E19: 2 algos x 5 dists x 8 seeds = 80
+E19 algo:   0%|          | 0/2 [00:00<?, ?it/s][E19 1/80] Muon-Exact dist=normal seed=0
+[E19 2/80] Muon-Exact dist=normal seed=1
+[E19 3/80] Muon-Exact dist=normal seed=2
+[E19 4/80] Muon-Exact dist=normal seed=3
+[E19 5/80] Muon-Exact dist=normal seed=4
+[E19 6/80] Muon-Exact dist=normal seed=5
+[E19 7/80] Muon-Exact dist=normal seed=6
+[E19 8/80] Muon-Exact dist=normal seed=7
+[E19 9/80] Muon-Exact dist=uniform seed=0
+[E19 10/80] Muon-Exact dist=uniform seed=1
+[E19 11/80] Muon-Exact dist=uniform seed=2
+[E19 12/80] Muon-Exact dist=uniform seed=3
+[E19 13/80] Muon-Exact dist=uniform seed=4
+[E19 14/80] Muon-Exact dist=uniform seed=5
+[E19 15/80] Muon-Exact dist=uniform seed=6
+[E19 16/80] Muon-Exact dist=uniform seed=7
+[E19 17/80] Muon-Exact dist=rademacher seed=0
+[E19 18/80] Muon-Exact dist=rademacher seed=1
+[E19 19/80] Muon-Exact dist=rademacher seed=2
+[E19 20/80] Muon-Exact dist=rademacher seed=3
+[E19 21/80] Muon-Exact dist=rademacher seed=4
+[E19 22/80] Muon-Exact dist=rademacher seed=5
+[E19 23/80] Muon-Exact dist=rademacher seed=6
+[E19 24/80] Muon-Exact dist=rademacher seed=7
+[E19 25/80] Muon-Exact dist=sparse seed=0
+[E19 26/80] Muon-Exact dist=sparse seed=1
+[E19 27/80] Muon-Exact dist=sparse seed=2
+[E19 28/80] Muon-Exact dist=sparse seed=3
+[E19 29/80] Muon-Exact dist=sparse seed=4
+[E19 30/80] Muon-Exact dist=sparse seed=5
+[E19 31/80] Muon-Exact dist=sparse seed=6
+[E19 32/80] Muon-Exact dist=sparse seed=7
+[E19 33/80] Muon-Exact dist=sphere seed=0
+[E19 34/80] Muon-Exact dist=sphere seed=1
+[E19 35/80] Muon-Exact dist=sphere seed=2
+[E19 36/80] Muon-Exact dist=sphere seed=3
+[E19 37/80] Muon-Exact dist=sphere seed=4
+[E19 38/80] Muon-Exact dist=sphere seed=5
+[E19 39/80] Muon-Exact dist=sphere seed=6
+[E19 40/80] Muon-Exact dist=sphere seed=7
+E19 algo:  50%|█████     | 1/2 [21:00<21:00, 1260.81s/it][E19 41/80] SGD dist=normal seed=0
+[E19 42/80] SGD dist=normal seed=1
+[E19 43/80] SGD dist=normal seed=2
+[E19 44/80] SGD dist=normal seed=3
+[E19 45/80] SGD dist=normal seed=4
+[E19 46/80] SGD dist=normal seed=5
+[E19 47/80] SGD dist=normal seed=6
+[E19 48/80] SGD dist=normal seed=7
+[E19 49/80] SGD dist=uniform seed=0
+[E19 50/80] SGD dist=uniform seed=1
+[E19 51/80] SGD dist=uniform seed=2
+[E19 52/80] SGD dist=uniform seed=3
+[E19 53/80] SGD dist=uniform seed=4
+[E19 54/80] SGD dist=uniform seed=5
+[E19 55/80] SGD dist=uniform seed=6
+[E19 56/80] SGD dist=uniform seed=7
+[E19 57/80] SGD dist=rademacher seed=0
+[E19 58/80] SGD dist=rademacher seed=1
+[E19 59/80] SGD dist=rademacher seed=2
+[E19 60/80] SGD dist=rademacher seed=3
+[E19 61/80] SGD dist=rademacher seed=4
+[E19 62/80] SGD dist=rademacher seed=5
+[E19 63/80] SGD dist=rademacher seed=6
+[E19 64/80] SGD dist=rademacher seed=7
+[E19 65/80] SGD dist=sparse seed=0
+[E19 66/80] SGD dist=sparse seed=1
+[E19 67/80] SGD dist=sparse seed=2
+[E19 68/80] SGD dist=sparse seed=3
+[E19 69/80] SGD dist=sparse seed=4
+[E19 70/80] SGD dist=sparse seed=5
+[E19 71/80] SGD dist=sparse seed=6
+[E19 72/80] SGD dist=sparse seed=7
+[E19 73/80] SGD dist=sphere seed=0
+[E19 74/80] SGD dist=sphere seed=1
+[E19 75/80] SGD dist=sphere seed=2
+[E19 76/80] SGD dist=sphere seed=3
+[E19 77/80] SGD dist=sphere seed=4
+[E19 78/80] SGD dist=sphere seed=5
+[E19 79/80] SGD dist=sphere seed=6
+[E19 80/80] SGD dist=sphere seed=7
+E19 algo: 100%|██████████| 2/2 [39:40<00:00, 1177.83s/it]E19 algo: 100%|██████████| 2/2 [39:40<00:00, 1190.27s/it]
+Saved E19_detailed: 80 rows
+
+============================================================
+algo                   dist    avg_K     avg_loss
+--------------------------------------------------
+Muon-Exact           normal     40.9     5.30e-03
+Muon-Exact          uniform     30.8     1.90e-03
+Muon-Exact       rademacher     40.6     5.15e-03
+Muon-Exact           sparse      1.0     2.23e-06
+Muon-Exact           sphere      1.0     2.13e-06
+SGD                  normal     47.2     3.46e-32
+SGD                 uniform     38.4     9.54e-33
+SGD              rademacher     47.1     4.94e-32
+SGD                  sparse      1.0     4.23e-04
+SGD                  sphere      1.0     4.09e-04
+
+E19 完成

@@ -1,0 +1,56 @@
+E01: 2 algos × 3 dims × 10 seeds = 60 runs
+    epsilon=0.01, iters=2000, lr=0.01
+
+E01 algo:   0%|          | 0/2 [00:00<?, ?it/s][E01 1/60] Muon-Exact d=50 seed=0
+[E01 2/60] Muon-Exact d=50 seed=1
+[E01 3/60] Muon-Exact d=50 seed=2
+[E01 4/60] Muon-Exact d=50 seed=3
+[E01 5/60] Muon-Exact d=50 seed=4
+[E01 6/60] Muon-Exact d=50 seed=5
+[E01 7/60] Muon-Exact d=50 seed=6
+[E01 8/60] Muon-Exact d=50 seed=7
+[E01 9/60] Muon-Exact d=50 seed=8
+[E01 10/60] Muon-Exact d=50 seed=9
+[E01 11/60] Muon-Exact d=60 seed=0
+[E01 12/60] Muon-Exact d=60 seed=1
+[E01 13/60] Muon-Exact d=60 seed=2
+[E01 14/60] Muon-Exact d=60 seed=3
+[E01 15/60] Muon-Exact d=60 seed=4
+[E01 16/60] Muon-Exact d=60 seed=5
+[E01 17/60] Muon-Exact d=60 seed=6
+[E01 18/60] Muon-Exact d=60 seed=7
+[E01 19/60] Muon-Exact d=60 seed=8
+[E01 20/60] Muon-Exact d=60 seed=9
+[E01 21/60] Muon-Exact d=70 seed=0
+[E01 22/60] Muon-Exact d=70 seed=1
+[E01 23/60] Muon-Exact d=70 seed=2
+[E01 24/60] Muon-Exact d=70 seed=3
+[E01 25/60] Muon-Exact d=70 seed=4
+[E01 26/60] Muon-Exact d=70 seed=5
+[E01 27/60] Muon-Exact d=70 seed=6
+[E01 28/60] Muon-Exact d=70 seed=7
+[E01 29/60] Muon-Exact d=70 seed=8
+[E01 30/60] Muon-Exact d=70 seed=9
+E01 algo:  50%|█████     | 1/2 [25:25<25:25, 1525.17s/it][E01 31/60] SGD d=50 seed=0
+[E01 32/60] SGD d=50 seed=1
+[E01 33/60] SGD d=50 seed=2
+[E01 34/60] SGD d=50 seed=3
+[E01 35/60] SGD d=50 seed=4
+[E01 36/60] SGD d=50 seed=5
+[E01 37/60] SGD d=50 seed=6
+[E01 38/60] SGD d=50 seed=7
+[E01 39/60] SGD d=50 seed=8
+[E01 40/60] SGD d=50 seed=9
+[E01 41/60] SGD d=60 seed=0
+[E01 42/60] SGD d=60 seed=1
+[E01 43/60] SGD d=60 seed=2
+[E01 44/60] SGD d=60 seed=3
+[E01 45/60] SGD d=60 seed=4
+[E01 46/60] SGD d=60 seed=5
+[E01 47/60] SGD d=60 seed=6
+[E01 48/60] SGD d=60 seed=7
+[E01 49/60] SGD d=60 seed=8
+[E01 50/60] SGD d=60 seed=9
+[E01 51/60] SGD d=70 seed=0
+[E01 52/60] SGD d=70 seed=1
+[E01 53/60] SGD d=70 seed=2

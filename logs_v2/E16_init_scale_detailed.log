@@ -1,0 +1,99 @@
+E16: 2 algos x 5 scales x 8 seeds = 80
+E16 algo:   0%|          | 0/2 [00:00<?, ?it/s][E16 1/80] Muon-Exact init=0.001 seed=0
+[E16 2/80] Muon-Exact init=0.001 seed=1
+[E16 3/80] Muon-Exact init=0.001 seed=2
+[E16 4/80] Muon-Exact init=0.001 seed=3
+[E16 5/80] Muon-Exact init=0.001 seed=4
+[E16 6/80] Muon-Exact init=0.001 seed=5
+[E16 7/80] Muon-Exact init=0.001 seed=6
+[E16 8/80] Muon-Exact init=0.001 seed=7
+[E16 9/80] Muon-Exact init=0.01 seed=0
+[E16 10/80] Muon-Exact init=0.01 seed=1
+[E16 11/80] Muon-Exact init=0.01 seed=2
+[E16 12/80] Muon-Exact init=0.01 seed=3
+[E16 13/80] Muon-Exact init=0.01 seed=4
+[E16 14/80] Muon-Exact init=0.01 seed=5
+[E16 15/80] Muon-Exact init=0.01 seed=6
+[E16 16/80] Muon-Exact init=0.01 seed=7
+[E16 17/80] Muon-Exact init=0.1 seed=0
+[E16 18/80] Muon-Exact init=0.1 seed=1
+[E16 19/80] Muon-Exact init=0.1 seed=2
+[E16 20/80] Muon-Exact init=0.1 seed=3
+[E16 21/80] Muon-Exact init=0.1 seed=4
+[E16 22/80] Muon-Exact init=0.1 seed=5
+[E16 23/80] Muon-Exact init=0.1 seed=6
+[E16 24/80] Muon-Exact init=0.1 seed=7
+[E16 25/80] Muon-Exact init=1.0 seed=0
+[E16 26/80] Muon-Exact init=1.0 seed=1
+[E16 27/80] Muon-Exact init=1.0 seed=2
+[E16 28/80] Muon-Exact init=1.0 seed=3
+[E16 29/80] Muon-Exact init=1.0 seed=4
+[E16 30/80] Muon-Exact init=1.0 seed=5
+[E16 31/80] Muon-Exact init=1.0 seed=6
+[E16 32/80] Muon-Exact init=1.0 seed=7
+[E16 33/80] Muon-Exact init=10.0 seed=0
+[E16 34/80] Muon-Exact init=10.0 seed=1
+[E16 35/80] Muon-Exact init=10.0 seed=2
+[E16 36/80] Muon-Exact init=10.0 seed=3
+[E16 37/80] Muon-Exact init=10.0 seed=4
+[E16 38/80] Muon-Exact init=10.0 seed=5
+[E16 39/80] Muon-Exact init=10.0 seed=6
+[E16 40/80] Muon-Exact init=10.0 seed=7
+E16 algo:  50%|█████     | 1/2 [21:24<21:24, 1284.76s/it][E16 41/80] SGD init=0.001 seed=0
+[E16 42/80] SGD init=0.001 seed=1
+[E16 43/80] SGD init=0.001 seed=2
+[E16 44/80] SGD init=0.001 seed=3
+[E16 45/80] SGD init=0.001 seed=4
+[E16 46/80] SGD init=0.001 seed=5
+[E16 47/80] SGD init=0.001 seed=6
+[E16 48/80] SGD init=0.001 seed=7
+[E16 49/80] SGD init=0.01 seed=0
+[E16 50/80] SGD init=0.01 seed=1
+[E16 51/80] SGD init=0.01 seed=2
+[E16 52/80] SGD init=0.01 seed=3
+[E16 53/80] SGD init=0.01 seed=4
+[E16 54/80] SGD init=0.01 seed=5
+[E16 55/80] SGD init=0.01 seed=6
+[E16 56/80] SGD init=0.01 seed=7
+[E16 57/80] SGD init=0.1 seed=0
+[E16 58/80] SGD init=0.1 seed=1
+[E16 59/80] SGD init=0.1 seed=2
+[E16 60/80] SGD init=0.1 seed=3
+[E16 61/80] SGD init=0.1 seed=4
+[E16 62/80] SGD init=0.1 seed=5
+[E16 63/80] SGD init=0.1 seed=6
+[E16 64/80] SGD init=0.1 seed=7
+[E16 65/80] SGD init=1.0 seed=0
+[E16 66/80] SGD init=1.0 seed=1
+[E16 67/80] SGD init=1.0 seed=2
+[E16 68/80] SGD init=1.0 seed=3
+[E16 69/80] SGD init=1.0 seed=4
+[E16 70/80] SGD init=1.0 seed=5
+[E16 71/80] SGD init=1.0 seed=6
+[E16 72/80] SGD init=1.0 seed=7
+[E16 73/80] SGD init=10.0 seed=0
+[E16 74/80] SGD init=10.0 seed=1
+[E16 75/80] SGD init=10.0 seed=2
+[E16 76/80] SGD init=10.0 seed=3
+[E16 77/80] SGD init=10.0 seed=4
+[E16 78/80] SGD init=10.0 seed=5
+[E16 79/80] SGD init=10.0 seed=6
+[E16 80/80] SGD init=10.0 seed=7
+E16 algo: 100%|██████████| 2/2 [40:42<00:00, 1209.79s/it]E16 algo: 100%|██████████| 2/2 [40:42<00:00, 1221.04s/it]
+Saved E16_detailed: 80 rows
+
+============================================================
+algo              init    avg_K     avg_loss    avg_t
+-------------------------------------------------------
+Muon-Exact       0.001     41.0     5.60e-03    30.64
+Muon-Exact       0.010     40.9     5.30e-03    34.52
+Muon-Exact       0.100     53.9     5.05e-03    31.18
+Muon-Exact       1.000    103.8     5.35e-03    31.74
+Muon-Exact      10.000    467.1     5.62e-03    32.31
+SGD              0.001     47.0     3.32e-32    29.85
+SGD              0.010     47.2     3.46e-32    29.29
+SGD              0.100     63.9     2.81e-31    28.65
+SGD              1.000    105.8     2.43e-29    28.47
+SGD             10.000    149.8     2.50e-27    28.21
+
+E16 完成

@@ -1,0 +1,81 @@
+E18: 2 algos x 4 kappas x 8 seeds = 64
+E18 algo:   0%|          | 0/2 [00:00<?, ?it/s][E18 1/64] Muon-Exact kappa=10 seed=0
+[E18 2/64] Muon-Exact kappa=10 seed=1
+[E18 3/64] Muon-Exact kappa=10 seed=2
+[E18 4/64] Muon-Exact kappa=10 seed=3
+[E18 5/64] Muon-Exact kappa=10 seed=4
+[E18 6/64] Muon-Exact kappa=10 seed=5
+[E18 7/64] Muon-Exact kappa=10 seed=6
+[E18 8/64] Muon-Exact kappa=10 seed=7
+[E18 9/64] Muon-Exact kappa=100 seed=0
+[E18 10/64] Muon-Exact kappa=100 seed=1
+[E18 11/64] Muon-Exact kappa=100 seed=2
+[E18 12/64] Muon-Exact kappa=100 seed=3
+[E18 13/64] Muon-Exact kappa=100 seed=4
+[E18 14/64] Muon-Exact kappa=100 seed=5
+[E18 15/64] Muon-Exact kappa=100 seed=6
+[E18 16/64] Muon-Exact kappa=100 seed=7
+[E18 17/64] Muon-Exact kappa=1000 seed=0
+[E18 18/64] Muon-Exact kappa=1000 seed=1
+[E18 19/64] Muon-Exact kappa=1000 seed=2
+[E18 20/64] Muon-Exact kappa=1000 seed=3
+[E18 21/64] Muon-Exact kappa=1000 seed=4
+[E18 22/64] Muon-Exact kappa=1000 seed=5
+[E18 23/64] Muon-Exact kappa=1000 seed=6
+[E18 24/64] Muon-Exact kappa=1000 seed=7
+[E18 25/64] Muon-Exact kappa=10000 seed=0
+[E18 26/64] Muon-Exact kappa=10000 seed=1
+[E18 27/64] Muon-Exact kappa=10000 seed=2
+[E18 28/64] Muon-Exact kappa=10000 seed=3
+[E18 29/64] Muon-Exact kappa=10000 seed=4
+[E18 30/64] Muon-Exact kappa=10000 seed=5
+[E18 31/64] Muon-Exact kappa=10000 seed=6
+[E18 32/64] Muon-Exact kappa=10000 seed=7
+E18 algo:  50%|█████     | 1/2 [15:49<15:49, 949.04s/it][E18 33/64] SGD kappa=10 seed=0
+[E18 34/64] SGD kappa=10 seed=1
+[E18 35/64] SGD kappa=10 seed=2
+[E18 36/64] SGD kappa=10 seed=3
+[E18 37/64] SGD kappa=10 seed=4
+[E18 38/64] SGD kappa=10 seed=5
+[E18 39/64] SGD kappa=10 seed=6
+[E18 40/64] SGD kappa=10 seed=7
+[E18 41/64] SGD kappa=100 seed=0
+[E18 42/64] SGD kappa=100 seed=1
+[E18 43/64] SGD kappa=100 seed=2
+[E18 44/64] SGD kappa=100 seed=3
+[E18 45/64] SGD kappa=100 seed=4
+[E18 46/64] SGD kappa=100 seed=5
+[E18 47/64] SGD kappa=100 seed=6
+[E18 48/64] SGD kappa=100 seed=7
+[E18 49/64] SGD kappa=1000 seed=0
+[E18 50/64] SGD kappa=1000 seed=1
+[E18 51/64] SGD kappa=1000 seed=2
+[E18 52/64] SGD kappa=1000 seed=3
+[E18 53/64] SGD kappa=1000 seed=4
+[E18 54/64] SGD kappa=1000 seed=5
+[E18 55/64] SGD kappa=1000 seed=6
+[E18 56/64] SGD kappa=1000 seed=7
+[E18 57/64] SGD kappa=10000 seed=0
+[E18 58/64] SGD kappa=10000 seed=1
+[E18 59/64] SGD kappa=10000 seed=2
+[E18 60/64] SGD kappa=10000 seed=3
+[E18 61/64] SGD kappa=10000 seed=4
+[E18 62/64] SGD kappa=10000 seed=5
+[E18 63/64] SGD kappa=10000 seed=6
+[E18 64/64] SGD kappa=10000 seed=7
+E18 algo: 100%|██████████| 2/2 [29:54<00:00, 887.99s/it]E18 algo: 100%|██████████| 2/2 [29:54<00:00, 897.15s/it]
+Saved E18_detailed: 64 rows
+
+============================================================
+algo             kappa    avg_K     avg_loss
+------------------------------------------------
+Muon-Exact          10     34.8     5.48e-03
+Muon-Exact         100     33.8     5.16e-03
+Muon-Exact        1000     34.1     5.28e-03
+Muon-Exact       10000     34.1     5.12e-03
+SGD                 10     38.9     1.54e-32
+SGD                100     38.2     1.58e-32
+SGD               1000     38.0     1.55e-32
+SGD              10000     38.0     1.55e-32
+
+E18 完成
