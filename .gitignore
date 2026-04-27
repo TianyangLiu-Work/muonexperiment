@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+results/
+results_backup/
+results_backup_v2/
+logs/
+*.npz
+.DS_Store
+analysis_report.json
