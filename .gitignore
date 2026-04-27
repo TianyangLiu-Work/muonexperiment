@@ -1,9 +1,23 @@
-__pycache__/
-*.pyc
+# Experiment outputs
+logs/
+logs_v2/
 results/
+results_v2/
 results_backup/
 results_backup_v2/
-logs/
-*.npz
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# System
 .DS_Store
-analysis_report.json
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# SSH askpass
+ssh_askpass.py
