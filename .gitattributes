@@ -1,0 +1,2 @@
+logs_v2/*_detailed/*/trajectory.jsonl filter=lfs diff=lfs merge=lfs -text
+logs_v2/*_detailed/*/summary.json filter=lfs diff=lfs merge=lfs -text
