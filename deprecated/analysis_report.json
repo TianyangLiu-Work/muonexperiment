@@ -1,0 +1,838 @@
+{
+  "experiments": {
+    "E01": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50, 60, 70]",
+        "r=[5]",
+        "lr=[0.01]",
+        "noise=[0.0]",
+        "init_scale=[0.01]",
+        "dist=['normal']",
+        "spectrum=['hard-cutoff']",
+        "kappa=[1.0]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E01",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 30,
+          "sgd_n": 30,
+          "muon_mean_min_loss": 0.0059663127178695066,
+          "muon_std_min_loss": 0.0012111550512927253,
+          "sgd_mean_min_loss": 3.591199081658665e-32,
+          "sgd_std_min_loss": 7.512268636047575e-33,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 221.8,
+          "sgd_std_K_epsilon": 0.8469010445797932,
+          "muon_mean_flops": 179360969000.0,
+          "sgd_mean_flops": 19188755623.333332,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 9.021641118124435,
+          "min_loss_ratio": 5.966312717869506e+27,
+          "p_value": 4.0191886111260096e-98,
+          "cohens_d": 2100.835760431475,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 30,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum"
+          ]
+        }
+      ]
+    },
+    "E02": {
+      "problem_type": "matrix_factorization",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "L=[2, 3]",
+        "lr=[0.01]",
+        "init_scale=[0.01]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E02",
+          "problem_type": "matrix_factorization",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 40,
+          "sgd_n": 40,
+          "muon_mean_min_loss": 0.00063872096826038,
+          "muon_std_min_loss": 0.00039268426243981833,
+          "sgd_mean_min_loss": 8.84607822362756e-06,
+          "sgd_std_min_loss": 7.196560283655283e-06,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 2001.0,
+          "sgd_std_K_epsilon": 0.0,
+          "muon_mean_flops": 10005000000.0,
+          "sgd_mean_flops": 1250625000.0,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 1.0,
+          "min_loss_ratio": 72.203857134609,
+          "p_value": NaN,
+          "cohens_d": 0.0,
+          "significance": "not_significant",
+          "paired_data": true,
+          "common_pairs": 80,
+          "paired_key_columns": [
+            "L",
+            "d",
+            "init_scale",
+            "lr",
+            "r",
+            "seed"
+          ]
+        }
+      ]
+    },
+    "E03": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50, 70]",
+        "r=[5]",
+        "lr=[0.001, 0.003, 0.01, 0.03, 0.1]",
+        "noise=[0.0]",
+        "init_scale=[0.01]",
+        "dist=['normal']",
+        "spectrum=['hard-cutoff']",
+        "kappa=[1.0]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E03",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 50,
+          "sgd_n": 50,
+          "muon_mean_min_loss": 0.09614428052653036,
+          "muon_std_min_loss": 0.16610446920796174,
+          "sgd_mean_min_loss": 1.7330707228057264e-31,
+          "sgd_std_min_loss": 2.4629540334109607e-31,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 248.04,
+          "sgd_std_K_epsilon": 77.72819203310145,
+          "muon_mean_flops": 188213459700.0,
+          "sgd_mean_flops": 21205140180.0,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 8.067247218190614,
+          "min_loss_ratio": 9.614428052653035e+28,
+          "p_value": 3.25916468698368e-68,
+          "cohens_d": 22.552435019374716,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 50,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum"
+          ]
+        }
+      ]
+    },
+    "E04": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "noise=[0.0, 0.01, 0.1]",
+        "init_scale=[0.001, 0.01, 0.1, 1.0]",
+        "dist=['normal']",
+        "spectrum=['hard-cutoff']",
+        "kappa=[1.0]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E04",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 60,
+          "sgd_n": 60,
+          "muon_mean_min_loss": 0.004557044134200781,
+          "muon_std_min_loss": 0.00012225667375076075,
+          "sgd_mean_min_loss": 4.871306262710736e-30,
+          "sgd_std_min_loss": 8.368073766427747e-30,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 239.75,
+          "sgd_std_K_epsilon": 24.419792611454355,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 8991224375.0,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 8.346193952033367,
+          "min_loss_ratio": 9.354870928737137e+26,
+          "p_value": 1.4801351916299734e-111,
+          "cohens_d": 72.12387214025182,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 60,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum"
+          ]
+        }
+      ]
+    },
+    "E06": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "noise=[0.0, 0.001, 0.01, 0.1]",
+        "init_scale=[0.01]",
+        "dist=['normal']",
+        "spectrum=['hard-cutoff']",
+        "kappa=[1.0]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E06",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 40,
+          "sgd_n": 40,
+          "muon_mean_min_loss": 0.004542068614871318,
+          "muon_std_min_loss": 0.00010402185284311687,
+          "sgd_mean_min_loss": 2.7701188210837703e-32,
+          "sgd_std_min_loss": 2.2417227524030987e-33,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 221.325,
+          "sgd_std_K_epsilon": 0.8883144511391021,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 8300240812.5,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 9.041003049813623,
+          "min_loss_ratio": 4.5420686148713173e+27,
+          "p_value": 1.3183392971524683e-130,
+          "cohens_d": 2003.4290759515281,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 40,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum"
+          ]
+        }
+      ]
+    },
+    "E09": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "noise=[0.0]",
+        "init_scale=[0.01]",
+        "dist=['normal']",
+        "spectrum=['hard-cutoff']",
+        "kappa=[1.0]",
+        "wd=[0.0, 1e-05, 0.0001, 0.001, 0.01]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E09",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 40,
+          "sgd_n": 40,
+          "muon_mean_min_loss": 0.004479064636557112,
+          "muon_std_min_loss": 0.00030220504005898103,
+          "sgd_mean_min_loss": 2.380077235859671e-08,
+          "sgd_std_min_loss": 4.775034760961457e-08,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 933.325,
+          "sgd_std_K_epsilon": 882.8589162633184,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 35002020812.5,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 2.143947713818873,
+          "min_loss_ratio": 188189.8859865906,
+          "p_value": 2.804877413685092e-09,
+          "cohens_d": 1.209338185674005,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 40,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum",
+            "wd"
+          ]
+        }
+      ]
+    },
+    "E11": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "noise=[0.0]",
+        "init_scale=[0.01]",
+        "dist=['normal']",
+        "spectrum=['hard-cutoff']",
+        "kappa=[1.0]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E11",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 10,
+          "sgd_n": 10,
+          "muon_mean_min_loss": 0.0045491161062651605,
+          "muon_std_min_loss": 0.00010409788597518074,
+          "sgd_mean_min_loss": 2.7626556931127135e-32,
+          "sgd_std_min_loss": 2.2713178541112697e-33,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 221.3,
+          "sgd_std_K_epsilon": 0.9486832980505138,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 8299303250.0,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 9.04202440126525,
+          "min_loss_ratio": 4.5491161062651603e+27,
+          "p_value": 5.595520168616521e-31,
+          "cohens_d": 1875.9685172672214,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 10,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum"
+          ]
+        }
+      ]
+    },
+    "E12": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "noise=[0.0]",
+        "init_scale=[0.01]",
+        "dist=['normal']",
+        "spectrum=['hard-cutoff']",
+        "kappa=[1.0]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E12",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 5,
+          "sgd_n": 5,
+          "muon_mean_min_loss": 0.004530232154841159,
+          "muon_std_min_loss": 0.00010253824014055859,
+          "sgd_mean_min_loss": 2.751802528685131e-32,
+          "sgd_std_min_loss": 2.7901548262733343e-33,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 220.8,
+          "sgd_std_K_epsilon": 0.8366600265340756,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 8280552000.0,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 9.0625,
+          "min_loss_ratio": 4.530232154841159e+27,
+          "p_value": 1.1709328956304026e-14,
+          "cohens_d": 2127.745970337088,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 5,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "eigen_ratio_end",
+            "eigen_ratio_max",
+            "eigen_ratio_min",
+            "eigen_ratio_start",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum"
+          ]
+        }
+      ]
+    },
+    "E13": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "noise=[0.0]",
+        "init_scale=[0.01]",
+        "dist=['normal']",
+        "spectrum=['hard-cutoff']",
+        "kappa=[1.0]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E13",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 10,
+          "sgd_n": 10,
+          "muon_mean_min_loss": 0.0045491161062651605,
+          "muon_std_min_loss": 0.00010409788597518074,
+          "sgd_mean_min_loss": 2.7626556931127135e-32,
+          "sgd_std_min_loss": 2.2713178541112697e-33,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 221.3,
+          "sgd_std_K_epsilon": 0.9486832980505138,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 8299303250.0,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 9.04202440126525,
+          "min_loss_ratio": 4.5491161062651603e+27,
+          "p_value": 5.595520168616521e-31,
+          "cohens_d": 1875.9685172672214,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 10,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum"
+          ]
+        },
+        {
+          "experiment": "E13",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-RandSVD",
+          "muon_n": 10,
+          "sgd_n": 10,
+          "muon_mean_min_loss": 0.0010199676291521899,
+          "muon_std_min_loss": 1.8942114912288855e-05,
+          "sgd_mean_min_loss": 2.7626556931127135e-32,
+          "sgd_std_min_loss": 2.2713178541112697e-33,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 221.3,
+          "sgd_std_K_epsilon": 0.9486832980505138,
+          "muon_mean_flops": 75142552500.0,
+          "sgd_mean_flops": 8299303250.0,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 9.04202440126525,
+          "min_loss_ratio": 1.0199676291521898e+27,
+          "p_value": 5.595520168616521e-31,
+          "cohens_d": 1875.9685172672214,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 10,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum"
+          ]
+        },
+        {
+          "experiment": "E13",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Trunc",
+          "muon_n": 10,
+          "sgd_n": 10,
+          "muon_mean_min_loss": 0.00054287447872484,
+          "muon_std_min_loss": 2.3096118728361646e-05,
+          "sgd_mean_min_loss": 2.7626556931127135e-32,
+          "sgd_std_min_loss": 2.2713178541112697e-33,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 221.3,
+          "sgd_std_K_epsilon": 0.9486832980505138,
+          "muon_mean_flops": 75142552500.0,
+          "sgd_mean_flops": 8299303250.0,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 9.04202440126525,
+          "min_loss_ratio": 5.4287447872483995e+26,
+          "p_value": 5.595520168616521e-31,
+          "cohens_d": 1875.9685172672214,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 10,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum"
+          ]
+        }
+      ]
+    },
+    "E14": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "noise=[0.0]",
+        "init_scale=[0.01]",
+        "dist=['normal']",
+        "spectrum=['hard-cutoff']",
+        "kappa=[1.0]"
+      ],
+      "comparisons": []
+    },
+    "E15": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[100, 200]",
+        "r=[5]",
+        "lr=[0.01]",
+        "noise=[0.0]",
+        "init_scale=[0.01]",
+        "dist=['normal']",
+        "spectrum=['hard-cutoff']",
+        "kappa=[1.0]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E15",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 6,
+          "sgd_n": 6,
+          "muon_mean_min_loss": 0.013073734987339469,
+          "muon_std_min_loss": 0.0018949501676837185,
+          "sgd_mean_min_loss": 2.1300696236048963e-31,
+          "sgd_std_min_loss": 1.5901488556633056e-31,
+          "muon_mean_K_epsilon": 1001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 224.83333333333334,
+          "sgd_std_K_epsilon": 2.0412414523193148,
+          "muon_mean_flops": 5168188025000.0,
+          "sgd_mean_flops": 1154905648333.3333,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 4.452186805040771,
+          "min_loss_ratio": 1.307373498733947e+28,
+          "p_value": 2.7078046515372682e-14,
+          "cohens_d": 380.24245773804205,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 6,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "init_scale",
+            "kappa",
+            "lr",
+            "noise",
+            "r",
+            "seed",
+            "spectrum"
+          ]
+        }
+      ]
+    },
+    "E16": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "init_scale=[0.001, 0.01, 0.1, 1.0, 10.0]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E16",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 40,
+          "sgd_n": 40,
+          "muon_mean_min_loss": 0.004525938112905257,
+          "muon_std_min_loss": 0.0001520359389665264,
+          "sgd_mean_min_loss": 3.8572385249224244e-28,
+          "sgd_std_min_loss": 7.722073165571974e-28,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 256.575,
+          "sgd_std_K_epsilon": 40.24023213217441,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 9622203937.5,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 7.79888921368021,
+          "min_loss_ratio": 1.1733622599852785e+25,
+          "p_value": 1.1021671064433838e-65,
+          "cohens_d": 43.3502717944122,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 40,
+          "paired_key_columns": [
+            "d",
+            "init_scale",
+            "lr",
+            "r",
+            "seed"
+          ]
+        }
+      ]
+    },
+    "E17": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "init_type=['orthogonal', 'random', 'spectral']"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E17",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 24,
+          "sgd_n": 24,
+          "muon_mean_min_loss": 0.00455064359876765,
+          "muon_std_min_loss": 0.00013036803030125004,
+          "sgd_mean_min_loss": 2.608091760274881e-32,
+          "sgd_std_min_loss": 2.3602716559927255e-33,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 220.95833333333334,
+          "sgd_std_K_epsilon": 0.7506036218280919,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 8286489895.833333,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 9.056006034320196,
+          "min_loss_ratio": 4.55064359876765e+27,
+          "p_value": 2.3897268472482383e-79,
+          "cohens_d": 2371.480252561775,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 24,
+          "paired_key_columns": [
+            "d",
+            "init_type",
+            "lr",
+            "r",
+            "seed"
+          ]
+        }
+      ]
+    },
+    "E18": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "kappa=[10, 100, 1000, 10000]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E18",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 32,
+          "sgd_n": 32,
+          "muon_mean_min_loss": 0.004554304530381475,
+          "muon_std_min_loss": 0.00012689053501603942,
+          "sgd_mean_min_loss": 1.1686469459124076e-32,
+          "sgd_std_min_loss": 6.724620628704735e-34,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 212.875,
+          "sgd_std_K_epsilon": 0.8327955253822958,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 7983344687.5,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 9.399882560187903,
+          "min_loss_ratio": 4.554304530381475e+27,
+          "p_value": 4.4811905331892416e-105,
+          "cohens_d": 2147.1356959791046,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 32,
+          "paired_key_columns": [
+            "d",
+            "kappa",
+            "lr",
+            "r",
+            "seed"
+          ]
+        }
+      ]
+    },
+    "E19": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]",
+        "dist=['normal', 'rademacher', 'sparse', 'sphere', 'uniform']"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E19",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 40,
+          "sgd_n": 40,
+          "muon_mean_min_loss": 0.0021027260972046936,
+          "muon_std_min_loss": 0.0020672108774720268,
+          "sgd_mean_min_loss": 0.000166194648925445,
+          "sgd_std_min_loss": 0.00020664794013974756,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 931.4,
+          "sgd_std_K_epsilon": 884.4564548426455,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 34929828500.0,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 2.1483787846252955,
+          "min_loss_ratio": 12.652188929067009,
+          "p_value": 2.8053115558649055e-09,
+          "cohens_d": 1.2093303114513347,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 40,
+          "paired_key_columns": [
+            "d",
+            "dist",
+            "lr",
+            "r",
+            "seed"
+          ]
+        }
+      ]
+    },
+    "E20": {
+      "problem_type": "matrix_sensing",
+      "parameters": [
+        "d=[50]",
+        "r=[5]",
+        "lr=[0.01]"
+      ],
+      "comparisons": [
+        {
+          "experiment": "E20",
+          "problem_type": "matrix_sensing",
+          "muon_variant": "Muon-Exact",
+          "muon_n": 50,
+          "sgd_n": 50,
+          "muon_mean_min_loss": 0.004564517128752164,
+          "muon_std_min_loss": 0.00014370772509570998,
+          "sgd_mean_min_loss": 2.7913588035805833e-32,
+          "sgd_std_min_loss": 2.2509597479860198e-33,
+          "muon_mean_K_epsilon": 2001.0,
+          "muon_std_K_epsilon": 0.0,
+          "sgd_mean_K_epsilon": 221.72,
+          "sgd_std_K_epsilon": 0.9267014137272488,
+          "muon_mean_flops": 78544252500.0,
+          "sgd_mean_flops": 8315054300.0,
+          "winner_K_epsilon": "SGD",
+          "winner_min_loss": "SGD",
+          "K_epsilon_speedup": 9.024896265560166,
+          "min_loss_ratio": 4.564517128752164e+27,
+          "p_value": 9.072842320630337e-163,
+          "cohens_d": 1920.0143364879832,
+          "significance": "highly_significant",
+          "paired_data": true,
+          "common_pairs": 50,
+          "paired_key_columns": [
+            "d",
+            "lr",
+            "r",
+            "seed"
+          ]
+        }
+      ]
+    }
+  },
+  "overall_summary": {
+    "total_comparisons": 17,
+    "muon_wins_K_epsilon": 0,
+    "sgd_wins_K_epsilon": 17,
+    "muon_wins_min_loss": 0,
+    "sgd_wins_min_loss": 17,
+    "significant_sgd_wins": 16
+  }
+}
