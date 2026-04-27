@@ -72,7 +72,7 @@ def run_mf(algo, d, L, r, lr, init_scale, seed, iters):
     logger = DetailedLogger(LOG_DIR, "E02_detailed", algo, {k: v for k, v in locals().items()
                              if k in ("d", "seed", "lr", "r", "noise", "dist",
                                       "spectrum", "kappa", "init_scale", "iters",
-                                      "L", "m", "n", "wd", "gamma", "p", "q")})
+                                      "L", "m", "n", "wd", "gamma", "p", "q")}, svd_interval=10)
     """运行一次深度矩阵分解实验。
 
     优化: min_{W_1,...,W_L} 0.5 * ||W_L...W_1 - X*||_F^2
@@ -104,7 +104,7 @@ def run_mf(algo, d, L, r, lr, init_scale, seed, iters):
         grad_norm = float(np.sqrt(sum(n**2 for n in layer_norms)))
         grad_max = float(max(np.max(np.abs(g)) for g in grads))
         extra = {"layer_grad_norms": layer_norms, "grad_max": grad_max}
-        if algo.startswith("Muon"):
+        if algo.startswith("Muon") and step % 10 == 0:
             U_svd, s_svd, Vt_svd = svd(grads[0], full_matrices=False)
             D = U_svd @ Vt_svd
             sv_log = s_svd
@@ -119,8 +119,8 @@ def run_mf(algo, d, L, r, lr, init_scale, seed, iters):
     elapsed = time.time() - t_start
     if k_epsilon < 0:
         k_epsilon = iters + 1
-    # ── Flush detailed log ───────────────────────────
-    logger.flush()
+    # ── Close detailed log ───────────────────────────
+    logger.close()
 
 
     return {

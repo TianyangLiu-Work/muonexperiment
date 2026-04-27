@@ -45,7 +45,7 @@ def run_ms(algo, d, r, lr, dist, seed, iters):
     logger = DetailedLogger(LOG_DIR, "E19_detailed", algo, {k: v for k, v in locals().items()
                              if k in ("d", "seed", "lr", "r", "noise", "dist",
                                       "spectrum", "kappa", "init_scale", "iters",
-                                      "L", "m", "n", "wd", "gamma", "p", "q")})
+                                      "L", "m", "n", "wd", "gamma", "p", "q")}, svd_interval=10)
     X_star = generate_target_matrix(d, r=r, seed=seed)
     m = int(2 * d * r)
     A = generate_measurement_matrices(d, m, dist=dist, seed=seed+1000)
@@ -65,7 +65,7 @@ def run_ms(algo, d, r, lr, dist, seed, iters):
         extra = {"grad_max": grad_max, "X_norm": X_norm}
         if hasattr(opt, "momentum") and opt.momentum is not None:
             extra["momentum_norm"] = float(np.linalg.norm(opt.momentum, 'fro'))
-        if algo.startswith("Muon"):
+        if algo.startswith("Muon") and step % 10 == 0:
             U_svd, s_svd, Vt_svd = svd(G, full_matrices=False)
             D = U_svd @ Vt_svd
             sv_log = s_svd
@@ -75,7 +75,7 @@ def run_ms(algo, d, r, lr, dist, seed, iters):
         logger.log_step(step, loss, grad_norm=grad_norm, sv=sv_log, **extra)
         if k_epsilon < 0 and loss <= EPSILON: k_epsilon = step + 1
     if k_epsilon < 0: k_epsilon = iters + 1
-    logger.flush()
+    logger.close()
 
     return {"algo": algo, "d": d, "r": r, "lr": lr, "dist": dist,
             "seed": seed, "iters": iters, "final_loss": losses[-1],
