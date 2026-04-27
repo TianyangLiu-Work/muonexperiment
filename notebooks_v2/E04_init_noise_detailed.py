@@ -66,7 +66,7 @@ def run_ms(algo, d, r, lr, noise, dist, spectrum, kappa, init_scale, seed, iters
     logger = DetailedLogger(LOG_DIR, "E04_detailed", algo, {k: v for k, v in locals().items()
                              if k in ("d", "seed", "lr", "r", "noise", "dist",
                                       "spectrum", "kappa", "init_scale", "iters",
-                                      "L", "m", "n", "wd", "gamma", "p", "q")})
+                                      "L", "m", "n", "wd", "gamma", "p", "q")}, svd_interval=10)
     """运行一次 Matrix Sensing 实验，返回结果字典。"""
     X_star = generate_target_matrix(d, r=r, spectrum=spectrum, kappa=kappa, seed=seed)
     m = int(2 * d * r)
@@ -94,7 +94,7 @@ def run_ms(algo, d, r, lr, noise, dist, spectrum, kappa, init_scale, seed, iters
         extra = {"grad_max": grad_max, "X_norm": X_norm}
         if hasattr(opt, "momentum") and opt.momentum is not None:
             extra["momentum_norm"] = float(np.linalg.norm(opt.momentum, 'fro'))
-        if algo.startswith("Muon"):
+        if algo.startswith("Muon") and step % 10 == 0:
             U_svd, s_svd, Vt_svd = svd(G, full_matrices=False)
             D = U_svd @ Vt_svd
             sv_log = s_svd
@@ -109,8 +109,8 @@ def run_ms(algo, d, r, lr, noise, dist, spectrum, kappa, init_scale, seed, iters
     elapsed = time.time() - t_start
     if k_epsilon < 0:
         k_epsilon = iters + 1
-    # ── Flush detailed log ───────────────────────────
-    logger.flush()
+    # ── Close detailed log ───────────────────────────
+    logger.close()
 
 
     return {
