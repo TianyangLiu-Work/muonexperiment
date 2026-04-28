@@ -27,20 +27,6 @@
 | E19 | Spectrum Distribution | 80 | 谱分布 |
 | E20 | Power Scheduling | 100 | 50 种子统计 |
 
-## 图表
-
-### E01 Benchmark
-![E01](plots_v3/E01_benchmark.png)
-
-### 加速比
-![Speedup](plots_v3/speedup_summary.png)
-
-### 理论 FLOPs (E05)
-![FLOPs](plots_v3/E05_flops.png)
-
-### 敏感性分析
-![Sensitivity](plots_v3/sensitivity.png)
-
 ## 数据格式
 
 - `results_v3/E*_detailed_results.csv` — 每 run 一行汇总 (algo, d, final_loss, time_s, K_epsilon, ...)
