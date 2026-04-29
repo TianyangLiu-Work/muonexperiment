@@ -32,7 +32,7 @@ If you don't want to verify the experiment code implementation ( or not yet), pl
 
 ### `results_v3/E*_detailed_results.csv` — One Summary Row Per Run
 
-| Column Name | Type | Description | |
+| Column Name | Type | Description |
 |------|------|------|
 | `algo` | str | Algorithm: `SGD`, `Muon-Exact`, `Adam`, `Momentum-SGD`, `RMSprop`, `Muon-NS`, `Muon-RandSVD`, `Muon-Trunc` |
 | `d` | int | Dimension of the square matrix |
