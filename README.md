@@ -51,10 +51,7 @@
 | `I_conv` | int | 收敛标志 (1=达到 ε) |
 | `F_eps` | int | 达到 ε 时的总 FLOPs；若未达到则为最大迭代对应的 FLOPs |
 
-> ⚠️ **`K_epsilon` vs `min_loss`**：K_epsilon 只是"多快跑到 ε=1e-10 这个门槛"，
-> 不代表最终收敛质量。Muon 的 K_epsilon 通常更小，但其 `min_loss` 卡在 ~5e-3；
-> SGD 虽然在凸问题上能收敛到机器零 (~1e-32)，但 K_epsilon 可能稍大。
-> **判断收敛质量请优先看 `min_loss`。**
+`K_epsilon` 和 `min_loss` 从不同维度衡量优化器性能，两者各有独立意义。
 
 ### `logs_v2/E*_detailed/*/trajectory.jsonl` — 每步一行轨迹
 
