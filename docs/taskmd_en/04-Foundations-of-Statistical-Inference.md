@@ -17,9 +17,11 @@ Split index: 04
 The statistical validity of the experiment relies on a clearly defined Data Generating Process (DGP). This experiment involves three sources of randomness: measurement matrices, observation noise, and parameter initialization.
 
 **Definition 3.1** (Data Generating Process). The DGP for the matrix sensing experiment is defined as a quintuple
+
 $$
 \mathcal{P}_{MS} := (d, r, m, X^\star, \{A_i\}, \epsilon),
 $$
+
 where:
 - $d$: matrix dimension
 - $r$: rank of the target matrix ($r \ll d$)
@@ -31,9 +33,11 @@ where:
 The observations are $y_i = \langle A_i, X^\star \rangle + \epsilon_i$, $i = 1, \ldots, m$.
 
 The DGP for the matrix factorization experiment is
+
 $$
 \mathcal{P}_{MF} := (d, L, X^\star, \{W_\ell^{(0)}\}),
 $$
+
 where $L$ is the factorization depth and $\{W_\ell^{(0)}\}$ are the random initializations.
 
 **Definition 3.2** (Random Seed Control). The experiment controls randomness through the seed $s \in \mathbb{Z}$ of a pseudorandom number generator. Denote by $\xi(s)$ the joint realization of all random variables determined by seed $s$. An experiment with a fixed seed is deterministic; varying the seed produces replications of a randomized experiment.
@@ -41,18 +45,23 @@ where $L$ is the factorization depth and $\{W_\ell^{(0)}\}$ are the random initi
 #### 3.1.2 Random Measurement Matrices
 
 **Definition 3.3** (Gaussian Measurement Matrix). Each element of a standard Gaussian measurement matrix is independently distributed as a standard normal:
+
 $$
 [A_i]_{jk} \overset{i.i.d.}{\sim} \mathcal{N}(0, 1), \quad j, k = 1, \ldots, d.
 $$
+
 Equivalently, $\text{vec}(A_i) \sim \mathcal{N}(0, I_{d^2})$.
 
 **Property**: For any matrix $X$, $\langle A_i, X \rangle \sim \mathcal{N}(0, \|X\|_F^2)$. Therefore
+
 $$
 \mathbb{E}\left[\frac{1}{m}\|\mathcal{A}(X)\|_2^2\right] = \|X\|_F^2,
 $$
+
 i.e., $\mathcal{A}$ is isometric in expectation.
 
 **Definition 3.4** (Sub-Gaussian Measurement Matrix). A measurement matrix is called **sub-Gaussian** if its elements are independent, zero-mean sub-Gaussian random variables with parameter $K > 0$. That is, for any $t > 0$:
+
 $$
 \mathbb{P}(|[A_i]_{jk}| > t) \leq 2 \exp(-t^2/K^2).
 $$
@@ -62,6 +71,7 @@ $$
 **Definition 3.5** (Additive Gaussian Noise). The elements of the observation noise $\epsilon \in \mathbb{R}^m$ are independently and identically distributed:
 $$\epsilon_i \overset{i.i.d.}{\sim} \mathcal{N}(0, \sigma_n^2),$$
 where $\sigma_n^2$ is the noise variance. The signal-to-noise ratio is defined as
+
 $$
 \text{SNR} := \frac{\|\mathcal{A}(X^\star)\|_2^2}{\mathbb{E}\|\epsilon\|_2^2} = \frac{\sum_{i=1}^m \langle A_i, X^\star \rangle^2}{m \sigma_n^2}.$$
 

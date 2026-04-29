@@ -47,6 +47,7 @@ Integrate existing experiments (E1–E5) with supplementary experiments (E6–E2
 Represent all experiments uniformly as a high-dimensional factor space $\mathcal{E} = (\mathcal{P}, \mathcal{A}, \mathcal{D}, \mathcal{M}, \mathcal{R})$:
 
 **Problem Space $\mathcal{P}$**:
+
 $$
 \mathcal{P} = \left\{ \begin{array}{l}
 \text{Problem-Type} \in \{\text{MS}, \text{MF-L2}, \text{MF-L3}, \text{MF-L4}, \text{MF-rect}\} \\
@@ -62,6 +63,7 @@ $$
 $$
 
 **Algorithm Space $\mathcal{A}$**:
+
 $$
 \mathcal{A} = \left\{ \begin{array}{l}
 \text{Algorithm} \in \{\text{Muon-Exact}, \text{Muon-RandSVD}, \text{Muon-Trunc}, \\
@@ -73,6 +75,7 @@ $$
 $$
 
 **Data and Initialization Space $\mathcal{D}$**:
+
 $$
 \mathcal{D} = \left\{ \begin{array}{l}
 \text{Seed } s \in \{1, 2, \dots, n_{\max}\} \\
@@ -82,6 +85,7 @@ $$
 $$
 
 **Metric Space $\mathcal{M}$**:
+
 $$
 \mathcal{M} = \left\{ \begin{array}{l}
 K_\epsilon \text{ (convergence iterations)}, \quad F_\epsilon \text{ (total FLOPs)}, \quad T_\epsilon \text{ (wall-clock time)} \\
@@ -95,6 +99,7 @@ f_{\text{final}} \text{ (final loss)}, \quad \delta_{\text{conv}} \in \{0, 1\} \
 $$
 
 **Response and Inference Space $\mathcal{R}$**:
+
 $$
 \mathcal{R} = \left\{ \begin{array}{l}
 \text{Hypothesis test results (} p \text{-values, effect sizes, confidence intervals)} \\

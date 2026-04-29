@@ -260,7 +260,7 @@ experiment_data/
 | ID | Experiment Name | Core Hypothesis | Null Hypothesis $H_0$ | Alternative Hypothesis $H_1$ | Test Statistic | Rejection Region | Test Type |
 |:---|:---|:---|:---|:---|:---|:---|:---|
 | **E6** | Noise sensitivity | Muon remains faster under noise | $\mathbb{E}[\log K_\epsilon^{\text{Muon}}] = \mathbb{E}[\log K_\epsilon^{\text{SGD}}]$ | $\mathbb{E}[\log K_\epsilon^{\text{Muon}}] < \mathbb{E}[\log K_\epsilon^{\text{SGD}}]$ | $T^{(d,\sigma)} = \bar{D} / (S_D / \sqrt{n})$ | $T < -t_{0.95, n-1}$ | Paired log t |
-| **E7** | Rank ratio sweep | A sweet spot exists for $r/d$ | Algorithm$\times(r/d)$ interaction is not significant | There exists $(r/d)^*$ maximizing the difference | $F_{\text{int}} = \text{MS}_{\text{Alg} \times r/d} / \text{MS}_{\text{Error}}$ | $F > F_{\alpha, df_1, df_2}$ | Two-way ANOVA |
+| **E7** | Rank ratio sweep | A sweet spot exists for $r/d$ | Algorithm $\times(r/d)$ interaction is not significant | There exists $(r/d)^*$ maximizing the difference | $F_{\text{int}} = \text{MS}_{\text{Alg} \times r/d} / \text{MS}_{\text{Error}}$ | $F > F_{\alpha, df_1, df_2}$ | Two-way ANOVA |
 | **E8** | Over-/under-sampling | Sampling rate modulates advantage | $P(\delta_{\text{conv}}^{\text{Muon}}=1) = P(\delta_{\text{conv}}^{\text{SGD}}=1)$ | $P(\delta_{\text{conv}}^{\text{Muon}}=1) > P(\delta_{\text{conv}}^{\text{SGD}}=1)$ | $Z = (\hat{p}_M - \hat{p}_S) / \sqrt{\hat{p}(1-\hat{p})(2/n)}$ | $Z > z_{0.95}$ | Proportion z-test |
 | **E9** | Weight decay ablation | $\lambda$ changes relative algorithm dynamics | $\mathbb{E}[\log K_\epsilon^{\text{Muon}}] = \mathbb{E}[\log K_\epsilon^{\text{SGD}}]$ for all $\lambda$ | There exists $\lambda^*$ maximizing the difference | $F_{\text{Alg} \times \lambda} = \text{MS}_{\text{Alg} \times \lambda} / \text{MS}_{\text{Error}}$ | $F > F_{\alpha, df_1, df_2}$ | Repeated measures ANOVA |
 | **E10** | Rectangular matrices | Rectangularity does not eliminate advantage | $\mathbb{E}[K_\epsilon^{\text{Muon}} - K_\epsilon^{\text{SGD}}] = 0$ | Rectangularity does not eliminate (or enhances) advantage | $T_\alpha = \bar{D}_\alpha / (S_{D_\alpha} / \sqrt{n})$ | $\|T\| > t_{0.975, n-1}$ | Paired t |
@@ -270,7 +270,7 @@ experiment_data/
 | **E14** | Random SVD trade-off | Approximate SVD preserves accuracy | $K_\epsilon^{\text{RandomSVD}} = K_\epsilon^{\text{Exact}}$ | There exists optimal $(r^*, q^*)$ for higher efficiency | Paired t (per parameter combination) | $T < -t_{0.95, n-1}$ | Response surface + t |
 | **E15** | Large-scale scalability | A scale crossover point $d_{\text{cross}}$ exists | $T_\epsilon^{\text{Muon}}(d) \leq T_\epsilon^{\text{SGD}}(d)$ for all $d$ | There exists $d_{\text{cross}}$ where Muon degrades | Log-ratio t-test | $\log R_j > t_{0.95, n-1} \cdot \text{SE}$ | One-sample t |
 | **E16** | Initialization scale | Muon has scale invariance | Muon $K_\epsilon$ does not depend on $\sigma_{\text{init}}$ | Muon $K_\epsilon$ depends on $\sigma_{\text{init}}$ | One-way ANOVA $F$ | $F > F_{\alpha, df}$ | ANOVA |
-| **E17** | Orthogonal/spectral initialization | Muon is less sensitive to initialization | Algorithm$\times$Initialization has no interaction | Muon sensitivity is lower than SGD | $F_{\text{int}} = \text{MS}_{\text{Alg} \times \text{Init}} / \text{MS}_{\text{Error}}$ | $F > F_{\alpha, df}$ | Two-way ANOVA |
+| **E17** | Orthogonal/spectral initialization | Muon is less sensitive to initialization | Algorithm $\times$ Initialization has no interaction | Muon sensitivity is lower than SGD | $F_{\text{int}} = \text{MS}_{\text{Alg} \times \text{Init}} / \text{MS}_{\text{Error}}$ | $F > F_{\alpha, df}$ | Two-way ANOVA |
 | **E18** | Condition number control | Ill-conditioning amplifies Muon advantage | $\Delta(\kappa) = \text{const}$ for all $\kappa$ | $\Delta(\kappa)$ increases monotonically with $\kappa$ | Spearman $\rho_S = \text{corr}_{\text{rank}}(\Delta(\kappa), \log \kappa)$ | $\rho_S > \rho_{\text{crit}}$ | Spearman |
 | **E19** | Matrix distribution generalization | Conclusions do not depend on Gaussian assumption | Measurement distribution does not affect $\Delta K$ | There exists a distribution making $\Delta K$ significantly different | Kruskal-Wallis $H$ | $H > \chi^2_{0.95, 4}$ | Kruskal-Wallis |
 | **E20** | Power and sample size | $n=10$ is insufficient | $n=10$ is sufficient to detect $\delta_{\min}=0.5$ | $n_{\min} > 10$ | Direct computation of $\hat{\delta}$ and $\hat{n}_{\min}$ | $\hat{n}_{\min} > 10$ | Bootstrap + power |
@@ -282,7 +282,7 @@ experiment_data/
 | H1–H5 (core hypotheses) | 5 | Holm-Bonferroni | $\alpha / (5 - j + 1)$ | Controls FWER, more powerful than Bonferroni |
 | H3a + H3b (depth sub-tests) | 2 | Bonferroni | $\alpha / 2 = 0.025$ | Few sub-tests, conservative correction |
 | E6–E20 (exploratory supplementary) | 15 | Benjamini-Hochberg | $p_{(i)} \leq \frac{i}{M} \cdot 0.10$ | Controls FDR = 0.10, suitable for exploratory analysis |
-| E11 (multi-baseline) | 5 (algorithm$\times$problem) | Holm stepwise | $\alpha / (5 - j + 1)$ | Multiple comparison correction |
+| E11 (multi-baseline) | 5 (algorithm $\times$ problem) | Holm stepwise | $\alpha / (5 - j + 1)$ | Multiple comparison correction |
 | All-configuration pairwise comparison | $\gg 40$ | Benjamini-Hochberg | FDR = 0.10 | Large-scale exploratory scanning |
 
 ### C.4 Test Distribution Quick Reference

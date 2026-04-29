@@ -167,21 +167,21 @@ A more precise test can be decomposed into two one-sided tests:
 
 - **H3a ($L=2 \to 3$):**
 
-  $$
+  ```math
   \begin{aligned}
   H_0^{(3a)}: & \quad \bar{\rho}_K(3) \geq \bar{\rho}_K(2) \\
   H_1^{(3a)}: & \quad \bar{\rho}_K(3) < \bar{\rho}_K(2)
   \end{aligned}
-  $$
+  ```
 
 - **H3b ($L=3 \to 4$):**
 
-  $$
+  ```math
   \begin{aligned}
   H_0^{(3b)}: & \quad \bar{\rho}_K(4) \geq \bar{\rho}_K(3) \\
   H_1^{(3b)}: & \quad \bar{\rho}_K(4) < \bar{\rho}_K(3)
   \end{aligned}
-  $$
+  ```
 
 **Test Statistic:** A paired t-test is used for each depth pair (paired by the same $d$ and $s$):
 

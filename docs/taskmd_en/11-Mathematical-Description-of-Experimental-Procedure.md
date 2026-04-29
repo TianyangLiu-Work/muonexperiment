@@ -35,12 +35,15 @@ $$
 Record the convergence trajectory:
 
 $$\mathcal{T}(\eta) = \{ (k, f(\theta^{(k)})) \}_{k=0}^{K_{\max}}
+
 $$
 
 **Output**:
 
 $$
+
 \eta^\star(p, \mathcal{A}) = \arg\min_{\eta \in \mathcal{H}} K_\epsilon^{(\mathcal{A})}(p, s_0; \eta)
+
 $$
 
 where $K_\epsilon$ denotes the number of iterations required to reach precision $\epsilon$. If multiple values of $\eta$ achieve the same minimum number of iterations, the smallest $\eta$ is selected (more conservative).
@@ -48,7 +51,9 @@ where $K_\epsilon$ denotes the number of iterations required to reach precision 
 **Calibration Result Record**:
 
 $$
+
 \mathcal{C} = \left\{ (p, \mathcal{A}, \eta^\star(p, \mathcal{A})) \; \middle| \; p \in \mathcal{P}_{\text{cal}}, \mathcal{A} \in \mathcal{A} \right\}
+
 $$
 
 where $\mathcal{P}_{\text{cal}} \subseteq \mathcal{P}$ is the calibration subset (typically selected to be representative in dimension, e.g., $d = 100$).
@@ -71,16 +76,20 @@ where $\mathcal{P}_{\text{cal}} \subseteq \mathcal{P}$ is the calibration subset
 **Randomization Design**: A **paired randomized design** is adopted, meaning that for the same problem instance and the same random seed, both algorithms use identical data and initialization:
 
 $$
+
 (\theta^{(0)}, \{A_i\}, y) = \Phi_{MS}(s) \quad \text{or} \quad (\{W_i^{(0)}\}, X^\star) = \Phi_{MF}(s)
+
 $$
 
 Then Muon and SGD are run separately:
 
 $$
+
 \begin{aligned}
 \theta_{\text{Muon}}^{(k+1)} &= \mathcal{T}_{\eta^\star}^{\text{Muon}}(\theta_{\text{Muon}}^{(k)}, G^{(k)}) \\
 \theta_{\text{SGD}}^{(k+1)} &= \mathcal{T}_{\eta^\star}^{\text{SGD}}(\theta_{\text{SGD}}^{(k)}, G^{(k)})
 \end{aligned}
+
 $$
 
 Note: For MF problems, the same initialization can be used since the parameter dimensions are identical; for MS problems, the initialization is the same.
@@ -88,7 +97,9 @@ Note: For MF problems, the same initialization can be used since the parameter d
 **Output**: For each $(p, \mathcal{A}, s)$ triplet, record:
 
 $$
+
 \mathcal{D}_{\text{raw}} = \left\{ (p, \mathcal{A}, s, \{f(\theta^{(k)}\}_{k=0}^{K_\epsilon}, K_\epsilon, F_\epsilon, \bar{\sigma}_{\log}) \right\}
+
 $$
 
 ---
@@ -104,11 +115,15 @@ $$
 For each problem $p$ and algorithm $\mathcal{A}$, compute:
 
 $$
+
 \bar{K}_\epsilon^{(\mathcal{A})}(p) = \frac{1}{R} \sum_{s=1}^R K_\epsilon^{(\mathcal{A})}(p, s), \quad \hat{\sigma}_{K}^{(\mathcal{A})}(p) = \sqrt{\frac{1}{R-1} \sum_{s=1}^R \left(K_\epsilon^{(\mathcal{A})}(p, s) - \bar{K}_\epsilon^{(\mathcal{A})}(p)\right)^2}
+
 $$
 
 $$
+
 \bar{F}_\epsilon^{(\mathcal{A})}(p) = \frac{1}{R} \sum_{s=1}^R F_\epsilon^{(\mathcal{A})}(p, s)
+
 $$
 
 **Step 2: Compute efficiency ratios.**
@@ -116,13 +131,17 @@ $$
 For each problem $p$ and seed $s$:
 
 $$
+
 \rho_K(p, s) = \frac{K_\epsilon^{\text{Muon}}(p, s)}{K_\epsilon^{\text{SGD}}(p, s)}, \quad \rho_F(p, s) = \frac{F_\epsilon^{\text{Muon}}(p, s)}{F_\epsilon^{\text{SGD}}(p, s)}
+
 $$
 
 Then compute:
 
 $$
+
 \bar{\rho}_K(p) = \frac{1}{R} \sum_{s=1}^R \rho_K(p, s), \quad \bar{\rho}_F(p) = \frac{1}{R} \sum_{s=1}^R \rho_F(p, s)
+
 $$
 
 **Step 3: Compute stability measures.**
@@ -130,19 +149,25 @@ $$
 For each algorithm, each problem, and each step $k$:
 
 $$
+
 \sigma_{\log}^{(\mathcal{A})}(p, k) = \sqrt{\frac{1}{R-1} \sum_{s=1}^R \left(\ell_s^{(k)} - \bar{\ell}^{(k)}\right)^2}
+
 $$
 
 Then:
 
 $$
+
 \bar{\sigma}_{\log}^{(\mathcal{A})}(p) = \frac{1}{\bar{K}_\epsilon^{(\mathcal{A})}(p)} \sum_{k=1}^{\bar{K}_\epsilon^{(\mathcal{A})}(p)} \sigma_{\log}^{(\mathcal{A})}(p, k)
+
 $$
 
 **Output**: Aggregated dataset
 
 $$
+
 \mathcal{D}_{\text{agg}} = \left\{ (p, \bar{K}_\epsilon^{\text{Muon}}, \bar{K}_\epsilon^{\text{SGD}}, \bar{\rho}_K, \bar{\rho}_F, \bar{\sigma}_{\log}^{\text{Muon}}, \bar{\sigma}_{\log}^{\text{SGD}}) \right\}_{p \in \mathcal{P}}
+
 $$
 
 ---
@@ -170,7 +195,9 @@ Under $H_0^{(i)}$, $T^{(i)}$ follows (asymptotically or exactly):
 **Step 3: Compute p-value.**
 
 $$
+
 p^{(i)} = \mathbb{P}(T \geq T_{\text{obs}}^{(i)} \mid H_0^{(i)}) \quad \text{or} \quad \mathbb{P}(T \leq T_{\text{obs}}^{(i)} \mid H_0^{(i)})
+
 $$
 
 depending on the direction of the alternative hypothesis.
@@ -188,7 +215,9 @@ For the 5 hypotheses, apply the Holm--Bonferroni procedure:
 For each rejected hypothesis, report Cohen's d effect size:
 
 $$
+
 d^{(i)} = \frac{|\bar{\Delta}^{(i)}|}{\hat{\sigma}^{(i)}}
+
 $$
 
 where $\bar{\Delta}^{(i)}$ is the sample mean of the corresponding difference, and $\hat{\sigma}^{(i)}$ is the pooled standard deviation.
@@ -196,7 +225,9 @@ where $\bar{\Delta}^{(i)}$ is the sample mean of the corresponding difference, a
 **Output**: Hypothesis testing report
 
 $$
+
 \mathcal{R}_{\text{report}} = \left\{ (H_i, T_{\text{obs}}^{(i)}, p^{(i)}, \text{decision}, d^{(i)}) \right\}_{i=1}^5
+
 $$
 
 where $\text{decision} \in \{\text{Reject } H_0, \text{Fail to reject } H_0\}$.

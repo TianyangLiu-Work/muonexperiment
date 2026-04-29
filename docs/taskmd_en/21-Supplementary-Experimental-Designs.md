@@ -27,19 +27,25 @@ The following 15 supplementary experiments (numbered E6--E20) systematically cov
 **Mathematical Formulation**:
 
 Data generation process (matrix sensing):
+
 $$
 X^\star = U^\star \Sigma^\star (V^\star)^\top, \quad U^\star, V^\star \sim \text{Haar}, \quad \Sigma^\star = \text{diag}(\lambda_1, \dots, \lambda_r)
 $$
+
 $$
 y_i = \langle A_i, X^\star \rangle + \epsilon_i, \quad A_{ij} \overset{iid}{\sim} \mathcal{N}(0,1), \quad \epsilon_i \overset{iid}{\sim} \mathcal{N}(0, \sigma_\epsilon^2)
 $$
+
 where the noise level $\sigma_\epsilon \in \{0, 10^{-4}, 10^{-3}, 10^{-2}, 10^{-1}\}$ (with fixed signal norm $\|X^\star\|_F = 1$).
 
 Matrix factorization (noise injected into the target matrix):
+
 $$
 X^\star_{\text{noisy}} = X^\star + \sigma_\epsilon E, \quad E_{ij} \overset{iid}{\sim} \mathcal{N}(0,1)
 $$
+
 Optimization objectives:
+
 $$
 f_{\text{MS}}^{(\sigma)}(X) = \frac{1}{2m}\sum_{i=1}^m (\langle A_i, X \rangle - y_i)^2, \quad f_{\text{MF}}^{(\sigma)} = \frac{1}{2}\|W_L \cdots W_1 - X^\star_{\text{noisy}}\|_F^2
 $$
@@ -54,25 +60,32 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design (full factorial):
+
 $$
 \text{Algorithm} \times \text{Problem} \times d \times \sigma_\epsilon \times \text{Seed}
 $$
+
 Response variables:
 - $K_\epsilon^{(j)}$: number of iterations to reach convergence (right-censored: if not converged, $K_\epsilon = K_{\max}$)
 - $F_\epsilon^{(j)} = K_\epsilon^{(j)} \times \text{FLOPs-per-iter}$
 - $f_{\text{final}}^{(j)} = f(X^{(K_{\max})})$ (final loss)
 
 Null and alternative hypotheses (for each $(d, \sigma_\epsilon)$ combination):
+
 $$
 H_0^{(d,\sigma)}: \mathbb{E}[\log K_\epsilon^{\text{Muon}}] = \mathbb{E}[\log K_\epsilon^{\text{SGD}}] \quad \text{(no difference under noise)}
 $$
+
 $$
 H_1^{(d,\sigma)}: \mathbb{E}[\log K_\epsilon^{\text{Muon}}] < \mathbb{E}[\log K_\epsilon^{\text{SGD}}] \quad \text{(Muon is faster)}
 $$
+
 Test statistic: paired log t-statistic
+
 $$
 T^{(d,\sigma)} = \frac{\bar{D} - 0}{S_D / \sqrt{n}}, \quad D_j = \log K_{\epsilon,j}^{\text{Muon}} - \log K_{\epsilon,j}^{\text{SGD}}
 $$
+
 where $\bar{D}$ and $S_D$ are the mean and standard deviation of the difference samples. If $T < -t_{0.95, n-1}$, reject $H_0$.
 
 **Relationship to Existing Experiments**: Directly extends E1 (matrix sensing) and E2 (matrix factorization), generalizing noise from $\sigma_\epsilon=0$ to $>0$.
@@ -80,24 +93,28 @@ where $\bar{D}$ and $S_D$ are the mean and standard deviation of the difference 
 **Expected Results and Interpretation**:
 - **Expectation 1**: As $\sigma_\epsilon$ increases, $K_\epsilon$ increases for both algorithms, but Muon's spectral normalization may amplify high-frequency noise components (if noise flattens the gradient spectrum), causing the relative advantage to shrink.
 - **Expectation 2**: At $\sigma_\epsilon = 10^{-1}$ (high noise), the difference in $K_\epsilon$ may no longer be significant, suggesting that Muon's advantage is limited to problems with signal-to-noise ratio (SNR) above a certain threshold.
-- **Interpretation Framework**: Establish the "$\sigma_\epsilon$--advantage boundary" hypothesis---there exists a critical $\sigma_\epsilon^*(d)$ such that Muon is significantly better than SGD when $\sigma_\epsilon < \sigma_\epsilon^*$, and no significant difference otherwise.
+- **Interpretation Framework**: Establish the " $\sigma_\epsilon$--advantage boundary" hypothesis---there exists a critical $\sigma_\epsilon^*(d)$ such that Muon is significantly better than SGD when $\sigma_\epsilon < \sigma_\epsilon^*$, and no significant difference otherwise.
 
 ---
 
 ### E7: Rank Ratio Sweep Experiment (Problem Variant B1)
 
-**Research Question**: Does Muon's advantage over SGD depend on a specific rank ratio $r/d$? Is there an "$r/d$ sweet spot" where spectral normalization's information compression is most effective?
+**Research Question**: Does Muon's advantage over SGD depend on a specific rank ratio $r/d$? Is there an " $r/d$ sweet spot" where spectral normalization's information compression is most effective?
 
 **Mathematical Formulation**:
 
 Matrix sensing data generation:
+
 $$
 r \in \{0.01d, 0.05d, 0.1d, 0.2d, 0.5d, 1.0d\} \quad \Rightarrow \quad r/d \in \{0.01, 0.05, 0.1, 0.2, 0.5, 1.0\}
 $$
+
 Construction of $X^\star$:
+
 $$
 X^\star = \sum_{i=1}^r \lambda_i u_i v_i^\top, \quad \lambda_i = \lambda_1 \cdot \rho^{i-1}, \quad \rho \in \{0.5, 0.9, 0.99\}
 $$
+
 (geometric decay, controlling spectral concentration)
 
 Parameter settings:
@@ -110,28 +127,37 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm} \times r/d \times \rho \times d \times \text{Seed}
 $$
+
 Response variables: $K_\epsilon$, $\bar{\sigma}_{\log}$, $\kappa_{\text{sp}}$, $\text{rank}_\epsilon(X^{(\infty)})$.
 
 Null and alternative hypotheses:
+
 $$
 H_0: \text{Algorithm} \times (r/d) \text{ interaction is not significant on } K_\epsilon
 $$
+
 $$
 H_1: \exists \; (r/d)^* \text{ such that } \Delta K_\epsilon^{\text{Muon-SGD}} \text{ is maximized at this point}
 $$
+
 Test statistic: two-way ANOVA interaction F-statistic
+
 $$
 F_{\text{int}} = \frac{\text{MS}_{\text{Alg} \times r/d}}{\text{MS}_{\text{Error}}}, \quad \text{where } \text{MS} \text{ is the mean square}
 $$
+
 If $F_{\text{int}} > F_{\alpha, df_1, df_2}$, reject $H_0$ (significant interaction effect exists).
 
 Additional analysis: fit response surfaces for each algorithm separately
+
 $$
 \log K_\epsilon^{(\text{Alg})}(r/d, \rho) = \beta_0 + \beta_1(r/d) + \beta_2\rho + \beta_3(r/d)^2 + \beta_4(r/d)\rho + \varepsilon
 $$
+
 Compare the response surface differences between the two algorithms.
 
 **Relationship to Existing Experiments**: Extends the existing low-rank ($r=d/10$) vs. full-rank dichotomy into a continuous rank ratio sweep.
@@ -150,16 +176,21 @@ Compare the response surface differences between the two algorithms.
 **Mathematical Formulation**:
 
 Sampling rate definition:
+
 $$
 \gamma = m / d^2 \in \{0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0\}
 $$
+
 Sensing operator:
+
 $$
 \mathcal{A}: \mathbb{R}^{d \times d} \to \mathbb{R}^m, \quad (\mathcal{A}(X))_i = \langle A_i, X \rangle, \quad A_{ij} \overset{iid}{\sim} \mathcal{N}(0, 1/d^2)
 $$
+
 (note the normalization: $\mathbb{E}[\|\mathcal{A}(X)\|^2] = \|X\|_F^2$)
 
 Optimization objective:
+
 $$
 f_{\text{MS}}^{(\gamma)}(X) = \frac{1}{2m}\|\mathcal{A}(X) - y\|_2^2
 $$
@@ -174,27 +205,34 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm} \times \gamma \times d \times \text{Seed}
 $$
+
 Response variables:
 - $K_\epsilon$ (convergence iterations)
 - $\hat{\kappa}_{\text{cond}}(\mathcal{A}^*\mathcal{A})$: estimated condition number of the sensing operator (approximation of the Hessian)
 - Convergence indicator $\delta_{\text{conv}} \in \{0, 1\}$ (binary response; may not converge under undersampling)
 
 Null and alternative hypotheses:
+
 $$
 H_0^{(\gamma)}: P(\delta_{\text{conv}}^{\text{Muon}} = 1) = P(\delta_{\text{conv}}^{\text{SGD}} = 1) \quad \text{(equal convergence probability given } \gamma \text{)}
 $$
+
 $$
 H_1^{(\gamma)}: P(\delta_{\text{conv}}^{\text{Muon}} = 1) > P(\delta_{\text{conv}}^{\text{SGD}} = 1)
 $$
+
 Test statistic: two-sample proportion z-test
+
 $$
 Z = \frac{\hat{p}_{\text{Muon}} - \hat{p}_{\text{SGD}}}{\sqrt{\hat{p}(1-\hat{p})(2/n)}}, \quad \hat{p} = \frac{\hat{p}_{\text{Muon}} + \hat{p}_{\text{SGD}}}{2}
 $$
 
 For $K_\epsilon$ (computed only on the converged subsample):
+
 $$
 T^{(\gamma)} = \frac{\bar{D}}{S_D / \sqrt{n_{\text{conv}}}}, \quad D_j = \log K_{\epsilon,j}^{\text{Muon}} - \log K_{\epsilon,j}^{\text{SGD}}
 $$
@@ -216,9 +254,11 @@ $$
 **Mathematical Formulation**:
 
 Algorithm update rules (with weight decay):
+
 $$
 \text{Muon:} \quad X^{(k+1)} = X^{(k)} - \eta D^{(k)} - \lambda X^{(k)} = (1-\lambda)X^{(k)} - \eta \cdot UV^\top
 $$
+
 $$
 \text{SGD:} \quad X^{(k+1)} = X^{(k)} - \eta G^{(k)} - \lambda X^{(k)} = (1-\lambda)X^{(k)} - \eta G^{(k)}
 $$
@@ -234,19 +274,25 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm} \times \lambda \times d \times \text{Problem} \times \text{Seed}
 $$
+
 Response variables: $K_\epsilon$, $F_\epsilon$ (total FLOPs), $\|X^{(K)}\|_F$ (final parameter norm).
 
 Null and alternative hypotheses:
+
 $$
 H_0^{(\lambda)}: \text{Given } \lambda, \; \mathbb{E}[\log K_\epsilon^{\text{Muon}}] = \mathbb{E}[\log K_\epsilon^{\text{SGD}}]
 $$
+
 $$
 H_1^{(\lambda)}: \exists \; \lambda^* \text{ such that } \Delta(\lambda^*) = \max_{\lambda} \left|\mathbb{E}[\log K_\epsilon^{\text{Muon}} - \log K_\epsilon^{\text{SGD}}]\right|
 $$
+
 Test statistic: paired t-test for each $\lambda$ separately; overall repeated-measures ANOVA:
+
 $$
 F_{\text{Alg} \times \lambda} = \frac{\text{MS}_{\text{Alg} \times \lambda}}{\text{MS}_{\text{Error}}}
 $$
@@ -267,18 +313,23 @@ $$
 **Mathematical Formulation**:
 
 Rectangular matrix sensing:
+
 $$
 X^\star \in \mathbb{R}^{m \times n}, \quad m \neq n, \quad \text{rank}(X^\star) = r
 $$
+
 $$
 y_i = \langle A_i, X^\star \rangle, \quad A_i \in \mathbb{R}^{m \times n}, \quad A_{ij} \overset{iid}{\sim} \mathcal{N}(0, 1)
 $$
+
 Number of measurements $m_{\text{meas}} = 3mn$ (maintaining a similar oversampling rate to the square case).
 
 Rectangular matrix factorization:
+
 $$
 W_1 \in \mathbb{R}^{d_1 \times d_0}, \; W_2 \in \mathbb{R}^{d_2 \times d_1}, \; \dots, \; W_L \in \mathbb{R}^{d_L \times d_{L-1}}, \quad d_L = m, \; d_0 = n
 $$
+
 $$
 f_{\text{MF-rect}} = \frac{1}{2}\|W_L W_{L-1} \cdots W_1 - X^\star\|_F^2
 $$
@@ -293,19 +344,25 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm} \times \alpha \times \min(m,n) \times \text{Problem} \times \text{Seed}
 $$
+
 Response variables: $K_\epsilon$, $F_\epsilon$, $\bar{\sigma}_{\log}(G)$ (singular value distribution of the rectangular gradient matrix).
 
 Null and alternative hypotheses:
+
 $$
 H_0: \text{For rectangular matrices, } \mathbb{E}[K_\epsilon^{\text{Muon}} - K_\epsilon^{\text{SGD}}] = 0
 $$
+
 $$
 H_1: \text{Rectangularity does not eliminate Muon's advantage (or enhances it)}
 $$
+
 Test statistic: paired t-test, grouped by $\alpha$; testing the moderating effect of aspect ratio:
+
 $$
 T_{\alpha} = \frac{\bar{D}_{\alpha} - 0}{S_{D_\alpha} / \sqrt{n}}
 $$
@@ -344,21 +401,27 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm} \times \text{Problem} \times d \times \text{Seed}
 $$
+
 Response variables: $K_\epsilon$, $F_\epsilon$ (FLOPs count for Adam and other adaptive methods requires additional accounting for first/second moment accumulation).
 
 Null and alternative hypotheses (multiple comparison framework):
+
 $$
 H_0^{(i)}: \mathbb{E}[\log K_\epsilon^{\text{Muon}}] = \mathbb{E}[\log K_\epsilon^{\text{Algo}_i}], \quad i \in \{\text{Adam, RMSprop, Momentum, SGD}\}
 $$
+
 $$
 H_1^{(i)}: \mathbb{E}[\log K_\epsilon^{\text{Muon}}] < \mathbb{E}[\log K_\epsilon^{\text{Algo}_i}]
 $$
+
 Multiple testing correction: use the Holm method to control FWER at $\alpha=0.05$.
 
 Test statistic:
+
 $$
 T_i = \frac{\bar{D}_i}{S_{D_i} / \sqrt{n}}, \quad D_{i,j} = \log K_{\epsilon,j}^{\text{Muon}} - \log K_{\epsilon,j}^{\text{Algo}_i}
 $$
@@ -379,9 +442,11 @@ $$
 **Mathematical Formulation**:
 
 For the MS problem, the Hessian is:
+
 $$
 \nabla^2 f_{\text{MS}}(X) = \frac{1}{m}\sum_{i=1}^m \text{vec}(A_i) \text{vec}(A_i)^\top \in \mathbb{R}^{d^2 \times d^2}
 $$
+
 Eigenvalues $\lambda_1(H) \geq \lambda_2(H) \geq \dots \geq \lambda_{d^2}(H)$.
 
 For the MF problem (taking $L=2$ as an example), $W = W_2 W_1$, Hessian block structure near equilibrium points (computed via automatic differentiation).
@@ -389,14 +454,14 @@ For the MF problem (taking $L=2$ as an example), $W = W_2 W_1$, Hessian block st
 Tracking metrics:
 1. **Condition number dynamics**: $\kappa_2^{(k)} = \lambda_{\max}(H^{(k)}) / \lambda_{\min}(H^{(k)})$
 2. **Spectral normalization direction-Hessian alignment**:
-   $$
+   ```math
    \mathcal{A}_{\text{Muon}}^{(k)} = \frac{\|H^{(k)} \text{vec}(D^{(k)})\|_2}{\lambda_{\max}(H^{(k)}) \|\text{vec}(D^{(k)})\|_2}, \quad \mathcal{A}_{\text{SGD}}^{(k)} = \frac{\|H^{(k)} \text{vec}(G^{(k)})\|_2}{\lambda_{\max}(H^{(k)}) \|\text{vec}(G^{(k)})\|_2}
-   $$
+   ```
    This quantity measures the alignment of the update direction with the maximum curvature direction of the Hessian.
 3. **Gradient-direction angle**:
-   $$
+   ```math
    \theta^{(k)} = \arccos\left(\frac{\langle G^{(k)}, D^{(k)}\rangle}{\|G^{(k)}\|_F \|D^{(k)}\|_F}\right)
-   $$
+   ```
 
 Parameter settings:
 - Problems: MS ($d=50, 100$) and MF-L2 ($d=50, 100$)
@@ -411,19 +476,22 @@ Parameter settings:
 Time series analysis framework: treat $\kappa_2^{(k)}$, $\mathcal{A}^{(k)}$, $\theta^{(k)}$ as discrete-time stochastic processes.
 
 Null and alternative hypotheses:
+
 $$
 H_0: \mathbb{E}[\theta^{(k)}_{\text{Muon}}] = \mathbb{E}[\theta^{(k)}_{\text{SGD}}] \quad \forall k \in \{1, \dots, K/T\}
 $$
+
 $$
 H_1: \exists \; k^* \text{ such that } \mathbb{E}[\theta^{(k^*)}_{\text{Muon}}] < \mathbb{E}[\theta^{(k^*)}_{\text{SGD}}] \text{ and } \mathcal{A}^{(k^*)}_{\text{Muon}} > \mathcal{A}^{(k^*)}_{\text{SGD}}
 $$
+
 (Muon's direction is closer to the gradient and better aligned with the Hessian)
 
 Test statistics:
 - Functional ANOVA on the angle sequence or a repeated-measures mixed-effects model:
-  $$
+  ```math
   \theta_{ij}^{(k)} = \mu + \alpha_i^{\text{Alg}} + \beta_j^{\text{Seed}} + \gamma_k^{\text{Time}} + (\alpha\gamma)_{ik}^{\text{Alg}\times\text{Time}} + \varepsilon_{ijk}
-  $$
+  ```
   where $(\alpha\gamma)_{ik}$ is the key interaction term---the different evolutionary patterns of algorithms over time.
 - F-test: $H_0: (\alpha\gamma)_{ik} = 0 \; \forall i, k$.
 
@@ -464,27 +532,35 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm-Variant} \times d \times \text{Hardware} \times \text{Seed}
 $$
+
 Response variables: $\tau_{\text{iter}}$ (seconds), $T_\epsilon$ (total time), peak memory $M_{\text{peak}}$ (MB).
 
 Null and alternative hypotheses:
+
 $$
 H_0^{(d)}: T_\epsilon^{\text{Muon-Exact}} = T_\epsilon^{\text{SGD}} \quad \text{(no difference in actual time)}
 $$
+
 $$
 H_1^{(d)}: T_\epsilon^{\text{Muon-Exact}} > T_\epsilon^{\text{SGD}} \quad \text{(SVD overhead cancels iteration advantage)}
 $$
+
 Additional hypotheses:
+
 $$
 H_0^{\text{Rand}}: T_\epsilon^{\text{Muon-RandomSVD}} = T_\epsilon^{\text{Muon-Exact}}
 $$
+
 $$
 H_1^{\text{Rand}}: T_\epsilon^{\text{Muon-RandomSVD}} < T_\epsilon^{\text{Muon-Exact}} \quad \text{(randomized SVD acceleration is effective)}
 $$
 
 Test statistic: paired Wilcoxon signed-rank test (timing data may be skewed):
+
 $$
 W = \sum_{j=1}^n \text{rank}(|D_j|) \cdot \mathbb{I}(D_j > 0), \quad D_j = T_{\epsilon,j}^{\text{Alg}_1} - T_{\epsilon,j}^{\text{Alg}_2}
 $$
@@ -505,17 +581,21 @@ $$
 **Mathematical Formulation**:
 
 Randomized SVD (Halko et al.) parameterization:
+
 $$
 \text{RandomSVD}(G, r_{\text{approx}}, q, p): \quad \tilde{U}\tilde{\Sigma}\tilde{V}^\top \approx G
 $$
+
 where $r_{\text{approx}}$ is the approximation rank, $q$ is the number of power iterations, and $p$ is the oversampling parameter.
 
 Approximate direction:
+
 $$
 \tilde{D}^{(k)} = \tilde{U}\tilde{V}^\top \quad \text{or} \quad \tilde{D}^{(k)} = \tilde{U}\tilde{\Sigma}^{-1}\tilde{V}^\top
 $$
 
 Approximation error metric:
+
 $$
 \delta_{\text{svd}} = \|G - \tilde{U}\tilde{\Sigma}\tilde{V}^\top\|_F / \|G\|_F
 $$
@@ -534,9 +614,11 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{SVD-Variant} \times r_{\text{approx}}/r \times q \times d \times \text{Seed}
 $$
+
 Response variables:
 - $K_\epsilon$ (convergence iterations; may not converge if approximation is too coarse)
 - $\tau_{\text{iter}}$ (per-iteration time)
@@ -544,12 +626,15 @@ Response variables:
 - Composite efficiency: $E = K_\epsilon \times \tau_{\text{iter}}$
 
 Null and alternative hypotheses:
+
 $$
 H_0^{(r_{\text{approx}}, q)}: K_\epsilon^{\text{RandomSVD}(r_{\text{approx}}, q)} = K_\epsilon^{\text{Exact}}
 $$
+
 $$
 H_1^{(r_{\text{approx}}, q)}: \exists \; (r_{\text{approx}}^*, q^*) \text{ such that } E^{\text{RandomSVD}} < E^{\text{Exact}} \text{ and } K_\epsilon^{\text{RandomSVD}} \approx K_\epsilon^{\text{Exact}}
 $$
+
 Test statistic: paired t-test for each parameter combination; use response surface methodology to find the optimal $(r_{\text{approx}}^*, q^*)$.
 
 **Relationship to Existing Experiments**: Extends E13's wall-clock analysis, specifically focusing on SVD approximation strategies.
@@ -557,7 +642,7 @@ Test statistic: paired t-test for each parameter combination; use response surfa
 **Expected Results and Interpretation**:
 - **Expectation 1**: There exists a "good enough approximation" threshold---when $r_{\text{approx}} \geq 2r$ and $q \geq 1$, $K_\epsilon$ is almost identical to exact SVD, but $\tau_{\text{iter}}$ is reduced by 2--5x.
 - **Expectation 2**: Excessively low $r_{\text{approx}}$ (e.g., $r_{\text{approx}} = r$) may lead to degraded direction quality and increased $K_\epsilon$, offsetting the time gains.
-- **Expectation 3**: Diminishing marginal returns for power iterations $q$---$q=1$ is usually sufficient; $q=2$ offers limited improvement but at significantly increased cost.
+- **Expectation 3**: Diminishing marginal returns for power iterations $q$--- $`q=1`$ is usually sufficient; $q=2$ offers limited improvement but at significantly increased cost.
 
 ---
 
@@ -568,24 +653,31 @@ Test statistic: paired t-test for each parameter combination; use response surfa
 **Mathematical Formulation**:
 
 Scale sequence:
+
 $$
 d \in \{500, 1000, 2000\}
 $$
+
 Corresponding problem sizes:
 - MS: $m = 3d^2 \in \{7.5 \times 10^5, 3 \times 10^6, 1.2 \times 10^7\}$ measurements
 - MF: $W_i \in \mathbb{R}^{d \times d}$
 
 SVD complexity boundary:
+
 $$
 T_{\text{SVD}}(d) = C_{\text{svd}} \cdot d^3, \quad C_{\text{svd}} \approx 10^{-8} \text{ s (typical CPU)}
 $$
+
 $$
 T_{\text{SGD-iter}}(d) = C_{\text{sgd}} \cdot d^2, \quad C_{\text{sgd}} \approx 10^{-9} \text{ s}
 $$
+
 Intersection scale $d^*$ satisfies:
+
 $$
 K_{\text{Muon}} \cdot C_{\text{svd}} d^3 = K_{\text{SGD}} \cdot C_{\text{sgd}} d^2 \quad \Rightarrow \quad d^* = \frac{K_{\text{SGD}}}{K_{\text{Muon}}} \cdot \frac{C_{\text{sgd}}}{C_{\text{svd}}}
 $$
+
 If $K_{\text{SGD}} / K_{\text{Muon}} \approx 10$, then $d^* \approx 10 \times 0.1 = 1$ (i.e., SGD is always faster), but this contradicts the theoretical advantage---indicating that constant factor estimates require experimental calibration.
 
 Parameter settings:
@@ -599,9 +691,11 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm} \times d \times \text{Seed}
 $$
+
 Response variables:
 - $K_\epsilon$ (if converged)
 - $T_\epsilon$ (total wall-clock time)
@@ -609,16 +703,21 @@ Response variables:
 - Scaling efficiency: $S(d) = T_\epsilon(d/2) / T_\epsilon(d)$ (ideal value is 8 for Muon exact SVD, 4 for SGD)
 
 Null and alternative hypotheses:
+
 $$
 H_0: T_\epsilon^{\text{Muon}}(d) / T_\epsilon^{\text{SGD}}(d) \leq 1 \quad \forall d \in \{500, 1000, 2000\}
 $$
+
 $$
 H_1: \exists \; d_{\text{cross}} \text{ such that } d > d_{\text{cross}} \Rightarrow T_\epsilon^{\text{Muon}}(d) > T_\epsilon^{\text{SGD}}(d)
 $$
+
 Test statistic: paired test for time ratio at each $d$:
+
 $$
 R_j(d) = T_{\epsilon,j}^{\text{Muon}}(d) / T_{\epsilon,j}^{\text{SGD}}(d)
 $$
+
 Using log transformation: one-sample t-test of $\log R_j(d)$ vs. 0.
 
 **Relationship to Existing Experiments**: Extends the existing dimension upper bound from $d=500$ to $d=2000$, verifying scalability.
@@ -637,9 +736,11 @@ Using log transformation: one-sample t-test of $\log R_j(d)$ vs. 0.
 **Mathematical Formulation**:
 
 Initialization distribution:
+
 $$
 X^{(0)}_{ij} \overset{iid}{\sim} \mathcal{N}(0, \sigma_{\text{init}}^2), \quad \sigma_{\text{init}} \in \left\{\frac{10^{-3}}{\sqrt{d}}, \frac{10^{-2}}{\sqrt{d}}, \frac{10^{-1}}{\sqrt{d}}, \frac{1}{\sqrt{d}}, \frac{10}{\sqrt{d}}\right\}
 $$
+
 ($1/\sqrt{d}$ is the existing "standard" initialization)
 
 Key theoretical relationships:
@@ -662,30 +763,36 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm} \times \sigma_{\text{init}} \times d \times \text{Problem} \times \text{Seed}
 $$
+
 Response variables: $K_\epsilon$, $\eta^*$ (optimal learning rate), $f_{\text{final}}$, $\|\nabla f(X^{(0)})\|_F$.
 
 Null and alternative hypotheses:
+
 $$
 H_0^{\text{scale-inv}}: \text{For Muon, } K_\epsilon \text{ does not depend on } \sigma_{\text{init}} \quad \text{(scale invariance hypothesis)}
 $$
+
 $$
 H_1^{\text{scale-inv}}: \exists \; \sigma_{\text{init}}^1, \sigma_{\text{init}}^2 \text{ such that } K_\epsilon(\sigma_{\text{init}}^1) \neq K_\epsilon(\sigma_{\text{init}}^2) \text{ for Muon}
 $$
+
 $$
 H_0^{\text{SGD-dep}}: \text{For SGD, } K_\epsilon \text{ does not depend on } \sigma_{\text{init}}
 $$
+
 $$
 H_1^{\text{SGD-dep}}: K_\epsilon^{\text{SGD}} \text{ significantly depends on } \sigma_{\text{init}}
 $$
 
 Test statistics:
 - For each algorithm, one-way ANOVA (factor: $\sigma_{\text{init}}$):
-  $$
+  ```math
   F = \frac{\text{MS}_{\sigma_{\text{init}}}}{\text{MS}_{\text{Error}}}
-  $$
+  ```
 - If Muon's ANOVA is not significant while SGD's is, this supports the scale invariance hypothesis.
 - Simultaneously test learning rate calibration requirements: the magnitude of change in $\eta^*$ with $\sigma_{\text{init}}$.
 
@@ -708,9 +815,9 @@ Initialization strategies:
 1. **Gaussian initialization** (baseline): $X^{(0)}_{ij} \sim \mathcal{N}(0, 1/d)$
 2. **Orthogonal initialization**: $X^{(0)} = Q R$ (QR decomposition, $Q$ orthogonal/unitary), or partial QR for rectangular matrices.
 3. **Spectral initialization** (Spectral Init): $X^{(0)} = U^{(0)} \text{diag}(\lambda^{(0)}) (V^{(0)})^\top$, where
-   $$
+   ```math
    \lambda_i^{(0)} = \lambda_1 \cdot \rho^{i-1}, \quad \rho \in \{0.5, 0.9\}
-   $$
+   ```
    i.e., the initialization already has the same spectral decay pattern as the true matrix.
 4. **Zero initialization**: $X^{(0)} = 0$ (test Muon's degradation under zero gradient)
 
@@ -725,19 +832,25 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm} \times \text{Init-Strategy} \times d \times \text{Problem} \times \text{Seed}
 $$
+
 Response variables: $K_\epsilon$, $K_{\epsilon,\text{normalized}} = K_\epsilon \cdot \|X^{(0)} - X^\star\|_F$ (normalized to initial distance).
 
 Null and alternative hypotheses:
+
 $$
 H_0^{\text{init}}: \text{Algorithm} \times \text{Init-Strategy} \text{ has no interaction effect on } K_\epsilon
 $$
+
 $$
 H_1^{\text{init}}: \text{Muon is less sensitive to initialization strategy than SGD} \quad \text{(or vice versa)}
 $$
+
 Test statistic: two-way ANOVA interaction test
+
 $$
 F_{\text{int}} = \frac{\text{MS}_{\text{Alg} \times \text{Init}}}{\text{MS}_{\text{Error}}}
 $$
@@ -764,21 +877,26 @@ Condition number control method (sensing operator construction):
 Goal: Construct a family of sensing operators $\{\mathcal{A}_\kappa\}$ such that the Hessian $H = \mathcal{A}^*\mathcal{A}/m$ has a specified condition number $\kappa_{\text{target}}$.
 
 Method 1 (parameterized matrix family):
+
 $$
 H = Q^\top \text{diag}(\lambda_1, \dots, \lambda_{d^2}) Q, \quad \lambda_i = 1 + (\kappa_{\text{target}} - 1) \cdot \frac{i-1}{d^2-1}
 $$
+
 (linear spectral distribution, from 1 to $\kappa_{\text{target}}$)
 
 Construct sensing vectors via Cholesky decomposition $H = L L^\top$:
+
 $$
 \text{vec}(A_i) = \text{row}_i(L) + \mathcal{N}(0, \sigma^2 I_{d^2})
 $$
+
 (add small noise to prevent degeneracy)
 
 Method 2 (SVD water-filling):
 Directly construct $X^\star = U^\star \text{diag}(\lambda_1, \dots, \lambda_r) (V^\star)^\top$, where $\lambda_i$ are distributed according to a specified decay rate.
 
 Condition number levels:
+
 $$
 \kappa_{\text{target}} \in \{10, 10^2, 10^3, 10^4, 10^5, 10^6\}
 $$
@@ -795,33 +913,38 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm} \times \kappa_{\text{target}} \times \text{Spectrum-Type} \times \text{Seed}
 $$
+
 Response variables:
 - $K_\epsilon$ (convergence iterations)
 - $\kappa_{\text{eff}} = \lambda_{\max}(H)/\lambda_{\min}(H)$ (actually measured condition number, verifying construction accuracy)
 - Convergence rate estimate (local linear fit $\log(f(X^{(k)})) \sim -\rho k$)
 
 Null and alternative hypotheses:
+
 $$
 H_0^{(\kappa)}: \mathbb{E}[\log K_\epsilon^{\text{Muon}} \mid \kappa] - \mathbb{E}[\log K_\epsilon^{\text{SGD}} \mid \kappa] = \text{const} \quad \forall \kappa
 $$
+
 $$
 H_1^{(\kappa)}: \text{Advantage } \Delta(\kappa) = \mathbb{E}[\log K_\epsilon^{\text{SGD}}] - \mathbb{E}[\log K_\epsilon^{\text{Muon}}] \text{ increases monotonically with } \kappa
 $$
+
 (i.e., ill-conditioned problems amplify Muon's advantage)
 
 Test statistics:
 - Spearman rank correlation test: correlation between $\Delta(\kappa)$ and $\log \kappa$
-  $$
+  ```math
   \rho_S = \text{corr}_{\text{rank}}(\Delta(\kappa), \log \kappa)
-  $$
+  ```
   $H_0: \rho_S = 0$, $H_1: \rho_S > 0$.
 - Or linear model:
-  $$
+  ```math
   \log K_\epsilon^{(i,j)} = \beta_0 + \beta_1 \log \kappa_j + \beta_2 \mathbb{I}_{\text{Muon}} + \beta_3 \log \kappa_j \cdot \mathbb{I}_{\text{Muon}} + \varepsilon_{ij}
-  $$
+  ```
   Test $\beta_3 < 0$ (Muon is less sensitive to condition number).
 
 **Relationship to Existing Experiments**: Entirely new dimension---existing experiments use the natural condition number of random matrices without systematic control.
@@ -862,23 +985,28 @@ Parameter settings:
 **Statistical Model**:
 
 Factorial design:
+
 $$
 \text{Algorithm} \times \text{Meas-Dist} \times \text{Target-Spec} \times d \times \text{Seed}
 $$
+
 Response variables: $K_\epsilon$, $\bar{\sigma}_{\log}(G^{(0)})$, $\kappa_{\text{sp}}$.
 
 Null and alternative hypotheses:
+
 $$
 H_0: \text{Measurement distribution does not affect the distribution of } \Delta K = K_\epsilon^{\text{SGD}} - K_\epsilon^{\text{Muon}}
 $$
+
 $$
 H_1: \exists \; \text{Meas-Dist} \text{ such that } \Delta K \text{ is significantly different from the Gaussian baseline}
 $$
+
 Test statistics:
 - Kruskal-Wallis H-test (multi-group non-parametric test):
-  $$
+  ```math
   H = \frac{12}{N(N+1)}\sum_{i=1}^5 \frac{R_i^2}{n_i} - 3(N+1)
-  $$
+  ```
   where $R_i$ is the mean rank of the $i$-th distribution group, $N=5n$, $n_i=n$. If $H > \chi^2_{0.95, 4}$, reject $H_0$.
 - Post-hoc: Dunn test for pairwise comparisons.
 
@@ -900,9 +1028,11 @@ Test statistics:
 Power analysis framework:
 
 Define effect size:
+
 $$
 \delta = \frac{\mathbb{E}[\log K_\epsilon^{\text{SGD}}] - \mathbb{E}[\log K_\epsilon^{\text{Muon}}]}{\sigma_{\text{within}}}
 $$
+
 where $\sigma_{\text{within}}$ is the standard deviation of paired differences.
 
 Estimate from existing data (or pilot experiments E6--E19):
@@ -911,12 +1041,15 @@ Estimate from existing data (or pilot experiments E6--E19):
 
 Power calculation:
 For a paired t-test, given $\alpha = 0.05$ (one-sided), sample size $n$, and effect size $\delta$:
+
 $$
 \text{Power} = 1 - \beta = \Phi\left(\sqrt{n} \cdot \delta - z_{1-\alpha}\right)
 $$
+
 where $\Phi$ is the standard normal CDF, $z_{1-\alpha} = 1.645$.
 
 Solve for $n_{\min}$ such that $\text{Power} \geq 0.8$:
+
 $$
 n_{\min} = \left\lceil \frac{(z_{1-\alpha} + z_{1-\beta})^2}{\delta^2} \right\rceil = \left\lceil \frac{(1.645 + 0.84)^2}{\delta^2} \right\rceil \approx \left\lceil \frac{6.2}{\delta^2} \right\rceil
 $$
@@ -931,9 +1064,11 @@ Parameter settings:
 
 Bootstrap confidence interval construction:
 For response variable $Y = \log K_\epsilon$, use BCa Bootstrap:
+
 $$
 Y^{*(b)}_j = \text{resample}(Y_1, \dots, Y_n), \quad b = 1, \dots, B=10000
 $$
+
 $$
 CI_{95\%} = [\hat{Y}^{*(\alpha/2)}, \hat{Y}^{*(1-\alpha/2)}]
 $$
@@ -942,29 +1077,35 @@ Multiple testing correction:
 Existing experiments involve hypotheses H1--H5, a total of 5 main hypotheses. If testing at each dimension level, the total number of hypotheses $M$ may reach $5 \times 4 \times 2 = 40$ (dimensions $\times$ problems $\times$ ranks).
 
 Use Holm stepwise correction:
+
 $$
 p_{(1)} \leq p_{(2)} \leq \dots \leq p_{(M)} \quad \text{(sorted p-values)}
 $$
+
 Reject all hypotheses satisfying $p_{(i)} \leq \alpha / (M - i + 1)$.
 
 Or use Benjamini-Hochberg FDR control:
+
 $$
 \text{Reject all } p_{(i)} \leq \frac{i}{M} \cdot \alpha
 $$
 
 Null and alternative hypotheses:
+
 $$
 H_0^{\text{power}}: n=10 \text{ is sufficient to detect } \delta_{\min} = 0.5 \text{ (medium effect size)}
 $$
+
 $$
 H_1^{\text{power}}: n_{\min} > 10 \text{ is needed to achieve } 80\% \text{ power}
 $$
+
 Test: directly compute $\hat{\delta}$ and $\hat{n}_{\min}$.
 
 **Relationship to Existing Experiments**: Meta-analysis of the statistical rigor of existing experimental designs, determining whether additional repetitions are needed.
 
 **Expected Results and Interpretation**:
-- **Expectation 1**: For $d=50$, the effect size may be large ($\delta \approx 1.0$), and $n=10$ is sufficient; for $d=500$, the effect size may be small ($\delta \approx 0.3$), $n=10$ is underpowered, and $n_{\min} \approx 30$--$50$ is recommended.
+- **Expectation 1**: For $d=50$, the effect size may be large ($\delta \approx 1.0$), and $n=10$ is sufficient; for $d=500$, the effect size may be small ($\delta \approx 0.3$), $n=10$ is underpowered, and $n_{\min} \approx 30$-- $`50`$ is recommended.
 - **Expectation 2**: Under $n=10$, some "marginally significant" results ($p \approx 0.04$) may no longer be significant after Holm correction, requiring a reassessment of the robustness of conclusions.
 - **Expectation 3**: Provide a standardized effect size reporting template (Cohen's $d$, log ratio, speedup ratio and their confidence intervals) to improve the reproducibility and comparability of experiments.
 

@@ -17,9 +17,11 @@ In numerical optimization, convergence is a core concept for evaluating algorith
 #### 1.1.1 Pointwise Convergence
 
 **Definition 1.1** (Pointwise Convergence). The iterate sequence $\{X^{(k)}\}$ is said to **converge to** $X^\star$ if
+
 $$
 \lim_{k \to \infty} \|X^{(k)} - X^\star\| = 0,
 $$
+
 where $\|\cdot\|$ is some matrix norm (typically the Frobenius norm $\|\cdot\|_F$ or the spectral norm $\|\cdot\|_2$). Equivalently, for any $\epsilon > 0$, there exists $K(\epsilon) < \infty$ such that for all $k \geq K(\epsilon)$, we have $\|X^{(k)} - X^\star\| \leq \epsilon$.
 
 **Physical Interpretation**: Pointwise convergence is the most basic convergence requirement for optimization algorithms, meaning that as iterations proceed, the iterates can approach the true solution arbitrarily closely. At the experimental level, this guarantees that the algorithm does not diverge, but it does not indicate how many iterations are needed to achieve a given accuracy.
@@ -29,26 +31,26 @@ where $\|\cdot\|$ is some matrix norm (typically the Frobenius norm $\|\cdot\|_F
 **Definition 1.2** ($Q$-Convergence Rate). Let $\{a_k\}_{k \geq 0}$ be a non-negative scalar sequence (e.g., $a_k = \|X^{(k)} - X^\star\|_F$ or $a_k = \delta_k$).
 
 - **Linear Convergence** (Linear / Geometric Convergence): There exist constants $q \in (0, 1)$ and $C > 0$ such that
-  $$
+  ```math
   a_k \leq C \cdot q^k, \quad \forall k \geq 0.
-  $$
+  ```
   Equivalently, $\limsup_{k \to \infty} \frac{a_{k+1}}{a_k} = \rho < 1$, where $\rho$ is called the **convergence ratio**.
 
 - **Sublinear Convergence**: There exist constants $C > 0$ and $p > 0$ such that
-  $$
+  ```math
   a_k \leq C \cdot k^{-p}, \quad \forall k \geq 1.
-  $$
+  ```
   A typical example is gradient descent with $O(1/k)$ convergence on smooth convex functions, corresponding to $p = 1$.
 
 - **Superlinear Convergence**:
-  $$
+  ```math
   \lim_{k \to \infty} \frac{a_{k+1}}{a_k} = 0.
-  $$
+  ```
 
-- **Order-$r$ Convergence** (Order-$r$ Convergence): For $r > 1$, there exists a constant $q \in (0, 1)$ such that
-  $$
+- **Order- $`r`$ Convergence** (Order- $`r`$ Convergence): For $r > 1$, there exists a constant $q \in (0, 1)$ such that
+  ```math
   a_{k+1} \leq q \cdot (a_k)^r.
-  $$
+  ```
   When $r = 2$, this is called **quadratic convergence** (Quadratic Convergence).
 
 **Experimental Implications**: The convergence rate directly determines the algorithm's **iterative efficiency** $K_\epsilon$. Linear convergence means that the error decreases by a fixed proportion at each iteration, which is suitable for high-precision solutions; sublinear convergence makes rapid progress initially but slows down later, which is suitable for low-precision scenarios. In the comparison between Muon and SGD, the convergence rate is a core competitive metric.
@@ -64,10 +66,13 @@ where $\|\cdot\|$ is some matrix norm (typically the Frobenius norm $\|\cdot\|_F
 #### 1.2.1 Iteration Complexity
 
 **Definition 1.4** ($\epsilon$-Accuracy Iteration Complexity). Let $\delta_k := f(X^{(k)}) - f^\star$ be the optimization gap at step $k$. Given an accuracy parameter $\epsilon > 0$, the **iteration complexity** is defined as
+
 $$
 K_\epsilon := \min\{k \geq 0 : \delta_k \leq \epsilon\}.
 $$
+
 If the parameter distance is of interest, then define
+
 $$
 K_\epsilon^{\text{param}} := \min\{k \geq 0 : \|X^{(k)} - X^\star\|_F \leq \epsilon\}.
 $$
@@ -84,9 +89,11 @@ Common scenarios:
 #### 1.2.2 Query Complexity
 
 **Definition 1.6** (Query Complexity). Suppose each iteration requires $b_k$ function value or gradient queries (e.g., in mini-batch SGD, $b_k = |\mathcal{B}_k|$ is the batch size). The **total query complexity** is
+
 $$
 Q_\epsilon := \sum_{k=1}^{K_\epsilon} b_k.
 $$
+
 For full-batch gradient descent (GD), $b_k \equiv m$ (total number of samples), so $Q_\epsilon^{\text{GD}} = m \cdot K_\epsilon$.
 
 **Definition 1.7** (Matrix Query Complexity). For matrix sensing problems, each iteration requires computing the gradient $G^{(k)} = \frac{1}{m}\mathcal{A}^*(\mathcal{A}(X^{(k)}) - y)$, which involves multiplication with $m$ measurement matrices of size $d \times d$. The **measurement query cost** of each gradient computation is $m$ matrix inner product operations.
@@ -98,9 +105,11 @@ For full-batch gradient descent (GD), $b_k \equiv m$ (total number of samples), 
 #### 1.3.1 General Form of First-Order Methods
 
 **Definition 1.8** (First-Order Iterative Method). A first-order optimization method is an algorithm that updates using only the function value $f(X)$ and first-order information (gradient $\nabla f(X)$ or subgradient). Its general update form is
+
 $$
 X^{(k+1)} = X^{(k)} - \eta_k \cdot D^{(k)},
 $$
+
 where $\eta_k > 0$ is the step size (learning rate), and $D^{(k)}$ is the **search direction**, typically satisfying $D^{(k)} \approx \nabla f(X^{(k)})$.
 
 For the two algorithms in this experiment:
@@ -110,18 +119,23 @@ For the two algorithms in this experiment:
 #### 1.3.2 Theoretical Guarantees for Gradient Descent
 
 **Theorem 1.1** (Convergence of GD on Smooth Convex Functions). Let $f: \mathbb{R}^{d \times d} \to \mathbb{R}$ be a convex and $L$-smooth ($L$-gradient Lipschitz) function, i.e., for all $X, Y$:
+
 $$
 f(Y) \leq f(X) + \langle \nabla f(X), Y - X \rangle + \frac{L}{2}\|Y - X\|_F^2.
 $$
+
 Taking a fixed step size $\eta = 1/L$, the GD iterates satisfy
+
 $$
 \delta_k = f(X^{(k)}) - f^\star \leq \frac{2L\|X^{(0)} - X^\star\|_F^2}{k + 4} = O\left(\frac{1}{k}\right).
 $$
 
 **Theorem 1.2** (Convergence of GD on Strongly Convex Smooth Functions). Let $f$ be $\mu$-strongly convex and $L$-smooth; then taking $\eta = 1/L$ yields
+
 $$
 \delta_k \leq \left(1 - \frac{1}{\kappa}\right)^k \delta_0, \quad \text{where } \kappa := \frac{L}{\mu} \text{ is the condition number}.
 $$
+
 Equivalently, $K_\epsilon \leq \kappa \cdot \log(\delta_0 / \epsilon)$.
 
 **Physical Interpretation**: Strong convexity guarantees that the function's "bowl shape" is sufficiently steep, allowing the gradient direction to point efficiently toward the global minimum. The condition number $\kappa$ measures the eccentricity of the function's "elliptical contour lines" — the larger $\kappa$ is, the more ill-conditioned the problem, and the slower the convergence.
@@ -129,9 +143,11 @@ Equivalently, $K_\epsilon \leq \kappa \cdot \log(\delta_0 / \epsilon)$.
 #### 1.3.3 First-Order Lower Bound Theory
 
 **Theorem 1.3** (Nesterov's First-Order Lower Bound). For the class of $L$-smooth and $\mu$-strongly convex functions $\mathcal{F}_{L,\mu}$, any black-box algorithm that uses only first-order information satisfies the lower bound
+
 $$
 K_\epsilon \geq \Omega\left(\sqrt{\kappa} \log\frac{1}{\epsilon}\right).
 $$
+
 Nesterov's accelerated gradient method (AGD) exactly achieves this lower bound.
 
 **Experimental Implications**: The iteration complexity upper bound of SGD/GD is $O(\kappa \log(1/\epsilon))$, leaving a gap of $\sqrt{\kappa}$ with the lower bound. Muon may circumvent this lower bound by exploiting the low-rank structure of the problem through matrix spectral normalization, achieving superlinear or near-optimal convergence on certain problem classes.
@@ -141,11 +157,13 @@ Nesterov's accelerated gradient method (AGD) exactly achieves this lower bound.
 #### 1.4.1 Convexity Assumptions
 
 **Definition 1.9** (Convex Function). A function $f: \mathcal{X} \to \mathbb{R}$ is called a **convex function** if for all $X, Y \in \mathcal{X}$ and $\lambda \in [0, 1]$:
+
 $$
 f(\lambda X + (1-\lambda)Y) \leq \lambda f(X) + (1-\lambda)f(Y).
 $$
 
 **Definition 1.10** (Strong Convexity). A function $f$ is called **$\mu$-strongly convex** ($\mu > 0$) if
+
 $$
 f(Y) \geq f(X) + \langle \nabla f(X), Y - X \rangle + \frac{\mu}{2}\|Y - X\|_F^2, \quad \forall X, Y.
 $$
@@ -153,9 +171,11 @@ $$
 #### 1.4.2 Non-Convexity and Stationary Points
 
 **Definition 1.11** (Stationary Point). A point $X$ is called a **stationary point** of $f$ if $\nabla f(X) = 0$. In the case with a regularization term, a point $X$ satisfying
+
 $$
 \|\nabla f(X) + \lambda X\|_F \leq \epsilon
 $$
+
 is called an **$\epsilon$-approximate stationary point**.
 
 **Definition 1.12** (First-Order Stationary Point and Second-Order Stationary Point).
@@ -165,9 +185,11 @@ is called an **$\epsilon$-approximate stationary point**.
 - **Strict Saddle Point**: Satisfies FOSP but the Hessian has a direction with a negative eigenvalue
 
 **Definition 1.13** (PL Condition / Polyak-\L{}ojasiewicz Condition). A function $f$ satisfies the $\mu$-PL condition if
+
 $$
 \frac{1}{2}\|\nabla f(X)\|_F^2 \geq \mu \cdot (f(X) - f^\star), \quad \forall X.
 $$
+
 The PL condition does not require convexity, but guarantees global linear convergence of gradient descent.
 
 **Experimental Implications**: Matrix sensing problems (MS) have favorable properties under RIP conditions; matrix factorization problems (MF-L) are highly non-convex, and their optimization landscape contains numerous saddle points. Muon's spectral normalization mechanism may help escape saddle points, which is one of its key differences from SGD.
