@@ -29,5 +29,35 @@
 
 ## 数据格式
 
-- `results_v3/E*_detailed_results.csv` — 每 run 一行汇总 (algo, d, final_loss, time_s, K_epsilon, ...)
-- `logs_v2/E*_detailed/*/trajectory.jsonl` — 每步一行轨迹 (step, loss, singular_values, grad_norm, ...)
+### `results_v3/E*_detailed_results.csv` — 每 run 一行汇总
+
+| 列名 | 类型 | 说明 |
+|------|------|------|
+| `algo` | str | 算法：`SGD`, `Muon-Exact`, `Adam`, `Momentum-SGD`, `RMSprop`, `Muon-NS`, `Muon-RandSVD`, `Muon-Trunc` |
+| `d` | int | 方阵维度 |
+| `r` | int | 目标矩阵秩 |
+| `lr` | float | 学习率 |
+| `noise` | float | 观测噪声标准差 (0 = 无噪声) |
+| `dist` | str | 测量矩阵分布：`normal`, `uniform`, `rademacher`, `sparse`, `sphere` |
+| `spectrum` | str | 目标矩阵谱类型：`hard-cutoff`, `exponential-decay`, `polynomial-decay` |
+| `kappa` | float | 条件数 |
+| `init_scale` | float | 初始权重标准差 |
+| `seed` | int | 随机种子 |
+| `iters` | int | 总迭代步数 |
+| `final_loss` | float | 最后一步的损失 |
+| `min_loss` | float | **运行中达到的最小损失**（核心指标） |
+| `K_epsilon` | int | 首次达到 ε=1e-10 的迭代步；若未达到则为 2001 |
+| `time_s` | float | 墙钟运行时间 (秒) |
+| `I_conv` | int | 收敛标志 (1=达到 ε) |
+| `F_eps` | int | 达到 ε 时的总 FLOPs；若未达到则为最大迭代对应的 FLOPs |
+
+> ⚠️ **`K_epsilon` vs `min_loss`**：K_epsilon 只是"多快跑到 ε=1e-10 这个门槛"，
+> 不代表最终收敛质量。Muon 的 K_epsilon 通常更小，但其 `min_loss` 卡在 ~5e-3；
+> SGD 虽然在凸问题上能收敛到机器零 (~1e-32)，但 K_epsilon 可能稍大。
+> **判断收敛质量请优先看 `min_loss`。**
+
+### `logs_v2/E*_detailed/*/trajectory.jsonl` — 每步一行轨迹
+
+每行 JSON 包含：`step`, `loss`, `grad_norm`, `singular_values` (列表), `spectral_gap`, `iteration_time_s`。
+
+轨迹日志在 Git LFS 中管理，首次使用需 `git lfs pull`。
