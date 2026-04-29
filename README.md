@@ -47,7 +47,7 @@ If you don't want to verify the experiment code implementation ( or not yet), pl
 | `iters` | int | Total number of iteration steps |
 | `final_loss` | float | Loss at the final step |
 | `min_loss` | float | **Minimum loss achieved during the run** (Core Metric) |
-| `K_epsilon` | int | Iteration step at which ε=1e-10 was first reached; 2001 if not reached |
+| `K_epsilon` | int | Iteration step at which ε was first reached; 2001 if not reached |
 | `time_s` | float | Wall-clock runtime (seconds) |
 | `I_conv` | int | Convergence flag (1 = ε reached) |
 | `F_eps` | int | Total FLOPs accumulated when ε was reached; FLOPs corresponding to the maximum iterations if not reached |
