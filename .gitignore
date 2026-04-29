@@ -21,3 +21,8 @@ Thumbs.db
 
 # SSH askpass
 ssh_askpass.py
+
+# plots
+analysis_report/output/*
+AGENTS.md
+*.png
