@@ -22,25 +22,35 @@ $$
 
 - **Smoothness**: $f_{MS} \in \mathcal{C}^\infty(\mathbb{R}^{d \times d})$, infinitely differentiable;
 - **Convexity**: $f_{MS}$ is a convex function (as it is composed of quadratic functions of linear functions);
-- **Strong Convexity**: $f_{MS}$ is strongly convex when $m \geq d^2$ and $\{A_i\}$ span the full space, with strong convexity modulus:
 
-  ```math
-  \mu_{MS} = \frac{1}{m} \lambda_{\min}\left( \sum_{i=1}^m \mathrm{vec}(A_i) \mathrm{vec}(A_i)^T \right)
-  ```
+**Strong Convexity** $f_{MS}$ is strongly convex when $m \geq d^2$ and $\{A_i\}$ span the full space, with strong convexity modulus:
 
-- **$L$-smoothness**:
 
-  ```math
-  L_{MS} = \frac{1}{m} \lambda_{\max}\left( \sum_{i=1}^m \mathrm{vec}(A_i) \mathrm{vec}(A_i)^T \right)
-  ```
+$$
+\mu_{MS} = \frac{1}{m} \lambda_{\min}\left( \sum_{i=1}^m \mathrm{vec}(A_i) \mathrm{vec}(A_i)^T \right)
+$$
 
-- **Condition Number**:
 
-  ```math
-  \kappa_{MS} = \frac{L_{MS}}{\mu_{MS}} = \frac{\lambda_{\max}(\mathcal{A}^T \mathcal{A})}{\lambda_{\min}(\mathcal{A}^T \mathcal{A})}
-  ```
 
-  where $\mathcal{A} \in \mathbb{R}^{m \times d^2}$ is the matrix representation of the measurement operator, with the $i$-th row being $\mathrm{vec}(A_i)^T$.
+**$L$-smoothness**
+
+
+$$
+L_{MS} = \frac{1}{m} \lambda_{\max}\left( \sum_{i=1}^m \mathrm{vec}(A_i) \mathrm{vec}(A_i)^T \right)
+$$
+
+
+
+**Condition Number**
+
+
+$$
+\kappa_{MS} = \frac{L_{MS}}{\mu_{MS}} = \frac{\lambda_{\max}(\mathcal{A}^T \mathcal{A})}{\lambda_{\min}(\mathcal{A}^T \mathcal{A})}
+$$
+
+
+where $\mathcal{A} \in \mathbb{R}^{m \times d^2}$ is the matrix representation of the measurement operator, with the $i$-th row being $\mathrm{vec}(A_i)^T$.
+
 
 **Definition 3.2 (Matrix Sensing Gradient).** The gradient of the objective function $f_{MS}$ is:
 
@@ -167,23 +177,31 @@ $$
 
 where $\mathcal{G}$ is the gradient space. For the deterministic full-gradient setting:
 
-- **Muon:**
+**Muon:**
 
-  ```math
-  \mathcal{T}_{\eta}^{\text{Muon}}(\theta, G) = \theta - \eta \cdot \mathcal{S}(G) - \lambda \cdot \theta
-  ```
 
-  where $\mathcal{S}: \mathbb{R}^{d \times d} \to \mathbb{R}^{d \times d}$ is the SVD normalization operator:
+$$
+\mathcal{T}_{\eta}^{\text{Muon}}(\theta, G) = \theta - \eta \cdot \mathcal{S}(G) - \lambda \cdot \theta
+$$
 
-  ```math
-  \mathcal{S}(G) = U_G V_G^T, \quad G = U_G \Sigma_G V_G^T \text{ (SVD)}
-  ```
 
-- **SGD:**
+where $\mathcal{S}: \mathbb{R}^{d \times d} \to \mathbb{R}^{d \times d}$ is the SVD normalization operator:
 
-  ```math
-  \mathcal{T}_{\eta}^{\text{SGD}}(\theta, G) = \theta - \eta \cdot G - \lambda \cdot \theta
-  ```
+
+$$
+\mathcal{S}(G) = U_G V_G^T, \quad G = U_G \Sigma_G V_G^T \text{ (SVD)}
+$$
+
+
+
+**SGD:**
+
+
+$$
+\mathcal{T}_{\eta}^{\text{SGD}}(\theta, G) = \theta - \eta \cdot G - \lambda \cdot \theta
+$$
+
+
 
 **Complete Iteration Sequence:** Given initialization $\theta^{(0)}$ and number of iterations $K$, the sequence is defined as:
 
@@ -211,40 +229,52 @@ $$
 
 **Definition 3.11 (Per-Step FLOPs Computation).**
 
-- **Per-Step FLOPs for SGD:**
+**Per-Step FLOPs for SGD:**
 
-  For MS: gradient computation requires $O(md^2)$, update requires $O(d^2)$, totaling:
-
-  ```math
-  C_{\text{SGD}}^{MS} = 2md^2 + d^2 \approx 6d^4 + d^2 \text{ FLOPs}
-  ```
-
-  For MF- $`L`$: gradient computation requires $O(Ld^3)$, update requires $O(Ld^2)$, totaling:
-
-  ```math
-  C_{\text{SGD}}^{MF} = O(Ld^3) \text{ FLOPs}
-  ```
-
-- **Per-Step FLOPs for Muon:**
-
-  In addition to the SGD cost, the SVD cost is added. For the SVD of a $d \times d$ matrix:
-
-  ```math
-  C_{\text{SVD}}(d) = O(d^3) \text{ FLOPs}
-  ```
-
-  For MS:
-
-  ```math
-  C_{\text{Muon}}^{MS} = C_{\text{SGD}}^{MS} + C_{\text{SVD}}(d)
-  ```
-
-  For MF- $`L`$ (SVD is performed on each layer matrix):
+For MS: gradient computation requires $O(md^2)$, update requires $O(d^2)$, totaling:
 
 
-  ```math
-  C_{\text{Muon}}^{MF} = C_{\text{SGD}}^{MF} + L \cdot C_{\text{SVD}}(d)
-  ```
+$$
+C_{\text{SGD}}^{MS} = 2md^2 + d^2 \approx 6d^4 + d^2 \text{ FLOPs}
+$$
+
+
+For MF- $`L`$: gradient computation requires $O(Ld^3)$, update requires $O(Ld^2)$, totaling:
+
+
+$$
+C_{\text{SGD}}^{MF} = O(Ld^3) \text{ FLOPs}
+$$
+
+
+
+**Per-Step FLOPs for Muon:**
+
+In addition to the SGD cost, the SVD cost is added. For the SVD of a $d \times d$ matrix:
+
+
+$$
+C_{\text{SVD}}(d) = O(d^3) \text{ FLOPs}
+$$
+
+
+For MS:
+
+
+$$
+C_{\text{Muon}}^{MS} = C_{\text{SGD}}^{MS} + C_{\text{SVD}}(d)
+$$
+
+
+For MF- $`L`$ (SVD is performed on each layer matrix):
+
+
+
+$$
+C_{\text{Muon}}^{MF} = C_{\text{SGD}}^{MF} + L \cdot C_{\text{SVD}}(d)
+$$
+
+
 
 **Definition 3.12 (Total FLOPs Consumption).**
 
@@ -272,17 +302,23 @@ $$
 
 **Definition 3.14 (Efficiency Ratio).** For the same problem instance and the same random seed $s$, the efficiency ratio between the two algorithms is:
 
-- **Iteration Efficiency Ratio:**
+**Iteration Efficiency Ratio:**
 
-  ```math
-  \rho_K(s) = \frac{K_\epsilon^{\text{Muon}}(s)}{K_\epsilon^{\text{SGD}}(s)}
-  ```
 
-- **FLOPs Efficiency Ratio:**
+$$
+\rho_K(s) = \frac{K_\epsilon^{\text{Muon}}(s)}{K_\epsilon^{\text{SGD}}(s)}
+$$
 
-  ```math
-  \rho_F(s) = \frac{F_\epsilon^{\text{Muon}}(s)}{F_\epsilon^{\text{SGD}}(s)} = \rho_K(s) \cdot \frac{C_{\text{Muon}}}{C_{\text{SGD}}}
-  ```
+
+
+**FLOPs Efficiency Ratio:**
+
+
+$$
+\rho_F(s) = \frac{F_\epsilon^{\text{Muon}}(s)}{F_\epsilon^{\text{SGD}}(s)} = \rho_K(s) \cdot \frac{C_{\text{Muon}}}{C_{\text{SGD}}}
+$$
+
+
 
 **Definition 3.15 (Early Stopping Condition).** Define the relative decrease between adjacent iterations:
 
