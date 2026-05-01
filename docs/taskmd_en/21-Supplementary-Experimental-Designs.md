@@ -488,11 +488,15 @@ $$
 (Muon's direction is closer to the gradient and better aligned with the Hessian)
 
 Test statistics:
-- Functional ANOVA on the angle sequence or a repeated-measures mixed-effects model:
-  ```math
-  \theta_{ij}^{(k)} = \mu + \alpha_i^{\text{Alg}} + \beta_j^{\text{Seed}} + \gamma_k^{\text{Time}} + (\alpha\gamma)_{ik}^{\text{Alg}\times\text{Time}} + \varepsilon_{ijk}
-  ```
-  where $(\alpha\gamma)_{ik}$ is the key interaction term---the different evolutionary patterns of algorithms over time.
+
+Functional ANOVA on the angle sequence or a repeated-measures mixed-effects model:
+
+$$
+\theta_{ij}^{(k)} = \mu + \alpha_i^{\text{Alg}} + \beta_j^{\text{Seed}} + \gamma_k^{\text{Time}} + (\alpha\gamma)_{ik}^{\text{Alg}\times\text{Time}} + \varepsilon_{ijk}
+$$
+
+where $(\alpha\gamma)_{ik}$ is the key interaction term---the different evolutionary patterns of algorithms over time.
+
 - F-test: $H_0: (\alpha\gamma)_{ik} = 0 \; \forall i, k$.
 
 **Relationship to Existing Experiments**: Entirely new dynamic analysis dimension, providing a temporal evolution version of existing static spectral metrics ($\bar{\sigma}_{\log}$).
@@ -789,10 +793,14 @@ H_1^{\text{SGD-dep}}: K_\epsilon^{\text{SGD}} \text{ significantly depends on } 
 $$
 
 Test statistics:
-- For each algorithm, one-way ANOVA (factor: $\sigma_{\text{init}}$):
-  ```math
-  F = \frac{\text{MS}_{\sigma_{\text{init}}}}{\text{MS}_{\text{Error}}}
-  ```
+
+For each algorithm, one-way ANOVA (factor: $\sigma_{\text{init}}$):
+
+$$
+F = \frac{\text{MS}_{\sigma_{\text{init}}}}{\text{MS}_{\text{Error}}}
+$$
+
+
 - If Muon's ANOVA is not significant while SGD's is, this supports the scale invariance hypothesis.
 - Simultaneously test learning rate calibration requirements: the magnitude of change in $\eta^*$ with $\sigma_{\text{init}}$.
 
@@ -936,16 +944,23 @@ $$
 (i.e., ill-conditioned problems amplify Muon's advantage)
 
 Test statistics:
-- Spearman rank correlation test: correlation between $\Delta(\kappa)$ and $\log \kappa$
-  ```math
-  \rho_S = \text{corr}_{\text{rank}}(\Delta(\kappa), \log \kappa)
-  ```
-  $H_0: \rho_S = 0$, $H_1: \rho_S > 0$.
-- Or linear model:
-  ```math
-  \log K_\epsilon^{(i,j)} = \beta_0 + \beta_1 \log \kappa_j + \beta_2 \mathbb{I}_{\text{Muon}} + \beta_3 \log \kappa_j \cdot \mathbb{I}_{\text{Muon}} + \varepsilon_{ij}
-  ```
-  Test $\beta_3 < 0$ (Muon is less sensitive to condition number).
+
+Spearman rank correlation test: correlation between $\Delta(\kappa)$ and $\log \kappa$
+
+$$
+\rho_S = \text{corr}_{\text{rank}}(\Delta(\kappa), \log \kappa)
+$$
+
+$H_0: \rho_S = 0$, $H_1: \rho_S > 0$.
+
+Or linear model:
+
+$$
+\log K_\epsilon^{(i,j)} = \beta_0 + \beta_1 \log \kappa_j + \beta_2 \mathbb{I}_{\text{Muon}} + \beta_3 \log \kappa_j \cdot \mathbb{I}_{\text{Muon}} + \varepsilon_{ij}
+$$
+
+Test $\beta_3 < 0$ (Muon is less sensitive to condition number).
+
 
 **Relationship to Existing Experiments**: Entirely new dimension---existing experiments use the natural condition number of random matrices without systematic control.
 
@@ -1003,11 +1018,15 @@ H_1: \exists \; \text{Meas-Dist} \text{ such that } \Delta K \text{ is significa
 $$
 
 Test statistics:
-- Kruskal-Wallis H-test (multi-group non-parametric test):
-  ```math
-  H = \frac{12}{N(N+1)}\sum_{i=1}^5 \frac{R_i^2}{n_i} - 3(N+1)
-  ```
-  where $R_i$ is the mean rank of the $i$-th distribution group, $N=5n$, $n_i=n$. If $H > \chi^2_{0.95, 4}$, reject $H_0$.
+
+Kruskal-Wallis H-test (multi-group non-parametric test):
+
+$$
+H = \frac{12}{N(N+1)}\sum_{i=1}^5 \frac{R_i^2}{n_i} - 3(N+1)
+$$
+
+where $R_i$ is the mean rank of the $i$-th distribution group, $N=5n$, $n_i=n$. If $H > \chi^2_{0.95, 4}$, reject $H_0$.
+
 - Post-hoc: Dunn test for pairwise comparisons.
 
 **Relationship to Existing Experiments**: Extends the fixed Gaussian measurement in existing experiments to a complete distribution family, verifying distributional robustness of conclusions.
