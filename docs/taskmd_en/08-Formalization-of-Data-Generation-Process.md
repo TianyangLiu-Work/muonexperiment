@@ -28,23 +28,31 @@ $$
 
 **Step 2: Generate the ground-truth matrix $X^\star$.**
 
-- **Low-rank case** ($r < d$):
+**Low-rank case** ($r < d$):
 
-  ```math
-  U, V \in \mathbb{R}^{d \times r}, \quad U_{jk} \overset{iid}{\sim} \mathcal{N}(0, 1), \quad V_{jk} \overset{iid}{\sim} \mathcal{N}(0, 1)
-  ```
 
-  ```math
-  X^\star = \frac{1}{\sqrt{r}} U V^T
-  ```
+$$
+U, V \in \mathbb{R}^{d \times r}, \quad U_{jk} \overset{iid}{\sim} \mathcal{N}(0, 1), \quad V_{jk} \overset{iid}{\sim} \mathcal{N}(0, 1)
+$$
 
-  The scaling factor $1/\sqrt{r}$ ensures that $\mathbb{E}[\|X^\star\|_F^2] = d^2$, which is of the same order of magnitude as the full-rank case.
 
-- **Full-rank case** ($r = d$):
 
-  ```math
-  X^\star_{ij} \overset{iid}{\sim} \mathcal{N}(0, 1)
-  ```
+$$
+X^\star = \frac{1}{\sqrt{r}} U V^T
+$$
+
+
+The scaling factor $1/\sqrt{r}$ ensures that $\mathbb{E}[\|X^\star\|_F^2] = d^2$, which is of the same order of magnitude as the full-rank case.
+
+
+**Full-rank case** ($r = d$):
+
+
+$$
+X^\star_{ij} \overset{iid}{\sim} \mathcal{N}(0, 1)
+$$
+
+
 
 **Step 3: Generate measurements and noise.**
 
@@ -90,25 +98,34 @@ $$
 
 Define the noise matrix $E$, where $E_{ij} \overset{iid}{\sim} \mathcal{N}(0, 0.01^2)$:
 
-- **Scheme (a)** — Imbalanced Initialization I:
+**Scheme (a)** — Imbalanced Initialization I:
 
-  ```math
-  W_1^{(0)} = X^\star + E, \quad W_2^{(0)} = I_d
-  ```
 
-- **Scheme (b)** — Imbalanced Initialization II:
+$$
+W_1^{(0)} = X^\star + E, \quad W_2^{(0)} = I_d
+$$
 
-  ```math
-  W_1^{(0)} = I_d, \quad W_2^{(0)} = X^\star + E
-  ```
 
-- **Scheme (c)** — Symmetric Initialization:
 
-  ```math
-  W_1^{(0)} = c \cdot I_d, \quad W_2^{(0)} = \frac{1}{c} \cdot (X^\star + E)
-  ```
+**Scheme (b)** — Imbalanced Initialization II:
 
-  where $c > 0$ is an arbitrary constant (typically $c = 1$).
+
+$$
+W_1^{(0)} = I_d, \quad W_2^{(0)} = X^\star + E
+$$
+
+
+
+**Scheme (c)** — Symmetric Initialization:
+
+
+$$
+W_1^{(0)} = c \cdot I_d, \quad W_2^{(0)} = \frac{1}{c} \cdot (X^\star + E)
+$$
+
+
+where $c > 0$ is an arbitrary constant (typically $c = 1$).
+
 
 **Step 3: Generate initializations ($L \geq 3$).**
 
