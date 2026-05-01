@@ -30,28 +30,40 @@ where $\|\cdot\|$ is some matrix norm (typically the Frobenius norm $\|\cdot\|_F
 
 **Definition 1.2** ($Q$-Convergence Rate). Let $\{a_k\}_{k \geq 0}$ be a non-negative scalar sequence (e.g., $a_k = \|X^{(k)} - X^\star\|_F$ or $a_k = \delta_k$).
 
-- **Linear Convergence** (Linear / Geometric Convergence): There exist constants $q \in (0, 1)$ and $C > 0$ such that
-  ```math
-  a_k \leq C \cdot q^k, \quad \forall k \geq 0.
-  ```
-  Equivalently, $\limsup_{k \to \infty} \frac{a_{k+1}}{a_k} = \rho < 1$, where $\rho$ is called the **convergence ratio**.
+**Linear Convergence** (Linear / Geometric Convergence): There exist constants $q \in (0, 1)$ and $C > 0$ such that
 
-- **Sublinear Convergence**: There exist constants $C > 0$ and $p > 0$ such that
-  ```math
-  a_k \leq C \cdot k^{-p}, \quad \forall k \geq 1.
-  ```
-  A typical example is gradient descent with $O(1/k)$ convergence on smooth convex functions, corresponding to $p = 1$.
+$$
+a_k \leq C \cdot q^k, \quad \forall k \geq 0.
+$$
 
-- **Superlinear Convergence**:
-  ```math
-  \lim_{k \to \infty} \frac{a_{k+1}}{a_k} = 0.
-  ```
+Equivalently, $\limsup_{k \to \infty} \frac{a_{k+1}}{a_k} = \rho < 1$, where $\rho$ is called the **convergence ratio**.
 
-- **Order- $`r`$ Convergence** (Order- $`r`$ Convergence): For $r > 1$, there exists a constant $q \in (0, 1)$ such that
-  ```math
-  a_{k+1} \leq q \cdot (a_k)^r.
-  ```
-  When $r = 2$, this is called **quadratic convergence** (Quadratic Convergence).
+
+**Sublinear Convergence** There exist constants $C > 0$ and $p > 0$ such that
+
+$$
+a_k \leq C \cdot k^{-p}, \quad \forall k \geq 1.
+$$
+
+A typical example is gradient descent with $O(1/k)$ convergence on smooth convex functions, corresponding to $p = 1$.
+
+
+**Superlinear Convergence**
+
+$$
+\lim_{k \to \infty} \frac{a_{k+1}}{a_k} = 0.
+$$
+
+
+
+**Order- $`r`$ Convergence** (Order- $`r`$ Convergence): For $r > 1$, there exists a constant $q \in (0, 1)$ such that
+
+$$
+a_{k+1} \leq q \cdot (a_k)^r.
+$$
+
+When $r = 2$, this is called **quadratic convergence** (Quadratic Convergence).
+
 
 **Experimental Implications**: The convergence rate directly determines the algorithm's **iterative efficiency** $K_\epsilon$. Linear convergence means that the error decreases by a fixed proportion at each iteration, which is suitable for high-precision solutions; sublinear convergence makes rapid progress initially but slows down later, which is suitable for low-precision scenarios. In the comparison between Muon and SGD, the convergence rate is a core competitive metric.
 
