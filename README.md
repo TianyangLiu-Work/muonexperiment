@@ -9,11 +9,10 @@ design documents have been removed from this branch.
 The code is notebook-first:
 
 - Experiment setup stays in the notebook.
-- Data generation stays in the notebook.
-- Loss functions stay in the notebook.
-- Run loops stay in the notebook.
-- Tables and plots stay in the notebook.
-- Only local fallback optimizers are extracted into a tiny Python module.
+- The run grid stays in the notebook.
+- Metrics, tables, plots, and conclusions stay in the notebook.
+- Stateful optimizers and the importable single-run worker live in
+  `muonlib_torch/` so multiprocessing with `spawn` works reliably.
 
 This keeps each experiment readable without jumping through framework code.
 
@@ -22,6 +21,7 @@ This keeps each experiment readable without jumping through framework code.
 ```text
 muonlib_torch/
   __init__.py
+  e01_matrix_sensing.py     # importable per-run worker for multiprocessing
   optimizers.py              # local Muon exact/fallback + Shampoo
 
 notebooks_torch/
@@ -65,16 +65,18 @@ The notebook compares multiple optimizers by default:
 It includes:
 
 - explicit parameter grid
-- torch target matrix generation
-- torch measurement tensor generation
-- matrix sensing loss via `torch.einsum`
-- full run loop
-- live table and plot helpers
+- importable torch single-run worker
+- per-run multiprocessing
+- `tqdm` progress over completed runs
+- table and plot helpers
 - in-notebook result table, plots, and conclusion
 
 Default mode is the full E01 grid: 5 optimizers, 3 dimensions, 10 seeds, and
 2000 iterations per run, for 150 runs in total. Quick validation lives in
 `smoketests/`, not in the experiment notebook.
+
+`NUM_WORKERS` controls process-level parallelism across independent runs. Each
+worker uses one torch thread to avoid CPU oversubscription.
 
 ## Optimizers
 

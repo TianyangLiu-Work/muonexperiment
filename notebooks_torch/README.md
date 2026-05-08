@@ -7,10 +7,13 @@ Current scope:
 
 - `E01_ms_benchmark_torch.ipynb` is a runnable Matrix Sensing prototype.
 - Default methods are `Muon`, `Muon-Exact`, `Shampoo`, `Adam`, and `SGD`.
-- Experiment setup, data generation, loss, run loop, metrics, plotting, and
-  conclusion stay inside the notebook for readability.
+- Experiment setup, run grid, metrics, plotting, and conclusion stay inside the
+  notebook for readability.
+- Runs are dispatched across worker processes with a `tqdm` progress bar.
 - Official PyTorch `torch.optim.Muon` is used when available; exact-SVD Muon
   and Shampoo live in `muonlib_torch/optimizers.py`.
+- The importable single-run worker lives in `muonlib_torch/e01_matrix_sensing.py`
+  so multiprocessing can use the `spawn` start method.
 - Results stay in notebook memory as `df` and `trajectories`; the notebook does
   not write CSV, PNG, or report files by default.
 

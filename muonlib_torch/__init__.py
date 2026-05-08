@@ -1,4 +1,4 @@
-"""Minimal PyTorch optimizers for notebook-first matrix experiments."""
+"""Small PyTorch helpers for notebook-first matrix experiments."""
 
 from .optimizers import MuonTorch, ShampooTorch
 
