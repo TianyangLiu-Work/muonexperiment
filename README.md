@@ -57,8 +57,7 @@ The notebook compares `Muon-Exact` and `SGD` by default. It includes:
 - matrix sensing loss via `torch.einsum`
 - full run loop
 - live table and plot helpers
-- a clickable `Run E01 torch` button when `ipywidgets` is available
-- CSV export to `results_torch/`
+- in-notebook result table, plots, and conclusion
 
 Default mode is a fast smoke run:
 
@@ -116,9 +115,11 @@ jupyter lab notebooks_torch/E01_ms_benchmark_torch.ipynb
 
 Or run the notebook cells manually in any Jupyter-compatible environment.
 
+The notebook keeps results in memory as `df` and `trajectories`. It does not
+write CSV, PNG, or report files by default.
+
 ## Notes
 
 - This branch intentionally does not preserve old experiment outputs.
-- `results_torch/` and `logs_torch/` are ignored by git.
 - PyTorch wall-clock results are not directly comparable with the old
   NumPy/SciPy branch, especially when CUDA is available.

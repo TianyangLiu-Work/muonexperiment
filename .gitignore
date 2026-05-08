@@ -1,7 +1,3 @@
-# Experiment outputs
-results_torch/
-logs_torch/
-
 # Notebook state
 .ipynb_checkpoints/
 

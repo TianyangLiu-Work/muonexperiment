@@ -1,5 +1,4 @@
 torch
 pandas
 matplotlib
-ipywidgets
 jupyterlab
