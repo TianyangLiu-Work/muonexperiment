@@ -1,13 +1,13 @@
-"""Matrix Factorization worker for the PyTorch experiments."""
+"""Matrix Factorization problem worker."""
 
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import Any, Callable
 
 import torch
 
-from .common import (
+from .MatrixConstruction import (
     configure_torch,
     generate_target_matrix,
     make_optimizer,
@@ -17,10 +17,15 @@ from .common import (
 )
 
 
+StepFn = Callable[[dict[str, Any]], tuple[float, float]]
+
+
 def run_spec(
     spec: dict[str, Any],
+    *,
+    step_fn: StepFn | None = None,
 ) -> tuple[tuple[str, int, int], dict[str, Any], dict[str, list[float]]]:
-    row, trajectory = run_once(**spec)
+    row, trajectory = run_once(**spec, step_fn=step_fn or step)
     key = (spec["algo"], spec["d"], spec["seed"])
     return key, row, trajectory
 
@@ -36,6 +41,7 @@ def run_once(
     seed: int,
     iters: int,
     epsilon: float,
+    step_fn: StepFn | None = None,
     factor_rank: int | None = None,
     device_type: str = "cpu",
     dtype_name: str = "float64",
@@ -43,6 +49,7 @@ def run_once(
     device = torch.device(device_type)
     dtype = torch_dtype(dtype_name)
     configure_torch(dtype)
+    step_fn = step_fn or step
     factor_rank = rank if factor_rank is None else factor_rank
 
     x_star = generate_target_matrix(
@@ -61,6 +68,7 @@ def run_once(
         randn((d, factor_rank), seed + 4000, device=device, dtype=dtype) * init_scale
     )
     opt = make_optimizer(algo, [left, right], lr, rank=factor_rank)
+    state = {"left": left, "right": right, "target": x_star, "optimizer": opt}
 
     losses: list[float] = []
     grad_norms: list[float] = []
@@ -69,18 +77,7 @@ def run_once(
     sync_device(device)
     t0 = time.time()
     for step in range(iters):
-        opt.zero_grad(set_to_none=True)
-        loss = matrix_factorization_loss(left, right, x_star)
-        loss.backward()
-
-        grad_norm = float(
-            torch.linalg.vector_norm(
-                torch.stack([left.grad.detach().norm(), right.grad.detach().norm()])
-            ).cpu()
-        )
-        opt.step()
-
-        loss_value = float(loss.detach().cpu())
+        loss_value, grad_norm = step_fn(state)
         losses.append(loss_value)
         grad_norms.append(grad_norm)
 
@@ -113,6 +110,28 @@ def run_once(
     return row, trajectory
 
 
+def step(state: dict[str, Any]) -> tuple[float, float]:
+    """One visible optimization step for MatrixFactorization."""
+
+    opt = state["optimizer"]
+    left = state["left"]
+    right = state["right"]
+    opt.zero_grad(set_to_none=True)
+    loss = matrix_factorization_loss(left, right, state["target"])
+    loss.backward()
+
+    grad_norm = float(
+        torch.linalg.vector_norm(
+            torch.stack([left.grad.detach().norm(), right.grad.detach().norm()])
+        ).cpu()
+    )
+    opt.step()
+    return float(loss.detach().cpu()), grad_norm
+
+
+matrix_factorization_step = step
+
+
 def matrix_factorization_loss(
     left: torch.Tensor,
     right: torch.Tensor,
@@ -120,4 +139,3 @@ def matrix_factorization_loss(
 ) -> torch.Tensor:
     residual = left @ right.T - target
     return 0.5 * torch.mean(residual.square())
-

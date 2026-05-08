@@ -1,4 +1,4 @@
-"""Shared utilities for PyTorch matrix problems."""
+"""Reusable construction and runtime helpers for matrix problems."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from typing import Iterable
 
 import torch
 
-from muonlib_torch import MuonTorch, ShampooTorch
+from optimizers import MuonExact, Shampoo
 
 
 THREAD_ENV_VARS = [
@@ -103,15 +103,15 @@ def make_optimizer(
                 nesterov=False,
                 ns_steps=5,
             )
-        return MuonTorch(params, lr=lr, momentum=0.9, variant="newton_schulz", ns_steps=5)
+        return MuonExact(params, lr=lr, momentum=0.9, variant="newton_schulz", ns_steps=5)
     if algo in {"Muon-Exact", "MuonExact"}:
-        return MuonTorch(params, lr=lr, momentum=0.9, variant="exact")
+        return MuonExact(params, lr=lr, momentum=0.9, variant="exact")
     if algo == "Muon-RandSVD":
-        return MuonTorch(params, lr=lr, momentum=0.9, variant="randsvd", rank=rank)
+        return MuonExact(params, lr=lr, momentum=0.9, variant="randsvd", rank=rank)
     if algo == "Muon-Trunc":
-        return MuonTorch(params, lr=lr, momentum=0.9, variant="truncated", rank=rank)
+        return MuonExact(params, lr=lr, momentum=0.9, variant="truncated", rank=rank)
     if algo == "Shampoo":
-        return ShampooTorch(params, lr=lr, beta2=0.9, epsilon=1e-8)
+        return Shampoo(params, lr=lr, beta2=0.9, epsilon=1e-8)
     if algo == "Adam":
         return torch.optim.Adam(params, lr=lr)
     if algo == "SGD":

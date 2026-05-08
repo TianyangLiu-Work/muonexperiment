@@ -1,13 +1,13 @@
-"""Matrix Sensing worker for the PyTorch experiments."""
+"""Matrix Sensing problem worker."""
 
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import Any, Callable
 
 import torch
 
-from .common import (
+from .MatrixConstruction import (
     configure_torch,
     generate_target_matrix,
     make_generator,
@@ -18,10 +18,15 @@ from .common import (
 )
 
 
+StepFn = Callable[[dict[str, Any]], tuple[float, float]]
+
+
 def run_spec(
     spec: dict[str, Any],
+    *,
+    step_fn: StepFn | None = None,
 ) -> tuple[tuple[str, int, int], dict[str, Any], dict[str, list[float]]]:
-    row, trajectory = run_once(**spec)
+    row, trajectory = run_once(**spec, step_fn=step_fn or step)
     key = (spec["algo"], spec["d"], spec["seed"])
     return key, row, trajectory
 
@@ -39,12 +44,14 @@ def run_once(
     seed: int,
     iters: int,
     epsilon: float,
+    step_fn: StepFn | None = None,
     device_type: str = "cpu",
     dtype_name: str = "float64",
 ) -> tuple[dict[str, Any], dict[str, list[float]]]:
     device = torch.device(device_type)
     dtype = torch_dtype(dtype_name)
     configure_torch(dtype)
+    step_fn = step_fn or step
 
     x_star = generate_target_matrix(
         d,
@@ -63,6 +70,7 @@ def run_once(
 
     x = torch.nn.Parameter(randn((d, d), seed + 3000, device=device, dtype=dtype) * init_scale)
     opt = make_optimizer(algo, [x], lr, rank=rank)
+    state = {"a": a, "y": y, "x": x, "optimizer": opt}
 
     losses: list[float] = []
     grad_norms: list[float] = []
@@ -71,14 +79,7 @@ def run_once(
     sync_device(device)
     t0 = time.time()
     for step in range(iters):
-        opt.zero_grad(set_to_none=True)
-        loss = matrix_sensing_loss(a, y, x)
-        loss.backward()
-
-        grad_norm = float(x.grad.detach().norm().cpu())
-        opt.step()
-
-        loss_value = float(loss.detach().cpu())
+        loss_value, grad_norm = step_fn(state)
         losses.append(loss_value)
         grad_norms.append(grad_norm)
 
@@ -111,6 +112,23 @@ def run_once(
     }
     trajectory = {"loss": losses, "grad_norm": grad_norms}
     return row, trajectory
+
+
+def step(state: dict[str, Any]) -> tuple[float, float]:
+    """One visible optimization step for MatrixSensing."""
+
+    opt = state["optimizer"]
+    x = state["x"]
+    opt.zero_grad(set_to_none=True)
+    loss = matrix_sensing_loss(state["a"], state["y"], x)
+    loss.backward()
+
+    grad_norm = float(x.grad.detach().norm().cpu())
+    opt.step()
+    return float(loss.detach().cpu()), grad_norm
+
+
+matrix_sensing_step = step
 
 
 def generate_measurements(
@@ -147,4 +165,3 @@ def generate_measurements(
 def matrix_sensing_loss(a: torch.Tensor, y: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
     pred = torch.einsum("mij,ij->m", a, x)
     return 0.5 * torch.mean((pred - y) ** 2)
-
