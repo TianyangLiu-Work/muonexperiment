@@ -13,7 +13,7 @@ The code is notebook-first:
 - Loss functions stay in the notebook.
 - Run loops stay in the notebook.
 - Tables and plots stay in the notebook.
-- Only the stateful Muon optimizer is extracted into a tiny Python module.
+- Only local fallback optimizers are extracted into a tiny Python module.
 
 This keeps each experiment readable without jumping through framework code.
 
@@ -22,7 +22,7 @@ This keeps each experiment readable without jumping through framework code.
 ```text
 muonlib_torch/
   __init__.py
-  optimizers.py              # MuonTorch only
+  optimizers.py              # local Muon exact/fallback + Shampoo
 
 notebooks_torch/
   README.md
@@ -49,7 +49,15 @@ $$
 f(X) = \frac{1}{2m}\sum_{i=1}^{m}(\langle A_i, X\rangle-y_i)^2
 $$
 
-The notebook compares `Muon-Exact` and `SGD` by default. It includes:
+The notebook compares multiple optimizers by default:
+
+- `Muon`: official `torch.optim.Muon` when available
+- `Muon-Exact`: exact SVD Muon implemented in `MuonTorch`
+- `Shampoo`: matrix Shampoo implemented in `ShampooTorch`
+- `Adam`: PyTorch built-in
+- `SGD`: PyTorch built-in with momentum
+
+It includes:
 
 - explicit parameter grid
 - torch target matrix generation
@@ -67,7 +75,16 @@ SMOKE_MODE = True
 
 Set it to `False` in the notebook to run the E01-sized grid.
 
-## Muon Optimizer
+## Optimizers
+
+This branch targets PyTorch `2.11.0`. PyTorch 2.11 ships official
+`torch.optim.Muon`, and the notebook uses it for the `Muon` row. The local
+`MuonTorch` implementation remains useful for exact-SVD Muon and for older
+environments where `torch.optim.Muon` is unavailable. PyTorch does not provide
+a built-in `torch.optim.Shampoo`, so this branch keeps a small local
+matrix-only `ShampooTorch`.
+
+### Muon
 
 `MuonTorch` is implemented in `muonlib_torch/optimizers.py`.
 
@@ -95,9 +112,29 @@ $$
 
 Supported variants:
 
+- `newton_schulz`
 - `exact`
 - `randsvd`
 - `truncated`
+
+### Shampoo
+
+`ShampooTorch` keeps row and column second-moment preconditioners for each
+matrix parameter:
+
+$$
+L_{k+1} = \beta L_k + (1-\beta)GG^\top
+$$
+
+$$
+R_{k+1} = \beta R_k + (1-\beta)G^\top G
+$$
+
+and updates with:
+
+$$
+\Delta = L_{k+1}^{-1/4} G R_{k+1}^{-1/4}
+$$
 
 ## Run
 

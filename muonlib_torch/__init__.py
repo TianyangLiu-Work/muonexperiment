@@ -1,5 +1,5 @@
-"""Minimal PyTorch utilities for notebook-first Muon experiments."""
+"""Minimal PyTorch optimizers for notebook-first matrix experiments."""
 
-from .optimizers import MuonTorch
+from .optimizers import MuonTorch, ShampooTorch
 
-__all__ = ["MuonTorch"]
+__all__ = ["MuonTorch", "ShampooTorch"]
