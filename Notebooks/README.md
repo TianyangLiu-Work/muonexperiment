@@ -8,6 +8,8 @@ Current scope:
 - Default methods are `Muon`, `Muon-Exact`, `Shampoo`, `Adam`, and `SGD`.
 - Experiment setup, run grid, metrics, plotting, and conclusion stay inside the
   notebook for readability.
+- Plotting functions are imported from `plotting/`; the main experiment
+  notebook does not define plotting internals inline.
 - The notebook imports `problems.MatrixSensing.step`, binds it as `STEP_FN`, and
   passes it into the multiprocessing runner through `functools.partial`.
 - Runs are dispatched across worker processes with a `tqdm` progress bar.

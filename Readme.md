@@ -17,6 +17,13 @@ problems/
   MatrixFactorization.py    # MatrixFactorization worker
   MatrixSensing.py          # MatrixSensing worker
 
+plotting/
+  colors.py                 # shared color dictionaries and color helpers
+  data.py                   # summary and trajectory dataframe transforms
+  metrics.py                # metric plots
+  trajectories.py           # trajectory plots
+  PlottingUsage.ipynb       # usage examples for plotting functions
+
 Notebooks/
   E01_ms_benchmark_torch.ipynb
 
