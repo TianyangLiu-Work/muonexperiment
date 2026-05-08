@@ -1,61 +1,124 @@
-# Muon Optimizer — Matrix Sensing Benchmark
+# Muon Matrix Experiments — PyTorch Notebook Rewrite
 
-## where is the result
-If you don't want to verify the experiment code implementation ( or not yet), please go directly to the analysis_report folder
+This branch is a clean PyTorch rewrite of the Muon matrix experiments. The old
+NumPy/SciPy experiment scripts, generated result tables, logs, reports, and long
+design documents have been removed from this branch.
 
-## Experiment Matrix
+## Design Principle
 
-| ID  | Experiment          | Rows | Description                     |
-|-----|---------------------|------|---------------------------------|
-| E01 | MS Benchmark        | 60   | d=50-200, Dimension Scan        |
-| E02 | MF Benchmark        | 40   | Matrix Factorization Scenario   |
-| E03 | LR Calibration      | 100  | Learning Rate Calibration       |
-| E04 | Init Noise          | 120  | Initialization Noise Robustness |
-| E05 | FLOPs               | 8    | Theoretical FLOPs Calculation   |
-| E06 | Observation Noise   | 80   | Observation Noise Robustness    |
-| E07 | Rank Ratio          | 80   | Effect of Rank Ratio            |
-| E08 | Oversampling        | 80   | Oversampling Factor             |
-| E09 | Weight Decay        | 80   | Weight Decay                    |
-| E10 | Rectangular         | 64   | Rectangular Matrices            |
-| E11 | Baselines           | 50   | Adam/SGD/Muon/RMSprop           |
-| E12 | Hessian             | 50   | Hessian Analysis                |
-| E13 | Wallclock           | 40   | Per-step Timing                 |
-| E14 | RandSVD             | 70   | Randomized SVD                  |
-| E15 | Scalability         | 12   | d=100-200 Scalability           |
-| E16 | Init Scale          | 80   | Initialization Scale            |
-| E17 | Init Type           | 48   | Initialization Distribution     |
-| E18 | Condition Number    | 64   | κ=10-10000                      |
-| E19 | Spectrum Distribution | 80   | Spectral Distribution           |
-| E20 | Power Scheduling    | 100  | 50-Seed Statistics              |
+The code is notebook-first:
 
-## Data Format
+- Experiment setup stays in the notebook.
+- Data generation stays in the notebook.
+- Loss functions stay in the notebook.
+- Run loops stay in the notebook.
+- Tables and plots stay in the notebook.
+- Only the stateful Muon optimizer is extracted into a tiny Python module.
 
-### `results_v3/E*_detailed_results.csv` — One Summary Row Per Run
+This keeps each experiment readable without jumping through framework code.
 
-| Column Name | Type | Description |
-|------|------|------|
-| `algo` | str | Algorithm: `SGD`, `Muon-Exact`, `Adam`, `Momentum-SGD`, `RMSprop`, `Muon-NS`, `Muon-RandSVD`, `Muon-Trunc` |
-| `d` | int | Dimension of the square matrix |
-| `r` | int | Rank of the target matrix |
-| `lr` | float | Learning rate |
-| `noise` | float | Standard deviation of observation noise (0 = no noise) |
-| `dist` | str | Distribution of the measurement matrix: `normal`, `uniform`, `rademacher`, `sparse`, `sphere` |
-| `spectrum` | str | Spectral type of the target matrix: `hard-cutoff`, `exponential-decay`, `polynomial-decay` |
-| `kappa` | float | Condition number |
-| `init_scale` | float | Standard deviation of initial weights |
-| `seed` | int | Random seed |
-| `iters` | int | Total number of iteration steps |
-| `final_loss` | float | Loss at the final step |
-| `min_loss` | float | **Minimum loss achieved during the run** (Core Metric) |
-| `K_epsilon` | int | Iteration step at which ε was first reached; 2001 if not reached |
-| `time_s` | float | Wall-clock runtime (seconds) |
-| `I_conv` | int | Convergence flag (1 = ε reached) |
-| `F_eps` | int | Total FLOPs accumulated when ε was reached; FLOPs corresponding to the maximum iterations if not reached |
+## Current Layout
 
-`K_epsilon` and `min_loss` measure optimizer performance from different perspectives, and each holds independent significance.
+```text
+muonlib_torch/
+  __init__.py
+  optimizers.py              # MuonTorch only
 
----
+notebooks_torch/
+  README.md
+  E01_ms_benchmark_torch.ipynb
 
-`logs_v2/E*_detailed/*/trajectory.jsonl` — One trajectory entry per step
+requirements.txt
+README.md
+```
 
-Each JSON line contains: `step`, `loss`, `grad_norm`, `singular_values` (list), `spectral_gap`, `iteration_time_s`. The trajectory logs are managed in Git LFS; for first-time use, please run `git lfs pull`.
+## Implemented Prototype
+
+`notebooks_torch/E01_ms_benchmark_torch.ipynb` implements a PyTorch Matrix
+Sensing benchmark:
+
+$$
+X^\star = U \operatorname{diag}(s)V^\top
+$$
+
+$$
+y_i = \langle A_i, X^\star\rangle + \varepsilon_i
+$$
+
+$$
+f(X) = \frac{1}{2m}\sum_{i=1}^{m}(\langle A_i, X\rangle-y_i)^2
+$$
+
+The notebook compares `Muon-Exact` and `SGD` by default. It includes:
+
+- explicit parameter grid
+- torch target matrix generation
+- torch measurement tensor generation
+- matrix sensing loss via `torch.einsum`
+- full run loop
+- live table and plot helpers
+- a clickable `Run E01 torch` button when `ipywidgets` is available
+- CSV export to `results_torch/`
+
+Default mode is a fast smoke run:
+
+```python
+SMOKE_MODE = True
+```
+
+Set it to `False` in the notebook to run the E01-sized grid.
+
+## Muon Optimizer
+
+`MuonTorch` is implemented in `muonlib_torch/optimizers.py`.
+
+Given a matrix gradient:
+
+$$
+G = U\Sigma V^\top
+$$
+
+Muon uses the spectral-normalized direction:
+
+$$
+D = UV^\top
+$$
+
+and applies:
+
+$$
+M_{k+1} = \mu M_k + D_k
+$$
+
+$$
+X_{k+1} = X_k - \eta M_{k+1} - \eta\lambda X_k
+$$
+
+Supported variants:
+
+- `exact`
+- `randsvd`
+- `truncated`
+
+## Run
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Open the notebook:
+
+```bash
+jupyter lab notebooks_torch/E01_ms_benchmark_torch.ipynb
+```
+
+Or run the notebook cells manually in any Jupyter-compatible environment.
+
+## Notes
+
+- This branch intentionally does not preserve old experiment outputs.
+- `results_torch/` and `logs_torch/` are ignored by git.
+- PyTorch wall-clock results are not directly comparable with the old
+  NumPy/SciPy branch, especially when CUDA is available.
