@@ -68,13 +68,14 @@ It includes:
 - live table and plot helpers
 - in-notebook result table, plots, and conclusion
 
-Default mode is a fast smoke run:
+Default mode is the full E01 grid:
 
 ```python
-SMOKE_MODE = True
+SMOKE_MODE = False
 ```
 
-Set it to `False` in the notebook to run the E01-sized grid.
+That runs 5 optimizers, 3 dimensions, 10 seeds, and 2000 iterations per run:
+150 runs in total. Set `SMOKE_MODE = True` only for a quick local sanity check.
 
 ## Optimizers
 

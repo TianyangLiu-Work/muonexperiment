@@ -14,5 +14,6 @@ Current scope:
 - Results stay in notebook memory as `df` and `trajectories`; the notebook does
   not write CSV, PNG, or report files by default.
 
-Default notebook mode is a small smoke run. Set `SMOKE_MODE = False` in the
-parameter cell to run the E01-sized grid.
+Default notebook mode is the full E01 grid: 5 optimizers, 3 dimensions, 10
+seeds, and 2000 iterations per run. Set `SMOKE_MODE = True` in the parameter
+cell only for a quick sanity check.
