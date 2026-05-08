@@ -15,5 +15,5 @@ Current scope:
   not write CSV, PNG, or report files by default.
 
 Default notebook mode is the full E01 grid: 5 optimizers, 3 dimensions, 10
-seeds, and 2000 iterations per run. Set `SMOKE_MODE = True` in the parameter
-cell only for a quick sanity check.
+seeds, and 2000 iterations per run. Quick validation lives in `smoketests/`,
+not in this experiment notebook.

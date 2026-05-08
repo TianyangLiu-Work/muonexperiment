@@ -28,6 +28,10 @@ notebooks_torch/
   README.md
   E01_ms_benchmark_torch.ipynb
 
+smoketests/
+  README.md
+  test_e01_smoke.py
+
 environment.yml
 requirements.txt
 README.md
@@ -68,14 +72,9 @@ It includes:
 - live table and plot helpers
 - in-notebook result table, plots, and conclusion
 
-Default mode is the full E01 grid:
-
-```python
-SMOKE_MODE = False
-```
-
-That runs 5 optimizers, 3 dimensions, 10 seeds, and 2000 iterations per run:
-150 runs in total. Set `SMOKE_MODE = True` only for a quick local sanity check.
+Default mode is the full E01 grid: 5 optimizers, 3 dimensions, 10 seeds, and
+2000 iterations per run, for 150 runs in total. Quick validation lives in
+`smoketests/`, not in the experiment notebook.
 
 ## Optimizers
 
@@ -166,6 +165,12 @@ write CSV, PNG, or report files by default.
 
 `requirements.txt` is kept only as a pip-only fallback. Prefer
 `environment.yml` for this branch.
+
+Run the quick optimizer smoke test:
+
+```bash
+python smoketests/test_e01_smoke.py
+```
 
 ## Notes
 
