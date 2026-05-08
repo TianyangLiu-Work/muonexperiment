@@ -28,6 +28,7 @@ notebooks_torch/
   README.md
   E01_ms_benchmark_torch.ipynb
 
+environment.yml
 requirements.txt
 README.md
 ```
@@ -77,7 +78,7 @@ Set it to `False` in the notebook to run the E01-sized grid.
 
 ## Optimizers
 
-This branch targets PyTorch `2.11.0`. PyTorch 2.11 ships official
+This branch targets the `torch==2.11.0` package. PyTorch 2.11 ships official
 `torch.optim.Muon`, and the notebook uses it for the `Muon` row. The local
 `MuonTorch` implementation remains useful for exact-SVD Muon and for older
 environments where `torch.optim.Muon` is unavailable. PyTorch does not provide
@@ -138,13 +139,20 @@ $$
 
 ## Run
 
-Install dependencies:
+Create and activate the dedicated conda environment:
 
 ```bash
-pip install -r requirements.txt
+conda env create -f environment.yml
+conda activate muonexperiment-torch
 ```
 
-Open the notebook:
+Register the environment as a Jupyter kernel:
+
+```bash
+python -m ipykernel install --user --name muonexperiment-torch --display-name "Python (muonexperiment-torch)"
+```
+
+Open the notebook from this environment:
 
 ```bash
 jupyter lab notebooks_torch/E01_ms_benchmark_torch.ipynb
@@ -154,6 +162,9 @@ Or run the notebook cells manually in any Jupyter-compatible environment.
 
 The notebook keeps results in memory as `df` and `trajectories`. It does not
 write CSV, PNG, or report files by default.
+
+`requirements.txt` is kept only as a pip-only fallback. Prefer
+`environment.yml` for this branch.
 
 ## Notes
 
