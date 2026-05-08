@@ -12,6 +12,8 @@ Current scope:
 - Runs are dispatched across worker processes with a `tqdm` progress bar.
 - Plotting includes same-dimension algorithm comparisons, same-algorithm
   dimension comparisons, all-combination grids, metric bars, and seed traces.
+- Plot colors are semantic: related algorithms use related hues, and dimensions
+  use ordered shade/line-style variants.
 - Official PyTorch `torch.optim.Muon` is used when available; exact-SVD Muon
   and Shampoo live in `muonlib_torch/optimizers.py`.
 - The importable single-run worker lives in `muonlib_torch/e01_matrix_sensing.py`

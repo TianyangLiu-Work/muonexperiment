@@ -71,6 +71,8 @@ It includes:
 - broad result plots: same-dimension algorithm comparisons, same-algorithm
   dimension comparisons, all algorithm-dimension grids, metric bars, and seed
   trajectory checks
+- semantic colors: related algorithms use related hues, and dimensions use
+  ordered shade/line-style variants
 - in-notebook result table, plots, and conclusion
 
 Default mode is the full E01 grid: 5 optimizers, 3 dimensions, 10 seeds, and
