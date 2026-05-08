@@ -11,6 +11,8 @@ Current scope:
 - The notebook imports `problems.MatrixSensing.step`, binds it as `STEP_FN`, and
   passes it into the multiprocessing runner through `functools.partial`.
 - Runs are dispatched across worker processes with a `tqdm` progress bar.
+- Plotting is split into short cells, with each output cell producing one
+  figure or one coherent figure group.
 - Plotting includes same-dimension algorithm comparisons, same-algorithm
   dimension comparisons, all-combination grids, metric bars, and seed traces.
 - Official PyTorch `torch.optim.Muon` is used when available; exact-SVD Muon
