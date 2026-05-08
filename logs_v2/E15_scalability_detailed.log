@@ -1,8 +1,0 @@
-E15: 2 algos x 2 dims x 3 seeds = 12 runs
-    iters=1000, d up to 200
-
-E15 algo:   0%|          | 0/2 [00:00<?, ?it/s][E15 1/12] Muon-Exact d=100 seed=0
-[E15 2/12] Muon-Exact d=100 seed=1
-[E15 3/12] Muon-Exact d=100 seed=2
-[E15 4/12] Muon-Exact d=200 seed=0
-[E15 5/12] Muon-Exact d=200 seed=1
