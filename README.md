@@ -68,7 +68,9 @@ It includes:
 - importable torch single-run worker
 - per-run multiprocessing
 - `tqdm` progress over completed runs
-- table and plot helpers
+- broad result plots: same-dimension algorithm comparisons, same-algorithm
+  dimension comparisons, all algorithm-dimension grids, metric bars, and seed
+  trajectory checks
 - in-notebook result table, plots, and conclusion
 
 Default mode is the full E01 grid: 5 optimizers, 3 dimensions, 10 seeds, and
