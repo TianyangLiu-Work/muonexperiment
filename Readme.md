@@ -46,7 +46,7 @@ RUN_ONE = partial(run_matrix_sensing_spec, step_fn=STEP_FN)
 ```
 
 That keeps the step visible in the notebook while `problems/` remains importable
-and multiprocessing-safe.
+and joblib-serializable.
 
 ## Current Experiment
 
@@ -74,8 +74,8 @@ Default full grid:
 - total optimizer steps: `300000`
 
 Runs are independent across `(method, d, seed)` and are dispatched with
-`ProcessPoolExecutor` plus a `tqdm` progress bar. Each worker uses one torch
-thread to avoid CPU oversubscription.
+`joblib.Parallel` plus a `tqdm` progress bar. Each worker uses one torch thread
+to avoid CPU oversubscription.
 
 ## Optimizers
 

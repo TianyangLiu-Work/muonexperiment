@@ -13,8 +13,8 @@ Current scope:
 - `problems/` only defines autograd problems; this notebook owns the run loop,
   optimizer construction, timing, and worker serialization.
 - The notebook defines `step`, binds it as `STEP_FN`, and
-  passes it into the multiprocessing callable through `functools.partial`.
-- Runs are dispatched across worker processes with a `tqdm` progress bar.
+  passes it into the joblib callable through `functools.partial`.
+- Runs are dispatched with `joblib.Parallel` and a `tqdm` progress bar.
 - Plotting is split into short cells, with each output cell producing one
   figure or one coherent figure group.
 - Plotting includes same-dimension algorithm comparisons, same-algorithm

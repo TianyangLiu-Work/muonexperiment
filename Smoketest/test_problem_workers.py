@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import sys
-from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from math import isfinite
-from multiprocessing import get_context
 from pathlib import Path
 
+from joblib import Parallel, delayed
 import torch
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -195,13 +194,14 @@ def check_problem(name: str, run_one, spec_factory) -> None:
         print(f"{algo:10s} final_loss={final_loss:.6e}")
 
 
-def check_spawn_step_binding() -> None:
-    print("\nProcessPool step binding")
+def check_joblib_step_binding() -> None:
+    print("\njoblib.Parallel step binding")
     spec = make_sensing_spec("SGD")
     spec["iters"] = 3
     run_one = partial(run_sensing_spec, step_fn=matrix_sensing_step)
-    with ProcessPoolExecutor(max_workers=1, mp_context=get_context("spawn")) as executor:
-        key, row, traj = executor.submit(run_one, spec).result(timeout=60)
+    [(key, row, traj)] = Parallel(n_jobs=2, backend="loky")(
+        delayed(run_one)(spec) for spec in [spec]
+    )
     if key != ("SGD", spec["d"], spec["seed"]):
         raise AssertionError(f"unexpected key from worker: {key}")
     if len(traj["loss"]) != spec["iters"]:
@@ -213,7 +213,7 @@ def main() -> None:
     print(f"torch={torch.__version__}, official_muon={hasattr(torch.optim, 'Muon')}")
     check_problem("MatrixSensing", run_sensing_spec, make_sensing_spec)
     check_problem("MatrixFactorization", run_factorization_spec, make_factorization_spec)
-    check_spawn_step_binding()
+    check_joblib_step_binding()
 
 
 if __name__ == "__main__":
