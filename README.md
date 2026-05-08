@@ -11,8 +11,9 @@ The code is notebook-first:
 - Experiment setup stays in the notebook.
 - The run grid stays in the notebook.
 - Metrics, tables, plots, and conclusions stay in the notebook.
-- Stateful optimizers and the importable single-run worker live in
-  `muonlib_torch/` so multiprocessing with `spawn` works reliably.
+- Stateful optimizers live in `muonlib_torch/`.
+- Problem definitions and importable single-run workers live in
+  `problems_torch/` so multiprocessing with `spawn` works reliably.
 
 This keeps each experiment readable without jumping through framework code.
 
@@ -21,8 +22,14 @@ This keeps each experiment readable without jumping through framework code.
 ```text
 muonlib_torch/
   __init__.py
-  e01_matrix_sensing.py     # importable per-run worker for multiprocessing
   optimizers.py              # local Muon exact/fallback + Shampoo
+
+problems_torch/
+  __init__.py
+  README.md
+  common.py                  # shared target generation, RNG, threading, optimizers
+  matrix_sensing.py          # MatrixSensing worker
+  matrix_factorization.py    # MatrixFactorization worker
 
 notebooks_torch/
   README.md
@@ -30,7 +37,7 @@ notebooks_torch/
 
 smoketests/
   README.md
-  test_e01_smoke.py
+  test_problem_workers.py
 
 environment.yml
 requirements.txt
@@ -65,7 +72,7 @@ The notebook compares multiple optimizers by default:
 It includes:
 
 - explicit parameter grid
-- importable torch single-run worker
+- MatrixSensing worker from `problems_torch/`
 - per-run multiprocessing
 - `tqdm` progress over completed runs
 - broad result plots: same-dimension algorithm comparisons, same-algorithm
@@ -172,10 +179,10 @@ write CSV, PNG, or report files by default.
 `requirements.txt` is kept only as a pip-only fallback. Prefer
 `environment.yml` for this branch.
 
-Run the quick optimizer smoke test:
+Run the quick problem-worker smoke test:
 
 ```bash
-python smoketests/test_e01_smoke.py
+python smoketests/test_problem_workers.py
 ```
 
 ## Notes

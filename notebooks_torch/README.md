@@ -1,7 +1,6 @@
 # PyTorch Notebook Rewrite
 
-This directory contains a notebook-first PyTorch rewrite path. The existing
-NumPy/SciPy experiments remain untouched in `notebooks_v2/`.
+This directory contains notebook-first PyTorch experiments.
 
 Current scope:
 
@@ -16,8 +15,8 @@ Current scope:
   use ordered shade/line-style variants.
 - Official PyTorch `torch.optim.Muon` is used when available; exact-SVD Muon
   and Shampoo live in `muonlib_torch/optimizers.py`.
-- The importable single-run worker lives in `muonlib_torch/e01_matrix_sensing.py`
-  so multiprocessing can use the `spawn` start method.
+- Importable problem workers live in `problems_torch/`; the E01 notebook uses
+  `problems_torch/matrix_sensing.py`.
 - Results stay in notebook memory as `df` and `trajectories`; the notebook does
   not write CSV, PNG, or report files by default.
 
