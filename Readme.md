@@ -17,11 +17,6 @@ problems/
   MatrixFactorization.py    # autograd MatrixFactorization definition
   MatrixSensing.py          # autograd MatrixSensing definition
 
-runners/
-  runtime.py                # torch setup and optimizer selection
-  MatrixFactorizationRunner.py
-  MatrixSensingRunner.py
-
 plotting/
   colors.py                 # shared color dictionaries and color helpers
   data.py                   # summary and trajectory dataframe transforms
@@ -44,14 +39,14 @@ need. It does not choose optimizers, run iterations, time experiments, or manage
 worker serialization.
 
 The main experiment notebook defines its MatrixSensing optimizer `step` inline,
-binds it as `STEP_FN`, and passes it to the runner through:
+binds it as `STEP_FN`, and passes it to the notebook-defined worker through:
 
 ```python
 RUN_ONE = partial(run_matrix_sensing_spec, step_fn=STEP_FN)
 ```
 
-That keeps the step visible in the notebook while still using an importable,
-multiprocessing-safe runner.
+That keeps the step visible in the notebook while `problems/` remains importable
+and multiprocessing-safe.
 
 ## Current Experiment
 
