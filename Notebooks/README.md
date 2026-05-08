@@ -10,7 +10,9 @@ Current scope:
   notebook for readability.
 - Plotting functions are imported from `plotting/`; the main experiment
   notebook does not define plotting internals inline.
-- The notebook imports `problems.MatrixSensing.step`, binds it as `STEP_FN`, and
+- `problems/` only defines autograd problems; `runners/` owns the run loop,
+  optimizer construction, timing, and worker serialization.
+- The notebook defines `step`, binds it as `STEP_FN`, and
   passes it into the multiprocessing runner through `functools.partial`.
 - Runs are dispatched across worker processes with a `tqdm` progress bar.
 - Plotting is split into short cells, with each output cell producing one

@@ -1,4 +1,4 @@
-"""Quick execution checks for the PyTorch problem workers."""
+"""Quick execution checks for the PyTorch experiment runners."""
 
 from __future__ import annotations
 
@@ -14,9 +14,9 @@ import torch
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
 
-from problems.MatrixFactorization import run_spec as run_matrix_factorization
-from problems.MatrixSensing import run_spec as run_matrix_sensing
-from problems.MatrixSensing import step as matrix_sensing_step
+from runners.MatrixFactorizationRunner import run_spec as run_matrix_factorization
+from runners.MatrixSensingRunner import run_spec as run_matrix_sensing
+from runners.MatrixSensingRunner import step as matrix_sensing_step
 
 
 ALGOS = ["Muon", "Muon-Exact", "Shampoo", "Adam", "SGD"]

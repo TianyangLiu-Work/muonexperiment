@@ -13,9 +13,14 @@ optimizers/
   Shampoo.py                # matrix-only Shampoo
 
 problems/
-  MatrixConstruction.py     # shared target generation, RNG, torch setup
-  MatrixFactorization.py    # MatrixFactorization worker
-  MatrixSensing.py          # MatrixSensing worker
+  MatrixConstruction.py     # tensor construction for matrix problems
+  MatrixFactorization.py    # autograd MatrixFactorization definition
+  MatrixSensing.py          # autograd MatrixSensing definition
+
+runners/
+  runtime.py                # torch setup and optimizer selection
+  MatrixFactorizationRunner.py
+  MatrixSensingRunner.py
 
 plotting/
   colors.py                 # shared color dictionaries and color helpers
@@ -34,16 +39,19 @@ Readme.md
 requirement.yml
 ```
 
-`problems.MatrixSensing.step` and `problems.MatrixFactorization.step` are the
-single optimizer-step functions. The notebook imports `step`, binds it as
-`STEP_FN`, and passes it to the worker through:
+`problems/` only defines differentiable PyTorch objectives and the tensors they
+need. It does not choose optimizers, run iterations, time experiments, or manage
+worker serialization.
+
+The main experiment notebook defines its MatrixSensing optimizer `step` inline,
+binds it as `STEP_FN`, and passes it to the runner through:
 
 ```python
 RUN_ONE = partial(run_matrix_sensing_spec, step_fn=STEP_FN)
 ```
 
 That keeps the step visible in the notebook while still using an importable,
-multiprocessing-safe function object.
+multiprocessing-safe runner.
 
 ## Current Experiment
 
