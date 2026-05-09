@@ -72,7 +72,7 @@ Default full grid:
 - dimensions: `50`, `60`, `70`
 - seeds: `0` through `9`
 - maximum iterations per run: `2000`
-- early stopping: standard patience-based early stopping on relative loss
+- early stopping: standard patience-based early stopping on absolute loss
   improvement, with `min_steps=200`, `patience=200`, and `min_delta=1e-4`
 - total runs: `150`
 - maximum optimizer-step budget: `300000`

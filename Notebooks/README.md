@@ -14,7 +14,7 @@ Current scope:
   optimizer construction, timing, and worker serialization.
 - The notebook defines `single_run(run)` inline; each joblib worker receives one
   row from `runs` and returns that run's per-step DataFrame.
-- Runs use standard patience-based early stopping on relative loss improvement;
+- Runs use standard patience-based early stopping on absolute loss improvement;
   the summary table reports `actual_steps`, `stopped_early`, and `stop_reason`.
 - Runs are dispatched with `joblib.Parallel` and a `tqdm` progress bar.
 - Plotting is split into short cells, with each output cell producing one
