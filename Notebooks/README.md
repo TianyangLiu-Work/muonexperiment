@@ -22,5 +22,7 @@ Current scope:
 - Official PyTorch `torch.optim.Muon` is used when available; exact-SVD Muon
   and Shampoo live in `optimizers/`.
 
-Results stay in notebook memory as `df` and `trajectories`; the notebook does
-not write CSV, PNG, or report files by default.
+Results stay in notebook memory. `runs` becomes a long per-step table with one
+row per optimizer step, while `run_summary` and `trajectories` are derived from
+it for tables and plots. The notebook does not write CSV, PNG, or report files
+by default.

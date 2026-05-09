@@ -138,5 +138,7 @@ Run the quick worker checks:
 python Smoketest/test_problem_workers.py
 ```
 
-The notebook keeps results in memory as `df` and `trajectories`; it does not
-write result tables or figures to separate files.
+The notebook keeps results in memory. `runs` becomes a long per-step table with
+one row per optimizer step, while `run_summary` and `trajectories` are derived
+from it for tables and plots. It does not write result tables or figures to
+separate files.
