@@ -112,6 +112,19 @@ def plot_metric_bar(
         return empty_figure()
 
     summary = summary_table(df)
+    if metric not in summary and metric.endswith("_mean"):
+        source_metric = metric.removesuffix("_mean")
+        if source_metric in df:
+            summary = summary.merge(
+                df.groupby(["algo", "d"], as_index=False)[source_metric]
+                .mean()
+                .rename(columns={source_metric: metric}),
+                on=["algo", "d"],
+                how="left",
+            )
+    if metric not in summary:
+        return empty_figure(f"Missing metric: {metric}")
+
     dims = ordered_dims_in(summary)
     bar_colors = [dimension_color(d, dims, dimension_base_colors) for d in dims]
     pivot = summary.pivot(index="algo", columns="d", values=metric).reindex(
