@@ -11,14 +11,19 @@ from .colors import DEFAULT_ALGORITHM_ORDER
 
 
 def summary_table(df: pd.DataFrame) -> pd.DataFrame:
-    return df.groupby(["algo", "d"], as_index=False).agg(
-        runs=("seed", "count"),
-        K_epsilon_mean=("K_epsilon", "mean"),
-        K_epsilon_std=("K_epsilon", "std"),
-        min_loss_mean=("min_loss", "mean"),
-        final_loss_mean=("final_loss", "mean"),
-        time_s_mean=("time_s", "mean"),
-    )
+    aggregations = {
+        "runs": ("seed", "count"),
+        "K_epsilon_mean": ("K_epsilon", "mean"),
+        "K_epsilon_std": ("K_epsilon", "std"),
+        "min_loss_mean": ("min_loss", "mean"),
+        "final_loss_mean": ("final_loss", "mean"),
+        "time_s_mean": ("time_s", "mean"),
+    }
+    if "actual_steps" in df:
+        aggregations["actual_steps_mean"] = ("actual_steps", "mean")
+    if "stopped_early" in df:
+        aggregations["stopped_early_rate"] = ("stopped_early", "mean")
+    return df.groupby(["algo", "d"], as_index=False).agg(**aggregations)
 
 
 def trajectory_frame(
@@ -26,7 +31,7 @@ def trajectory_frame(
 ) -> pd.DataFrame:
     records: list[dict[str, Any]] = []
     for (algo, d, seed), traj in trajectories.items():
-        for step_idx, loss in enumerate(traj["loss"]):
+        for step_idx, loss in enumerate(traj["loss"], start=1):
             records.append(
                 {
                     "algo": algo,

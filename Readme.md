@@ -38,15 +38,17 @@ requirement.yml
 need. It does not choose optimizers, run iterations, time experiments, or manage
 worker serialization.
 
-The main experiment notebook defines its MatrixSensing optimizer `step` inline,
-binds it as `STEP_FN`, and passes it to the notebook-defined worker through:
+The main experiment notebook defines `single_run(run)` inline. Each joblib
+worker receives one row of the `runs` table, initializes the MatrixSensing
+problem, runs optimization, records per-step data, and returns that run's
+DataFrame.
 
 ```python
-RUN_ONE = partial(run_matrix_sensing_spec, step_fn=STEP_FN)
+delayed(single_run)(run)
 ```
 
-That keeps the step visible in the notebook while `problems/` remains importable
-and joblib-serializable.
+That keeps the experiment logic visible in the notebook while `problems/`
+remains importable and joblib-serializable.
 
 ## Current Experiment
 
@@ -69,13 +71,16 @@ Default full grid:
 - methods: `Muon`, `Muon-Exact`, `Shampoo`, `Adam`, `SGD`
 - dimensions: `50`, `60`, `70`
 - seeds: `0` through `9`
-- iterations per run: `2000`
+- maximum iterations per run: `2000`
+- early stopping: standard patience-based early stopping on relative loss
+  improvement, with `min_steps=200`, `patience=200`, and `min_delta=1e-4`
 - total runs: `150`
-- total optimizer steps: `300000`
+- maximum optimizer-step budget: `300000`
 
 Runs are independent across `(method, d, seed)` and are dispatched with
 `joblib.Parallel` plus a `tqdm` progress bar. Each worker uses one torch thread
-to avoid CPU oversubscription.
+to avoid CPU oversubscription. The long `runs` table stores the executed steps;
+`run_summary` reports `actual_steps`, `stopped_early`, and `stop_reason`.
 
 ## Optimizers
 
@@ -139,6 +144,6 @@ python Smoketest/test_problem_workers.py
 ```
 
 The notebook keeps results in memory. `runs` becomes a long per-step table with
-one row per optimizer step, while `run_summary` and `trajectories` are derived
-from it for tables and plots. It does not write result tables or figures to
-separate files.
+one row per executed optimizer step, while `run_summary` and `trajectories` are
+derived from it for tables and plots. It does not write result tables or figures
+to separate files.

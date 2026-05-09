@@ -12,8 +12,10 @@ Current scope:
   notebook does not define plotting internals inline.
 - `problems/` only defines autograd problems; this notebook owns the run loop,
   optimizer construction, timing, and worker serialization.
-- The notebook defines `step`, binds it as `STEP_FN`, and
-  passes it into the joblib callable through `functools.partial`.
+- The notebook defines `single_run(run)` inline; each joblib worker receives one
+  row from `runs` and returns that run's per-step DataFrame.
+- Runs use standard patience-based early stopping on relative loss improvement;
+  the summary table reports `actual_steps`, `stopped_early`, and `stop_reason`.
 - Runs are dispatched with `joblib.Parallel` and a `tqdm` progress bar.
 - Plotting is split into short cells, with each output cell producing one
   figure or one coherent figure group.
@@ -23,6 +25,6 @@ Current scope:
   and Shampoo live in `optimizers/`.
 
 Results stay in notebook memory. `runs` becomes a long per-step table with one
-row per optimizer step, while `run_summary` and `trajectories` are derived from
-it for tables and plots. The notebook does not write CSV, PNG, or report files
-by default.
+row per executed optimizer step, while `run_summary` and `trajectories` are
+derived from it for tables and plots. The notebook does not write CSV, PNG, or
+report files by default.
