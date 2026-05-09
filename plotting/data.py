@@ -13,8 +13,6 @@ from .colors import DEFAULT_ALGORITHM_ORDER
 def summary_table(df: pd.DataFrame) -> pd.DataFrame:
     aggregations = {
         "runs": ("seed", "count"),
-        "K_epsilon_mean": ("K_epsilon", "mean"),
-        "K_epsilon_std": ("K_epsilon", "std"),
         "min_loss_mean": ("min_loss", "mean"),
         "final_loss_mean": ("final_loss", "mean"),
         "time_s_mean": ("time_s", "mean"),

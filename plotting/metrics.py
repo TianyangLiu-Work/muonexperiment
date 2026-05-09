@@ -73,7 +73,7 @@ def plot_metric_overview(
     summary = summary_table(df)
     fig, axes = plt.subplots(1, 3, figsize=(15, 4.2))
     metrics = [
-        ("K_epsilon_mean", "Mean K_epsilon", "iterations", False),
+        ("actual_steps_mean", "Mean executed steps", "steps", False),
         ("time_s_mean", "Mean wall-clock", "seconds", False),
         ("min_loss_mean", "Mean min loss", "loss", True),
     ]
