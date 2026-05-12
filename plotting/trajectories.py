@@ -15,10 +15,15 @@ from .metrics import empty_figure
 TrajectoryDict = Mapping[tuple[str, int, int], Mapping[str, Sequence[float]]]
 
 
-def apply_log_loss_axis(ax: Axes) -> None:
-    ax.set_yscale("log")
+def loss_scale_name(log_y: bool) -> str:
+    return "log loss" if log_y else "loss"
+
+
+def apply_loss_axis(ax: Axes, *, log_y: bool, ylabel: str = "mean loss") -> None:
+    if log_y:
+        ax.set_yscale("log")
     ax.set_xlabel("step")
-    ax.set_ylabel("mean loss")
+    ax.set_ylabel(f"{ylabel} (log scale)" if log_y else ylabel)
     ax.grid(alpha=0.3)
 
 
@@ -26,6 +31,8 @@ def plot_algorithms_for_dimension(
     trajectories: TrajectoryDict,
     d: int,
     algorithm_colors: Mapping[str, str] | None = None,
+    *,
+    log_y: bool = False,
 ) -> tuple[Figure, Axes]:
     mean_tf = mean_trajectory_frame(trajectories)
     sub_d = mean_tf[mean_tf["d"] == int(d)]
@@ -42,8 +49,8 @@ def plot_algorithms_for_dimension(
             linewidth=2.6,
             label=algo,
         )
-    apply_log_loss_axis(ax)
-    ax.set_title(f"Same dimension comparison: d={d}")
+    apply_loss_axis(ax, log_y=log_y)
+    ax.set_title(f"Same dimension comparison: d={d} ({loss_scale_name(log_y)})")
     ax.legend(fontsize=8)
     fig.tight_layout()
     return fig, ax
@@ -53,6 +60,8 @@ def plot_dimensions_for_algorithm(
     trajectories: TrajectoryDict,
     algo: str,
     algorithm_colors: Mapping[str, str] | None = None,
+    *,
+    log_y: bool = False,
 ) -> tuple[Figure, Axes]:
     mean_tf = mean_trajectory_frame(trajectories)
     sub_algo = mean_tf[mean_tf["algo"] == algo]
@@ -71,8 +80,8 @@ def plot_dimensions_for_algorithm(
             linewidth=2.6,
             label=f"d={d}",
         )
-    apply_log_loss_axis(ax)
-    ax.set_title(f"Same algorithm comparison: {algo}")
+    apply_loss_axis(ax, log_y=log_y)
+    ax.set_title(f"Same algorithm comparison: {algo} ({loss_scale_name(log_y)})")
     ax.legend(fontsize=8)
     fig.tight_layout()
     return fig, ax
@@ -81,6 +90,8 @@ def plot_dimensions_for_algorithm(
 def plot_all_mean_curves_combined(
     trajectories: TrajectoryDict,
     algorithm_colors: Mapping[str, str] | None = None,
+    *,
+    log_y: bool = False,
 ) -> tuple[Figure, Axes]:
     mean_tf = mean_trajectory_frame(trajectories)
     if mean_tf.empty:
@@ -100,8 +111,8 @@ def plot_all_mean_curves_combined(
                 linewidth=2.1,
                 label=f"{algo}, d={d}",
             )
-    apply_log_loss_axis(ax)
-    ax.set_title("All algorithms and all dimensions: mean loss curves")
+    apply_loss_axis(ax, log_y=log_y)
+    ax.set_title(f"All algorithms and all dimensions: mean {loss_scale_name(log_y)} curves")
     ax.legend(fontsize=7, ncol=3)
     fig.tight_layout()
     return fig, ax
@@ -110,6 +121,8 @@ def plot_all_mean_curves_combined(
 def plot_algorithm_dimension_grid(
     trajectories: TrajectoryDict,
     algorithm_colors: Mapping[str, str] | None = None,
+    *,
+    log_y: bool = False,
 ) -> tuple[Figure, Sequence[Sequence[Axes]]]:
     mean_tf = mean_trajectory_frame(trajectories)
     if mean_tf.empty:
@@ -137,8 +150,9 @@ def plot_algorithm_dimension_grid(
                 linestyle=dimension_linestyle(d, dims),
                 linewidth=2.2,
             )
-            apply_log_loss_axis(ax)
+            apply_loss_axis(ax, log_y=log_y)
             ax.set_title(f"{algo}, d={d}", fontsize=10)
+    fig.suptitle(f"Algorithm-dimension grid ({loss_scale_name(log_y)})", y=1.01)
     fig.tight_layout()
     return fig, axes
 
@@ -147,6 +161,8 @@ def plot_seed_variability_for_dimension(
     trajectories: TrajectoryDict,
     d: int,
     algorithm_colors: Mapping[str, str] | None = None,
+    *,
+    log_y: bool = False,
 ) -> tuple[Figure, Axes]:
     has_data = any(dd == int(d) for _, dd, _ in trajectories)
     if not has_data:
@@ -166,8 +182,8 @@ def plot_seed_variability_for_dimension(
             alpha=0.28,
             label=label,
         )
-    apply_log_loss_axis(ax)
-    ax.set_title(f"All seed trajectories at d={d}")
+    apply_loss_axis(ax, log_y=log_y, ylabel="loss")
+    ax.set_title(f"All seed trajectories at d={d} ({loss_scale_name(log_y)})")
     ax.legend(fontsize=8)
     fig.tight_layout()
     return fig, ax

@@ -38,8 +38,8 @@ def generate_target_matrix(
         singular_values[:rank] = 1.0
     elif spectrum == "polynomial-decay":
         idx = torch.arange(1, rank + 1, device=device, dtype=dtype)
-        singular_values[:rank] = idx.pow(-1.0)
-        singular_values[:rank] /= singular_values[0]
+        values = idx.pow(-1.0)
+        singular_values[:rank] = values / values[0]
     elif spectrum == "exponential-decay":
         idx = torch.arange(rank, device=device, dtype=dtype)
         singular_values[:rank] = torch.exp(-0.5 * idx)

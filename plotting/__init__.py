@@ -18,6 +18,7 @@ from .data import (
     summary_table,
     trajectory_frame,
 )
+from .ablations import plot_scenario_metric
 from .metrics import (
     plot_color_key,
     plot_metric_bar,
@@ -52,6 +53,7 @@ __all__ = [
     "plot_metric_bar",
     "plot_metric_overview",
     "plot_seed_variability_for_dimension",
+    "plot_scenario_metric",
     "summary_table",
     "trajectory_frame",
 ]

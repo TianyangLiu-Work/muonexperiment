@@ -6,6 +6,7 @@ This package contains stateless plotting helpers for experiment outputs.
 - `data.py`: summary tables and trajectory dataframe transforms
 - `metrics.py`: metric overview and metric bar plots
 - `trajectories.py`: loss-curve plots
+- `ablations.py`: scenario and ablation metric plots
 - `PlottingUsage.ipynb`: small synthetic example showing how to call the API
 
 Plot functions take data as inputs and return Matplotlib figures and axes. They

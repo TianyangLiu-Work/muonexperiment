@@ -18,17 +18,21 @@ problems/
   MatrixSensing.py          # autograd MatrixSensing definition
 
 plotting/
+  ablations.py              # scenario/ablation metric plots
   colors.py                 # shared color dictionaries and color helpers
   data.py                   # summary and trajectory dataframe transforms
   metrics.py                # metric plots
   trajectories.py           # trajectory plots
   PlottingUsage.ipynb       # usage examples for plotting functions
 
+util/
+  experiment.py             # joblib/tqdm execution helper
+
 Notebooks/
   E01_ms_benchmark_torch.ipynb
-
-Smoketest/
-  test_problem_workers.py
+  E02_matrix_factorization_torch.ipynb
+  E03_ms_ablations_torch.ipynb
+  E04_mf_initialization_ablations_torch.ipynb
 
 Readme.md
 requirement.yml
@@ -38,21 +42,23 @@ requirement.yml
 need. It does not choose optimizers, run iterations, time experiments, or manage
 worker serialization.
 
-The main experiment notebook defines `single_run(run)` inline. Each joblib
-worker receives one row of the `runs` table, initializes the MatrixSensing
-problem, runs optimization, records per-step data, and returns that run's
-DataFrame.
+Each experiment notebook defines `single_run(run)` inline. Each joblib worker
+receives one row of the `runs` table, initializes the problem, runs
+optimization, records per-step data, and returns that run's DataFrame.
 
 ```python
-delayed(single_run)(run)
+util.run_experiments(runs, single_run, ...)
 ```
 
 That keeps the experiment logic visible in the notebook while `problems/`
 remains importable and joblib-serializable.
 
-## Current Experiment
+## Experiments
 
-`Notebooks/E01_ms_benchmark_torch.ipynb` runs the Matrix Sensing benchmark:
+### E01 Matrix Sensing Dimension Benchmark
+
+`Notebooks/E01_ms_benchmark_torch.ipynb` runs the baseline Matrix Sensing
+dimension benchmark:
 
 $$
 X^\star = U \operatorname{diag}(s)V^\top
@@ -81,6 +87,60 @@ Runs are independent across `(method, d, seed)` and are dispatched with
 `joblib.Parallel` plus a `tqdm` progress bar. Each worker uses one torch thread
 to avoid CPU oversubscription. The long `runs` table stores the executed steps;
 `run_summary` reports `actual_steps`, `stopped_early`, and `stop_reason`.
+
+### E02 Matrix Factorization Benchmark
+
+`Notebooks/E02_matrix_factorization_torch.ipynb` runs the same optimizer grid on
+the nonconvex low-rank factorization objective. The target is still
+
+$$
+X^\star = U \operatorname{diag}(s)V^\top
+$$
+
+but the optimized variables are factors:
+
+$$
+f(L,R) = \frac{1}{2d^2}\lVert LR^\top-X^\star\rVert_F^2.
+$$
+
+This experiment checks whether conclusions from E01 survive the switch from a
+full matrix variable `X` to two matrix factors `L` and `R`.
+
+### E03 Matrix Sensing Ablations
+
+`Notebooks/E03_ms_ablations_torch.ipynb` keeps the Matrix Sensing objective but
+changes problem assumptions one at a time:
+
+- baseline normal measurements
+- Rademacher measurements
+- sphere-normalized measurements
+- polynomial-decay spectrum
+- exponential-decay spectrum
+- ill-conditioned target with `kappa=100`
+- noisy observations with `noise=0.01`
+
+This experiment is intentionally longer than E01 because it multiplies the
+optimizer/seed grid by several problem scenarios. It is the notebook to inspect
+when explaining which modeling choices make the experiment take longer.
+
+### E04 Matrix Factorization Initialization Ablations
+
+`Notebooks/E04_mf_initialization_ablations_torch.ipynb` keeps the
+MatrixFactorization objective from E02 but changes only the initialization of
+the factors `L` and `R`.
+
+It includes harder and more ill-conditioned starts:
+
+- tiny balanced factors
+- oversized factors
+- left tiny / right large factors
+- left large / right tiny factors
+- column-wise ill-conditioned factors with condition number `100`
+- column-wise ill-conditioned factors with condition number `10000`
+- opposite left/right column conditioning with condition number `10000`
+
+This experiment is the one to inspect when comparing optimizers under flat
+small-initialization regions or badly scaled factor coordinates.
 
 ## Optimizers
 
@@ -131,17 +191,15 @@ Register the environment as a Jupyter kernel:
 python -m ipykernel install --user --name muonexperiment-torch --display-name "Python (muonexperiment-torch)"
 ```
 
-Open the notebook:
+Open a notebook:
 
 ```bash
 jupyter lab Notebooks/E01_ms_benchmark_torch.ipynb
 ```
 
-Run the quick worker checks:
-
-```bash
-python Smoketest/test_problem_workers.py
-```
+To smoke-test the complete notebook code path, set `SMOKE_TEST = True` in the
+parameter cell and run the notebook. Smoke mode keeps the same run grid but
+sets `iters` to `SMOKE_TEST_MAX_STEPS`, which defaults to `10`.
 
 The notebook keeps results in memory. `runs` becomes a long per-step table with
 one row per executed optimizer step, while `run_summary` and `trajectories` are

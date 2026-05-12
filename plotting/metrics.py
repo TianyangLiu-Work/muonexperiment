@@ -65,6 +65,8 @@ def plot_color_key(
 def plot_metric_overview(
     df: pd.DataFrame,
     algorithm_colors: Mapping[str, str] | None = None,
+    *,
+    loss_log_y: bool = False,
 ) -> tuple[Figure, Sequence[Axes]]:
     if df.empty:
         fig, ax = empty_figure()
@@ -75,7 +77,12 @@ def plot_metric_overview(
     metrics = [
         ("actual_steps_mean", "Mean executed steps", "steps", False),
         ("time_s_mean", "Mean wall-clock", "seconds", False),
-        ("min_loss_mean", "Mean min loss", "loss", True),
+        (
+            "min_loss_mean",
+            "Mean min loss (log scale)" if loss_log_y else "Mean min loss",
+            "loss",
+            loss_log_y,
+        ),
     ]
     for ax, (metric, title, ylabel, log_y) in zip(axes, metrics):
         for algo in ordered_algos_in(summary):
