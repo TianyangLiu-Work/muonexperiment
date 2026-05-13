@@ -1,15 +1,64 @@
 # Muon Matrix Experiments
 
-This branch is a PyTorch notebook-first rewrite of the matrix experiments. The
-old script-oriented code has been removed from this branch; the repository now
-keeps reusable optimizer/problem code small, and keeps experiment setup,
-metrics, plotting, and conclusions in the notebook.
+This repo is a notebook-first experimental report on matrix optimization with
+Muon and related baselines.
+
+The notebooks are already executed. A reader should inspect the saved tables and
+figures first. Code cells are needed only to modify the experimental grid,
+optimizer set, stopping rule, or diagnostics.
+
+## Reader Guide
+
+Two objectives are studied.
+
+Matrix Sensing observes
+
+$$y_i=\langle A_i,X^\star\rangle+\xi_i,\qquad X^\star\in\mathbb{R}^{d\times d},\quad \operatorname{rank}(X^\star)=r,$$
+
+and minimizes
+
+$$f(X)=\frac{1}{2m}\sum_{i=1}^{m}(\langle A_i,X\rangle-y_i)^2.$$
+
+Matrix Factorization parameterizes \(X=LR^\top\) and minimizes
+
+$$g(L,R)=\frac{1}{2d^2}\lVert LR^\top-X^\star\rVert_F^2.$$
+
+The primary recovery metric is
+
+$$e(\widehat X)=\frac{\lVert \widehat X-X^\star\rVert_F}{\lVert X^\star\rVert_F}.$$
+
+For two methods \(a,b\), heatmap gaps use
+
+$$\Delta_{a,b}=\log_{10} e_a-\log_{10} e_b.$$
+
+Thus \(\Delta_{\mathrm{Muon},b}<0\) means Muon has lower median recovery error
+than method \(b\).
+
+| Notebook | Mathematical Question | First Quantities To Inspect |
+|---|---|---|
+| `E01_ms_benchmark_torch.ipynb` | For Matrix Sensing, how do trajectories depend on \(d\)? | \(f(X_t)\), runtime, actual steps |
+| `E02_matrix_factorization_torch.ipynb` | Under the reparameterization \(X=LR^\top\), does optimizer behavior change? | \(g(L_t,R_t)\), runtime, actual steps |
+| `E03_ms_ablations_torch.ipynb` | How do measurement law, spectrum, condition number, and noise affect \(f\)? | Scenario-wise loss and log-loss |
+| `E04_mf_initialization_ablations_torch.ipynb` | How does \((L_0,R_0)\) affect convergence of \(g\)? | Scenario-wise loss, stop reason |
+| `E05_ms_sample_complexity_phase_diagram_torch.ipynb` | How does recovery depend on \(m=\alpha dr\)? | \(e(\widehat X)\), \(\Delta_{\mathrm{Muon},b}\), success probability |
+| `E06_ms_noise_robustness_torch.ipynb` | As \(\sigma\) increases, does low training loss imply low recovery error? | \(e(\widehat X)\), \(f_\sigma(\widehat X)\), clean test loss |
+| `E07_mf_rank_init_phase_diagram_torch.ipynb` | How do factor rank \(q\) and scale \(s\) affect \(g\)? | \(e(LR^\top)\), divergence rate, effective rank |
+| `E08_mf_scale_imbalance_torch.ipynb` | How does scale symmetry \(LR^\top=(cL)(R/c)^\top\) affect optimization? | \(e(LR^\top)\), balancedness, factor norms |
+| `E09_muon_geometry_diagnostics_torch.ipynb` | What are the spectra and alignments of gradients and updates? | effective rank, cosine, relative step size, singular-value error |
+| `E10_muon_variant_ablation_torch.ipynb` | Is the effect polar geometry or normalization? | variant error, time per step, update rank, cosine |
+
+## Implementation Model
+
+The old script-oriented code has been removed from this branch. The repository
+keeps reusable optimizer/problem code small, while experiment setup, metrics,
+plotting, and conclusions live in the notebooks.
 
 ## Layout
 
 ```text
 optimizers/
   MuonExact.py              # exact SVD / approximate Muon variants
+  NormalizedSGD.py          # Frobenius/spectral normalized SGD baselines
   Shampoo.py                # matrix-only Shampoo
 
 problems/
@@ -22,10 +71,12 @@ plotting/
   colors.py                 # shared color dictionaries and color helpers
   data.py                   # summary and trajectory dataframe transforms
   metrics.py                # metric plots
+  phase.py                  # phase-diagram heatmaps, gaps, and line plots
   trajectories.py           # trajectory plots
   PlottingUsage.ipynb       # usage examples for plotting functions
 
 util/
+  diagnostics.py            # recovery, rank, spectrum, and update diagnostics
   experiment.py             # joblib/tqdm execution helper
 
 Notebooks/
@@ -33,6 +84,12 @@ Notebooks/
   E02_matrix_factorization_torch.ipynb
   E03_ms_ablations_torch.ipynb
   E04_mf_initialization_ablations_torch.ipynb
+  E05_ms_sample_complexity_phase_diagram_torch.ipynb
+  E06_ms_noise_robustness_torch.ipynb
+  E07_mf_rank_init_phase_diagram_torch.ipynb
+  E08_mf_scale_imbalance_torch.ipynb
+  E09_muon_geometry_diagnostics_torch.ipynb
+  E10_muon_variant_ablation_torch.ipynb
 
 Readme.md
 requirement.yml
@@ -53,94 +110,23 @@ util.run_experiments(runs, single_run, ...)
 That keeps the experiment logic visible in the notebook while `problems/`
 remains importable and joblib-serializable.
 
-## Experiments
+## Experiment Axes
 
-### E01 Matrix Sensing Dimension Benchmark
+Each notebook estimates a map from controlled variables to optimization and
+recovery statistics.
 
-`Notebooks/E01_ms_benchmark_torch.ipynb` runs the baseline Matrix Sensing
-dimension benchmark:
-
-$$
-X^\star = U \operatorname{diag}(s)V^\top
-$$
-
-$$
-y_i = \langle A_i, X^\star\rangle + \varepsilon_i
-$$
-
-$$
-f(X) = \frac{1}{2m}\sum_{i=1}^{m}(\langle A_i, X\rangle-y_i)^2
-$$
-
-Default full grid:
-
-- methods: `Muon`, `Muon-Exact`, `Shampoo`, `Adam`, `SGD`
-- dimensions: `50`, `60`, `70`
-- seeds: `0` through `9`
-- maximum iterations per run: `2000`
-- early stopping: standard patience-based early stopping on absolute loss
-  improvement, with `min_steps=200`, `patience=200`, and `min_delta=1e-4`
-- total runs: `150`
-- maximum optimizer-step budget: `300000`
-
-Runs are independent across `(method, d, seed)` and are dispatched with
-`joblib.Parallel` plus a `tqdm` progress bar. Each worker uses one torch thread
-to avoid CPU oversubscription. The long `runs` table stores the executed steps;
-`run_summary` reports `actual_steps`, `stopped_early`, and `stop_reason`.
-
-### E02 Matrix Factorization Benchmark
-
-`Notebooks/E02_matrix_factorization_torch.ipynb` runs the same optimizer grid on
-the nonconvex low-rank factorization objective. The target is still
-
-$$
-X^\star = U \operatorname{diag}(s)V^\top
-$$
-
-but the optimized variables are factors:
-
-$$
-f(L,R) = \frac{1}{2d^2}\lVert LR^\top-X^\star\rVert_F^2.
-$$
-
-This experiment checks whether conclusions from E01 survive the switch from a
-full matrix variable `X` to two matrix factors `L` and `R`.
-
-### E03 Matrix Sensing Ablations
-
-`Notebooks/E03_ms_ablations_torch.ipynb` keeps the Matrix Sensing objective but
-changes problem assumptions one at a time:
-
-- baseline normal measurements
-- Rademacher measurements
-- sphere-normalized measurements
-- polynomial-decay spectrum
-- exponential-decay spectrum
-- ill-conditioned target with `kappa=100`
-- noisy observations with `noise=0.01`
-
-This experiment is intentionally longer than E01 because it multiplies the
-optimizer/seed grid by several problem scenarios. It is the notebook to inspect
-when explaining which modeling choices make the experiment take longer.
-
-### E04 Matrix Factorization Initialization Ablations
-
-`Notebooks/E04_mf_initialization_ablations_torch.ipynb` keeps the
-MatrixFactorization objective from E02 but changes only the initialization of
-the factors `L` and `R`.
-
-It includes harder and more ill-conditioned starts:
-
-- tiny balanced factors
-- oversized factors
-- left tiny / right large factors
-- left large / right tiny factors
-- column-wise ill-conditioned factors with condition number `100`
-- column-wise ill-conditioned factors with condition number `10000`
-- opposite left/right column conditioning with condition number `10000`
-
-This experiment is the one to inspect when comparing optimizers under flat
-small-initialization regions or badly scaled factor coordinates.
+| Notebook | Controlled Variables | Reported Statistics |
+|---|---|---|
+| E01 | \(d\), method, seed | \(f(X_t)\), final/min loss, runtime |
+| E02 | \(d\), method, seed | \(g(L_t,R_t)\), final/min loss, runtime |
+| E03 | measurement law, spectrum, \(\kappa\), noise | scenario-wise loss and log-loss |
+| E04 | initialization law for \((L_0,R_0)\) | loss, actual steps, stop reason |
+| E05 | \(\alpha\) in \(m=\alpha dr\), spectrum, method | \(e(\widehat X)\), \(\Delta_{\mathrm{Muon},b}\), success rate |
+| E06 | noise scale \(\sigma\), spectrum, \(\alpha\) | \(f_\sigma(\widehat X)\), \(e(\widehat X)\), clean test loss |
+| E07 | factor rank \(q\), init scale \(s\) | \(e(LR^\top)\), divergence, effective rank |
+| E08 | left/right scales \(a,b\) | \(e(LR^\top)\), balancedness, factor norms |
+| E09 | representative regimes and method | spectra of \(G_t,U_t\), cosine, step size |
+| E10 | Muon variants and normalized baselines | \(e\), time per step, update rank, cosine |
 
 ## Optimizers
 
@@ -175,6 +161,21 @@ and applies:
 $$
 \Delta = L_{k+1}^{-1/4} G R_{k+1}^{-1/4}
 $$
+
+`NormalizedSGD` and `SpectralNormSGD` are mechanism baselines for E09/E10.
+They update with
+
+$$
+\Delta=-\eta\frac{G}{\lVert G\rVert_F}
+$$
+
+or
+
+$$
+\Delta=-\eta\frac{G}{\lVert G\rVert_2}
+$$
+
+respectively.
 
 ## Run
 

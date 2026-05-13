@@ -24,6 +24,12 @@ from .metrics import (
     plot_metric_bar,
     plot_metric_overview,
 )
+from .phase import (
+    plot_gap_heatmap,
+    plot_metric_heatmap,
+    plot_metric_lines,
+    plot_optimizer_heatmaps,
+)
 from .trajectories import (
     plot_algorithm_dimension_grid,
     plot_algorithms_for_dimension,
@@ -51,7 +57,11 @@ __all__ = [
     "plot_color_key",
     "plot_dimensions_for_algorithm",
     "plot_metric_bar",
+    "plot_gap_heatmap",
+    "plot_metric_heatmap",
+    "plot_metric_lines",
     "plot_metric_overview",
+    "plot_optimizer_heatmaps",
     "plot_seed_variability_for_dimension",
     "plot_scenario_metric",
     "summary_table",

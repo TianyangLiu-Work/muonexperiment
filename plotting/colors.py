@@ -10,9 +10,16 @@ from matplotlib.colors import to_hex, to_rgb
 ALGORITHM_COLORS: dict[str, str] = {
     "Muon": "#0072B2",
     "Muon-Exact": "#56B4E9",
+    "Muon-NS-1": "#1F9AC7",
+    "Muon-NS-10": "#085C83",
+    "Muon-Truncated": "#7B92D4",
+    "Muon-RandSVD": "#5E3C99",
     "Shampoo": "#009E73",
     "Adam": "#D55E00",
     "SGD": "#CC79A7",
+    "NormalizedSGD": "#E69F00",
+    "SpectralNormSGD": "#A6761D",
+    "LayerwiseNormalizedSGD": "#8C564B",
 }
 DIMENSION_BASE_COLORS: tuple[str, ...] = ("#C6DBEF", "#6BAED6", "#2171B5", "#08306B")
 DIMENSION_LINESTYLES: tuple[str, ...] = ("-", "--", ":", "-.")

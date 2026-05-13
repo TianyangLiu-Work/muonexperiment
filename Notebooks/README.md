@@ -1,38 +1,58 @@
 # PyTorch Notebooks
 
-This directory contains notebook-first experiments.
+This directory contains executed notebook experiments. Open them as reports:
+the tables and figures are already saved. Inspect code cells only when changing
+the grid, optimizers, stopping rule, or diagnostics.
 
-Current scope:
+## Reading Order
 
-- `E01_ms_benchmark_torch.ipynb` runs the full Matrix Sensing benchmark.
-- `E02_matrix_factorization_torch.ipynb` runs the same optimizer comparison on
-  nonconvex low-rank Matrix Factorization.
-- `E03_ms_ablations_torch.ipynb` runs Matrix Sensing ablations over measurement
-  distribution, spectrum shape, condition number, and noise.
-- `E04_mf_initialization_ablations_torch.ipynb` runs Matrix Factorization
-  ablations over tiny, unbalanced, oversized, and ill-conditioned factor
-  initialization.
-- Default methods are `Muon`, `Muon-Exact`, `Shampoo`, `Adam`, and `SGD`.
-- Experiment setup, run grid, metrics, plotting, and conclusion stay inside the
-  notebook for readability.
-- Each notebook has `SMOKE_TEST = False` by default. Set it to `True` to keep
-  the same grid but cap each run at `SMOKE_TEST_MAX_STEPS = 10`.
-- Plotting functions are imported from `plotting/`; the main experiment
-  notebook does not define plotting internals inline.
-- `problems/` only defines autograd problems; this notebook owns the run loop,
-  optimizer construction, timing, and worker serialization.
-- The notebook defines `single_run(run)` inline; each joblib worker receives one
-  row from `runs` and returns that run's per-step DataFrame.
-- Runs use standard patience-based early stopping on absolute loss improvement;
-  the summary table reports `actual_steps`, `stopped_early`, and `stop_reason`.
-- Runs are dispatched through `util.run_experiments`, which wraps
-  `joblib.Parallel` and a `tqdm` progress bar.
-- Plotting is split into short cells, with each output cell producing one
-  figure or one coherent figure group.
-- Plotting includes same-dimension algorithm comparisons, same-algorithm
-  dimension comparisons, all-combination grids, metric bars, and seed traces.
-- Official PyTorch `torch.optim.Muon` is used when available; exact-SVD Muon
-  and Shampoo live in `optimizers/`.
+The two core metrics are training loss and relative recovery error:
+
+$$e(\widehat X)=\frac{\lVert \widehat X-X^\star\rVert_F}{\lVert X^\star\rVert_F}.$$
+
+Gap heatmaps use
+
+$$\Delta_{\mathrm{Muon},b}=\log_{10} e_{\mathrm{Muon}}-\log_{10} e_b,$$
+
+so negative values favor Muon.
+
+| Notebook | Mathematical Question | First Quantities |
+|---|---|---|
+| `E01_ms_benchmark_torch.ipynb` | Matrix Sensing baseline as \(d\) varies. | \(f(X_t)\), time, steps |
+| `E02_matrix_factorization_torch.ipynb` | Factorized baseline with \(X=LR^\top\). | \(g(L_t,R_t)\), time, steps |
+| `E03_ms_ablations_torch.ipynb` | Sensitivity to sensing law, spectrum, \(\kappa\), and noise. | scenario-wise loss |
+| `E04_mf_initialization_ablations_torch.ipynb` | Sensitivity to \((L_0,R_0)\). | scenario-wise loss and stop reason |
+| `E05_ms_sample_complexity_phase_diagram_torch.ipynb` | Recovery as \(m=\alpha dr\) varies. | \(e\), gap heatmaps, success probability |
+| `E06_ms_noise_robustness_torch.ipynb` | Relation between noisy loss and true recovery. | \(e\), noisy loss, clean test loss |
+| `E07_mf_rank_init_phase_diagram_torch.ipynb` | Joint effect of factor rank \(q\) and scale \(s\). | \(e\), divergence, effective rank |
+| `E08_mf_scale_imbalance_torch.ipynb` | Effect of \(LR^\top=(cL)(R/c)^\top\). | \(e\), balancedness, factor norms |
+| `E09_muon_geometry_diagnostics_torch.ipynb` | Spectra and alignment of gradients and updates. | effective rank, cosine, step size |
+| `E10_muon_variant_ablation_torch.ipynb` | Polar geometry versus update normalization. | variant error, cost, update rank |
+
+Default benchmark methods are `Muon`, `Muon-Exact`, `Shampoo`, `Adam`, and
+`SGD`. E10 also includes `Muon-NS-1`, `Muon-NS-10`, `Muon-Truncated`,
+`Muon-RandSVD`, `NormalizedSGD`, `SpectralNormSGD`, and
+`LayerwiseNormalizedSGD`.
+
+## Code Cells
+
+Skip imports, parameter grids, and worker definitions unless changing:
+
+- the optimizer list
+- the dimension, rank, seed, noise, spectrum, or initialization grid
+- the early stopping rule
+- the diagnostics collected per step
+- the plotting functions
+
+Execution convention:
+
+- `runs` is first the experimental grid.
+- `single_run(run)` maps one grid row to a per-step DataFrame.
+- `util.run_experiments` applies `joblib.Parallel` and returns the long `runs`
+  table.
+- `run_summary` is derived from the final row of each run.
+- `SMOKE_TEST=True` keeps the grid fixed and sets each run to at most
+  `SMOKE_TEST_MAX_STEPS=10`.
 
 Results stay in notebook memory. `runs` becomes a long per-step table with one
 row per executed optimizer step, while `run_summary` and `trajectories` are

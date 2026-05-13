@@ -38,6 +38,8 @@ def make_matrix_sensing_problem(
     seed: int,
     device: torch.device,
     dtype: torch.dtype,
+    m_multiplier: float | None = None,
+    m_meas: int | None = None,
 ) -> MatrixSensingProblem:
     target = generate_target_matrix(
         d,
@@ -48,7 +50,10 @@ def make_matrix_sensing_problem(
         device=device,
         dtype=dtype,
     )
-    m_meas = int(2 * d * rank)
+    if m_meas is None:
+        multiplier = 2.0 if m_multiplier is None else float(m_multiplier)
+        m_meas = int(multiplier * d * rank)
+    m_meas = max(1, int(m_meas))
     measurements = generate_measurements(
         d,
         m_meas,
