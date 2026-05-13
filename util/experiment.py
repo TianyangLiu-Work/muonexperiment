@@ -5,7 +5,7 @@ import typing
 
 import joblib
 import pandas as pd
-import tqdm.auto
+import tqdm
 
 
 RESULT_COLUMNS = (
@@ -48,7 +48,14 @@ def run_experiments(
         )
 
     result = pd.concat(
-        tqdm.auto.tqdm(chunks, total=len(run_rows), desc=desc or f"runs ({workers} joblib)", unit="run"),
+        tqdm.tqdm(
+            chunks,
+            total=len(run_rows),
+            desc=desc or f"runs ({workers} joblib)",
+            unit="run",
+            dynamic_ncols=True,
+            mininterval=1.0,
+        ),
         ignore_index=True,
     )
     if "algo" in result and algo_order is not None:
