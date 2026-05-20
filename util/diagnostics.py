@@ -127,12 +127,21 @@ def top_singular_value_error(
 
 
 def balancedness(
-    left: torch.Tensor,
-    right: torch.Tensor,
-    *,
+    *factors: torch.Tensor,
     epsilon: float = 1e-12,
 ) -> float:
-    left_gram = left.detach().T @ left.detach()
-    right_gram = right.detach().T @ right.detach()
-    denom = torch.linalg.norm(left_gram) + torch.linalg.norm(right_gram) + epsilon
-    return float((torch.linalg.norm(left_gram - right_gram) / denom).detach().cpu())
+    if len(factors) < 2:
+        return 0.0
+    if len(factors) == 2 and factors[0].shape == factors[1].shape:
+        left_gram = factors[0].detach().T @ factors[0].detach()
+        right_gram = factors[1].detach().T @ factors[1].detach()
+        denom = torch.linalg.norm(left_gram) + torch.linalg.norm(right_gram) + epsilon
+        return float((torch.linalg.norm(left_gram - right_gram) / denom).detach().cpu())
+
+    values = []
+    for current, following in zip(factors, factors[1:]):
+        current_gram = current.detach().T @ current.detach()
+        following_gram = following.detach() @ following.detach().T
+        denom = torch.linalg.norm(current_gram) + torch.linalg.norm(following_gram) + epsilon
+        values.append(torch.linalg.norm(current_gram - following_gram) / denom)
+    return float(torch.stack(values).mean().detach().cpu())

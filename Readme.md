@@ -19,9 +19,10 @@ and minimizes
 
 $$f(X)=\frac{1}{2m}\sum_{i=1}^{m}(\langle A_i,X\rangle-y_i)^2.$$
 
-Matrix Factorization parameterizes \(X=LR^\top\) and minimizes
+Matrix Factorization now parameterizes \(X\) as a ten-factor chain
+\(X=W_1W_2\cdots W_{10}\) and minimizes
 
-$$g(L,R)=\frac{1}{2d^2}\lVert LR^\top-X^\star\rVert_F^2.$$
+$$g(W_{1:10})=\frac{1}{2d^2}\lVert W_1W_2\cdots W_{10}-X^\star\rVert_F^2.$$
 
 The primary recovery metric is
 
@@ -37,17 +38,17 @@ than method \(b\).
 | Notebook | Mathematical Question | First Quantities To Inspect |
 |---|---|---|
 | `E01_ms_benchmark_torch.ipynb` | For Matrix Sensing, how do trajectories depend on \(d\)? | \(f(X_t)\), runtime, actual steps |
-| `E02_matrix_factorization_torch.ipynb` | Under the reparameterization \(X=LR^\top\), does optimizer behavior change? | \(g(L_t,R_t)\), runtime, actual steps |
+| `E02_matrix_factorization_torch.ipynb` | Under the reparameterization \(X=W_1\cdots W_{10}\), does optimizer behavior change? | \(g(W_{1:10,t})\), runtime, actual steps |
 | `E03_ms_ablations_torch.ipynb` | How do measurement law, spectrum, condition number, and noise affect \(f\)? | Scenario-wise loss and log-loss |
-| `E04_mf_initialization_ablations_torch.ipynb` | How does \((L_0,R_0)\) affect convergence of \(g\)? | Scenario-wise loss, stop reason |
+| `E04_mf_initialization_ablations_torch.ipynb` | How do endpoint factor initializations affect convergence of \(g\)? | Scenario-wise loss, stop reason |
 | `E05_ms_sample_complexity_phase_diagram_torch.ipynb` | How does recovery depend on \(m=\alpha dr\)? | \(e(\widehat X)\), \(\Delta_{\mathrm{Muon},b}\), success probability |
 | `E06_ms_noise_robustness_torch.ipynb` | As \(\sigma\) increases, does low training loss imply low recovery error? | \(e(\widehat X)\), \(f_\sigma(\widehat X)\), clean test loss |
-| `E07_mf_rank_init_phase_diagram_torch.ipynb` | How do factor rank \(q\) and scale \(s\) affect \(g\)? | \(e(LR^\top)\), divergence rate, effective rank |
-| `E08_mf_scale_imbalance_torch.ipynb` | How does scale symmetry \(LR^\top=(cL)(R/c)^\top\) affect optimization? | \(e(LR^\top)\), balancedness, factor norms |
+| `E07_mf_rank_init_phase_diagram_torch.ipynb` | How do factor rank \(q\) and endpoint scale \(s\) affect \(g\)? | \(e(\widehat X)\), divergence rate, effective rank |
+| `E08_mf_scale_imbalance_torch.ipynb` | How does endpoint scale imbalance affect ten-factor optimization? | \(e(\widehat X)\), chain balancedness, factor norms |
 | `E09_muon_geometry_diagnostics_torch.ipynb` | What are the spectra and alignments of gradients and updates? | effective rank, cosine, relative step size, singular-value error |
 | `E10_muon_variant_ablation_torch.ipynb` | Is the effect polar geometry or normalization? | variant error, time per step, update rank, cosine |
 | `E11_paper_condition_diagnostics_torch.ipynb` | Does the spectral-update condition score predict Muon-family advantage? | condition score, Muon-vs-baseline error gap, update rank |
-| `E12_mf_scale_imbalance_preconditioning_torch.ipynb` | Under factor scale imbalance, when does preconditioning help matrix factorization? | \(e(LR^\top)\), balancedness, factor norms, stop reason |
+| `E12_mf_scale_imbalance_preconditioning_torch.ipynb` | Under endpoint factor scale imbalance, when does preconditioning help matrix factorization? | \(e(\widehat X)\), chain balancedness, factor norms, stop reason |
 | `E13_polar_vs_normalization_ablation_torch.ipynb` | Can polar orthogonalization be separated from normalization-only effects? | recovery error, update rank, cosine, time per step |
 | `E14_isotropic_curvature_spectrum_control_torch.ipynb` | In a synthetic one-step model, when does spectrum homogenization help? | predicted local improvement by spectrum and curvature |
 | `E15_ms_negative_control_torch.ipynb` | Is direct Matrix Sensing a negative-control regime for layerwise spectral theory? | \(e(\widehat X)\), loss, clean loss, update rank |
@@ -128,17 +129,17 @@ recovery statistics.
 | Notebook | Controlled Variables | Reported Statistics |
 |---|---|---|
 | E01 | \(d\), method, seed | \(f(X_t)\), final/min loss, runtime |
-| E02 | \(d\), method, seed | \(g(L_t,R_t)\), final/min loss, runtime |
+| E02 | \(d\), method, seed | \(g(W_{1:10,t})\), final/min loss, runtime |
 | E03 | measurement law, spectrum, \(\kappa\), noise | scenario-wise loss and log-loss |
-| E04 | initialization law for \((L_0,R_0)\) | loss, actual steps, stop reason |
+| E04 | endpoint initialization law for \(W_{1,0},W_{10,0}\) | loss, actual steps, stop reason |
 | E05 | \(\alpha\) in \(m=\alpha dr\), spectrum, method | \(e(\widehat X)\), \(\Delta_{\mathrm{Muon},b}\), success rate |
 | E06 | noise scale \(\sigma\), spectrum, \(\alpha\) | \(f_\sigma(\widehat X)\), \(e(\widehat X)\), clean test loss |
-| E07 | factor rank \(q\), init scale \(s\) | \(e(LR^\top)\), divergence, effective rank |
-| E08 | left/right scales \(a,b\) | \(e(LR^\top)\), balancedness, factor norms |
+| E07 | factor rank \(q\), endpoint init scale \(s\) | \(e(\widehat X)\), divergence, effective rank |
+| E08 | first/last factor scales \(a,b\) | \(e(\widehat X)\), chain balancedness, factor norms |
 | E09 | representative regimes and method | spectra of \(G_t,U_t\), cosine, step size |
 | E10 | Muon variants and normalized baselines | \(e\), time per step, update rank, cosine |
 | E11 | factorization setting, optimizer, initialization scale, spectrum | condition score, Muon-vs-baseline error gap, update rank |
-| E12 | target spectrum, \(\kappa\), left/right factor scales, optimizer | \(e(LR^\top)\), balancedness, factor norms, stop reason |
+| E12 | target spectrum, \(\kappa\), first/last factor scales, optimizer | \(e(\widehat X)\), chain balancedness, factor norms, stop reason |
 | E13 | direct/factorized setting, Muon variant, normalization baseline | \(e\), time per step, update rank, cosine |
 | E14 | synthetic gradient spectrum, curvature model, homogenization strength | predicted one-step improvement |
 | E15 | Matrix Sensing sample multiplier, spectrum, optimizer | \(e(\widehat X)\), loss, clean loss, update rank |
