@@ -28,6 +28,14 @@ The primary recovery metric is
 
 $$e(\widehat X)=\frac{\lVert \widehat X-X^\star\rVert_F}{\lVert X^\star\rVert_F}.$$
 
+Spectral diagnostics use standard singular-value definitions. If \(M\) has
+singular values \(\sigma_1\ge\sigma_2\ge\cdots\), then
+\(\operatorname{srank}(M)=\lVert M\rVert_F^2/(\lVert M\rVert_{op}^2+\epsilon)
+=\sum_i\sigma_i^2/(\sigma_1^2+\epsilon)\). This is the `stable_rank` in the code and
+tables. `effective_rank` is the entropy rank
+\(\exp(-\sum_i p_i\log p_i)\), where \(p_i=\sigma_i/(\sum_j\sigma_j+\epsilon)\).
+`nuclear_fro_ratio` is \(\lVert M\rVert_*^2/(\lVert M\rVert_F^2+\epsilon)\).
+
 For two methods \(a,b\), heatmap gaps use
 
 $$\Delta_{a,b}=\log_{10} e_a-\log_{10} e_b.$$

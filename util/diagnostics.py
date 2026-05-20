@@ -11,6 +11,7 @@ def relative_matrix_error(
     *,
     epsilon: float = 1e-12,
 ) -> float:
+    """Return ||estimate - target||_F / max(||target||_F, epsilon)."""
     denom = torch.linalg.norm(target).clamp_min(epsilon)
     return float((torch.linalg.norm(estimate - target) / denom).detach().cpu())
 
@@ -20,6 +21,11 @@ def effective_rank(
     *,
     epsilon: float = 1e-12,
 ) -> float:
+    """Return entropy effective rank exp(-sum_i p_i log p_i).
+
+    Here p_i = sigma_i / sum_j sigma_j and sigma_i are singular values.
+    This is a soft rank: it is high when singular mass is spread out.
+    """
     singular_values = torch.linalg.svdvals(matrix.detach())
     total = singular_values.sum()
     if float(total.detach().cpu()) <= epsilon:
@@ -34,6 +40,7 @@ def stable_rank(
     *,
     epsilon: float = 1e-12,
 ) -> float:
+    """Return stable rank srank(M) = ||M||_F^2 / max(||M||_op^2, epsilon)."""
     singular_values = torch.linalg.svdvals(matrix.detach())
     if singular_values.numel() == 0:
         return 0.0
@@ -46,6 +53,7 @@ def matrix_norms(
     *,
     epsilon: float = 1e-12,
 ) -> dict[str, float]:
+    """Return Frobenius, operator, effective-rank, and stable-rank diagnostics."""
     singular_values = torch.linalg.svdvals(matrix.detach())
     if singular_values.numel() == 0:
         return {"fro_norm": 0.0, "op_norm": 0.0, "effective_rank": 0.0, "stable_rank": 0.0}
@@ -71,6 +79,7 @@ def aggregate_matrix_diagnostics(
     *,
     prefix: str,
 ) -> dict[str, float]:
+    """Aggregate matrix diagnostics over a list of parameter blocks."""
     if not matrices:
         return {
             f"{prefix}_fro_norm": 0.0,
@@ -94,6 +103,11 @@ def descent_alignment(
     *,
     epsilon: float = 1e-12,
 ) -> float:
+    """Return cosine alignment between the update and negative gradient.
+
+    A value near 1 means the update follows steepest descent direction, 0 means
+    it is nearly orthogonal, and negative means it locally points uphill.
+    """
     numerator = sum(float(((-grad.detach()) * update.detach()).sum().cpu()) for grad, update in zip(gradients, updates))
     grad_norm = sum(float(grad.detach().square().sum().cpu()) for grad in gradients) ** 0.5
     update_norm = sum(float(update.detach().square().sum().cpu()) for update in updates) ** 0.5
@@ -106,6 +120,7 @@ def relative_step_size(
     *,
     epsilon: float = 1e-12,
 ) -> float:
+    """Return ||update||_F / max(||params_before||_F, epsilon), aggregated over blocks."""
     update_norm = sum(float(update.detach().square().sum().cpu()) for update in updates) ** 0.5
     param_norm = sum(float(param.detach().square().sum().cpu()) for param in params_before) ** 0.5
     return update_norm / max(param_norm, epsilon)
@@ -118,6 +133,7 @@ def top_singular_value_error(
     k: int,
     epsilon: float = 1e-12,
 ) -> float:
+    """Return relative l2 error between the top-k singular value vectors."""
     estimate_s = torch.linalg.svdvals(estimate.detach())[:k]
     target_s = torch.linalg.svdvals(target.detach())[:k]
     if estimate_s.numel() < k:
@@ -130,6 +146,13 @@ def balancedness(
     *factors: torch.Tensor,
     epsilon: float = 1e-12,
 ) -> float:
+    """Return factor-chain Gram mismatch.
+
+    For legacy two-factor inputs with equal shapes this is
+    ||L^T L - R^T R||_F / (||L^T L||_F + ||R^T R||_F + epsilon).
+    For a factor chain it averages the adjacent mismatch between
+    W_i^T W_i and W_{i+1} W_{i+1}^T.
+    """
     if len(factors) < 2:
         return 0.0
     if len(factors) == 2 and factors[0].shape == factors[1].shape:
