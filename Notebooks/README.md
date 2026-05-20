@@ -28,11 +28,17 @@ so negative values favor Muon.
 | `E08_mf_scale_imbalance_torch.ipynb` | Effect of \(LR^\top=(cL)(R/c)^\top\). | \(e\), balancedness, factor norms |
 | `E09_muon_geometry_diagnostics_torch.ipynb` | Spectra and alignment of gradients and updates. | effective rank, cosine, step size |
 | `E10_muon_variant_ablation_torch.ipynb` | Polar geometry versus update normalization. | variant error, cost, update rank |
+| `E11_paper_condition_diagnostics_torch.ipynb` | Spectral-update theory condition diagnostics. | condition score, Muon advantage, update rank |
+| `E12_mf_scale_imbalance_preconditioning_torch.ipynb` | Factor scale imbalance and preconditioning. | \(e\), balancedness, factor norms |
+| `E13_polar_vs_normalization_ablation_torch.ipynb` | Polar orthogonalization versus normalization baselines. | \(e\), update rank, cosine, cost |
+| `E14_isotropic_curvature_spectrum_control_torch.ipynb` | Controlled one-step spectrum and curvature model. | predicted local improvement |
+| `E15_ms_negative_control_torch.ipynb` | Direct Matrix Sensing as a negative control. | \(e\), loss, clean loss, update rank |
 
 Default benchmark methods are `Muon`, `Muon-Exact`, `Shampoo`, `Adam`, and
 `SGD`. E10 also includes `Muon-NS-1`, `Muon-NS-10`, `Muon-Truncated`,
 `Muon-RandSVD`, `NormalizedSGD`, `SpectralNormSGD`, and
-`LayerwiseNormalizedSGD`.
+`LayerwiseNormalizedSGD`. E11-E15 reuse these Muon-family and normalization
+baselines for the theory-verification supplement.
 
 ## Code Cells
 

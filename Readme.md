@@ -46,6 +46,11 @@ than method \(b\).
 | `E08_mf_scale_imbalance_torch.ipynb` | How does scale symmetry \(LR^\top=(cL)(R/c)^\top\) affect optimization? | \(e(LR^\top)\), balancedness, factor norms |
 | `E09_muon_geometry_diagnostics_torch.ipynb` | What are the spectra and alignments of gradients and updates? | effective rank, cosine, relative step size, singular-value error |
 | `E10_muon_variant_ablation_torch.ipynb` | Is the effect polar geometry or normalization? | variant error, time per step, update rank, cosine |
+| `E11_paper_condition_diagnostics_torch.ipynb` | Does the spectral-update condition score predict Muon-family advantage? | condition score, Muon-vs-baseline error gap, update rank |
+| `E12_mf_scale_imbalance_preconditioning_torch.ipynb` | Under factor scale imbalance, when does preconditioning help matrix factorization? | \(e(LR^\top)\), balancedness, factor norms, stop reason |
+| `E13_polar_vs_normalization_ablation_torch.ipynb` | Can polar orthogonalization be separated from normalization-only effects? | recovery error, update rank, cosine, time per step |
+| `E14_isotropic_curvature_spectrum_control_torch.ipynb` | In a synthetic one-step model, when does spectrum homogenization help? | predicted local improvement by spectrum and curvature |
+| `E15_ms_negative_control_torch.ipynb` | Is direct Matrix Sensing a negative-control regime for layerwise spectral theory? | \(e(\widehat X)\), loss, clean loss, update rank |
 
 ## Implementation Model
 
@@ -90,6 +95,11 @@ Notebooks/
   E08_mf_scale_imbalance_torch.ipynb
   E09_muon_geometry_diagnostics_torch.ipynb
   E10_muon_variant_ablation_torch.ipynb
+  E11_paper_condition_diagnostics_torch.ipynb
+  E12_mf_scale_imbalance_preconditioning_torch.ipynb
+  E13_polar_vs_normalization_ablation_torch.ipynb
+  E14_isotropic_curvature_spectrum_control_torch.ipynb
+  E15_ms_negative_control_torch.ipynb
 
 Readme.md
 requirement.yml
@@ -127,6 +137,11 @@ recovery statistics.
 | E08 | left/right scales \(a,b\) | \(e(LR^\top)\), balancedness, factor norms |
 | E09 | representative regimes and method | spectra of \(G_t,U_t\), cosine, step size |
 | E10 | Muon variants and normalized baselines | \(e\), time per step, update rank, cosine |
+| E11 | factorization setting, optimizer, initialization scale, spectrum | condition score, Muon-vs-baseline error gap, update rank |
+| E12 | target spectrum, \(\kappa\), left/right factor scales, optimizer | \(e(LR^\top)\), balancedness, factor norms, stop reason |
+| E13 | direct/factorized setting, Muon variant, normalization baseline | \(e\), time per step, update rank, cosine |
+| E14 | synthetic gradient spectrum, curvature model, homogenization strength | predicted one-step improvement |
+| E15 | Matrix Sensing sample multiplier, spectrum, optimizer | \(e(\widehat X)\), loss, clean loss, update rank |
 
 ## Optimizers
 
