@@ -17,6 +17,7 @@ ALGORITHM_COLORS: dict[str, str] = {
     "Shampoo": "#009E73",
     "Adam": "#D55E00",
     "SGD": "#CC79A7",
+    "SpecGD": "#A6761D",
     "NormalizedSGD": "#E69F00",
     "SpectralNormSGD": "#A6761D",
     "LayerwiseNormalizedSGD": "#8C564B",
