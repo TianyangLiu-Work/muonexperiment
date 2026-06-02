@@ -18,6 +18,7 @@ class MatrixFactorizationProblem:
     rank: int
     factor_rank: int
     num_factors: int = DEFAULT_NUM_FACTORS
+    input_matrix: torch.Tensor | None = None
 
     @property
     def d(self) -> int:
@@ -26,8 +27,21 @@ class MatrixFactorizationProblem:
     def estimate(self, *factors: torch.Tensor) -> torch.Tensor:
         return matrix_factorization_product(*factors)
 
+    def output(self, *factors: torch.Tensor) -> torch.Tensor:
+        estimate = self.estimate(*factors)
+        if self.input_matrix is None:
+            return estimate
+        return estimate @ self.input_matrix
+
+    @property
+    def target_output(self) -> torch.Tensor:
+        if self.input_matrix is None:
+            return self.target
+        return self.target @ self.input_matrix
+
     def loss(self, *factors: torch.Tensor) -> torch.Tensor:
-        return matrix_factorization_loss(*factors, self.target)
+        residual = self.output(*factors) - self.target_output
+        return 0.5 * torch.mean(residual.square())
 
 
 def make_matrix_factorization_problem(
@@ -41,6 +55,9 @@ def make_matrix_factorization_problem(
     dtype: torch.dtype,
     factor_rank: int | None = None,
     num_factors: int = DEFAULT_NUM_FACTORS,
+    input_columns: int | None = None,
+    input_seed: int | None = None,
+    input_scale: float | None = None,
 ) -> MatrixFactorizationProblem:
     if num_factors < 2:
         raise ValueError("num_factors must be at least 2")
@@ -53,12 +70,38 @@ def make_matrix_factorization_problem(
         device=device,
         dtype=dtype,
     )
+    input_matrix = None
+    if input_columns is not None:
+        input_matrix = generate_input_matrix(
+            d,
+            int(input_columns),
+            seed=seed + 1009 if input_seed is None else int(input_seed),
+            device=device,
+            dtype=dtype,
+            scale=(float(d) ** -0.5) if input_scale is None else float(input_scale),
+        )
+
     return MatrixFactorizationProblem(
         target=target,
         rank=rank,
         factor_rank=rank if factor_rank is None else factor_rank,
         num_factors=int(num_factors),
+        input_matrix=input_matrix,
     )
+
+
+def generate_input_matrix(
+    d: int,
+    input_columns: int,
+    *,
+    seed: int,
+    device: torch.device,
+    dtype: torch.dtype,
+    scale: float,
+) -> torch.Tensor:
+    if input_columns <= 0:
+        raise ValueError("input_columns must be positive")
+    return randn((int(d), int(input_columns)), seed, device=device, dtype=dtype) * float(scale)
 
 
 def factor_chain_shapes(
