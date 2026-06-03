@@ -3,10 +3,13 @@
 from .MatrixFactorization import (
     DEFAULT_NUM_FACTORS,
     MatrixFactorizationProblem,
+    MatrixFactorizationProblemWithInput,
+    MatrixFactorizationProblemwithInput,
     factor_chain_shapes,
     generate_input_matrix,
     initialize_factor_chain,
     make_matrix_factorization_problem,
+    make_matrix_factorization_problem_with_input,
     matrix_factorization_loss,
     matrix_factorization_product,
 )
@@ -18,12 +21,15 @@ from .MatrixSensing import (
 
 __all__ = [
     "MatrixFactorizationProblem",
+    "MatrixFactorizationProblemWithInput",
+    "MatrixFactorizationProblemwithInput",
     "MatrixSensingProblem",
     "DEFAULT_NUM_FACTORS",
     "factor_chain_shapes",
     "generate_input_matrix",
     "initialize_factor_chain",
     "make_matrix_factorization_problem",
+    "make_matrix_factorization_problem_with_input",
     "make_matrix_sensing_problem",
     "matrix_factorization_loss",
     "matrix_factorization_product",

@@ -18,7 +18,25 @@ class MatrixFactorizationProblem:
     rank: int
     factor_rank: int
     num_factors: int = DEFAULT_NUM_FACTORS
-    input_matrix: torch.Tensor | None = None
+
+    @property
+    def d(self) -> int:
+        return int(self.target.shape[0])
+
+    def estimate(self, *factors: torch.Tensor) -> torch.Tensor:
+        return matrix_factorization_product(*factors)
+
+    def loss(self, *factors: torch.Tensor) -> torch.Tensor:
+        return matrix_factorization_loss(*factors, self.target)
+
+
+@dataclass(frozen=True)
+class MatrixFactorizationProblemWithInput:
+    target: torch.Tensor
+    rank: int
+    factor_rank: int
+    input_matrix: torch.Tensor
+    num_factors: int = DEFAULT_NUM_FACTORS
 
     @property
     def d(self) -> int:
@@ -28,20 +46,18 @@ class MatrixFactorizationProblem:
         return matrix_factorization_product(*factors)
 
     def output(self, *factors: torch.Tensor) -> torch.Tensor:
-        estimate = self.estimate(*factors)
-        if self.input_matrix is None:
-            return estimate
-        return estimate @ self.input_matrix
+        return self.estimate(*factors) @ self.input_matrix
 
     @property
     def target_output(self) -> torch.Tensor:
-        if self.input_matrix is None:
-            return self.target
         return self.target @ self.input_matrix
 
     def loss(self, *factors: torch.Tensor) -> torch.Tensor:
         residual = self.output(*factors) - self.target_output
         return 0.5 * torch.mean(residual.square())
+
+
+MatrixFactorizationProblemwithInput = MatrixFactorizationProblemWithInput
 
 
 def make_matrix_factorization_problem(
@@ -55,9 +71,6 @@ def make_matrix_factorization_problem(
     dtype: torch.dtype,
     factor_rank: int | None = None,
     num_factors: int = DEFAULT_NUM_FACTORS,
-    input_columns: int | None = None,
-    input_seed: int | None = None,
-    input_scale: float | None = None,
 ) -> MatrixFactorizationProblem:
     if num_factors < 2:
         raise ValueError("num_factors must be at least 2")
@@ -70,23 +83,54 @@ def make_matrix_factorization_problem(
         device=device,
         dtype=dtype,
     )
-    input_matrix = None
-    if input_columns is not None:
-        input_matrix = generate_input_matrix(
-            d,
-            int(input_columns),
-            seed=seed + 1009 if input_seed is None else int(input_seed),
-            device=device,
-            dtype=dtype,
-            scale=(float(d) ** -0.5) if input_scale is None else float(input_scale),
-        )
-
     return MatrixFactorizationProblem(
         target=target,
         rank=rank,
         factor_rank=rank if factor_rank is None else factor_rank,
         num_factors=int(num_factors),
+    )
+
+
+def make_matrix_factorization_problem_with_input(
+    d: int,
+    rank: int,
+    *,
+    spectrum: str,
+    kappa: float,
+    seed: int,
+    device: torch.device,
+    dtype: torch.dtype,
+    input_columns: int,
+    factor_rank: int | None = None,
+    num_factors: int = DEFAULT_NUM_FACTORS,
+    input_seed: int | None = None,
+    input_scale: float | None = None,
+) -> MatrixFactorizationProblemWithInput:
+    base = make_matrix_factorization_problem(
+        d,
+        rank,
+        spectrum=spectrum,
+        kappa=kappa,
+        seed=seed,
+        device=device,
+        dtype=dtype,
+        factor_rank=factor_rank,
+        num_factors=num_factors,
+    )
+    input_matrix = generate_input_matrix(
+        d,
+        int(input_columns),
+        seed=seed + 1009 if input_seed is None else int(input_seed),
+        device=device,
+        dtype=dtype,
+        scale=(float(d) ** -0.5) if input_scale is None else float(input_scale),
+    )
+    return MatrixFactorizationProblemWithInput(
+        target=base.target,
+        rank=base.rank,
+        factor_rank=base.factor_rank,
         input_matrix=input_matrix,
+        num_factors=base.num_factors,
     )
 
 
