@@ -14,21 +14,19 @@ The current E11 run uses \(\kappa\in\{10,10^2,10^3,10^4,10^5\}\), Adam and Muon,
 
 ## 1. Definition of \(G\) and \(A\)
 
-**Finding:** The current implementation defines the strict activation \(A_i\) using the explicit input matrix \(Z\), not a factor proxy.
-
-**Interpretation:** This makes the diagnostic closer to the activation-product setting used by the theory.
-
-**Reasoning:** For layer \(i\), the downstream factors and the input distribution jointly determine the activation seen by that layer; using only a factor proxy would omit the input matrix.
-
-The definitions are:
+For the loss above, the layer-\(i\) gradient is:
 
 $$
 G_i = \nabla_{W_i} L(W),
 $$
 
+and the strict layer-\(i\) activation is:
+
 $$
 A_i = W_{i+1}W_{i+2}\cdots W_{10}Z,\qquad A_{10}=Z.
 $$
+
+This definition uses the explicit input matrix \(Z\), so \(A_i\) is the downstream activation product rather than a factor proxy.
 
 From the recorded singular values, the notebook computes:
 
