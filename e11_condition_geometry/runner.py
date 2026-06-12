@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Iterable
+import math
 
 import pandas as pd
 import torch
@@ -54,20 +55,24 @@ def build_optimizer(algo: str, params: Iterable[torch.nn.Parameter], lr: float) 
     raise ValueError(f"unknown optimizer: {algo}")
 
 
-def effective_train_batch_size(spec: ProblemSpec) -> int:
-    mini_batch_families = {"SmallMLPDigits", "MNISTMLP", "DeepMNISTMLP", "MNISTPatchClassifier", "MNISTConvNet"}
-    if spec.family not in mini_batch_families or spec.batch_size is None:
-        return int(spec.num_samples)
-    return int(max(1, min(spec.batch_size, spec.num_samples)))
+def problem_num_samples(problem: TrainProblem, spec: ProblemSpec) -> int:
+    return int(getattr(problem, "num_train_examples", spec.num_samples))
 
 
-def collect_diagnostics(problem: TrainProblem) -> tuple[list[list[float]], list[list[float]]]:
+def effective_train_batch_size(spec: ProblemSpec, sample_count: int) -> int:
+    if spec.batch_size is None:
+        return int(sample_count)
+    return int(max(1, min(spec.batch_size, sample_count)))
+
+
+def collect_diagnostics(problem: TrainProblem) -> tuple[list[list[float]], list[list[float]], list[torch.Tensor]]:
     params = problem.parameters()
     sigma_g = [singular_values(param.grad) for param in params]
-    sigma_a = [singular_values(matrix) for matrix in problem.activation_matrices()]
+    activations = [matrix.detach().clone() for matrix in problem.activation_matrices()]
+    sigma_a = [singular_values(matrix) for matrix in activations]
     if len(sigma_g) != len(sigma_a):
         raise ValueError(f"G/A layer count mismatch: {len(sigma_g)} vs {len(sigma_a)}")
-    return sigma_g, sigma_a
+    return sigma_g, sigma_a, activations
 
 
 def snapshot_parameters(params: list[torch.nn.Parameter]) -> list[torch.Tensor]:
@@ -142,6 +147,89 @@ def update_gradient_alignment(before: list[torch.Tensor], after: list[torch.nn.P
     }
 
 
+def _activation_for_update(update_matrix: torch.Tensor, activation: torch.Tensor) -> torch.Tensor:
+    """Orient an activation matrix so columns are diagnostic examples."""
+
+    matrix = matrix_view(activation.detach())
+    input_dim = update_matrix.shape[1]
+    if matrix.shape[0] == input_dim:
+        return matrix
+    if matrix.shape[1] == input_dim:
+        return matrix.T
+    raise ValueError(
+        "activation/update shape mismatch: "
+        f"update shape={tuple(update_matrix.shape)}, activation shape={tuple(matrix.shape)}"
+    )
+
+
+def activation_perturbation_metrics(
+    before: list[torch.Tensor],
+    after: list[torch.nn.Parameter],
+    activations: list[torch.Tensor],
+) -> dict:
+    layer_rows = []
+    perturb_fro_sq = 0.0
+    base_fro_sq = 0.0
+    relative_op_values = []
+    max_sample_values = []
+    mean_sample_values = []
+
+    if len(before) != len(after) or len(before) != len(activations):
+        raise ValueError(f"activation perturbation layer mismatch: {len(before)}, {len(after)}, {len(activations)}")
+
+    for old, param, activation in zip(before, after, activations):
+        weight = matrix_view(old.detach())
+        descent_update = matrix_view(old.detach() - param.detach())
+        oriented_activation = _activation_for_update(descent_update, activation)
+        perturbation = descent_update @ oriented_activation
+        baseline = weight @ oriented_activation
+
+        perturb_fro = float(torch.linalg.norm(perturbation).cpu())
+        perturb_op = float(torch.linalg.matrix_norm(perturbation, ord=2).cpu())
+        baseline_fro = float(torch.linalg.norm(baseline).cpu())
+        baseline_op = float(torch.linalg.matrix_norm(baseline, ord=2).cpu())
+
+        sample_num = torch.linalg.norm(perturbation, dim=0)
+        sample_den = torch.linalg.norm(oriented_activation, dim=0).clamp_min(1e-300)
+        sample_ratio = sample_num / sample_den
+        max_sample = float(sample_ratio.max().cpu()) if sample_ratio.numel() else float("nan")
+        mean_sample = float(sample_ratio.mean().cpu()) if sample_ratio.numel() else float("nan")
+
+        relative_fro = perturb_fro / max(baseline_fro, 1e-300)
+        relative_op = perturb_op / max(baseline_op, 1e-300)
+        perturb_fro_sq += perturb_fro**2
+        base_fro_sq += baseline_fro**2
+        relative_op_values.append(relative_op)
+        max_sample_values.append(max_sample)
+        mean_sample_values.append(mean_sample)
+        layer_rows.append(
+            {
+                "activation_delta_fro_norm": perturb_fro,
+                "activation_delta_op_norm": perturb_op,
+                "activation_base_fro_norm": baseline_fro,
+                "activation_base_op_norm": baseline_op,
+                "relative_activation_delta_fro_norm": relative_fro,
+                "relative_activation_delta_op_norm": relative_op,
+                "max_relative_sample_activation_delta": max_sample,
+                "mean_relative_sample_activation_delta": mean_sample,
+            }
+        )
+
+    def finite_mean(values: list[float]) -> float:
+        finite = [value for value in values if math.isfinite(value)]
+        return float(sum(finite) / len(finite)) if finite else float("nan")
+    activation_delta_fro = float(perturb_fro_sq**0.5)
+    activation_base_fro = float(base_fro_sq**0.5)
+    return {
+        "activation_delta_fro_norm": activation_delta_fro,
+        "relative_activation_delta_fro_norm": activation_delta_fro / max(activation_base_fro, 1e-300),
+        "mean_relative_activation_delta_op_norm": finite_mean(relative_op_values),
+        "max_relative_sample_activation_delta": max(max_sample_values) if max_sample_values else float("nan"),
+        "mean_relative_sample_activation_delta": finite_mean(mean_sample_values),
+        "layer_metrics": layer_rows,
+    }
+
+
 def relative_update_norm(before: list[torch.Tensor], after: list[torch.nn.Parameter]) -> float:
     fro_sq = 0.0
     param_fro_sq = 0.0
@@ -173,13 +261,15 @@ def append_step_diagnostics(
     started: float,
     step_rows: list[dict],
     layer_rows: list[dict],
-) -> tuple[int, int]:
+) -> tuple[int, int, list[torch.Tensor]]:
     problem.set_train_step(step)
     loss = problem.loss()
     loss.backward()
-    sigma_g, sigma_a = collect_diagnostics(problem)
+    sigma_g, sigma_a, activations = collect_diagnostics(problem)
     derived = derive_step_metrics(sigma_g, sigma_a)
     loss_value = float(loss.detach().cpu())
+    sample_count = problem_num_samples(problem, spec)
+    train_batch_size = effective_train_batch_size(spec, sample_count)
     row = {
         "run_id": run_id,
         "problem_family": spec.family,
@@ -189,8 +279,9 @@ def append_step_diagnostics(
         "algo": algo,
         "seed": int(seed),
         "step": int(step),
-        "num_samples": int(spec.num_samples),
-        "train_batch_size": effective_train_batch_size(spec),
+        "num_samples": sample_count,
+        "train_batch_size": train_batch_size,
+        "noise_std": float(spec.noise_std),
         "loss": loss_value,
         "delta_loss": float("nan"),
         "recovery_error": problem.recovery_error(),
@@ -215,6 +306,11 @@ def append_step_diagnostics(
         "update_op_norm": float("nan"),
         "relative_update_fro_norm": float("nan"),
         "mean_relative_layer_update_norm": float("nan"),
+        "activation_delta_fro_norm": float("nan"),
+        "relative_activation_delta_fro_norm": float("nan"),
+        "mean_relative_activation_delta_op_norm": float("nan"),
+        "max_relative_sample_activation_delta": float("nan"),
+        "mean_relative_sample_activation_delta": float("nan"),
         "elapsed_s": time.perf_counter() - started,
     }
     step_rows.append(row)
@@ -231,8 +327,9 @@ def append_step_diagnostics(
                 "algo": algo,
                 "seed": int(seed),
                 "step": int(step),
-                "num_samples": int(spec.num_samples),
-                "train_batch_size": effective_train_batch_size(spec),
+                "num_samples": sample_count,
+                "train_batch_size": train_batch_size,
+                "noise_std": float(spec.noise_std),
                 "loss": loss_value,
                 "recovery_error": row["recovery_error"],
                 "diagnostic_A_definition": problem.diagnostic_a_definition,
@@ -246,10 +343,18 @@ def append_step_diagnostics(
                 "update_grad_inner": float("nan"),
                 "update_grad_cosine": float("nan"),
                 "update_grad_per_update_norm": float("nan"),
+                "activation_delta_fro_norm": float("nan"),
+                "activation_delta_op_norm": float("nan"),
+                "activation_base_fro_norm": float("nan"),
+                "activation_base_op_norm": float("nan"),
+                "relative_activation_delta_fro_norm": float("nan"),
+                "relative_activation_delta_op_norm": float("nan"),
+                "max_relative_sample_activation_delta": float("nan"),
+                "mean_relative_sample_activation_delta": float("nan"),
                 **layer_metric,
             }
             )
-    return len(step_rows) - 1, layer_start
+    return len(step_rows) - 1, layer_start, activations
 
 
 def apply_update_diagnostics(
@@ -259,10 +364,13 @@ def apply_update_diagnostics(
     step_row: dict,
     layer_rows: list[dict],
     layer_start: int,
+    activations: list[torch.Tensor],
+    activation_supported: bool,
 ) -> None:
     sigma_update = update_singular_values(before, after)
     update_metrics = derive_update_metrics(sigma_update)
     alignment = update_gradient_alignment(before, after)
+    activation = activation_perturbation_metrics(before, after, activations) if activation_supported else None
     step_row.update(
         {
             "sigma_update": json_dumps_nested(sigma_update),
@@ -277,6 +385,16 @@ def apply_update_diagnostics(
             **update_norms(before, after),
         }
     )
+    if activation is not None:
+        step_row.update(
+            {
+                "activation_delta_fro_norm": activation["activation_delta_fro_norm"],
+                "relative_activation_delta_fro_norm": activation["relative_activation_delta_fro_norm"],
+                "mean_relative_activation_delta_op_norm": activation["mean_relative_activation_delta_op_norm"],
+                "max_relative_sample_activation_delta": activation["max_relative_sample_activation_delta"],
+                "mean_relative_sample_activation_delta": activation["mean_relative_sample_activation_delta"],
+            }
+        )
     for offset, layer_metric in enumerate(update_metrics["layer_metrics"]):
         row = layer_rows[layer_start + offset]
         layer_alignment = alignment["layer_metrics"][offset]
@@ -290,6 +408,8 @@ def apply_update_diagnostics(
         row["update_grad_inner"] = layer_alignment["update_grad_inner"]
         row["update_grad_cosine"] = layer_alignment["update_grad_cosine"]
         row["update_grad_per_update_norm"] = layer_alignment["update_grad_per_update_norm"]
+        if activation is not None:
+            row.update(activation["layer_metrics"][offset])
 
 
 def run_single(spec: ProblemSpec, algo: str, seed: int, run_id: int, config: ExperimentConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -304,7 +424,7 @@ def run_single(spec: ProblemSpec, algo: str, seed: int, run_id: int, config: Exp
 
     for step in range(spec.steps + 1):
         optimizer.zero_grad(set_to_none=True)
-        current_row_index, layer_start = append_step_diagnostics(
+        current_row_index, layer_start, activations = append_step_diagnostics(
             problem=problem,
             spec=spec,
             algo=algo,
@@ -327,6 +447,8 @@ def run_single(spec: ProblemSpec, algo: str, seed: int, run_id: int, config: Exp
                 step_row=step_rows[current_row_index],
                 layer_rows=layer_rows,
                 layer_start=layer_start,
+                activations=activations,
+                activation_supported=problem.diagnostic_a_definition != "measurement_operator_proxy",
             )
 
     return pd.DataFrame(step_rows), pd.DataFrame(layer_rows)
@@ -367,12 +489,13 @@ def run_equal_update_pair(
     layer_rows: list[dict] = []
     current_row_indices: dict[str, int] = {"Adam": 0, "Muon": 0}
     current_layer_starts: dict[str, int] = {"Adam": 0, "Muon": 0}
+    current_activations: dict[str, list[torch.Tensor]] = {"Adam": [], "Muon": []}
     started = time.perf_counter()
 
     for step in range(spec.steps + 1):
         for algo in ["Adam", "Muon"]:
             optimizers[algo].zero_grad(set_to_none=True)
-            current_row_index, layer_start = append_step_diagnostics(
+            current_row_index, layer_start, activations = append_step_diagnostics(
                 problem=problems[algo],
                 spec=spec,
                 algo=algo,
@@ -385,6 +508,7 @@ def run_equal_update_pair(
             )
             current_row_indices[algo] = current_row_index
             current_layer_starts[algo] = layer_start
+            current_activations[algo] = activations
 
         if step < spec.steps:
             before = {algo: snapshot_parameters(params[algo]) for algo in ["Adam", "Muon"]}
@@ -404,6 +528,8 @@ def run_equal_update_pair(
                     step_row=step_rows[current_row_indices[algo]],
                     layer_rows=layer_rows,
                     layer_start=current_layer_starts[algo],
+                    activations=current_activations[algo],
+                    activation_supported=problems[algo].diagnostic_a_definition != "measurement_operator_proxy",
                 )
 
     return pd.DataFrame(step_rows), pd.DataFrame(layer_rows)

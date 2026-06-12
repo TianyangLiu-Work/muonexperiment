@@ -1,11 +1,11 @@
 \section{已有 E11 实验证据}
 \label{sec:e11}
 
-本节整理当前已有实验结果。它们支持本文的局部谱几何机制，但尚未直接验证完整的 activation perturbation 或 downstream Jacobian 理论。
+本节整理当前已有实验结果。它们支持本文的局部谱几何机制，并包含 direct activation perturbation 的初步证据；downstream Jacobian 理论仍未被直接验证。
 
 \subsection{更新谱塑形}
 
-E11 结果显示，Muon-like 极分解更新稳定地产生更平、更高秩的 update spectrum。在 equal-update control 下，nrUpdate 比值约为 \(2.033\)，stUpdate 比值约为 \(5.215\)。这说明极分解更新确实改变更新矩阵奇异值分布，但这只是机制事实，不是性能声明。
+E11 结果显示，Muon-like 极分解更新稳定地产生更平、更高秩的 update spectrum。在 noisy mini-batch default setting 的 equal-update control 下，nrUpdate 比值约为 \(2.017\)，stUpdate 比值约为 \(4.765\)。这说明极分解更新确实改变更新矩阵奇异值分布，但这只是机制事实，不是性能声明。
 
 \input{tables/e11_core_results}
 
@@ -15,7 +15,7 @@ E11 记录的 \texttt{update\_grad\_inner} 对应本文记号中的
 \[
 \langle G,D\rangle,
 \]
-即正的一阶下降 proxy。已有结果显示，one-step 实际损失下降与该 proxy 的 Spearman 相关约为 \(0.9206\)，说明在当前短步长范围内，使用局部一阶模型是合理的。
+即正的一阶下降 proxy。已有结果显示，one-step 实际损失下降与该 proxy 的 Spearman 相关约为 \(0.9803\)，说明在当前短步长范围内，使用局部一阶模型是合理的。
 
 \subsection{范数几何边界}
 

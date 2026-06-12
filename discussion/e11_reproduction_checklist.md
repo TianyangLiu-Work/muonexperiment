@@ -68,9 +68,8 @@ make e11-paper-assets
 
 The validation gate enforces the current training-versus-diagnostics contract:
 
-- Non-MLP optimization is full-batch, so `train_batch_size == num_samples`.
-- MLP optimization uses a strict mini-batch, so `train_batch_size < num_samples`.
-- MLP activation diagnostics use the full sampled dataset and must record `diagnostic_A_definition == full_layer_input_activation`.
+- Default core E11 optimization uses noisy mini-batches, so `train_batch_size < num_samples` and `noise_std > 0`.
+- Activation diagnostics use the full sampled problem instance. MLP diagnostics must record `diagnostic_A_definition == full_layer_input_activation`.
 - `delta_loss` is the same-batch pre/post-update decrease, evaluated on the training batch used for the gradient/update.
 
 ## Validation Gate

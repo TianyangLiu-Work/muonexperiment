@@ -20,10 +20,10 @@ where \(G = \nabla_W L(W)\). The recorded code metric `update_grad_inner` is \(\
 
 \[
 \rho_\mathrm{Spearman}(\Delta L, \langle G, D\rangle)
-= 0.9206,
+= 0.9803,
 \quad
 95\%\ \mathrm{CI} =
-[0.9145, 0.9263].
+[0.9787, 0.9817].
 \]
 
 ## Notation

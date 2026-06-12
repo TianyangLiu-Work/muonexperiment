@@ -56,9 +56,9 @@ Generated animations/videos are also ignored by default; the current E11 evidenc
 
 Training and diagnostic batch contract:
 
-- MF-with-input and Matrix Sensing are optimized full-batch.
-- Neural tasks are optimized with a strict mini-batch (`train_batch_size < num_samples`).
-- Neural activation diagnostics use the full sampled dataset for the problem instance. MLP tasks record `diagnostic_A_definition == full_layer_input_activation`; the patch surrogate records `diagnostic_A_definition == full_patch_and_classifier_activation`; the ConvNet probe records `diagnostic_A_definition == full_conv_patch_and_classifier_activation`.
+- The default core E11 settings use noisy mini-batch optimization (`train_batch_size < num_samples`, `noise_std > 0`) for MF-with-input, Matrix Sensing, and SmallMLPDigits.
+- Synthetic tasks add fixed observation noise to the sampled training problem; SmallMLPDigits adds step-level input noise to the training mini-batch.
+- Activation and spectral diagnostics still use the full sampled problem instance. MLP tasks record `diagnostic_A_definition == full_layer_input_activation`; the patch surrogate records `diagnostic_A_definition == full_patch_and_classifier_activation`; the ConvNet probe records `diagnostic_A_definition == full_conv_patch_and_classifier_activation`.
 - `delta_loss` is the same-batch pre/post-update decrease, evaluated on the training batch used for the gradient/update.
 
 Regenerate all core discussion artifacts after results exist:
@@ -102,6 +102,7 @@ Paper-facing synthesis:
 - `discussion/e11_research_synthesis.md`
 - `discussion/e11_evidence_index.md`
 - `discussion/e11_artifact_manifest.md`
+- `discussion/e11_activation_perturbation.md`
 
 Mechanism and boundary evidence:
 
@@ -124,6 +125,7 @@ Mechanism and boundary evidence:
 Primary quantitative tables:
 
 - `results/e11_equal_update/update_spectrum_summary.csv`
+- `results/e11_equal_update/activation_perturbation_summary.csv`
 - `results/e11_equal_update/first_order_calibration_summary.csv`
 - `results/e11_cross_task_signature/cross_task_signature_summary.csv`
 - `results/e11_mechanism_boundary/mechanism_boundary_map.csv`
@@ -150,13 +152,17 @@ Primary figures:
 - `figures/e11_mnist_patch_probe/mnist_patch_first_order_ratios.png`
 - `figures/e11_mnist_conv_probe/mnist_conv_first_order_ratios.png`
 
+Paper draft tables:
+
+- `paper/specgrad_activation_paper/tables/e11_activation_perturbation.tex`
+
 ## Claims That Currently Survive
 
 1. Muon reliably changes update spectra.
-   - Equal-update `nrUpdate` ratio is about `2.033`.
-   - Equal-update `stUpdate` ratio is about `5.215`.
+   - Equal-update `nrUpdate` ratio is about `2.017`.
+   - Equal-update `stUpdate` ratio is about `4.765`.
 2. One-step loss decrease is locally well explained by `<G,D>`, where `D` is the positive descent update.
-   - Spearman correlation is about `0.9206` in the equal-update calibration summary.
+   - Spearman correlation is about `0.9803` in the equal-update calibration summary.
 3. Flat/polar update allocation has a norm-geometry boundary.
    - It loses under Frobenius budget and wins under operator-norm budget in the spectral-allocation probe.
    - The stateless direction ablation shows polar direction alone raises update rank but still loses to GD under matched Frobenius update size.

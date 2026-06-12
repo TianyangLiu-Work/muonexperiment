@@ -60,7 +60,8 @@ xelatex main.tex
 - 已写入完整中文论文结构。
 - 已包含核心数学推导：Frobenius/operator-norm 一阶最优性、activation perturbation bound、sandwiched stable rank。
 - 已整理现有 E11 局部几何证据。
-- 未做的实验已在 `sections/08_experiments_tbd.tex` 中以 TBD 形式保留。
+- 已加入 direct activation perturbation diagnostics 的初步结果。
+- 未做的 downstream Jacobian、长尾小 batch 与现代架构实验已在 `sections/08_experiments_tbd.tex` 中以 TBD 形式保留。
 - `notes/experiment_evaluation.md` 评估了哪些实验必须先做，才能把本文从理论框架推进到项目论文。
 
 ## 安全表述

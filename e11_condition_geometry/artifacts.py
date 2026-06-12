@@ -38,6 +38,11 @@ ARTIFACT_DIRS: tuple[dict[str, str], ...] = (
         "commit_policy": "commit",
     },
     {
+        "path": "paper",
+        "role": "LaTeX paper draft, paper-facing tables, and experiment triage notes.",
+        "commit_policy": "commit source and selected rendered PDFs",
+    },
+    {
         "path": "Makefile",
         "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
         "commit_policy": "commit",
@@ -57,7 +62,9 @@ ARTIFACT_DIRS: tuple[dict[str, str], ...] = (
 
 KEY_TABLES: tuple[str, ...] = (
     "results/e11/step_metrics.csv",
+    "results/e11/activation_perturbation_summary.csv",
     "results/e11_equal_update/step_metrics.csv",
+    "results/e11_equal_update/activation_perturbation_summary.csv",
     "results/e11_overlap_followup/step_metrics.csv",
     "results/e11_hyperparam_sweep/equal_step_metrics.csv",
     "results/e11_target_update_sweep/step_metrics.csv",
@@ -197,6 +204,7 @@ APPENDIX_RUNNER_DESCRIPTIONS: dict[str, str] = {
 
 PAPER_ASSET_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_write_discussion.py",
+    "scripts/e11_write_activation_perturbation_note.py",
     "scripts/e11_write_claim_audit.py",
     "scripts/e11_write_mechanism_ladder.py",
     "scripts/e11_run_mnist_mlp_probe.py",

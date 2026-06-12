@@ -33,7 +33,7 @@ This generated glossary fixes the notation used across the E11 paper-facing arti
 ## Scope Notes
 
 1. The strict activation-product definition of \(A_i\) applies to MF-with-input. Matrix Sensing and MLP diagnostics still report an \(A_i\)-like spectral quantity, but those are task-specific diagnostics rather than the same theoretical object.
-2. MLP training uses a strict mini-batch (`train_batch_size < num_samples`), while MLP activation diagnostics use the full sampled dataset for that problem instance.
+2. The default core E11 settings use noisy mini-batch optimization (`train_batch_size < num_samples`, `noise_std > 0`) while activation diagnostics use the full sampled problem instance.
 3. `delta_loss` is a same-batch pre/post-update quantity, not the difference between losses evaluated on two independently sampled training batches.
 4. The main paper claim is about update-spectrum shaping through the descent update \(D_i\), not about condition score alone.
 5. Higher \(nr\) or \(sr\) should not be read as better optimization without the one-step decrease or performance evidence tied to it.

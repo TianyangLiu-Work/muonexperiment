@@ -22,10 +22,11 @@ parts of this framing:
 - Neural negative controls show that higher update rank does not automatically
   imply better one-step progress.
 
-The missing part is direct evidence for the paper's new activation-geometric
-language. The current draft should not claim that SpecGrad improves activation
-stability, downstream stability, or long-tail behavior until the experiments
-below are run.
+The direct activation-perturbation diagnostic has now been added for the
+activation-defined E11 tasks. The remaining missing part is downstream-aware
+evidence: the current draft should not claim that SpecGrad improves downstream
+stability or long-tail behavior until the JVP/downstream and long-tail
+experiments below are run.
 
 ## Required Experiments
 
@@ -34,6 +35,18 @@ below are run.
 **Claim tested.** Polar / SpecGrad updates naturally control per-sample or
 operator-norm activation perturbation, but not necessarily batch-Frobenius
 activation movement.
+
+**Status.** Initial version complete for MF-with-input and Small MLP. Matrix
+Sensing is excluded because its diagnostic `A` is a measurement-operator proxy,
+not a layer activation matrix.
+
+**Current result.** Under equal-update control, Muon/Adam ratios are below one
+for relative operator perturbation and max per-sample perturbation, but not for
+batch-Frobenius perturbation. See:
+
+- `discussion/e11_activation_perturbation.md`
+- `results/e11_equal_update/activation_perturbation_summary.csv`
+- `paper/specgrad_activation_paper/tables/e11_activation_perturbation.tex`
 
 **Tasks.**
 
@@ -82,6 +95,10 @@ perturbation metrics separate from batch-Frobenius metrics in the predicted
 direction. If Muon has higher update rank but no consistent operator/per-sample
 perturbation pattern, then the activation framing should be presented as a
 theoretical interpretation rather than an empirical finding.
+
+The current result passes this initial decision rule for operator and worst-case
+per-sample perturbation, with the important caveat that batch-Frobenius and mean
+per-sample perturbation remain task dependent.
 
 ### 2. Layerwise Condition Predictor: `nr(G_i)` vs `sr(A_i)`
 
@@ -231,14 +248,12 @@ gap.
 
 ## Suggested Immediate Work Order
 
-1. Add activation perturbation logging to the existing E11 runner.
-2. Re-run MF-with-input, Matrix Sensing, and Small MLP with Adam vs Muon.
-3. Add local GD-vs-polar direction probes at matched Frobenius and operator
+1. Add local GD-vs-polar direction probes at matched Frobenius and operator
    budgets.
-4. Generate tables for activation perturbation ratios and condition predictor
+2. Generate tables for condition predictor
    accuracy.
-5. Add downstream JVP diagnostics for the small MLP.
-6. Reassess whether the paper's title should emphasize activation geometry or
+3. Add downstream JVP diagnostics for the small MLP.
+4. Reassess whether the paper's title should emphasize activation geometry or
    stay with the safer update-spectrum geometry framing.
 
 ## Current Paper Claim After These Experiments

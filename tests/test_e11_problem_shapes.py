@@ -70,6 +70,45 @@ def test_problem_layer_counts_and_activation_definitions():
         assert problem.diagnostic_a_definition == expected_a[spec.family]
 
 
+def test_synthetic_problems_use_noisy_minibatches_with_full_diagnostics():
+    dtype = torch.float64
+    device = torch.device("cpu")
+    mf_spec = ProblemSpec(
+        family="MatrixFactorizationInput",
+        setting="mf noisy minibatch",
+        steps=1,
+        d=12,
+        rank=3,
+        kappa=10.0,
+        num_factors=10,
+        batch_size=16,
+        noise_std=1e-2,
+    )
+    mf = build_problem(mf_spec, seed=0, device=device, dtype=dtype)
+    mf.set_train_step(0)
+    assert mf.loss().ndim == 0
+    assert mf._train_indices.numel() == 16
+    assert mf.activation_matrices()[0].shape[1] == 120
+    assert not torch.allclose(mf.clean_target_output, mf.target_output)
+
+    ms_spec = ProblemSpec(
+        family="MatrixSensing",
+        setting="ms noisy minibatch",
+        steps=1,
+        d=12,
+        rank=3,
+        kappa=10.0,
+        batch_size=16,
+        noise_std=1e-2,
+    )
+    ms = build_problem(ms_spec, seed=0, device=device, dtype=dtype)
+    ms.set_train_step(0)
+    assert ms.loss().ndim == 0
+    assert ms._train_indices.numel() == 16
+    assert ms.activation_matrices()[0].shape[0] == 72
+    assert not torch.allclose(ms.clean_observations, ms.observations)
+
+
 def test_mlp_training_batch_is_separate_from_full_activation_diagnostics():
     dtype = torch.float64
     device = torch.device("cpu")

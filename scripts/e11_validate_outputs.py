@@ -106,6 +106,8 @@ def assert_batch_activation_contract(path: Path, frame: pd.DataFrame) -> None:
     ]
     if neural_rows.empty and non_neural_rows.empty:
         return
+    if (frame["train_batch_size"] > frame["num_samples"]).any():
+        raise AssertionError(f"{path} train_batch_size must not exceed num_samples")
     if not mlp_rows.empty:
         if (mlp_rows["train_batch_size"] >= mlp_rows["num_samples"]).any():
             raise AssertionError(f"{path} MLP rows must use a strict training mini-batch")
@@ -121,9 +123,13 @@ def assert_batch_activation_contract(path: Path, frame: pd.DataFrame) -> None:
             raise AssertionError(f"{path} MNIST ConvNet rows must use a strict training mini-batch")
         if set(conv_rows["diagnostic_A_definition"]) != {"full_conv_patch_and_classifier_activation"}:
             raise AssertionError(f"{path} MNIST ConvNet diagnostics must use full_conv_patch_and_classifier_activation")
-    if not non_neural_rows.empty:
-        if (non_neural_rows["train_batch_size"] != non_neural_rows["num_samples"]).any():
-            raise AssertionError(f"{path} non-neural rows must use full-batch optimization")
+    if path in {Path("results/e11/step_metrics.csv"), Path("results/e11_equal_update/step_metrics.csv")}:
+        if "noise_std" not in frame.columns:
+            raise AssertionError(f"{path} default core rows must record noise_std")
+        if (frame["train_batch_size"] >= frame["num_samples"]).any():
+            raise AssertionError(f"{path} default core rows must use strict noisy mini-batches")
+        if (frame["noise_std"] <= 0.0).any():
+            raise AssertionError(f"{path} default core rows must use positive observation/input noise")
 
 
 def main() -> None:
@@ -387,9 +393,9 @@ def main() -> None:
         raise AssertionError(f"Makefile missing required E11 reproduction entries: {missing_makefile_phrases}")
     readme_text = Path("README_E11.md").read_text(encoding="utf-8")
     required_readme_phrases = [
-        "Equal-update `nrUpdate` ratio is about `2.033`",
-        "Equal-update `stUpdate` ratio is about `5.215`",
-        "Spearman correlation is about `0.9206`",
+        "Equal-update `nrUpdate` ratio is about `2.017`",
+        "Equal-update `stUpdate` ratio is about `4.765`",
+        "Spearman correlation is about `0.9803`",
         "make e11-all-results",
         "`diagnostic_A_definition == full_layer_input_activation`",
         *MAIN_RESULT_SCRIPTS,

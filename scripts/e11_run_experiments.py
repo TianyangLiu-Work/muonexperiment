@@ -11,6 +11,7 @@ if str(ROOT) not in sys.path:
 from e11_condition_geometry import default_config
 from e11_condition_geometry.runner import run_experiment
 from e11_condition_geometry.statistics import (
+    activation_perturbation_summary,
     final_performance_summary,
     first_order_calibration_summary,
     first_order_pair_summary,
@@ -37,6 +38,7 @@ def main() -> None:
     dynamics = run_dynamics_summary(steps)
     volatility = volatility_summary(dynamics)
     update_spectrum = update_spectrum_summary(steps)
+    activation_perturbation = activation_perturbation_summary(layers)
     update_transmission = update_transmission_summary(steps)
     first_order_calibration = first_order_calibration_summary(steps)
     polar_alignment = polar_alignment_summary(layers)
@@ -52,6 +54,7 @@ def main() -> None:
     dynamics.to_csv(config.output_dir / "run_dynamics_summary.csv", index=False)
     volatility.to_csv(config.output_dir / "volatility_summary.csv", index=False)
     update_spectrum.to_csv(config.output_dir / "update_spectrum_summary.csv", index=False)
+    activation_perturbation.to_csv(config.output_dir / "activation_perturbation_summary.csv", index=False)
     update_transmission.to_csv(config.output_dir / "update_transmission_summary.csv", index=False)
     first_order_calibration.to_csv(config.output_dir / "first_order_calibration_summary.csv", index=False)
     polar_alignment.to_csv(config.output_dir / "polar_alignment_summary.csv", index=False)

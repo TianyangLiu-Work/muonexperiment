@@ -3,7 +3,7 @@ from __future__ import annotations
 import torch
 
 from ..config import ProblemSpec
-from .base import TrainProblem, make_low_rank_target, randn
+from .base import TrainProblem, make_generator, make_low_rank_target, randn
 
 
 class MatrixFactorizationInputProblem(TrainProblem):
@@ -15,6 +15,7 @@ class MatrixFactorizationInputProblem(TrainProblem):
         self.setting = spec.setting
         self.target = make_low_rank_target(spec.d, spec.rank, spec.kappa, seed, device=device, dtype=dtype)
         input_cols = int(spec.input_columns_multiplier * spec.d)
+        self.num_train_examples = input_cols
         self.input_matrix = randn((spec.d, input_cols), seed + 1009, device=device, dtype=dtype) / (spec.d**0.5)
         shapes = self._factor_shapes(spec.d, spec.rank, spec.num_factors)
         factors: list[torch.nn.Parameter] = []
@@ -27,7 +28,18 @@ class MatrixFactorizationInputProblem(TrainProblem):
                 value = torch.eye(shape[0], shape[1], device=device, dtype=dtype)
             factors.append(torch.nn.Parameter(value))
         self.factors = factors
-        self.target_output = self.target @ self.input_matrix
+        self.clean_target_output = self.target @ self.input_matrix
+        target_scale = self.clean_target_output.square().mean().sqrt().clamp_min(torch.finfo(dtype).eps)
+        noise = float(spec.noise_std) * target_scale * randn(
+            self.clean_target_output.shape,
+            seed + 2017,
+            device=device,
+            dtype=dtype,
+        )
+        self.target_output = self.clean_target_output + noise
+        self._batch_seed = seed + 7100
+        self._train_indices = torch.arange(self.input_matrix.shape[1], device=device)
+        self.set_train_step(0)
 
     @staticmethod
     def _factor_shapes(d: int, rank: int, num_factors: int) -> list[tuple[int, int]]:
@@ -42,15 +54,19 @@ class MatrixFactorizationInputProblem(TrainProblem):
             result = result @ factor
         return result
 
-    def output(self) -> torch.Tensor:
-        return self.product() @ self.input_matrix
+    def output(self, indices: torch.Tensor | None = None) -> torch.Tensor:
+        input_matrix = self.input_matrix if indices is None else self.input_matrix[:, indices]
+        return self.product() @ input_matrix
 
     def loss(self) -> torch.Tensor:
-        residual = self.output() - self.target_output
+        residual = self.output(self._train_indices) - self.target_output[:, self._train_indices]
         return 0.5 * torch.mean(residual.square())
 
     def set_train_step(self, step: int) -> None:
-        return None
+        sample_count = self.input_matrix.shape[1]
+        batch_size = sample_count if self.spec.batch_size is None else max(1, min(int(self.spec.batch_size), sample_count))
+        generator = make_generator(self._batch_seed + int(step), self.input_matrix.device)
+        self._train_indices = torch.randperm(sample_count, generator=generator, device=self.input_matrix.device)[:batch_size]
 
     def recovery_error(self) -> float:
         numerator = torch.linalg.norm(self.product().detach() - self.target)

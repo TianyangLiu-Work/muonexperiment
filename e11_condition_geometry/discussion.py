@@ -446,7 +446,7 @@ The evidence uses three problem families, treated as parallel experiments rather
 2. **Matrix Sensing:** direct matrix variable, same `kappa` sweep, 5 seeds, 5 steps.
 3. **Small torch MLP:** sklearn digits classifier, 5 seeds, 10 steps.
 
-For every trainable matrix or linear layer, \\(G_i = \\nabla_{{W_i}}L\\). For MF-with-input, \\(A_i = W_{{i+1}}\\cdots W_{{10}}Z\\). For Matrix Sensing, `A` is the measurement-operator proxy. For the MLP, training gradients are computed on a strict mini-batch (`train_batch_size < num_samples`), while `A` is the full-dataset input activation to each linear layer. Therefore MF-with-input is the strict theory-aligned activation-product case; the other two are problem-specific spectral diagnostics.
+For every trainable matrix or linear layer, \\(G_i = \\nabla_{{W_i}}L\\). For MF-with-input, \\(A_i = W_{{i+1}}\\cdots W_{{10}}Z\\). For Matrix Sensing, `A` is the measurement-operator proxy. The default core settings use noisy mini-batch optimization (`train_batch_size < num_samples`, `noise_std > 0`), while activation diagnostics use the full sampled problem instance. Therefore MF-with-input is the strict theory-aligned activation-product case; the other two are problem-specific spectral diagnostics.
 
 `delta_loss` is recorded as the same-batch pre/post-update decrease: the loss before the optimizer step minus the loss after applying that step, evaluated on the same training batch used for the gradient. This keeps the one-step decrease calibration aligned with `update_grad_inner` rather than with independent mini-batch noise.
 

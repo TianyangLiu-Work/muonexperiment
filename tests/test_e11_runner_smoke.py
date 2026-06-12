@@ -13,9 +13,9 @@ def test_runner_smoke_all_problem_families():
             continue
         seen.add(spec.family)
         if spec.family == "SmallMLPDigits":
-            specs.append(replace(spec, steps=1, hidden_dim=8, num_samples=64))
+            specs.append(replace(spec, steps=1, hidden_dim=8, num_samples=64, batch_size=16))
         else:
-            specs.append(replace(spec, steps=1, d=12, rank=3))
+            specs.append(replace(spec, steps=1, d=12, rank=3, batch_size=16))
     config = ExperimentConfig(
         seeds=(0,),
         algos=("Adam", "Muon"),
@@ -32,11 +32,25 @@ def test_runner_smoke_all_problem_families():
     assert set(["loss", "delta_loss", "recovery_error", "train_batch_size", "nrG", "stA", "condition_score"]).issubset(steps.columns)
     assert not steps[["loss", "recovery_error", "nrG", "stA", "condition_score"]].isna().any().any()
     mlp_steps = steps[steps["problem_family"] == "SmallMLPDigits"]
-    assert set(mlp_steps["train_batch_size"]) == {64}
+    assert set(mlp_steps["train_batch_size"]) == {16}
     non_mlp_steps = steps[steps["problem_family"] != "SmallMLPDigits"]
-    assert (non_mlp_steps["train_batch_size"] == non_mlp_steps["num_samples"]).all()
+    assert (non_mlp_steps["train_batch_size"] < non_mlp_steps["num_samples"]).all()
+    assert (steps["noise_std"] > 0.0).all()
     nonfinal = steps[steps["delta_loss"].notna()]
     assert not nonfinal[["nrUpdate", "stUpdate", "nrUpdateFrac", "stUpdateFrac", "update_flatness"]].isna().any().any()
     assert not nonfinal[["update_grad_inner", "update_grad_cosine", "update_grad_per_update_norm"]].isna().any().any()
+    activation_supported = nonfinal[nonfinal["diagnostic_A_definition"] != "measurement_operator_proxy"]
+    assert not activation_supported[
+        [
+            "activation_delta_fro_norm",
+            "relative_activation_delta_fro_norm",
+            "mean_relative_activation_delta_op_norm",
+            "max_relative_sample_activation_delta",
+            "mean_relative_sample_activation_delta",
+        ]
+    ].isna().any().any()
+    matrix_sensing = nonfinal[nonfinal["diagnostic_A_definition"] == "measurement_operator_proxy"]
+    assert matrix_sensing["relative_activation_delta_fro_norm"].isna().all()
     assert (nonfinal["sigma_update"].fillna("") != "").all()
     assert not layers.empty
+    assert "relative_activation_delta_op_norm" in layers.columns

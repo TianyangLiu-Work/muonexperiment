@@ -9,5 +9,5 @@
 \]
 这是映射 \(D\mapsto BDA\) 在谱范数与 Frobenius 范数几何下的精确敏感度比。
 
-实验部分目前采用已有 E11 控制实验作为局部机制证据：Muon-like 极分解更新稳定地产生更平、更高秩的 update spectrum；one-step 损失下降与梯度--更新内积高度相关；flat/polar 谱分配在 operator-norm 预算下胜出，但在 Frobenius 预算下失败；神经网络 sanity checks 进一步说明高秩更新不自动意味着更好的一阶进展。尚未进行的 activation perturbation、downstream Jacobian 与长尾小 batch 实验在本文中保留为待完成实验。
+实验部分目前采用 E11 控制实验作为局部机制证据：Muon-like 极分解更新稳定地产生更平、更高秩的 update spectrum；one-step 损失下降与梯度--更新内积高度相关；flat/polar 谱分配在 operator-norm 预算下胜出，但在 Frobenius 预算下失败；direct activation perturbation diagnostics 显示 Muon 在 matched update size 下可降低 operator/per-sample worst-case perturbation，但不统一降低 batch-Frobenius movement；神经网络 sanity checks 进一步说明高秩更新不自动意味着更好的一阶进展。尚未进行的 downstream Jacobian 与长尾小 batch 实验在本文中保留为待完成实验。
 \end{abstract}

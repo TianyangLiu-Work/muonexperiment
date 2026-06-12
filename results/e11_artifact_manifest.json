@@ -5,43 +5,43 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 425337,
-      "size": "415.4 KB"
+      "size_bytes": 452915,
+      "size": "442.3 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1284554,
-      "size": "1.2 MB"
+      "size_bytes": 1527059,
+      "size": "1.5 MB"
     },
     {
       "path": "tests",
       "role": "Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.",
       "commit_policy": "commit",
-      "size_bytes": 145247,
-      "size": "141.8 KB"
+      "size_bytes": 162921,
+      "size": "159.1 KB"
     },
     {
       "path": "discussion",
       "role": "Generated paper-facing Markdown evidence and synthesis.",
       "commit_policy": "commit",
-      "size_bytes": 635495,
-      "size": "620.6 KB"
+      "size_bytes": 635999,
+      "size": "621.1 KB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by discussion artifacts and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 259666894,
-      "size": "247.6 MB"
+      "size_bytes": 265268988,
+      "size": "253.0 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 42927099,
-      "size": "40.9 MB"
+      "size_bytes": 27263546,
+      "size": "26.0 MB"
     },
     {
       "path": "configs",
@@ -49,6 +49,13 @@
       "commit_policy": "commit",
       "size_bytes": 316,
       "size": "316 B"
+    },
+    {
+      "path": "paper",
+      "role": "LaTeX paper draft, paper-facing tables, and experiment triage notes.",
+      "commit_policy": "commit source and selected rendered PDFs",
+      "size_bytes": 416146,
+      "size": "406.4 KB"
     },
     {
       "path": "Makefile",
@@ -61,8 +68,8 @@
       "path": ".gitignore",
       "role": "Keeps local caches, datasets, and generated videos out of default commits.",
       "commit_policy": "commit",
-      "size_bytes": 375,
-      "size": "375 B"
+      "size_bytes": 470,
+      "size": "470 B"
     },
     {
       "path": ".gitattributes",
@@ -76,12 +83,22 @@
     {
       "path": "results/e11/step_metrics.csv",
       "rows": 2880,
-      "size": "20.8 MB"
+      "size": "20.9 MB"
+    },
+    {
+      "path": "results/e11/activation_perturbation_summary.csv",
+      "rows": 60,
+      "size": "12.6 KB"
     },
     {
       "path": "results/e11_equal_update/step_metrics.csv",
       "rows": 2880,
-      "size": "20.8 MB"
+      "size": "21.0 MB"
+    },
+    {
+      "path": "results/e11_equal_update/activation_perturbation_summary.csv",
+      "rows": 60,
+      "size": "12.6 KB"
     },
     {
       "path": "results/e11_overlap_followup/step_metrics.csv",

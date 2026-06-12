@@ -20,6 +20,7 @@ class ProblemSpec:
     output_dim: int = 10
     num_samples: int = 1024
     batch_size: int | None = 128
+    noise_std: float = 1e-2
     lr: float = 1e-2
 
 
@@ -55,6 +56,9 @@ def default_config() -> ExperimentConfig:
             kappa=kappa,
             num_factors=10,
             input_columns_multiplier=10,
+            num_samples=600,
+            batch_size=128,
+            noise_std=1e-2,
             lr=lr,
         )
         for kappa in kappas
@@ -69,6 +73,9 @@ def default_config() -> ExperimentConfig:
             rank=5,
             kappa=kappa,
             measurement_multiplier=2.0,
+            num_samples=600,
+            batch_size=128,
+            noise_std=1e-2,
             lr=lr,
         )
         for kappa in kappas
@@ -85,6 +92,8 @@ def default_config() -> ExperimentConfig:
                 kappa=1.0,
                 hidden_dim=64,
                 num_samples=1024,
+                batch_size=128,
+                noise_std=1e-2,
                 lr=lr,
             )
             for lr in learning_rates

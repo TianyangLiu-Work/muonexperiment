@@ -4,25 +4,28 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 ## Artifact Directories
 
-| path                   | role                                                                                 | commit_policy                   | size     |
-|:-----------------------|:-------------------------------------------------------------------------------------|:--------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.   | commit                          | 415.4 KB |
-| scripts                | Experiment runners, artifact writers, and validation scripts.                        | commit E11 scripts              | 1.2 MB   |
-| tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.      | commit                          | 141.8 KB |
-| discussion             | Generated paper-facing Markdown evidence and synthesis.                              | commit                          | 620.6 KB |
-| results                | Generated CSV evidence used by discussion artifacts and validator.                   | commit current E11 evidence set | 247.6 MB |
-| figures                | Static figures used by paper-facing Markdown artifacts.                              | commit static E11 figures       | 40.9 MB  |
-| configs                | Experiment configuration snapshots.                                                  | commit                          | 316 B    |
-| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands. | commit                          | 1.8 KB   |
-| .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.           | commit                          | 375 B    |
-| .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.       | commit                          | 404 B    |
+| path                   | role                                                                                 | commit_policy                            | size     |
+|:-----------------------|:-------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.   | commit                                   | 442.3 KB |
+| scripts                | Experiment runners, artifact writers, and validation scripts.                        | commit E11 scripts                       | 1.5 MB   |
+| tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.      | commit                                   | 159.1 KB |
+| discussion             | Generated paper-facing Markdown evidence and synthesis.                              | commit                                   | 621.1 KB |
+| results                | Generated CSV evidence used by discussion artifacts and validator.                   | commit current E11 evidence set          | 253.0 MB |
+| figures                | Static figures used by paper-facing Markdown artifacts.                              | commit static E11 figures                | 26.0 MB  |
+| configs                | Experiment configuration snapshots.                                                  | commit                                   | 316 B    |
+| paper                  | LaTeX paper draft, paper-facing tables, and experiment triage notes.                 | commit source and selected rendered PDFs | 406.4 KB |
+| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands. | commit                                   | 1.8 KB   |
+| .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.           | commit                                   | 470 B    |
+| .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.       | commit                                   | 404 B    |
 
 ## Key Quantitative Tables
 
 | path                                                                            |   rows | size      |
 |:--------------------------------------------------------------------------------|-------:|:----------|
-| results/e11/step_metrics.csv                                                    |   2880 | 20.8 MB   |
-| results/e11_equal_update/step_metrics.csv                                       |   2880 | 20.8 MB   |
+| results/e11/step_metrics.csv                                                    |   2880 | 20.9 MB   |
+| results/e11/activation_perturbation_summary.csv                                 |     60 | 12.6 KB   |
+| results/e11_equal_update/step_metrics.csv                                       |   2880 | 21.0 MB   |
+| results/e11_equal_update/activation_perturbation_summary.csv                    |     60 | 12.6 KB   |
 | results/e11_overlap_followup/step_metrics.csv                                   |   1530 | 8.2 MB    |
 | results/e11_hyperparam_sweep/equal_step_metrics.csv                             |   3360 | 21.0 MB   |
 | results/e11_target_update_sweep/step_metrics.csv                                |   3360 | 21.1 MB   |

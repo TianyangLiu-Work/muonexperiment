@@ -6,7 +6,7 @@ This generated audit separates optimizer-intrinsic evidence from effects that de
 
 The current evidence supports a robust optimizer-intrinsic claim for **update-spectrum shaping**, but it does **not** support the broad claim that Muon is generally more stable in the state geometry.
 
-Raw trajectories make Muon look smoother: all-task normalized rank-plane speed has Muon/Adam ratio 0.6352 with CI [0.5584, 0.7226], and normalized condition speed has ratio 0.5324 with CI [0.4542, 0.6241]. However, after matching global relative update size, those all-task ratios become 1.749 for rank-plane speed and 1.562 for condition speed. In Matrix Sensing under equal-update control, the same ratios are 6.096 and 6.096, both strongly above 1.
+Raw trajectories make Muon look smoother: all-task normalized rank-plane speed has Muon/Adam ratio 0.9134 with CI [0.8276, 1.008], and normalized condition speed has ratio 0.7201 with CI [0.6382, 0.8126]. However, after matching global relative update size, those all-task ratios become 1.072 for rank-plane speed and 0.916 for condition speed. In Matrix Sensing under equal-update control, the same ratios are 1.177 and 1.177, both strongly above 1.
 
 Therefore, "Muon is smoother/more stable" is not a reliable optimizer-level conclusion. A safer statement is: **Muon reliably flattens the update spectrum; the induced state-trajectory smoothness is task- and scale-dependent.**
 
@@ -14,16 +14,16 @@ Therefore, "Muon is smoother/more stable" is not a reliable optimizer-level conc
 
 | mode         | metric          |   ratio_muon_over_adam | ratio_ci95     | ci_above_one   |
 |:-------------|:----------------|-----------------------:|:---------------|:---------------|
-| raw          | nrUpdate        |                  1.977 | [1.875, 2.085] | yes            |
-| raw          | stUpdate        |                  4.856 | [4.637, 5.085] | yes            |
-| raw          | nrUpdateFrac    |                  1.907 | [1.812, 2.006] | yes            |
-| raw          | stUpdateFrac    |                  4.538 | [4.428, 4.651] | yes            |
-| raw          | update_flatness |                  2.377 | [2.226, 2.538] | yes            |
-| equal_update | nrUpdate        |                  2.033 | [1.921, 2.151] | yes            |
-| equal_update | stUpdate        |                  5.215 | [5.008, 5.43]  | yes            |
-| equal_update | nrUpdateFrac    |                  1.959 | [1.853, 2.07]  | yes            |
-| equal_update | stUpdateFrac    |                  4.862 | [4.749, 4.978] | yes            |
-| equal_update | update_flatness |                  2.473 | [2.3, 2.66]    | yes            |
+| raw          | nrUpdate        |                  1.985 | [1.879, 2.096] | yes            |
+| raw          | stUpdate        |                  4.495 | [4.298, 4.702] | yes            |
+| raw          | nrUpdateFrac    |                  1.924 | [1.823, 2.031] | yes            |
+| raw          | stUpdateFrac    |                  4.212 | [4.128, 4.298] | yes            |
+| raw          | update_flatness |                  2.179 | [2.06, 2.305]  | yes            |
+| equal_update | nrUpdate        |                  2.017 | [1.905, 2.136] | yes            |
+| equal_update | stUpdate        |                  4.765 | [4.582, 4.955] | yes            |
+| equal_update | nrUpdateFrac    |                  1.953 | [1.845, 2.068] | yes            |
+| equal_update | stUpdateFrac    |                  4.451 | [4.378, 4.525] | yes            |
+| equal_update | update_flatness |                  2.268 | [2.131, 2.413] | yes            |
 
 These diagnostics are robust to the equal-update control because rescaling an update does not change normalized singular-value geometry. This is the strongest current cross-task optimizer signature.
 
@@ -31,54 +31,54 @@ These diagnostics are robust to the equal-update control because rescaling an up
 
 | mode         | metric                           | problem_family           |   n_pairs |   muon_lower_pairs |   ratio_muon_over_adam | ratio_ci95        | ci_below_one   |
 |:-------------|:---------------------------------|:-------------------------|----------:|-------------------:|-----------------------:|:------------------|:---------------|
-| raw          | norm_rank_plane_mean_speed       | All                      |       165 |                137 |                0.6352  | [0.5584, 0.7226]  | yes            |
-| raw          | norm_rank_plane_mean_speed       | MatrixFactorizationInput |        75 |                 75 |                0.3778  | [0.3379, 0.4224]  | yes            |
-| raw          | norm_rank_plane_mean_speed       | MatrixSensing            |        75 |                 48 |                1.072   | [0.8785, 1.307]   | no             |
-| raw          | norm_rank_plane_mean_speed       | SmallMLPDigits           |        15 |                 14 |                0.6247  | [0.5096, 0.7659]  | yes            |
-| raw          | norm_condition_mean_speed        | All                      |       165 |                131 |                0.5324  | [0.4542, 0.6241]  | yes            |
-| raw          | norm_condition_mean_speed        | MatrixFactorizationInput |        75 |                 75 |                0.2421  | [0.2082, 0.2817]  | yes            |
-| raw          | norm_condition_mean_speed        | MatrixSensing            |        75 |                 48 |                1.072   | [0.8785, 1.307]   | no             |
-| raw          | norm_condition_mean_speed        | SmallMLPDigits           |        15 |                  8 |                0.8279  | [0.6707, 1.022]   | no             |
-| raw          | condition_score_std_speed        | All                      |       165 |                135 |                0.2204  | [0.172, 0.2824]   | yes            |
-| raw          | condition_score_std_speed        | MatrixFactorizationInput |        75 |                 74 |                0.2445  | [0.207, 0.2888]   | yes            |
-| raw          | condition_score_std_speed        | MatrixSensing            |        75 |                 50 |                0.1532  | [0.09293, 0.2527] | yes            |
-| raw          | condition_score_std_speed        | SmallMLPDigits           |        15 |                 11 |                0.8074  | [0.667, 0.9774]   | yes            |
-| raw          | loss_mean_rel_speed              | All                      |       165 |                164 |                0.1663  | [0.1332, 0.2076]  | yes            |
-| raw          | loss_mean_rel_speed              | MatrixFactorizationInput |        75 |                 74 |                0.08061 | [0.057, 0.114]    | yes            |
-| raw          | loss_mean_rel_speed              | MatrixSensing            |        75 |                 75 |                0.4508  | [0.3881, 0.5236]  | yes            |
-| raw          | loss_mean_rel_speed              | SmallMLPDigits           |        15 |                 15 |                0.04235 | [0.0372, 0.04821] | yes            |
-| raw          | per_update_rank_plane_mean_speed | All                      |       165 |                 45 |                1.663   | [1.458, 1.897]    | no             |
-| raw          | per_update_rank_plane_mean_speed | MatrixFactorizationInput |        75 |                 40 |                0.9038  | [0.8, 1.021]      | no             |
-| raw          | per_update_rank_plane_mean_speed | MatrixSensing            |        75 |                  0 |                3.222   | [2.821, 3.68]     | no             |
-| raw          | per_update_rank_plane_mean_speed | SmallMLPDigits           |        15 |                  5 |                1.285   | [0.7539, 2.189]   | no             |
-| raw          | per_update_condition_mean_speed  | All                      |       165 |                 71 |                1.379   | [1.175, 1.617]    | no             |
-| raw          | per_update_condition_mean_speed  | MatrixFactorizationInput |        75 |                 66 |                0.58    | [0.5057, 0.6652]  | yes            |
-| raw          | per_update_condition_mean_speed  | MatrixSensing            |        75 |                  0 |                3.222   | [2.821, 3.68]     | no             |
-| raw          | per_update_condition_mean_speed  | SmallMLPDigits           |        15 |                  5 |                1.502   | [0.8443, 2.671]   | no             |
-| equal_update | norm_rank_plane_mean_speed       | All                      |       165 |                 81 |                1.749   | [1.434, 2.132]    | no             |
-| equal_update | norm_rank_plane_mean_speed       | MatrixFactorizationInput |        75 |                 74 |                0.5619  | [0.5156, 0.6124]  | yes            |
-| equal_update | norm_rank_plane_mean_speed       | MatrixSensing            |        75 |                  0 |                6.096   | [5.106, 7.277]    | no             |
-| equal_update | norm_rank_plane_mean_speed       | SmallMLPDigits           |        15 |                  7 |                0.9922  | [0.9188, 1.071]   | no             |
-| equal_update | norm_condition_mean_speed        | All                      |       165 |                 79 |                1.562   | [1.258, 1.941]    | no             |
-| equal_update | norm_condition_mean_speed        | MatrixFactorizationInput |        75 |                 72 |                0.4386  | [0.3895, 0.494]   | yes            |
-| equal_update | norm_condition_mean_speed        | MatrixSensing            |        75 |                  0 |                6.096   | [5.106, 7.277]    | no             |
-| equal_update | norm_condition_mean_speed        | SmallMLPDigits           |        15 |                  7 |                0.9911  | [0.9192, 1.069]   | no             |
-| equal_update | condition_score_std_speed        | All                      |       165 |                 98 |                0.9507  | [0.8187, 1.104]   | no             |
-| equal_update | condition_score_std_speed        | MatrixFactorizationInput |        75 |                 69 |                0.501   | [0.4376, 0.5736]  | yes            |
-| equal_update | condition_score_std_speed        | MatrixSensing            |        75 |                 21 |                1.799   | [1.443, 2.243]    | no             |
-| equal_update | condition_score_std_speed        | SmallMLPDigits           |        15 |                  8 |                0.9641  | [0.8849, 1.05]    | no             |
-| equal_update | loss_mean_rel_speed              | All                      |       165 |                 92 |                0.5583  | [0.4978, 0.6262]  | yes            |
-| equal_update | loss_mean_rel_speed              | MatrixFactorizationInput |        75 |                 69 |                0.327   | [0.2783, 0.3841]  | yes            |
-| equal_update | loss_mean_rel_speed              | MatrixSensing            |        75 |                  8 |                1.034   | [1.018, 1.05]     | no             |
-| equal_update | loss_mean_rel_speed              | SmallMLPDigits           |        15 |                 15 |                0.3721  | [0.2989, 0.4632]  | yes            |
-| equal_update | per_update_rank_plane_mean_speed | All                      |       165 |                 79 |                1.752   | [1.438, 2.136]    | no             |
-| equal_update | per_update_rank_plane_mean_speed | MatrixFactorizationInput |        75 |                 73 |                0.5633  | [0.5164, 0.6145]  | yes            |
-| equal_update | per_update_rank_plane_mean_speed | MatrixSensing            |        75 |                  0 |                6.101   | [5.116, 7.275]    | no             |
-| equal_update | per_update_rank_plane_mean_speed | SmallMLPDigits           |        15 |                  6 |                0.998   | [0.9188, 1.084]   | no             |
-| equal_update | per_update_condition_mean_speed  | All                      |       165 |                 79 |                1.567   | [1.262, 1.946]    | no             |
-| equal_update | per_update_condition_mean_speed  | MatrixFactorizationInput |        75 |                 72 |                0.4407  | [0.3911, 0.4967]  | yes            |
-| equal_update | per_update_condition_mean_speed  | MatrixSensing            |        75 |                  0 |                6.101   | [5.116, 7.275]    | no             |
-| equal_update | per_update_condition_mean_speed  | SmallMLPDigits           |        15 |                  7 |                0.9971  | [0.92, 1.081]     | no             |
+| raw          | norm_rank_plane_mean_speed       | All                      |       165 |                 95 |                0.9134  | [0.8276, 1.008]   | no             |
+| raw          | norm_rank_plane_mean_speed       | MatrixFactorizationInput |        75 |                 56 |                0.6981  | [0.5993, 0.8133]  | yes            |
+| raw          | norm_rank_plane_mean_speed       | MatrixSensing            |        75 |                 25 |                1.292   | [1.16, 1.44]      | no             |
+| raw          | norm_rank_plane_mean_speed       | SmallMLPDigits           |        15 |                 14 |                0.6175  | [0.505, 0.7549]   | yes            |
+| raw          | norm_condition_mean_speed        | All                      |       165 |                 99 |                0.7201  | [0.6382, 0.8126]  | yes            |
+| raw          | norm_condition_mean_speed        | MatrixFactorizationInput |        75 |                 66 |                0.3919  | [0.3391, 0.4528]  | yes            |
+| raw          | norm_condition_mean_speed        | MatrixSensing            |        75 |                 25 |                1.292   | [1.16, 1.44]      | no             |
+| raw          | norm_condition_mean_speed        | SmallMLPDigits           |        15 |                  8 |                0.8115  | [0.6546, 1.006]   | no             |
+| raw          | condition_score_std_speed        | All                      |       165 |                 93 |                0.7307  | [0.6424, 0.8311]  | yes            |
+| raw          | condition_score_std_speed        | MatrixFactorizationInput |        75 |                 64 |                0.4076  | [0.3389, 0.4903]  | yes            |
+| raw          | condition_score_std_speed        | MatrixSensing            |        75 |                 18 |                1.286   | [1.156, 1.432]    | no             |
+| raw          | condition_score_std_speed        | SmallMLPDigits           |        15 |                 11 |                0.8004  | [0.6594, 0.9716]  | yes            |
+| raw          | loss_mean_rel_speed              | All                      |       165 |                153 |                0.3736  | [0.3213, 0.4344]  | yes            |
+| raw          | loss_mean_rel_speed              | MatrixFactorizationInput |        75 |                 64 |                0.6733  | [0.6164, 0.7355]  | yes            |
+| raw          | loss_mean_rel_speed              | MatrixSensing            |        75 |                 74 |                0.3205  | [0.2668, 0.385]   | yes            |
+| raw          | loss_mean_rel_speed              | SmallMLPDigits           |        15 |                 15 |                0.04227 | [0.0371, 0.04817] | yes            |
+| raw          | per_update_rank_plane_mean_speed | All                      |       165 |                 34 |                2.121   | [1.857, 2.422]    | no             |
+| raw          | per_update_rank_plane_mean_speed | MatrixFactorizationInput |        75 |                 23 |                1.652   | [1.36, 2.007]     | no             |
+| raw          | per_update_rank_plane_mean_speed | MatrixSensing            |        75 |                  6 |                3.021   | [2.562, 3.562]    | no             |
+| raw          | per_update_rank_plane_mean_speed | SmallMLPDigits           |        15 |                  5 |                1.263   | [0.7351, 2.168]   | no             |
+| raw          | per_update_condition_mean_speed  | All                      |       165 |                 60 |                1.645   | [1.421, 1.905]    | no             |
+| raw          | per_update_condition_mean_speed  | MatrixFactorizationInput |        75 |                 49 |                0.9179  | [0.7725, 1.091]   | no             |
+| raw          | per_update_condition_mean_speed  | MatrixSensing            |        75 |                  6 |                3.021   | [2.562, 3.562]    | no             |
+| raw          | per_update_condition_mean_speed  | SmallMLPDigits           |        15 |                  5 |                1.461   | [0.8114, 2.632]   | no             |
+| equal_update | norm_rank_plane_mean_speed       | All                      |       165 |                 77 |                1.072   | [1.009, 1.138]    | no             |
+| equal_update | norm_rank_plane_mean_speed       | MatrixFactorizationInput |        75 |                 41 |                0.9904  | [0.9039, 1.085]   | no             |
+| equal_update | norm_rank_plane_mean_speed       | MatrixSensing            |        75 |                 29 |                1.177   | [1.073, 1.29]     | no             |
+| equal_update | norm_rank_plane_mean_speed       | SmallMLPDigits           |        15 |                  7 |                0.9972  | [0.9129, 1.089]   | no             |
+| equal_update | norm_condition_mean_speed        | All                      |       165 |                 91 |                0.916   | [0.849, 0.9884]   | yes            |
+| equal_update | norm_condition_mean_speed        | MatrixFactorizationInput |        75 |                 56 |                0.7026  | [0.6275, 0.7868]  | yes            |
+| equal_update | norm_condition_mean_speed        | MatrixSensing            |        75 |                 29 |                1.177   | [1.073, 1.29]     | no             |
+| equal_update | norm_condition_mean_speed        | SmallMLPDigits           |        15 |                  6 |                0.9854  | [0.9048, 1.073]   | no             |
+| equal_update | condition_score_std_speed        | All                      |       165 |                 82 |                0.9866  | [0.915, 1.064]    | no             |
+| equal_update | condition_score_std_speed        | MatrixFactorizationInput |        75 |                 49 |                0.805   | [0.7199, 0.9002]  | yes            |
+| equal_update | condition_score_std_speed        | MatrixSensing            |        75 |                 25 |                1.215   | [1.095, 1.349]    | no             |
+| equal_update | condition_score_std_speed        | SmallMLPDigits           |        15 |                  8 |                0.9612  | [0.8731, 1.058]   | no             |
+| equal_update | loss_mean_rel_speed              | All                      |       165 |                127 |                0.795   | [0.7552, 0.837]   | yes            |
+| equal_update | loss_mean_rel_speed              | MatrixFactorizationInput |        75 |                 52 |                0.853   | [0.804, 0.9051]   | yes            |
+| equal_update | loss_mean_rel_speed              | MatrixSensing            |        75 |                 60 |                0.8532  | [0.8135, 0.8948]  | yes            |
+| equal_update | loss_mean_rel_speed              | SmallMLPDigits           |        15 |                 15 |                0.3927  | [0.3172, 0.4862]  | yes            |
+| equal_update | per_update_rank_plane_mean_speed | All                      |       165 |                 75 |                1.073   | [1.009, 1.14]     | no             |
+| equal_update | per_update_rank_plane_mean_speed | MatrixFactorizationInput |        75 |                 41 |                0.9897  | [0.9022, 1.086]   | no             |
+| equal_update | per_update_rank_plane_mean_speed | MatrixSensing            |        75 |                 28 |                1.179   | [1.073, 1.295]    | no             |
+| equal_update | per_update_rank_plane_mean_speed | SmallMLPDigits           |        15 |                  6 |                1.002   | [0.9112, 1.101]   | no             |
+| equal_update | per_update_condition_mean_speed  | All                      |       165 |                 91 |                0.9184  | [0.8507, 0.9914]  | yes            |
+| equal_update | per_update_condition_mean_speed  | MatrixFactorizationInput |        75 |                 56 |                0.7046  | [0.6293, 0.789]   | yes            |
+| equal_update | per_update_condition_mean_speed  | MatrixSensing            |        75 |                 28 |                1.179   | [1.073, 1.295]    | no             |
+| equal_update | per_update_condition_mean_speed  | SmallMLPDigits           |        15 |                  7 |                0.9926  | [0.906, 1.088]    | no             |
 
 ## Interpretation
 

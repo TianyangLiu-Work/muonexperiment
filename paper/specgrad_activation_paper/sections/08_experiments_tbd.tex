@@ -1,11 +1,11 @@
 \section{实验计划与待完成实验}
 \label{sec:experiments-tbd}
 
-本节区分已完成实验与待完成实验。当前完成的 E11 局部几何实验见第~\ref{sec:e11} 节。下面列出的实验尚未完成，本文暂时保留空位。
+本节区分已完成实验与待完成实验。当前完成的 E11 局部几何实验见第~\ref{sec:e11} 节。Activation perturbation diagnostics 已完成一个初步版本；downstream Jacobian、长尾小 batch 与现代架构实验仍是待完成实验。
 
 \subsection{实验一：Activation perturbation diagnostics}
 
-\paragraph{状态.} \TBD。
+\paragraph{状态.} 已完成初步版本。
 
 \paragraph{目标.} 直接测量 SpecGrad / polar update 是否在 activation perturbation 上表现出 operator-norm 意义下的稳定性。
 
@@ -29,7 +29,12 @@
 
 \paragraph{预期.} SpecGrad 应更自然地控制 operator/per-sample 指标，而不一定降低 batch-Frobenius movement。
 
-\paragraph{结果.} \TBD。
+\paragraph{结果.}
+在 matched global update size 的 equal-update control 中，Muon 在当前 activation-defined tasks 上降低了 operator-norm 与 worst-case per-sample pre-activation perturbation，但没有统一降低 batch-Frobenius movement。具体地，Muon/Adam 的相对 operator perturbation ratio 为 \(0.8390\,[0.8310,0.8471]\)，max per-sample perturbation ratio 为 \(0.7279\,[0.7198,0.7361]\)。但相对 Frobenius perturbation ratio 为 \(1.142\,[1.130,1.153]\)，mean per-sample perturbation ratio 为 \(1.206\,[1.190,1.222]\)。见表~\ref{tab:e11-activation-perturbation}。
+
+\input{tables/e11_activation_perturbation}
+
+这个结果支持本文的范数几何区分：Muon-like polar 更新可以降低 operator/per-sample worst-case activation perturbation，同时 batch-level Frobenius movement 仍然依赖任务族。它不支持“Muon 一般更稳定”的表述。Matrix Sensing 没有被纳入该诊断，因为其 \(A\) 是 measurement-operator proxy，而不是层激活矩阵。
 
 \subsection{实验二：Activation stable rank 与层级条件}
 

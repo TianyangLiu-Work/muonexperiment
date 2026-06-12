@@ -398,6 +398,81 @@ def update_spectrum_summary(steps: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
+def activation_perturbation_summary(layers: pd.DataFrame) -> pd.DataFrame:
+    metrics = [
+        "relative_activation_delta_fro_norm",
+        "relative_activation_delta_op_norm",
+        "max_relative_sample_activation_delta",
+        "mean_relative_sample_activation_delta",
+    ]
+    missing = [metric for metric in metrics if metric not in layers.columns]
+    if missing:
+        return pd.DataFrame(
+            columns=[
+                "metric",
+                "problem_family",
+                "layer_group",
+                "n_pairs",
+                "muon_higher_pairs",
+                "muon_lower_pairs",
+                "geomean_ratio_muon_over_adam",
+                "ratio_ci95_low",
+                "ratio_ci95_high",
+                "mean_delta_muon_minus_adam",
+                "delta_ci95_low",
+                "delta_ci95_high",
+                "ratio_ci95_above_one",
+                "ratio_ci95_below_one",
+            ]
+        )
+
+    source = layers[np.isfinite(layers["relative_activation_delta_fro_norm"])].copy()
+    pivot = source.pivot_table(
+        index=["problem_family", "setting", "kappa", "lr", "seed", "step", "layer"],
+        columns="algo",
+        values=metrics,
+        aggfunc="mean",
+    )
+    if pivot.empty:
+        return pd.DataFrame()
+    pivot.columns = [f"{metric}_{algo}" for metric, algo in pivot.columns]
+    paired = pivot.reset_index().dropna().copy()
+    records = []
+    groupers = [("All", "all_layers", paired)]
+    groupers.extend((family, "all_layers", group) for family, group in paired.groupby("problem_family", observed=True, sort=False))
+    groupers.extend(
+        (family, f"layer_{int(layer)}", group)
+        for (family, layer), group in paired.groupby(["problem_family", "layer"], observed=True, sort=False)
+    )
+    for metric in metrics:
+        muon_col = f"{metric}_Muon"
+        adam_col = f"{metric}_Adam"
+        for family, layer_group, group in groupers:
+            ratios = group[muon_col] / (group[adam_col].abs() + 1e-300)
+            deltas = group[muon_col] - group[adam_col]
+            ratio_mean, ratio_lo, ratio_hi = log_ratio_ci95(ratios)
+            delta_mean, delta_lo, delta_hi = ci95(deltas)
+            records.append(
+                {
+                    "metric": metric,
+                    "problem_family": family,
+                    "layer_group": layer_group,
+                    "n_pairs": int(len(group)),
+                    "muon_higher_pairs": int((deltas > 0).sum()),
+                    "muon_lower_pairs": int((deltas < 0).sum()),
+                    "geomean_ratio_muon_over_adam": ratio_mean,
+                    "ratio_ci95_low": ratio_lo,
+                    "ratio_ci95_high": ratio_hi,
+                    "mean_delta_muon_minus_adam": delta_mean,
+                    "delta_ci95_low": delta_lo,
+                    "delta_ci95_high": delta_hi,
+                    "ratio_ci95_above_one": bool(ratio_lo > 1.0) if np.isfinite(ratio_lo) else False,
+                    "ratio_ci95_below_one": bool(ratio_hi < 1.0) if np.isfinite(ratio_hi) else False,
+                }
+            )
+    return pd.DataFrame(records)
+
+
 def update_transmission_summary(steps: pd.DataFrame) -> pd.DataFrame:
     rows = []
     source = steps.sort_values(["run_id", "step"]).copy()
