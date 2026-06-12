@@ -1,0 +1,40 @@
+\section{建议实验指标与记录协议}
+
+后续实验建议记录以下量。
+
+\subsection{更新谱指标}
+\[
+\nrank(D)=\frac{\|D\|_*^2}{\|D\|_F^2},
+\qquad
+\srank(D)=\frac{\|D\|_F^2}{\|D\|_{\op}^2}.
+\]
+
+\subsection{激活扰动指标}
+\[
+\Delta Z_{\ell,\mathrm{direct}}=(W_\ell^{t+1}-W_\ell^t)A_{\ell-1}^t.
+\]
+记录
+\[
+\|\Delta Z_{\ell,\mathrm{direct}}\|_F,
+\qquad
+\|\Delta Z_{\ell,\mathrm{direct}}\|_{\op},
+\]
+以及归一化版本。
+
+\subsection{一阶进展指标}
+\[
+\langle G_\ell,D_\ell\rangle,
+\qquad
+\sum_\ell\langle G_\ell,D_\ell\rangle.
+\]
+
+\subsection{下游扰动指标}
+用 JVP 估计
+\[
+\|J_\theta D\|_F^2.
+\]
+比较
+\[
+\frac{\langle G,D\rangle^2}{\|J_\theta D\|_F^2}
+\]
+在不同更新方向上的差异。

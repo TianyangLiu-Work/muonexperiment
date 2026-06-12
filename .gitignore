@@ -1,15 +1,30 @@
-# Experiment outputs
-logs/
-#logs_v2/
-results/
-results_v2/
-results_backup/
-results_backup_v2/
+# Notebook state
+.ipynb_checkpoints/
 
 # Python
 __pycache__/
 *.pyc
 *.pyo
+.pytest_cache/
+
+# Local downloaded datasets and caches
+data/
+
+# Generated animations/videos are not part of the default E11 evidence set.
+# Force-add a specific file only when explicitly requested.
+*.gif
+*.mp4
+
+# LaTeX build byproducts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
 
 # System
 .DS_Store
@@ -19,10 +34,5 @@ Thumbs.db
 .vscode/
 .idea/
 
-# SSH askpass
-ssh_askpass.py
-
-# plots
-analysis_report/output/*
-AGENTS.md
-*.png
+# Local presentation workspace
+slidev/

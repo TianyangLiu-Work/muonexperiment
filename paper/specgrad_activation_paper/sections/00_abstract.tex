@@ -1,0 +1,13 @@
+\begin{abstract}
+谱梯度方法（spectral gradient methods）通过重塑矩阵更新的奇异值来改变优化动态。典型例子是极分解更新
+\(G=U\Sigma V^\top\mapsto UV^\top\)，它保留梯度奇异向量，但将非零奇异值拉平。已有理论通常从逐层角度解释这类方法：当某个参数块的梯度核秩（nuclear rank）大于输入激活的稳定秩（stable rank）时，谱更新可能优于欧几里得梯度步。本文将这个观点整理为一个更一般的\emph{激活扰动几何}框架。
+
+我们首先证明：在一阶线性化目标下，梯度形状的更新是 Frobenius 范数预算下的最优方向，而极分解/谱更新是 operator 范数预算下的最优方向。这解释了为什么高秩更新并不天然带来更大损失下降。其次，我们把参数更新对隐藏激活的影响写成 \(\Delta W A\)，并指出谱更新提供的是 per-sample/operator-norm 意义下的扰动控制，但它可能增加 batch-level activation spreading。进一步地，若该层扰动通过下游 Jacobian \(B\) 传播到模型输出，则真正相关的量不是 \(\srank(A)\)，而是
+\[
+\ssrank(B,A)=
+\frac{\sum_i \sigma_i(B)^2\sigma_i(A)^2}{\sigma_1(B)^2\sigma_1(A)^2},
+\]
+这是映射 \(D\mapsto BDA\) 在谱范数与 Frobenius 范数几何下的精确敏感度比。
+
+实验部分目前采用 E11 控制实验作为局部机制证据：Muon-like 极分解更新稳定地产生更平、更高秩的 update spectrum；one-step 损失下降与梯度--更新内积高度相关；flat/polar 谱分配在 operator-norm 预算下胜出，但在 Frobenius 预算下失败；direct activation perturbation diagnostics 显示 Muon 在 matched update size 下可降低 operator/per-sample worst-case perturbation，但不统一降低 batch-Frobenius movement；神经网络 sanity checks 进一步说明高秩更新不自动意味着更好的一阶进展。尚未进行的 downstream Jacobian 与长尾小 batch 实验在本文中保留为待完成实验。
+\end{abstract}

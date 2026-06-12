@@ -1,0 +1,4 @@
+hidden_dim,n_seed_pairs,muon_lower_final_loss_pairs,final_loss_ratio_muon_over_adam,final_loss_ratio_ci95_low,final_loss_ratio_ci95_high,final_loss_ratio_ci95_below_one,total_decrease_ratio_muon_over_adam,total_decrease_ratio_ci95_low,total_decrease_ratio_ci95_high,total_decrease_ratio_ci95_above_one,mean_best_target_adam,mean_best_target_muon
+16,5,0,1.001000166756238,1.0005530395717164,1.0014474937529747,False,0.768782393807557,0.7008602103234277,0.8432870925226802,False,0.1,0.1
+64,5,0,1.008483633632812,1.007797000758171,1.009170734324587,False,0.4623701909545949,0.45050598320185187,0.47454684611280823,False,0.1,0.1
+All,10,0,1.0047349329237945,1.0019000271371914,1.007577860160244,False,0.5962063923066665,0.4904733732652251,0.724732639125577,False,0.1,0.1

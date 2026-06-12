@@ -1,0 +1,13 @@
+target,model,evaluation,held_out_family,train_pairs,test_pairs,test_positive_rate,mean_predicted_probability,calibration_error,auc,accuracy,balanced_accuracy,brier,baseline_brier
+muon_first_order_win,spectrum_only,in_sample,None,1500,1500,0.264,0.3378991880089245,0.07389918800892448,0.9564485434050652,0.8993333333333333,0.9057010320597277,0.07923272239177559,0.194304
+muon_first_order_win,spectrum_only,leave_family_out,SmallMLPDigits,0,1500,0.264,,,,,,,
+muon_first_order_win,family_only,in_sample,None,1500,1500,0.264,0.5,0.236,0.5,0.264,0.5,0.25,0.194304
+muon_first_order_win,family_only,leave_family_out,SmallMLPDigits,0,1500,0.264,,,,,,,
+muon_first_order_win,spectrum_plus_family,in_sample,None,1500,1500,0.264,0.3378976304230931,0.07389763042309311,0.9564554055043185,0.8993333333333333,0.9057010320597277,0.07923443610460253,0.194304
+muon_first_order_win,spectrum_plus_family,leave_family_out,SmallMLPDigits,0,1500,0.264,,,,,,,
+muon_delta_loss_win,spectrum_only,in_sample,None,1500,1500,0.258,0.3366213307057113,0.07862133070571131,0.9535208749776543,0.8986666666666666,0.9022197148568365,0.08216899310661781,0.191436
+muon_delta_loss_win,spectrum_only,leave_family_out,SmallMLPDigits,0,1500,0.258,,,,,,,
+muon_delta_loss_win,family_only,in_sample,None,1500,1500,0.258,0.5,0.242,0.5,0.258,0.5,0.25,0.191436
+muon_delta_loss_win,family_only,leave_family_out,SmallMLPDigits,0,1500,0.258,,,,,,,
+muon_delta_loss_win,spectrum_plus_family,in_sample,None,1500,1500,0.258,0.3365892231558665,0.07858922315586647,0.9535556994969017,0.8986666666666666,0.9022197148568365,0.0821810489603042,0.191436
+muon_delta_loss_win,spectrum_plus_family,leave_family_out,SmallMLPDigits,0,1500,0.258,,,,,,,

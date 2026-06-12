@@ -1,0 +1,109 @@
+problem_family,setting,kappa,lr,algo,predictor,points,positive_delta_points,spearman_all_delta_loss,pearson_log_positive_delta_loss
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-03,1.0,0.003,Adam,delta_gd_pred,50,50,0.32254501800720287,0.3118788567373709
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-03,1.0,0.003,Adam,delta_spec_pred,50,50,0.7323409363745499,0.7095021697092885
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-03,1.0,0.003,Adam,update_grad_inner,50,50,0.9980792316926771,0.9988108213434623
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-03,1.0,0.003,Muon,delta_gd_pred,50,50,0.7697959183673468,0.7653503665694087
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-03,1.0,0.003,Muon,delta_spec_pred,50,50,0.8739015606242496,0.8471578181491084
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-03,1.0,0.003,Muon,update_grad_inner,50,50,0.9917406962785112,0.9987471332507822
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=1e-02,1.0,0.01,Adam,delta_gd_pred,50,50,0.47783913565426167,0.42240596413494974
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=1e-02,1.0,0.01,Adam,delta_spec_pred,50,50,0.3803601440576231,0.302877922330309
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=1e-02,1.0,0.01,Adam,update_grad_inner,50,50,0.9984633853541416,0.9977965594047955
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=1e-02,1.0,0.01,Muon,delta_gd_pred,50,50,0.9124129651860744,0.9057144639837251
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=1e-02,1.0,0.01,Muon,delta_spec_pred,50,50,0.9255702280912365,0.9153593123495408
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=1e-02,1.0,0.01,Muon,update_grad_inner,50,50,0.999423769507803,0.9983872515979483
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-02,1.0,0.03,Adam,delta_gd_pred,50,46,0.5087635054021609,0.452553075839748
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-02,1.0,0.03,Adam,delta_spec_pred,50,46,0.5660024009603841,0.5502737380196875
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-02,1.0,0.03,Adam,update_grad_inner,50,46,0.5629291716686674,0.6291881821441426
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-02,1.0,0.03,Muon,delta_gd_pred,50,50,0.9772388955582233,0.9628715190996626
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-02,1.0,0.03,Muon,delta_spec_pred,50,50,0.9531332533013206,0.9441978759377753
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=1 num_factors=10 input_columns_multiplier=2 lr=3e-02,1.0,0.03,Muon,update_grad_inner,50,50,0.9859783913565426,0.9919643497303678
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-03,10.0,0.003,Adam,delta_gd_pred,50,50,0.586938775510204,0.5603436855355092
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-03,10.0,0.003,Adam,delta_spec_pred,50,50,0.8349099639855943,0.8485625877791977
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-03,10.0,0.003,Adam,update_grad_inner,50,50,0.9977911164465786,0.998742086938103
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-03,10.0,0.003,Muon,delta_gd_pred,50,50,0.6754861944777911,0.6886498117978719
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-03,10.0,0.003,Muon,delta_spec_pred,50,50,0.7861224489795918,0.8131000399247681
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-03,10.0,0.003,Muon,update_grad_inner,50,50,0.996734693877551,0.9985905831633293
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=1e-02,10.0,0.01,Adam,delta_gd_pred,50,50,0.6243937575030011,0.538571983032862
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=1e-02,10.0,0.01,Adam,delta_spec_pred,50,50,0.6252581032412965,0.6165257442814787
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=1e-02,10.0,0.01,Adam,update_grad_inner,50,50,0.9969267707082833,0.9956037637826187
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=1e-02,10.0,0.01,Muon,delta_gd_pred,50,50,0.8254981992797119,0.8365439509206941
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=1e-02,10.0,0.01,Muon,delta_spec_pred,50,50,0.8555582232893156,0.8534466966370734
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=1e-02,10.0,0.01,Muon,update_grad_inner,50,50,0.9977911164465786,0.9983677913119275
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-02,10.0,0.03,Adam,delta_gd_pred,50,42,0.5608163265306122,0.4601565542423013
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-02,10.0,0.03,Adam,delta_spec_pred,50,42,0.6956542617046818,0.5732545528550006
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-02,10.0,0.03,Adam,update_grad_inner,50,42,0.540360144057623,0.5334463976996241
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-02,10.0,0.03,Muon,delta_gd_pred,50,50,0.8984873949579832,0.8621050635689386
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-02,10.0,0.03,Muon,delta_spec_pred,50,50,0.6715486194477791,0.5654331451249561
+MatrixFactorizationInput,overlap MF d=20 rank=10 kappa=10 num_factors=10 input_columns_multiplier=2 lr=3e-02,10.0,0.03,Muon,update_grad_inner,50,50,0.8823529411764706,0.9349707443004739
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-03,10.0,0.003,Adam,delta_gd_pred,25,25,0.8323076923076923,0.8716507775345438
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-03,10.0,0.003,Adam,delta_spec_pred,25,25,0.7938461538461539,0.8284638370298087
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-03,10.0,0.003,Adam,update_grad_inner,25,25,0.9984615384615384,0.9999780038006834
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-03,10.0,0.003,Muon,delta_gd_pred,25,25,0.9784615384615385,0.9857373390837655
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-03,10.0,0.003,Muon,delta_spec_pred,25,25,0.9969230769230769,0.9989612813941267
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-03,10.0,0.003,Muon,update_grad_inner,25,25,1.0,0.9999908363873217
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=1e-02,10.0,0.01,Adam,delta_gd_pred,25,25,0.9576923076923078,0.9497534216380035
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=1e-02,10.0,0.01,Adam,delta_spec_pred,25,25,0.9446153846153846,0.9331266032482369
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=1e-02,10.0,0.01,Adam,update_grad_inner,25,25,0.9992307692307693,0.9998186356509631
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=1e-02,10.0,0.01,Muon,delta_gd_pred,25,25,0.9915384615384615,0.9955616080446033
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=1e-02,10.0,0.01,Muon,delta_spec_pred,25,25,0.9984615384615384,0.999565284469489
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=1e-02,10.0,0.01,Muon,update_grad_inner,25,25,0.9992307692307693,0.9999390627392641
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-02,10.0,0.03,Adam,delta_gd_pred,25,25,0.9876923076923078,0.994938450778733
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-02,10.0,0.03,Adam,delta_spec_pred,25,25,0.9876923076923078,0.9915399135670253
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-02,10.0,0.03,Adam,update_grad_inner,25,25,0.9984615384615384,0.9994562305845847
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-02,10.0,0.03,Muon,delta_gd_pred,25,25,0.9976923076923077,0.9993476560034925
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-02,10.0,0.03,Muon,delta_spec_pred,25,25,0.9992307692307693,0.9997708902755171
+MatrixSensing,overlap MS d=20 rank=10 kappa=10 measurement_multiplier=2 lr=3e-02,10.0,0.03,Muon,update_grad_inner,25,25,0.9992307692307693,0.9998363951491179
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-03,1.0,0.003,Adam,delta_gd_pred,25,25,0.9876923076923078,0.96737776619072
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-03,1.0,0.003,Adam,delta_spec_pred,25,25,0.9476923076923076,0.954041171117376
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-03,1.0,0.003,Adam,update_grad_inner,25,25,1.0,0.9999946200892965
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-03,1.0,0.003,Muon,delta_gd_pred,25,25,0.953076923076923,0.9504804993922756
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-03,1.0,0.003,Muon,delta_spec_pred,25,25,0.9992307692307693,0.9987803023080486
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-03,1.0,0.003,Muon,update_grad_inner,25,25,1.0,0.9999700666785818
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=1e-02,1.0,0.01,Adam,delta_gd_pred,25,25,0.94,0.9578280377682038
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=1e-02,1.0,0.01,Adam,delta_spec_pred,25,25,0.9323076923076923,0.9445887012710192
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=1e-02,1.0,0.01,Adam,update_grad_inner,25,25,0.9992307692307693,0.9999254384643746
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=1e-02,1.0,0.01,Muon,delta_gd_pred,25,25,0.9830769230769232,0.9836141642412789
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=1e-02,1.0,0.01,Muon,delta_spec_pred,25,25,0.9992307692307693,0.9992600559982505
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=1e-02,1.0,0.01,Muon,update_grad_inner,25,25,0.9992307692307693,0.999873112794568
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-02,1.0,0.03,Adam,delta_gd_pred,25,25,0.9853846153846154,0.986724989572461
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-02,1.0,0.03,Adam,delta_spec_pred,25,25,0.9861538461538462,0.9880521928883652
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-02,1.0,0.03,Adam,update_grad_inner,25,25,0.9976923076923077,0.9995706284642466
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-02,1.0,0.03,Muon,delta_gd_pred,25,25,0.9953846153846154,0.9967152727326055
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-02,1.0,0.03,Muon,delta_spec_pred,25,25,0.9976923076923077,0.999590700264876
+MatrixSensing,overlap MS d=20 rank=5 kappa=1 measurement_multiplier=2 lr=3e-02,1.0,0.03,Muon,update_grad_inner,25,25,0.9984615384615384,0.9997394150708723
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-03,1.0,0.003,Adam,delta_gd_pred,25,25,0.976923076923077,0.9932300819263524
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-03,1.0,0.003,Adam,delta_spec_pred,25,25,0.9230769230769231,0.9841823888449319
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-03,1.0,0.003,Adam,update_grad_inner,25,25,1.0,0.9999984308834502
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-03,1.0,0.003,Muon,delta_gd_pred,25,25,0.9869230769230769,0.996359033880749
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-03,1.0,0.003,Muon,delta_spec_pred,25,25,1.0,0.9998290044379136
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-03,1.0,0.003,Muon,update_grad_inner,25,25,1.0,0.9999991684667404
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=1e-02,1.0,0.01,Adam,delta_gd_pred,25,25,0.9976923076923077,0.9943137757503034
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=1e-02,1.0,0.01,Adam,delta_spec_pred,25,25,0.9938461538461538,0.9899113380555706
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=1e-02,1.0,0.01,Adam,update_grad_inner,25,25,1.0,0.9999817935135709
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=1e-02,1.0,0.01,Muon,delta_gd_pred,25,25,0.9930769230769231,0.9959976085926759
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=1e-02,1.0,0.01,Muon,delta_spec_pred,25,25,0.9992307692307693,0.9998165106023408
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=1e-02,1.0,0.01,Muon,update_grad_inner,25,25,0.9992307692307693,0.9999887279336563
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-02,1.0,0.03,Adam,delta_gd_pred,25,25,0.9907692307692307,0.994694094829848
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-02,1.0,0.03,Adam,delta_spec_pred,25,25,0.9907692307692307,0.995530290303477
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-02,1.0,0.03,Adam,update_grad_inner,25,25,0.9992307692307693,0.9998895960245511
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-02,1.0,0.03,Muon,delta_gd_pred,25,25,0.9892307692307692,0.9961697703698756
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-02,1.0,0.03,Muon,delta_spec_pred,25,25,0.9984615384615384,0.9998721212083957
+MatrixSensing,overlap MS d=20 rank=10 kappa=1 measurement_multiplier=0.5 lr=3e-02,1.0,0.03,Muon,update_grad_inner,25,25,0.9992307692307693,0.9999400670512903
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-03,1.0,0.003,Adam,delta_gd_pred,50,50,0.14458583433373348,0.1884662174920242
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-03,1.0,0.003,Adam,delta_spec_pred,50,50,0.13210084033613445,0.14412814355885442
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-03,1.0,0.003,Adam,update_grad_inner,50,50,0.9810804321728691,0.9848658921586867
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-03,1.0,0.003,Muon,delta_gd_pred,50,50,0.15236494597839134,0.23259887783205457
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-03,1.0,0.003,Muon,delta_spec_pred,50,50,0.19231692677070825,0.2615758266350604
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-03,1.0,0.003,Muon,update_grad_inner,50,50,0.9879951980792315,0.9893800102441569
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=1e-02,1.0,0.01,Adam,delta_gd_pred,50,50,0.33454981992797117,0.3196372697716218
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=1e-02,1.0,0.01,Adam,delta_spec_pred,50,50,0.1404561824729892,0.12013340010532901
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=1e-02,1.0,0.01,Adam,update_grad_inner,50,50,0.9932773109243697,0.9906670233317157
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=1e-02,1.0,0.01,Muon,delta_gd_pred,50,50,0.3798799519807923,0.4949254527703684
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=1e-02,1.0,0.01,Muon,delta_spec_pred,50,50,0.5332533013205282,0.629250325022313
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=1e-02,1.0,0.01,Muon,update_grad_inner,50,50,0.9952941176470588,0.993128126697103
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-02,1.0,0.03,Adam,delta_gd_pred,50,50,0.2604081632653061,0.21485441408545036
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-02,1.0,0.03,Adam,delta_spec_pred,50,50,0.0642016806722689,0.013835166391569457
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-02,1.0,0.03,Adam,update_grad_inner,50,50,0.9951980792316926,0.9906888638169085
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-02,1.0,0.03,Muon,delta_gd_pred,50,50,0.4567106842737095,0.5990084318321975
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-02,1.0,0.03,Muon,delta_spec_pred,50,50,0.6353421368547418,0.7358847012030744
+SmallMLPDigits,overlap SmallMLPDigits d=64 rank=10 hidden_dim=16 num_samples=128 lr=3e-02,1.0,0.03,Muon,update_grad_inner,50,50,0.997406962785114,0.990014325262062

@@ -1,0 +1,30 @@
+\section{讨论}
+
+本文主张将谱梯度更新理解为 activation perturbation geometry，而不是简单理解为“更高 rank 的更新”。这一表述有三个好处。
+
+第一，它解释了为什么 polar/SpecGrad 更新在 operator-norm 预算下自然。由于
+\[
+\|UV^\top\|_{\op}=1,
+\]
+它给出了清晰的 per-sample activation perturbation 控制：
+\[
+\|UV^\top a\|_2\le \|a\|_2.
+\]
+
+第二，它解释了为什么高秩更新可能失败。Batch-level 扰动由
+\[
+\|D A\|_F
+\]
+决定，而 polar 更新的上界是 \(\|A\|_F\)，可能随着 activation stable rank 增大而增大。因此，高秩谱扩散只有在这些方向带来足够一阶收益、并且 downstream sensitivity 不高时才有利。
+
+第三，它自然引入 downstream-aware stable rank。若扰动通过后续网络传播为
+\[
+BDA,
+\]
+则相关几何量应为
+\[
+\ssrank(B,A),
+\]
+而非仅 \(\srank(A)\)。这说明 layerwise activation stable rank 可能是保守上界。
+
+已有 E11 实验与这一观点一致：Muon-like 更新稳定地产生更平、更高秩的 update spectra，但进展优势是条件化的。当前证据不支持“Muon 一般更稳定”或“更高 rank 一般更好”的宽泛结论；更安全的说法是，Muon/SpecGrad 是 update-spectrum shaping 方法，其效应由任务、层、范数几何和下游敏感度共同决定。

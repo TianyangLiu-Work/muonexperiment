@@ -1,0 +1,27 @@
+mode,problem_family,base_setting,algo,lr,seed_count,mean_best_final_loss,mean_best_total_loss_decrease
+equal_update,MatrixFactorizationInput,MF input kappa=1e+02,Adam,0.03,5,2.538262206090324e-05,0.00012905750711737258
+equal_update,MatrixFactorizationInput,MF input kappa=1e+02,Muon,0.03,5,1.1894040870408227e-05,0.0001425460883078676
+equal_update,MatrixFactorizationInput,MF input kappa=1e+05,Adam,0.03,5,2.106166752716339e-05,0.00011897871915646601
+equal_update,MatrixFactorizationInput,MF input kappa=1e+05,Muon,0.03,5,1.1517738942083795e-05,0.0001285226477415456
+equal_update,MatrixSensing,Matrix sensing kappa=1e+02,Adam,0.01,5,0.0018253489568513463,0.010672041702080753
+equal_update,MatrixSensing,Matrix sensing kappa=1e+02,Muon,0.03,5,0.0005358377649344853,0.011961552893997616
+equal_update,MatrixSensing,Matrix sensing kappa=1e+05,Adam,0.01,5,0.001487458122929496,0.009970303493624271
+equal_update,MatrixSensing,Matrix sensing kappa=1e+05,Muon,0.03,5,0.0005711408912811293,0.010886620725272638
+equal_update,SmallMLPDigits,Small MLP digits hidden=16,Adam,0.03,5,2.184683076489951,0.11791695785539939
+equal_update,SmallMLPDigits,Small MLP digits hidden=16,Muon,0.03,5,2.2082253877262032,0.09437464661914712
+equal_update,SmallMLPDigits,Small MLP digits hidden=64,Adam,0.03,5,1.8386688389601737,0.46391683338066764
+equal_update,SmallMLPDigits,Small MLP digits hidden=64,Muon,0.03,5,2.1893391875347943,0.11324648480604704
+raw,MatrixFactorizationInput,MF input kappa=1e+02,Adam,0.01,1,1.9246026019251368e-05,0.00014219520608325042
+raw,MatrixFactorizationInput,MF input kappa=1e+02,Adam,0.03,4,1.0261080366615104e-05,0.00014242877308060422
+raw,MatrixFactorizationInput,MF input kappa=1e+02,Muon,0.03,5,1.1894040870408222e-05,0.0001425460883078676
+raw,MatrixFactorizationInput,MF input kappa=1e+05,Adam,0.01,1,1.0656335520429752e-05,0.00013629583444534532
+raw,MatrixFactorizationInput,MF input kappa=1e+05,Adam,0.03,4,5.921054369884578e-06,0.0001323913864932084
+raw,MatrixFactorizationInput,MF input kappa=1e+05,Muon,0.03,5,1.1517738942083838e-05,0.00012852264774154557
+raw,MatrixSensing,Matrix sensing kappa=1e+02,Adam,0.003,5,0.001138418487935154,0.011358972170996946
+raw,MatrixSensing,Matrix sensing kappa=1e+02,Muon,0.03,5,0.0005358377649344855,0.011961552893997616
+raw,MatrixSensing,Matrix sensing kappa=1e+05,Adam,0.003,5,0.0011853426821978714,0.010272418934355897
+raw,MatrixSensing,Matrix sensing kappa=1e+05,Muon,0.03,5,0.0005711408912811293,0.010886620725272638
+raw,SmallMLPDigits,Small MLP digits hidden=16,Adam,0.03,5,1.5588312744411303,0.7437687599042201
+raw,SmallMLPDigits,Small MLP digits hidden=16,Muon,0.03,5,2.2082602201942714,0.09433981415107925
+raw,SmallMLPDigits,Small MLP digits hidden=64,Adam,0.03,5,0.7218245535538264,1.580761118787015
+raw,SmallMLPDigits,Small MLP digits hidden=64,Muon,0.03,5,2.189310241927153,0.11327543041368848

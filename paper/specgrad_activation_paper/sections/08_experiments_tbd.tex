@@ -1,0 +1,113 @@
+\section{实验计划与待完成实验}
+\label{sec:experiments-tbd}
+
+本节区分已完成实验与待完成实验。当前完成的 E11 局部几何实验见第~\ref{sec:e11} 节。Activation perturbation diagnostics 已完成一个初步版本；downstream Jacobian、长尾小 batch 与现代架构实验仍是待完成实验。
+
+\subsection{实验一：Activation perturbation diagnostics}
+
+\paragraph{状态.} 已完成初步版本。
+
+\paragraph{目标.} 直接测量 SpecGrad / polar update 是否在 activation perturbation 上表现出 operator-norm 意义下的稳定性。
+
+对每层记录
+\[
+\Delta Z_{\ell,\mathrm{direct}}
+=(W_\ell^{t+1}-W_\ell^t)A_{\ell-1}^t.
+\]
+测量：
+\[
+\frac{\|\Delta Z_{\ell,\mathrm{direct}}\|_F}{\|Z_\ell^t\|_F},
+\qquad
+\frac{\|\Delta Z_{\ell,\mathrm{direct}}\|_{\op}}{\|Z_\ell^t\|_{\op}},
+\]
+以及 per-sample 最大扰动：
+\[
+\max_b
+\frac{\|(W_\ell^{t+1}-W_\ell^t)h_{\ell-1}(x_b)\|_2}
+{\|h_{\ell-1}(x_b)\|_2}.
+\]
+
+\paragraph{预期.} SpecGrad 应更自然地控制 operator/per-sample 指标，而不一定降低 batch-Frobenius movement。
+
+\paragraph{结果.}
+在 matched global update size 的 equal-update control 中，Muon 在当前 activation-defined tasks 上降低了 operator-norm 与 worst-case per-sample pre-activation perturbation，但没有统一降低 batch-Frobenius movement。具体地，Muon/Adam 的相对 operator perturbation ratio 为 \(0.8390\,[0.8310,0.8471]\)，max per-sample perturbation ratio 为 \(0.7279\,[0.7198,0.7361]\)。但相对 Frobenius perturbation ratio 为 \(1.142\,[1.130,1.153]\)，mean per-sample perturbation ratio 为 \(1.206\,[1.190,1.222]\)。见表~\ref{tab:e11-activation-perturbation}。
+
+\input{tables/e11_activation_perturbation}
+
+这个结果支持本文的范数几何区分：Muon-like polar 更新可以降低 operator/per-sample worst-case activation perturbation，同时 batch-level Frobenius movement 仍然依赖任务族。它不支持“Muon 一般更稳定”的表述。Matrix Sensing 没有被纳入该诊断，因为其 \(A\) 是 measurement-operator proxy，而不是层激活矩阵。
+
+\subsection{实验二：Activation stable rank 与层级条件}
+
+\paragraph{状态.} \TBD。
+
+计算
+\[
+\srank(A_{\ell-1})=\frac{\|A_{\ell-1}\|_F^2}{\|A_{\ell-1}\|_{\op}^2},
+\qquad
+\nrank(G_\ell)=\frac{\|G_\ell\|_*^2}{\|G_\ell\|_F^2}.
+\]
+检验条件
+\[
+\nrank(G_\ell)>\srank(A_{\ell-1})
+\]
+是否预测该层 polar/SpecGrad 的一阶优势。
+
+\paragraph{结果.} \TBD。
+
+\subsection{实验三：Downstream-aware activation perturbation}
+
+\paragraph{状态.} \TBD。
+
+目标是测量
+\[
+\|B_\ell D_\ell A_{\ell-1}\|_F
+\]
+或使用 JVP 估计
+\[
+\|J_\theta D_\ell\|_F.
+\]
+比较
+\[
+D_{\mathrm{spec}}=\operatorname{polar}(G_\ell)
+\]
+与
+\[
+D_{\mathrm{gd}}=G_\ell/\|G_\ell\|_F.
+\]
+核心指标为
+\[
+\frac{\langle G_\ell,D_{\mathrm{spec}}\rangle^2/\|J_\theta D_{\mathrm{spec}}\|_F^2}
+{\langle G_\ell,D_{\mathrm{gd}}\rangle^2/\|J_\theta D_{\mathrm{gd}}\|_F^2}.
+\]
+
+\paragraph{结果.} \TBD。
+
+\subsection{实验四：长尾小 batch 激活实验}
+
+\paragraph{状态.} \TBD。
+
+构造长尾分类或 synthetic long-tail mode 数据。检验 rare direction 可见性条件
+\[
+\frac{Bp_c}{1-\beta}\gtrsim 1.
+\]
+记录 tail-class loss、tail activation drift、tail activation coverage、minibatch spectral-tail consistency 与 effective nuclear rank。
+
+\paragraph{结果.} \TBD。
+
+\subsection{实验五：现代架构激活扰动 benchmark}
+
+\paragraph{状态.} \TBD。
+
+在 Transformer、现代 MLP 或 CNN 架构中测量
+\[
+\|\Delta A_\ell\|_F,
+\qquad
+\|\Delta A_\ell\|_{\op},
+\qquad
+\srank(A_\ell),
+\qquad
+\|J_\theta D_\ell\|_F.
+\]
+本实验不以 attention 为核心，而是直接观察 activation perturbation。
+
+\paragraph{结果.} \TBD。

@@ -1,0 +1,21 @@
+\section{结论}
+
+本文将谱梯度更新整理为一种激活扰动几何。核心结论如下：
+
+\begin{enumerate}[label=(\arabic*)]
+  \item Polar/SpecGrad 更新是 operator-norm 预算下的一阶最优方向，而不是 Frobenius 预算下的一阶最优方向。
+  \item 对层激活而言，关键对象是 \(D A\)。SpecGrad 控制 operator/per-sample activation perturbation，但不保证 batch-Frobenius perturbation 更小。
+  \item 对深层网络而言，真正相关的是 \(BDA\)。对应的敏感度比是
+  \[
+  \ssrank(B,A)=
+  \frac{\sum_i \sigma_i(B)^2\sigma_i(A)^2}
+  {\sigma_1(B)^2\sigma_1(A)^2}.
+  \]
+  \item 已有 E11 实验支持局部谱几何机制：Muon-like 更新重塑 update spectrum；one-step 下降由 \(\langle G,D\rangle\) 很好解释；polar 谱分配在 operator-norm 预算下有利，但在 Frobenius 预算下不利。
+  \item 尚需补充直接的 activation perturbation、downstream Jacobian 和长尾小 batch 实验。
+\end{enumerate}
+
+因此，最稳妥的论文级表述是：
+\[
+\boxed{\text{谱梯度更新的收益不是来自高秩本身，而来自高秩谱扩散与激活/下游几何之间的匹配。}}
+\]

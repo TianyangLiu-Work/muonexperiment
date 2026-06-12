@@ -1,0 +1,211 @@
+group_type,problem_family,setting,comparison,metric,n_pairs,geomean_ratio,ratio_ci95_low,ratio_ci95_high,ratio_ci95_above_one,ratio_ci95_below_one,numerator_higher_rate
+all,All,All,FreshAdamSign/GD,final_loss,30,1.0116131885314599,1.0069100113447713,1.0163383337941436,True,False,1.0
+all,All,All,FreshAdamSign/GD,total_decrease,30,0.65147997808353,0.6098604745346825,0.6959397756799203,False,True,0.0
+all,All,All,FreshAdamSign/GD,mean_delta_loss,30,0.6429737414464043,0.602939580216218,0.6856661027981182,False,True,0.0
+all,All,All,FreshAdamSign/GD,mean_update_grad_inner,30,0.641756311572908,0.601315022862253,0.684917468855603,False,True,0.0
+all,All,All,FreshAdamSign/GD,mean_update_grad_cosine,30,0.645768672188503,0.6070664208161441,0.686938304740133,False,True,0.0
+all,All,All,FreshAdamSign/GD,mean_nrUpdate,30,1.4657420920122417,1.3138954511197616,1.6351376195613272,True,False,1.0
+all,All,All,FreshAdamSign/GD,mean_stUpdate,30,1.4060853534480524,1.3191494163832647,1.4987506317530874,True,False,1.0
+all,All,All,PolarMuon/FreshAdamSign,final_loss,30,1.0001106858509394,0.9988454739521777,1.0013775003611067,False,False,0.5
+all,All,All,PolarMuon/FreshAdamSign,total_decrease,30,0.7146944492130815,0.5984986069087728,0.853449197441236,False,True,0.5
+all,All,All,PolarMuon/FreshAdamSign,mean_delta_loss,30,0.6995295061654405,0.5890059056697753,0.8307922302402402,False,True,0.4666666666666667
+all,All,All,PolarMuon/FreshAdamSign,mean_update_grad_inner,30,0.7038020204372952,0.5949848257145344,0.8325208687074568,False,True,0.4666666666666667
+all,All,All,PolarMuon/FreshAdamSign,mean_update_grad_cosine,30,0.7244430982489543,0.6212086839764848,0.8448333324014036,False,True,0.4666666666666667
+all,All,All,PolarMuon/FreshAdamSign,mean_nrUpdate,30,1.844523820535557,1.6446125359602948,2.0687353708735365,True,False,1.0
+all,All,All,PolarMuon/FreshAdamSign,mean_stUpdate,30,5.2932425037311335,4.725470175581822,5.929233528567575,True,False,1.0
+all,All,All,PolarMuon/GD,final_loss,30,1.011725159798054,1.007875526735868,1.015589496734201,True,False,1.0
+all,All,All,PolarMuon/GD,total_decrease,30,0.4656091241097589,0.36857453380019317,0.5881900038481259,False,True,0.0
+all,All,All,PolarMuon/GD,mean_delta_loss,30,0.44977910383134884,0.3580846601669575,0.564953668076728,False,True,0.0
+all,All,All,PolarMuon/GD,mean_update_grad_inner,30,0.4516693887133989,0.3604488982233606,0.5659754758754146,False,True,0.0
+all,All,All,PolarMuon/GD,mean_update_grad_cosine,30,0.4678226576323524,0.379880184649536,0.5761238617805451,False,True,0.0
+all,All,All,PolarMuon/GD,mean_nrUpdate,30,2.7035962034782006,2.235917584102955,3.2690974316006667,True,False,1.0
+all,All,All,PolarMuon/GD,mean_stUpdate,30,7.442750756745047,6.378498004108942,8.684574141333048,True,False,1.0
+family,MatrixFactorizationInput,All,FreshAdamSign/GD,final_loss,10,1.00588991697839,1.0056722733207546,1.0061076077376139,True,False,1.0
+family,MatrixFactorizationInput,All,FreshAdamSign/GD,total_decrease,10,0.5369854943517525,0.5261125385259467,0.548083157174128,False,True,0.0
+family,MatrixFactorizationInput,All,FreshAdamSign/GD,mean_delta_loss,10,0.5369854943517525,0.5261125385259467,0.548083157174128,False,True,0.0
+family,MatrixFactorizationInput,All,FreshAdamSign/GD,mean_update_grad_inner,10,0.5325873096176763,0.5218018339084255,0.5435957176332464,False,True,0.0
+family,MatrixFactorizationInput,All,FreshAdamSign/GD,mean_update_grad_cosine,10,0.5421948162712623,0.5244600030783598,0.560529338874112,False,True,0.0
+family,MatrixFactorizationInput,All,FreshAdamSign/GD,mean_nrUpdate,10,1.5525103393299475,1.4388051048366892,1.6752014193054778,True,False,1.0
+family,MatrixFactorizationInput,All,FreshAdamSign/GD,mean_stUpdate,10,1.1393193388569998,1.0730289358611813,1.2097050811139363,True,False,1.0
+family,MatrixFactorizationInput,All,PolarMuon/FreshAdamSign,final_loss,10,1.0042013275572392,1.0038380361137664,1.004564750476775,True,False,1.0
+family,MatrixFactorizationInput,All,PolarMuon/FreshAdamSign,total_decrease,10,0.381270605609487,0.3497047677226408,0.41568571011625216,False,True,0.0
+family,MatrixFactorizationInput,All,PolarMuon/FreshAdamSign,mean_delta_loss,10,0.381270605609487,0.3497047677226408,0.4156857101162522,False,True,0.0
+family,MatrixFactorizationInput,All,PolarMuon/FreshAdamSign,mean_update_grad_inner,10,0.3895140688639309,0.3585774871536065,0.42311973082108534,False,True,0.0
+family,MatrixFactorizationInput,All,PolarMuon/FreshAdamSign,mean_update_grad_cosine,10,0.42274230665407125,0.3931649399172427,0.4545447462147101,False,True,0.0
+family,MatrixFactorizationInput,All,PolarMuon/FreshAdamSign,mean_nrUpdate,10,2.5825019123158732,2.2346037986303777,2.9845631387554543,True,False,1.0
+family,MatrixFactorizationInput,All,PolarMuon/FreshAdamSign,mean_stUpdate,10,4.3181757618761045,4.0232194498403695,4.6347563544400066,True,False,1.0
+family,MatrixFactorizationInput,All,PolarMuon/GD,final_loss,10,1.0101159900061403,1.0095541076383252,1.0106781850979518,True,False,1.0
+family,MatrixFactorizationInput,All,PolarMuon/GD,total_decrease,10,0.20473678463500236,0.18650977143724815,0.22474506648989437,False,True,0.0
+family,MatrixFactorizationInput,All,PolarMuon/GD,mean_delta_loss,10,0.20473678463500236,0.18650977143724815,0.22474506648989437,False,True,0.0
+family,MatrixFactorizationInput,All,PolarMuon/GD,mean_update_grad_inner,10,0.2074502499944754,0.18908152525073282,0.22760344335969732,False,True,0.0
+family,MatrixFactorizationInput,All,PolarMuon/GD,mean_update_grad_cosine,10,0.22920868728639374,0.20985436241248623,0.25034801146657476,False,True,0.0
+family,MatrixFactorizationInput,All,PolarMuon/GD,mean_nrUpdate,10,4.009360920209755,3.622333334112617,4.437740402607974,True,False,1.0
+family,MatrixFactorizationInput,All,PolarMuon/GD,mean_stUpdate,10,4.919781154089006,4.839984627777555,5.0008932807796045,True,False,1.0
+family,MatrixSensing,All,FreshAdamSign/GD,final_loss,10,1.0289706154987164,1.028062900360983,1.0298791320920522,True,False,1.0
+family,MatrixSensing,All,FreshAdamSign/GD,total_decrease,10,0.8027292852140916,0.800468860900127,0.8049960926846393,False,True,0.0
+family,MatrixSensing,All,FreshAdamSign/GD,mean_delta_loss,10,0.8027292852140915,0.800468860900127,0.8049960926846393,False,True,0.0
+family,MatrixSensing,All,FreshAdamSign/GD,mean_update_grad_inner,10,0.8018158801115609,0.7995428207457113,0.8040954016689864,False,True,0.0
+family,MatrixSensing,All,FreshAdamSign/GD,mean_update_grad_cosine,10,0.7962306023518511,0.7937967893489027,0.7986718775237233,False,True,0.0
+family,MatrixSensing,All,FreshAdamSign/GD,mean_nrUpdate,10,1.036316189003547,1.0313872917766302,1.0412686409398026,True,False,1.0
+family,MatrixSensing,All,FreshAdamSign/GD,mean_stUpdate,10,1.4819754548103785,1.4064769934430332,1.5615266078999557,True,False,1.0
+family,MatrixSensing,All,PolarMuon/FreshAdamSign,final_loss,10,0.9960866044365264,0.9957746479895737,0.9963986586132466,False,True,0.0
+family,MatrixSensing,All,PolarMuon/FreshAdamSign,total_decrease,10,1.034149017438059,1.0316036469403604,1.0367006683623436,True,False,1.0
+family,MatrixSensing,All,PolarMuon/FreshAdamSign,mean_delta_loss,10,1.0341490174380592,1.0316036469403604,1.0367006683623436,True,False,1.0
+family,MatrixSensing,All,PolarMuon/FreshAdamSign,mean_update_grad_inner,10,1.034381042538021,1.0318124577979477,1.036956021490063,True,False,1.0
+family,MatrixSensing,All,PolarMuon/FreshAdamSign,mean_update_grad_cosine,10,1.0358254633300241,1.0330395313601424,1.0386189084847408,True,False,1.0
+family,MatrixSensing,All,PolarMuon/FreshAdamSign,mean_nrUpdate,10,1.4146918687884444,1.4083429291533018,1.4210694300282096,True,False,1.0
+family,MatrixSensing,All,PolarMuon/FreshAdamSign,mean_stUpdate,10,5.552606520047008,5.25937601418607,5.862185758026649,True,False,1.0
+family,MatrixSensing,All,PolarMuon/GD,final_loss,10,1.0249438464570788,1.0241941654340254,1.0256940762253366,True,False,1.0
+family,MatrixSensing,All,PolarMuon/GD,total_decrease,10,0.8301417015729082,0.8283060962084859,0.831981374814012,False,True,0.0
+family,MatrixSensing,All,PolarMuon/GD,mean_delta_loss,10,0.8301417015729082,0.8283060962084859,0.831981374814012,False,True,0.0
+family,MatrixSensing,All,PolarMuon/GD,mean_update_grad_inner,10,0.8293831459933374,0.827515821194857,0.8312546844899897,False,True,0.0
+family,MatrixSensing,All,PolarMuon/GD,mean_update_grad_cosine,10,0.8247559325986503,0.8227597135739053,0.826756994945606,False,True,0.0
+family,MatrixSensing,All,PolarMuon/GD,mean_nrUpdate,10,1.4660680860771471,1.459011290042826,1.4731590136981183,True,False,1.0
+family,MatrixSensing,All,PolarMuon/GD,mean_stUpdate,10,8.228826572929735,7.911837984323799,8.558515341380794,True,False,1.0
+family,SmallMLPDigits,All,FreshAdamSign/GD,final_loss,10,1.0002073012616604,1.0001129374209625,1.0003016740058872,True,False,1.0
+family,SmallMLPDigits,All,FreshAdamSign/GD,total_decrease,10,0.6414629214192085,0.5978644346826343,0.6882407711274707,False,True,0.0
+family,SmallMLPDigits,All,FreshAdamSign/GD,mean_delta_loss,10,0.6166632247471671,0.5974195514807171,0.6365267621607948,False,True,0.0
+family,SmallMLPDigits,All,FreshAdamSign/GD,mean_update_grad_inner,10,0.618934909251919,0.5999579151027997,0.6385121560152136,False,True,0.0
+family,SmallMLPDigits,All,FreshAdamSign/GD,mean_update_grad_cosine,10,0.6237875336142524,0.603863395375545,0.6443690577577774,False,True,0.0
+family,SmallMLPDigits,All,FreshAdamSign/GD,mean_nrUpdate,10,1.957248169151598,1.7123392782397102,2.237185378113487,True,False,1.0
+family,SmallMLPDigits,All,FreshAdamSign/GD,mean_stUpdate,10,1.6464501020839197,1.5965818689066817,1.697875938243285,True,False,1.0
+family,SmallMLPDigits,All,PolarMuon/FreshAdamSign,final_loss,10,1.0000605873222204,0.9999992037790958,1.0001219746332874,False,False,0.5
+family,SmallMLPDigits,All,PolarMuon/FreshAdamSign,total_decrease,10,0.9258588439665423,0.7914270793604408,1.0831251814681206,False,False,0.5
+family,SmallMLPDigits,All,PolarMuon/FreshAdamSign,mean_delta_loss,10,0.8681637847263146,0.7552133529373211,0.9980071911849163,False,True,0.4
+family,SmallMLPDigits,All,PolarMuon/FreshAdamSign,mean_update_grad_inner,10,0.8652623897295214,0.7532874321402558,0.9938822435325649,False,True,0.4
+family,SmallMLPDigits,All,PolarMuon/FreshAdamSign,mean_update_grad_cosine,10,0.8682614958556879,0.7594417913517819,0.9926738741144048,False,True,0.4
+family,SmallMLPDigits,All,PolarMuon/FreshAdamSign,mean_nrUpdate,10,1.717711785215249,1.4558144117666012,2.026723841459259,True,False,1.0
+family,SmallMLPDigits,All,PolarMuon/FreshAdamSign,mean_stUpdate,10,6.185405260301162,4.4690634282477095,8.56090741347175,True,False,1.0
+family,SmallMLPDigits,All,PolarMuon/GD,final_loss,10,1.0002679011437092,1.000113708383557,1.0004221176765655,True,False,1.0
+family,SmallMLPDigits,All,PolarMuon/GD,total_decrease,10,0.5939041188725893,0.5000765737468259,0.7053361843588368,False,True,0.0
+family,SmallMLPDigits,All,PolarMuon/GD,mean_delta_loss,10,0.5353646790980345,0.46003670397453517,0.6230271131618377,False,True,0.0
+family,SmallMLPDigits,All,PolarMuon/GD,mean_update_grad_inner,10,0.5355410986663399,0.46082697077951834,0.6223686688207565,False,True,0.0
+family,SmallMLPDigits,All,PolarMuon/GD,mean_update_grad_cosine,10,0.541610697032041,0.46922502820260403,0.6251630443993981,False,True,0.0
+family,SmallMLPDigits,All,PolarMuon/GD,mean_nrUpdate,10,3.3619882467426687,2.4988994933176416,4.523177103145337,True,False,1.0
+family,SmallMLPDigits,All,PolarMuon/GD,mean_stUpdate,10,10.183961122253265,7.195137131135153,14.414327656212922,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,FreshAdamSign/GD,final_loss,5,1.005639322739459,1.0055381420803926,1.0057405135796667,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,FreshAdamSign/GD,total_decrease,5,0.5402067266668901,0.5170622878474249,0.5643871432802455,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,FreshAdamSign/GD,mean_delta_loss,5,0.5402067266668901,0.5170622878474249,0.5643871432802455,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,FreshAdamSign/GD,mean_update_grad_inner,5,0.537193698430763,0.514478842363227,0.5609114425544897,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,FreshAdamSign/GD,mean_update_grad_cosine,5,0.5494611850958281,0.5185413329046268,0.5822247423089038,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,FreshAdamSign/GD,mean_nrUpdate,5,1.6590357200918957,1.4450127396636017,1.9047579616367896,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,FreshAdamSign/GD,mean_stUpdate,5,1.2308086692811435,1.1956564470363091,1.2669943645874187,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/FreshAdamSign,final_loss,5,1.0038045699856972,1.003412138537159,1.0041971549129864,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/FreshAdamSign,total_decrease,5,0.4244771476481182,0.40671801666273005,0.4430117218655128,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/FreshAdamSign,mean_delta_loss,5,0.42447714764811834,0.40671801666273016,0.4430117218655129,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/FreshAdamSign,mean_update_grad_inner,5,0.4321182593821091,0.4161401332416322,0.44870988202188367,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/FreshAdamSign,mean_update_grad_cosine,5,0.46315342748502564,0.44535245731807294,0.48166591172061723,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/FreshAdamSign,mean_nrUpdate,5,2.140454284255005,2.042168551516466,2.2434703245153096,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/FreshAdamSign,mean_stUpdate,5,3.9379463453019063,3.8396493507683878,4.038759793358033,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/GD,final_loss,5,1.0094653479231905,1.0090074490433576,1.0099234546026628,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/GD,total_decrease,5,0.22930541047588815,0.21455934259546278,0.24506493465844292,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/GD,mean_delta_loss,5,0.2293054104758882,0.21455934259546286,0.24506493465844292,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/GD,mean_update_grad_inner,5,0.232131205916939,0.2172862387361545,0.2479903792981731,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/GD,mean_update_grad_cosine,5,0.25448483114711673,0.23803421783888015,0.2720723510760657,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/GD,mean_nrUpdate,5,3.5510901148027845,3.1777514180405513,3.9682905754867743,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+02,PolarMuon/GD,mean_stUpdate,5,4.84685850096158,4.699540543258222,4.998794480461351,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,FreshAdamSign/GD,final_loss,5,1.006140573662644,1.0058782041389955,1.0064030116217817,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,FreshAdamSign/GD,total_decrease,5,0.5337834701232894,0.519070796141003,0.5489131638595637,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,FreshAdamSign/GD,mean_delta_loss,5,0.5337834701232894,0.519070796141003,0.5489131638595638,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,FreshAdamSign/GD,mean_update_grad_inner,5,0.5280204201843466,0.5143812708100591,0.5420212203538918,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,FreshAdamSign/GD,mean_update_grad_cosine,5,0.5350245417975383,0.5044636773721093,0.5674368109450966,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,FreshAdamSign/GD,mean_nrUpdate,5,1.4528248696133441,1.3733573884057966,1.5368906299161842,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,FreshAdamSign/GD,mean_stUpdate,5,1.0546306572992203,1.0307589125437724,1.0790552570343677,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/FreshAdamSign,final_loss,5,1.0045982419487192,1.004232350067513,1.0049642671425685,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/FreshAdamSign,total_decrease,5,0.34246195703880644,0.3205231108289547,0.36590245151288076,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/FreshAdamSign,mean_delta_loss,5,0.34246195703880633,0.3205231108289546,0.3659024515128807,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/FreshAdamSign,mean_update_grad_inner,5,0.3511103882994508,0.331007969188934,0.3724336458540844,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/FreshAdamSign,mean_update_grad_cosine,5,0.38585714199639126,0.36897276120095696,0.4035141606253538,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/FreshAdamSign,mean_nrUpdate,5,3.1158414249601365,2.9281201934746295,3.315597429071769,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/FreshAdamSign,mean_stUpdate,5,4.735118327018425,4.625717568253959,4.847106473759273,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/GD,final_loss,5,1.0107670514547682,1.0102204579611924,1.011313940690174,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/GD,total_decrease,5,0.18280053181338687,0.17030619025396726,0.1962115081162098,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/GD,mean_delta_loss,5,0.18280053181338687,0.17030619025396726,0.1962115081162098,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/GD,mean_update_grad_inner,5,0.18539345476096514,0.17249993467405458,0.1992507019388203,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/GD,mean_update_grad_cosine,5,0.2064430405959269,0.19091761408155558,0.22323099529352902,False,True,0.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/GD,mean_nrUpdate,5,4.526771911953567,4.40596436987708,4.650891887131498,True,False,1.0
+setting,MatrixFactorizationInput,MF input kappa=1e+05,PolarMuon/GD,mean_stUpdate,5,4.993800953613024,4.990596251309323,4.99700771381048,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,FreshAdamSign/GD,final_loss,5,1.0282191878265057,1.0269186060334117,1.0295214167929887,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,FreshAdamSign/GD,total_decrease,5,0.8029045337403674,0.7985985077392783,0.8072337777411677,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,FreshAdamSign/GD,mean_delta_loss,5,0.8029045337403673,0.7985985077392783,0.8072337777411676,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,FreshAdamSign/GD,mean_update_grad_inner,5,0.802010016640241,0.7976950098862494,0.8063483647503349,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,FreshAdamSign/GD,mean_update_grad_cosine,5,0.796592287400993,0.7920968471681132,0.8011132409065989,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,FreshAdamSign/GD,mean_nrUpdate,5,1.0389902818120325,1.0295894384292457,1.0484769612115934,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,FreshAdamSign/GD,mean_stUpdate,5,1.4812412346457136,1.3499363138124671,1.6253178559352086,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/FreshAdamSign,final_loss,5,0.996131486653248,0.9956619719049232,0.9966012228061308,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/FreshAdamSign,total_decrease,5,1.034597277821871,1.0305531634147551,1.0386572622121362,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/FreshAdamSign,mean_delta_loss,5,1.034597277821871,1.0305531634147551,1.0386572622121362,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/FreshAdamSign,mean_update_grad_inner,5,1.0348211584204252,1.0307211979092623,1.0389374275863699,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/FreshAdamSign,mean_update_grad_cosine,5,1.0361685300077903,1.0315942651702903,1.0407630779153985,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/FreshAdamSign,mean_nrUpdate,5,1.408941296998314,1.4002427341773254,1.4176938968753812,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/FreshAdamSign,mean_stUpdate,5,5.414339491664899,4.939938341122476,5.934299197010019,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/GD,final_loss,5,1.0242415081750122,1.0230884414720995,1.0253958744359766,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/GD,total_decrease,5,0.8306828449586227,0.8263426479533799,0.8350458379675462,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/GD,mean_delta_loss,5,0.8306828449586227,0.8263426479533799,0.8350458379675462,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/GD,mean_update_grad_inner,5,0.8299369344844386,0.8255279078083819,0.8343695091423942,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/GD,mean_update_grad_cosine,5,0.82540385945183,0.8207808287594209,0.8300529292670282,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/GD,mean_nrUpdate,5,1.4638763152248886,1.4475732768912526,1.4803629636480107,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+02,PolarMuon/GD,mean_stUpdate,5,8.019942913424758,7.554019312094263,8.51460416994356,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,FreshAdamSign/GD,final_loss,5,1.0297225923179893,1.0284124454698036,1.0310344082287886,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,FreshAdamSign/GD,total_decrease,5,0.8025540749389959,0.7985671878129579,0.8065608668009138,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,FreshAdamSign/GD,mean_delta_loss,5,0.8025540749389958,0.7985671878129579,0.8065608668009137,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,FreshAdamSign/GD,mean_update_grad_inner,5,0.8016217905760494,0.7975995926094371,0.8056642719989631,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,FreshAdamSign/GD,mean_update_grad_cosine,5,0.7958690815223193,0.7914711304202366,0.8002914706274483,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,FreshAdamSign/GD,mean_nrUpdate,5,1.0336489786197327,1.0266725722293535,1.0406727908213125,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,FreshAdamSign/GD,mean_stUpdate,5,1.4827100389125558,1.3421758008138003,1.6379590945978175,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/FreshAdamSign,final_loss,5,0.9960417242420412,0.9953850120819391,0.9966988696725423,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/FreshAdamSign,total_decrease,5,1.0337009512722062,1.0285346566498386,1.0388931960168692,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/FreshAdamSign,mean_delta_loss,5,1.0337009512722062,1.0285346566498388,1.0388931960168692,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/FreshAdamSign,mean_update_grad_inner,5,1.0339411138396424,1.0287386043817397,1.0391699332897475,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/FreshAdamSign,mean_update_grad_cosine,5,1.035482510238747,1.029904993967887,1.0410902319051862,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/FreshAdamSign,mean_nrUpdate,5,1.4204659114470803,1.4121056662008986,1.428875652777195,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/FreshAdamSign,mean_stUpdate,5,5.694404500111595,5.176449623667196,6.264185874162761,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/GD,final_loss,5,1.0256466663433945,1.0248867525723417,1.0264071435610311,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/GD,total_decrease,5,0.8296009107118255,0.8279150818164887,0.8312901723493925,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/GD,mean_delta_loss,5,0.8296009107118254,0.8279150818164885,0.8312901723493925,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/GD,mean_update_grad_inner,5,0.8288297270263292,0.8271031049617772,0.8305599535069882,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/GD,mean_update_grad_cosine,5,0.8241085143561371,0.8221120055074524,0.8261098717504654,False,True,0.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/GD,mean_nrUpdate,5,1.4682631385314227,1.4611234687000803,1.4754376958218964,True,False,1.0
+setting,MatrixSensing,Matrix sensing kappa=1e+05,PolarMuon/GD,mean_stUpdate,5,8.443150717944294,7.905431466748673,9.01744507504306,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,FreshAdamSign/GD,final_loss,5,1.0000842075344982,1.000064610898651,1.0001038045543487,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,FreshAdamSign/GD,total_decrease,5,0.6403865695185729,0.556132288637429,0.7374054101849277,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,FreshAdamSign/GD,mean_delta_loss,5,0.628769701290865,0.5897221912932183,0.6704026795980436,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,FreshAdamSign/GD,mean_update_grad_inner,5,0.6307374020902844,0.5923364244899559,0.6716279025693226,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,FreshAdamSign/GD,mean_update_grad_cosine,5,0.6349976032326898,0.593082020784318,0.6798755348847397,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,FreshAdamSign/GD,mean_nrUpdate,5,1.6425405552250034,1.5732078352359113,1.7149288321172715,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,FreshAdamSign/GD,mean_stUpdate,5,1.5987327718148134,1.5472600306796673,1.6519178580163554,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/FreshAdamSign,final_loss,5,0.999982496138647,0.9999688496380693,0.9999961428254573,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/FreshAdamSign,total_decrease,5,1.1213334334389067,1.0159942369645427,1.2375942925666106,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/FreshAdamSign,mean_delta_loss,5,1.040577873222299,0.9728027637455695,1.1130748704606304,False,False,0.8
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/FreshAdamSign,mean_update_grad_inner,5,1.0357864770418854,0.9668462120136732,1.109642477461212,False,False,0.8
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/FreshAdamSign,mean_update_grad_cosine,5,1.031401881422525,0.9522716112823545,1.1171075861112738,False,False,0.8
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/FreshAdamSign,mean_nrUpdate,5,1.381387742449903,1.3280936211365948,1.4368204655314563,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/FreshAdamSign,mean_stUpdate,5,4.031592557305694,3.755713595208344,4.327736430397593,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/GD,final_loss,5,1.000066702199188,1.0000439221682524,1.0000894827490308,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/GD,total_decrease,5,0.7180868707264243,0.6457772710791456,0.79849319107806,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/GD,mean_delta_loss,5,0.6542838385158685,0.6380614460773919,0.6709186771506257,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/GD,mean_update_grad_inner,5,0.6533092716496468,0.63712716375635,0.6699023816642885,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/GD,mean_update_grad_cosine,5,0.6549377226729903,0.6429303251569354,0.6671693709195944,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/GD,mean_nrUpdate,5,2.2689853894646776,2.2212257658429078,2.317771915296736,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=16,PolarMuon/GD,mean_stUpdate,5,6.445439143969304,6.088879267717626,6.822878880005142,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,FreshAdamSign/GD,final_loss,5,1.0003304101396127,1.0002907273020398,1.0003700945514553,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,FreshAdamSign/GD,total_decrease,5,0.6425410824355706,0.5716323711472032,0.7222457359944681,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,FreshAdamSign/GD,mean_delta_loss,5,0.6047898490892184,0.5838151367077947,0.6265181194581316,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,FreshAdamSign/GD,mean_update_grad_inner,5,0.607353267177656,0.5862340572073192,0.6292333013005438,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,FreshAdamSign/GD,mean_update_grad_cosine,5,0.6127753634212783,0.5914299055689949,0.6348912060083093,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,FreshAdamSign/GD,mean_nrUpdate,5,2.332253157135908,2.265696618723755,2.4007648438096596,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,FreshAdamSign/GD,mean_stUpdate,5,1.6955916501135884,1.6212959889548395,1.7732918995181723,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/FreshAdamSign,final_loss,5,1.0001386846041336,1.0000956639650669,1.0001817070937986,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/FreshAdamSign,total_decrease,5,0.7644600378338453,0.6744707451527905,0.8664558895175475,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/FreshAdamSign,mean_delta_loss,5,0.7243171092773215,0.7058134419343262,0.7433058703926909,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/FreshAdamSign,mean_update_grad_inner,5,0.7228121043041643,0.7035542345829949,0.7425971054502726,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/FreshAdamSign,mean_update_grad_cosine,5,0.7309255865868663,0.7091523341335049,0.7533673477647703,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/FreshAdamSign,mean_nrUpdate,5,2.1359200508284233,2.071192336613748,2.2026705984195036,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/FreshAdamSign,mean_stUpdate,5,9.48985734305698,8.849487031642829,10.17656640091761,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/GD,final_loss,5,1.0004691405665456,1.0004012082718303,1.0005370774742066,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/GD,total_decrease,5,0.4911969801884961,0.3925826759444635,0.6145825787290462,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/GD,mean_delta_loss,5,0.43805963521257013,0.43257987280765237,0.44360881322811135,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/GD,mean_update_grad_inner,5,0.4390022931046909,0.4341567583524459,0.44390190787891765,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/GD,mean_update_grad_cosine,5,0.447893191954678,0.44481791523374414,0.45098972979524415,False,True,0.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/GD,mean_nrUpdate,5,4.981506281934479,4.894996122372812,5.069545351329839,True,False,1.0
+setting,SmallMLPDigits,Small MLP digits hidden=64,PolarMuon/GD,mean_stUpdate,5,16.090922871656527,14.683963893535639,17.63269105936601,True,False,1.0

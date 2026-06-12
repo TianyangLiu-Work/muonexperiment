@@ -1,0 +1,86 @@
+\documentclass[UTF8,11pt,a4paper]{ctexart}
+
+% =========================
+% 基础宏包
+% =========================
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools,bm}
+\usepackage{geometry}
+\usepackage{booktabs,multirow,array,longtable}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+\usepackage[numbers,sort&compress]{natbib}
+
+\geometry{margin=1in}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  citecolor=blue!55!black,
+  urlcolor=blue!55!black,
+  pdftitle={谱梯度更新的激活扰动几何},
+  pdfauthor={TBD}
+}
+
+% =========================
+% 定理环境
+% =========================
+\newtheorem{theorem}{定理}[section]
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{定义}
+\newtheorem{assumption}[theorem]{假设}
+\newtheorem{remark}[theorem]{注记}
+
+% =========================
+% 常用命令
+% =========================
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Tr}{\operatorname{tr}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\vecop}{\operatorname{vec}}
+\newcommand{\op}{\mathrm{op}}
+\newcommand{\srank}{\operatorname{srank}}
+\newcommand{\nrank}{\operatorname{nrank}}
+\newcommand{\ssrank}{\operatorname{ssrank}}
+\newcommand{\SpecGrad}{\mathrm{SpecGrad}}
+\newcommand{\Loss}{\mathcal{L}}
+\newcommand{\D}{\mathrm{d}}
+\newcommand{\TBD}{\textcolor{red!70!black}{\textbf{TBD}}}
+
+\title{谱梯度更新的激活扰动几何：\\局部理论与更新谱塑形实验证据}
+\author{TBD}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\input{sections/00_abstract}
+
+\tableofcontents
+\newpage
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_setup}
+\input{sections/04_local_geometry}
+\input{sections/05_activation_perturbation}
+\input{sections/06_downstream_stable_rank}
+\input{sections/07_existing_e11_evidence}
+\input{sections/08_experiments_tbd}
+\input{sections/09_discussion}
+\input{sections/10_conclusion}
+
+\appendix
+\input{appendices/A_proofs}
+\input{appendices/B_metrics_protocol}
+\input{appendices/C_claims_and_caveats}
+
+\input{references_manual}
+
+\end{document}

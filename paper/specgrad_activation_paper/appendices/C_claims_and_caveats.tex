@@ -1,0 +1,19 @@
+\section{安全表述与需避免表述}
+
+\subsection{可以安全使用的表述}
+
+\begin{itemize}
+  \item SpecGrad / Muon-like 更新是 update-spectrum shaping 方法。
+  \item Polar 更新是一阶线性化目标在 operator-norm 预算下的最优方向。
+  \item 谱更新是否有利取决于任务、层、激活稳定秩、下游 Jacobian 敏感度和更新预算几何。
+  \item 高 update rank 是机制事实，不是性能保证。
+\end{itemize}
+
+\subsection{应避免的表述}
+
+\begin{itemize}
+  \item Muon 一般比 Adam 更好。
+  \item 更高 rank/stable rank 更新一般带来更低损失。
+  \item 当前 E11 边界预测器已经能稳定预测 unseen tasks。
+  \item 当前实验已经证明 SpecGrad 改善 activation stability 或 long-tail generalization。
+\end{itemize}

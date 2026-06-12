@@ -1,0 +1,50 @@
+\section{引言}
+
+深度网络中大量参数天然是矩阵：全连接层、MLP 投影、嵌入矩阵、卷积核的矩阵化表示、以及 Transformer 中的投影矩阵。标准一阶优化方法通常在欧几里得几何或坐标几何中更新这些矩阵。谱梯度方法则不同：它们直接作用于矩阵梯度的奇异值结构。
+
+设某个矩阵参数块的梯度为
+\[
+G=U\Sigma V^\top.
+\]
+一般谱梯度更新可以写成
+\[
+D_f(G)=Uf(\Sigma)V^\top,
+\]
+其中 \(f\) 对奇异值进行重标定。最典型的极分解更新为
+\[
+D_{\mathrm{polar}}(G)=UV^\top.
+\]
+它保留梯度奇异向量，但将非零奇异值全部设置为同一尺度。
+
+近期工作已经从不同角度解释了这种更新。Davis 和 Drusvyatskiy 提出，当梯度的 squared nuclear-to-Frobenius ratio 大于输入激活稳定秩时，谱更新的一步下降界可能优于欧几里得梯度步\citep{davis2026spectral}. Chen、Li 和 Liu 则将 Muon 放入 Lion-\(\mathcal K\) 框架，指出 Muon 对应核范数选择，并与谱范数约束优化相关\citep{chen2025muon}. 这些工作表明，谱更新不是单纯的数值技巧，而是对应一种不同的矩阵几何。
+
+本文从另一个角度组织这一现象：\emph{激活扰动几何}。给定某层输入激活矩阵
+\[
+A_{\ell-1}=[h_{\ell-1}(x_1),\ldots,h_{\ell-1}(x_B)],
+\]
+该层 pre-activation 为
+\[
+Z_\ell=W_\ell A_{\ell-1}.
+\]
+若参数更新为
+\[
+W_\ell^+=W_\ell-D_\ell,
+\]
+则直接 pre-activation 扰动为
+\[
+\Delta Z_{\ell,\mathrm{direct}}=-D_\ell A_{\ell-1}.
+\]
+因此，讨论谱更新是否稳定或有效，不能只看 \(D_\ell\) 的 rank 或 stable rank，而必须看
+\[
+\|D_\ell A_{\ell-1}\|
+\]
+以及该扰动通过后续网络传播后的函数影响
+\[
+\|B_\ell D_\ell A_{\ell-1}\|.
+\]
+
+本文的中心观点是：
+\[
+\boxed{\text{谱梯度更新是 operator-norm 几何下自然的一阶方向，但其优化收益取决于激活与下游 Jacobian 的几何。}}
+\]
+换言之，高秩/平谱更新只是机制事实；它是否带来损失下降或激活稳定，需要由 gradient alignment、activation stable rank、downstream sensitivity 共同决定。
