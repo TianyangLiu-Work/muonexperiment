@@ -1,0 +1,13 @@
+source_algo,continuation_variant,continuation_lr,count
+Adam,own_fresh,0.003,10
+Adam,own_fresh,0.01,10
+Adam,own_fresh,0.03,10
+Adam,switched_fresh,0.003,10
+Adam,switched_fresh,0.01,10
+Adam,switched_fresh,0.03,10
+Muon,own_fresh,0.003,10
+Muon,own_fresh,0.01,8
+Muon,own_fresh,0.03,12
+Muon,switched_fresh,0.003,10
+Muon,switched_fresh,0.01,10
+Muon,switched_fresh,0.03,10

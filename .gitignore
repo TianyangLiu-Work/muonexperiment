@@ -5,6 +5,15 @@
 __pycache__/
 *.pyc
 *.pyo
+.pytest_cache/
+
+# Local downloaded datasets and caches
+data/
+
+# Generated animations/videos are not part of the default E11 evidence set.
+# Force-add a specific file only when explicitly requested.
+*.gif
+*.mp4
 
 # System
 .DS_Store

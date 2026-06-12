@@ -1,0 +1,88 @@
+{
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "algos": [
+    "Adam",
+    "Muon"
+  ],
+  "dtype": "float64",
+  "device": "cpu",
+  "output_dir": "results/e11_spectral_allocation_probe",
+  "figure_dir": "figures/e11_spectral_allocation_probe",
+  "discussion_path": "discussion/e11_spectral_allocation_probe.md",
+  "specs": [
+    {
+      "family": "MatrixFactorizationInput",
+      "setting": "MF input kappa=1e+02",
+      "steps": 10,
+      "d": 60,
+      "rank": 5,
+      "kappa": 100.0,
+      "num_factors": 10,
+      "input_columns_multiplier": 10,
+      "measurement_multiplier": 2.0,
+      "input_dim": 64,
+      "hidden_dim": 64,
+      "output_dim": 10,
+      "num_samples": 1024,
+      "batch_size": 128,
+      "lr": 0.01
+    },
+    {
+      "family": "MatrixSensing",
+      "setting": "Matrix sensing kappa=1e+02",
+      "steps": 5,
+      "d": 60,
+      "rank": 5,
+      "kappa": 100.0,
+      "num_factors": 10,
+      "input_columns_multiplier": 10,
+      "measurement_multiplier": 2.0,
+      "input_dim": 64,
+      "hidden_dim": 64,
+      "output_dim": 10,
+      "num_samples": 1024,
+      "batch_size": 128,
+      "lr": 0.01
+    },
+    {
+      "family": "SmallMLPDigits",
+      "setting": "Small MLP digits hidden=16",
+      "steps": 10,
+      "d": 64,
+      "rank": 10,
+      "kappa": 1.0,
+      "num_factors": 10,
+      "input_columns_multiplier": 10,
+      "measurement_multiplier": 2.0,
+      "input_dim": 64,
+      "hidden_dim": 16,
+      "output_dim": 10,
+      "num_samples": 1024,
+      "batch_size": 128,
+      "lr": 0.01
+    },
+    {
+      "family": "SmallMLPDigits",
+      "setting": "Small MLP digits hidden=64",
+      "steps": 10,
+      "d": 64,
+      "rank": 10,
+      "kappa": 1.0,
+      "num_factors": 10,
+      "input_columns_multiplier": 10,
+      "measurement_multiplier": 2.0,
+      "input_dim": 64,
+      "hidden_dim": 64,
+      "output_dim": 10,
+      "num_samples": 1024,
+      "batch_size": 128,
+      "lr": 0.01
+    }
+  ]
+}

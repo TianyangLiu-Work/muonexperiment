@@ -1,0 +1,226 @@
+{
+  "purpose": "E11 reproducibility and artifact-boundary manifest.",
+  "artifact_dirs": [
+    {
+      "path": "e11_condition_geometry",
+      "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
+      "commit_policy": "commit",
+      "size_bytes": 425337,
+      "size": "415.4 KB"
+    },
+    {
+      "path": "scripts",
+      "role": "Experiment runners, artifact writers, and validation scripts.",
+      "commit_policy": "commit E11 scripts",
+      "size_bytes": 1284554,
+      "size": "1.2 MB"
+    },
+    {
+      "path": "tests",
+      "role": "Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.",
+      "commit_policy": "commit",
+      "size_bytes": 145247,
+      "size": "141.8 KB"
+    },
+    {
+      "path": "discussion",
+      "role": "Generated paper-facing Markdown evidence and synthesis.",
+      "commit_policy": "commit",
+      "size_bytes": 635495,
+      "size": "620.6 KB"
+    },
+    {
+      "path": "results",
+      "role": "Generated CSV evidence used by discussion artifacts and validator.",
+      "commit_policy": "commit current E11 evidence set",
+      "size_bytes": 259666894,
+      "size": "247.6 MB"
+    },
+    {
+      "path": "figures",
+      "role": "Static figures used by paper-facing Markdown artifacts.",
+      "commit_policy": "commit static E11 figures",
+      "size_bytes": 42927099,
+      "size": "40.9 MB"
+    },
+    {
+      "path": "configs",
+      "role": "Experiment configuration snapshots.",
+      "commit_policy": "commit",
+      "size_bytes": 316,
+      "size": "316 B"
+    },
+    {
+      "path": "Makefile",
+      "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
+      "commit_policy": "commit",
+      "size_bytes": 1825,
+      "size": "1.8 KB"
+    },
+    {
+      "path": ".gitignore",
+      "role": "Keeps local caches, datasets, and generated videos out of default commits.",
+      "commit_policy": "commit",
+      "size_bytes": 375,
+      "size": "375 B"
+    },
+    {
+      "path": ".gitattributes",
+      "role": "Marks generated evidence artifacts and binary files for cleaner GitHub review.",
+      "commit_policy": "commit",
+      "size_bytes": 404,
+      "size": "404 B"
+    }
+  ],
+  "key_tables": [
+    {
+      "path": "results/e11/step_metrics.csv",
+      "rows": 2880,
+      "size": "20.8 MB"
+    },
+    {
+      "path": "results/e11_equal_update/step_metrics.csv",
+      "rows": 2880,
+      "size": "20.8 MB"
+    },
+    {
+      "path": "results/e11_overlap_followup/step_metrics.csv",
+      "rows": 1530,
+      "size": "8.2 MB"
+    },
+    {
+      "path": "results/e11_hyperparam_sweep/equal_step_metrics.csv",
+      "rows": 3360,
+      "size": "21.0 MB"
+    },
+    {
+      "path": "results/e11_target_update_sweep/step_metrics.csv",
+      "rows": 3360,
+      "size": "21.1 MB"
+    },
+    {
+      "path": "results/e11_mlp_width_sweep/step_metrics.csv",
+      "rows": 3300,
+      "size": "14.3 MB"
+    },
+    {
+      "path": "results/e11_mlp_per_layer_control/step_metrics.csv",
+      "rows": 1100,
+      "size": "4.8 MB"
+    },
+    {
+      "path": "results/e11_mlp_layer_hybrid/step_metrics.csv",
+      "rows": 2200,
+      "size": "9.6 MB"
+    },
+    {
+      "path": "results/e11_mnist_mlp_probe/step_metrics.csv",
+      "rows": 216,
+      "size": "4.4 MB"
+    },
+    {
+      "path": "results/e11_deep_mnist_mlp_probe/step_metrics.csv",
+      "rows": 432,
+      "size": "12.4 MB"
+    },
+    {
+      "path": "results/e11_mnist_patch_probe/step_metrics.csv",
+      "rows": 288,
+      "size": "839.6 KB"
+    },
+    {
+      "path": "results/e11_mnist_conv_probe/step_metrics.csv",
+      "rows": 288,
+      "size": "837.9 KB"
+    },
+    {
+      "path": "results/e11_stateless_direction_ablation/stateless_direction_rows.csv",
+      "rows": 1890,
+      "size": "2.8 MB"
+    },
+    {
+      "path": "results/e11_stateless_optimizer_trajectory/stateless_optimizer_step_metrics.csv",
+      "rows": 840,
+      "size": "5.3 MB"
+    },
+    {
+      "path": "results/e11_spectral_allocation_probe/probe_rows.csv",
+      "rows": 720,
+      "size": "192.6 KB"
+    },
+    {
+      "path": "results/e11_singular_vector_trajectory/update_subspace_rows.csv",
+      "rows": 725,
+      "size": "76.8 KB"
+    },
+    {
+      "path": "results/e11_singular_vector_swap_probe/swap_probe_rows.csv",
+      "rows": 320,
+      "size": "63.4 KB"
+    },
+    {
+      "path": "results/e11_natural_update_swap_probe/natural_update_swap_rows.csv",
+      "rows": 4800,
+      "size": "968.1 KB"
+    },
+    {
+      "path": "results/e11_optimizer_switch_probe/optimizer_switch_rows.csv",
+      "rows": 360,
+      "size": "72.2 KB"
+    },
+    {
+      "path": "results/e11_optimizer_switch_reset_control/optimizer_switch_reset_rows.csv",
+      "rows": 540,
+      "size": "92.0 KB"
+    },
+    {
+      "path": "results/e11_optimizer_switch_horizon_sweep/optimizer_switch_horizon_rows.csv",
+      "rows": 480,
+      "size": "99.0 KB"
+    },
+    {
+      "path": "results/e11_optimizer_switch_lr_sweep/optimizer_switch_lr_rows.csv",
+      "rows": 360,
+      "size": "64.6 KB"
+    },
+    {
+      "path": "results/e11_boundary_predictor/boundary_predictor_rows.csv",
+      "rows": 1500,
+      "size": "1017.5 KB"
+    },
+    {
+      "path": "results/e11_mechanism_boundary/mechanism_boundary_map.csv",
+      "rows": 14,
+      "size": "5.2 KB"
+    },
+    {
+      "path": "results/e11_cross_task_signature/cross_task_signature_summary.csv",
+      "rows": 14,
+      "size": "3.6 KB"
+    },
+    {
+      "path": "results/e11_boundary_predictor/boundary_predictor_uncertainty.csv",
+      "rows": 8,
+      "size": "1.6 KB"
+    }
+  ],
+  "ignore_policy": [
+    {
+      "path_or_pattern": "data/",
+      "reason": "Local torchvision/MNIST cache; downloaded by the MNIST probe and not part of the evidence set."
+    },
+    {
+      "path_or_pattern": ".pytest_cache/",
+      "reason": "Local test runner cache."
+    },
+    {
+      "path_or_pattern": "*.gif, *.mp4",
+      "reason": "Generated animations/videos are not part of the default E11 evidence set; force-add only when explicitly needed."
+    },
+    {
+      "path_or_pattern": "slidev/",
+      "reason": "Local presentation workspace, intentionally excluded from the repo."
+    }
+  ],
+  "validation_command": "make e11-check"
+}

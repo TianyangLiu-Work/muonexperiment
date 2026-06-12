@@ -1,0 +1,13 @@
+seeds: [0, 1, 2, 3, 4]
+algos: [Adam, Muon]
+problems:
+  - family: MatrixFactorizationInput
+    kappa: [10, 100, 1000, 10000, 100000]
+    steps: 10
+    num_factors: 10
+  - family: MatrixSensing
+    kappa: [10, 100, 1000, 10000, 100000]
+    steps: 5
+  - family: SmallMLPDigits
+    steps: 10
+    dataset: sklearn_digits

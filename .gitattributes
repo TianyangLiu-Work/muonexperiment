@@ -1,0 +1,13 @@
+# E11 generated evidence artifacts are committed for reproducibility, but should not dominate reviews.
+results/e11*/** linguist-generated=true
+figures/e11*/** linguist-generated=true
+discussion/e11_*.md linguist-generated=true
+Notebooks/E11_*.ipynb linguist-generated=true
+
+# Treat binary artifacts as binary in diffs.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.mp4 binary
+*.ipynb diff=ipynb

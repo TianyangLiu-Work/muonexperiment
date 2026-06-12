@@ -1,0 +1,9 @@
+target,feature_set,evaluation,held_out_settings,mean_balanced_accuracy_chance_filled,balanced_accuracy_ci95_low,balanced_accuracy_ci95_high,balanced_accuracy_ci95_above_chance,mean_brier_improvement_over_base_rate,brier_improvement_ci95_low,brier_improvement_ci95_high,brier_improvement_ci95_above_zero
+delta_loss_muon_higher,family_only,leave_setting_out,6,0.5,0.5,0.5,False,-0.11810043785735291,-0.25754343810325275,-0.003507201996643238,False
+delta_loss_muon_higher,state_only,leave_setting_out,6,0.5,0.5,0.5,False,-0.21234556331334917,-0.5320030559050314,-0.005062891299920807,False
+delta_loss_muon_higher,state_plus_update_spectrum,leave_setting_out,6,0.5906752112228275,0.5,0.718925802239376,False,-0.18074721676222516,-0.4377557094907892,-0.003095944346082319,False
+delta_loss_muon_higher,update_spectrum_only,leave_setting_out,6,0.5149642058961966,0.489952718676123,0.554939899012467,False,-0.018506141533084743,-0.03800030619918618,0.0003169083848638121,False
+update_grad_inner_muon_higher,family_only,leave_setting_out,6,0.5,0.5,0.5,False,-0.11094864409990908,-0.24684340713827793,-0.0036682743505492325,False
+update_grad_inner_muon_higher,state_only,leave_setting_out,6,0.5,0.5,0.5,False,-0.2050764988420948,-0.52180472786907,-0.005104614130588045,False
+update_grad_inner_muon_higher,state_plus_update_spectrum,leave_setting_out,6,0.5865987460815046,0.5,0.7446447230929989,False,-0.16898038402976043,-0.4211191605913948,0.0005074661601208128,False
+update_grad_inner_muon_higher,update_spectrum_only,leave_setting_out,6,0.5165708812260537,0.4913793103448276,0.5583333333333333,False,-0.01457737472358187,-0.027584785504181964,-0.002650148220264209,False
