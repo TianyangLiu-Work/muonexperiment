@@ -1,0 +1,59 @@
+\section{问题设定与记号}
+
+设模型参数由矩阵块组成：
+\[
+\theta=(W_1,\ldots,W_L),\qquad W_\ell\in\R^{m_\ell\times n_\ell}.
+\]
+对一个 batch，模型输出为
+\[
+F(\theta)\in\R^{c\times B},
+\]
+损失为
+\[
+\Loss(\theta)=\phi(F(\theta)).
+\]
+令
+\[
+G_\ell=\nabla_{W_\ell}\Loss(\theta)
+\]
+为第 \(\ell\) 个矩阵块的梯度。
+
+若某层输入 activation matrix 为
+\[
+A_{\ell-1}=[h_{\ell-1}(x_1),\ldots,h_{\ell-1}(x_B)]\in\R^{n_\ell\times B},
+\]
+则该层 pre-activation 为
+\[
+Z_\ell=W_\ell A_{\ell-1}.
+\]
+设正下降更新为
+\[
+D_\ell=W_\ell-W_\ell^+.
+\]
+那么固定输入激活时的直接 pre-activation 变化为
+\[
+\Delta Z_{\ell,\mathrm{direct}}=-D_\ell A_{\ell-1}.
+\]
+如果激活函数 \(\sigma\) 是 \(L_\sigma\)-Lipschitz，则
+\[
+\|\Delta H_\ell\|_F
+\le
+L_\sigma\|D_\ell A_{\ell-1}\|_F.
+\]
+因此，本文将 \(D_\ell A_{\ell-1}\) 视为最基本的 activation perturbation object。
+
+对矩阵 \(M\)，记
+\[
+\|M\|_{\op}=\sigma_1(M),\qquad
+\|M\|_F=\left(\sum_i\sigma_i(M)^2\right)^{1/2},
+\qquad
+\|M\|_*=\sum_i\sigma_i(M).
+\]
+稳定秩定义为
+\[
+\srank(M)=\frac{\|M\|_F^2}{\|M\|_{\op}^2},
+\]
+梯度核秩定义为
+\[
+\nrank(G)=\frac{\|G\|_*^2}{\|G\|_F^2}.
+\]

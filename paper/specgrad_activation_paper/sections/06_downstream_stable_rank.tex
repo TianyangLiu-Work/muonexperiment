@@ -1,0 +1,96 @@
+\section{下游敏感度与 Sandwiched Stable Rank}
+
+单层条件只考虑 \(DA\) 对该层输出的扰动。但在深层网络中，该扰动还要经过后续层传播。在线性化下，可写成
+\[
+\Delta F\approx BDA,
+\]
+其中 \(B\) 是从该层输出到最终模型输出的 downstream Jacobian。
+
+\subsection{精确敏感度公式}
+
+定义
+\[
+K_F^2=\sup_{\|D\|_F\le 1}\|BDA\|_F^2,
+\]
+以及
+\[
+K_S^2=\sup_{\|D\|_{\op}\le 1}\|BDA\|_F^2.
+\]
+
+\begin{theorem}[Sandwiched block 的精确敏感度]
+对映射 \(J(D)=BDA\)，有
+\[
+K_F^2=\|B\|_{\op}^2\|A\|_{\op}^2,
+\]
+且
+\[
+K_S^2=\sum_i\sigma_i(B)^2\sigma_i(A)^2,
+\]
+其中奇异值按降序排列，维度不足处以 \(0\) 补齐。
+\end{theorem}
+
+\begin{proof}
+Frobenius 情况使用 vectorization：
+\[
+\vecop(BDA)=(A^\top\otimes B)\vecop(D).
+\]
+因此
+\[
+K_F=\|A^\top\otimes B\|_{\op}=\|A\|_{\op}\|B\|_{\op}.
+\]
+
+Operator-norm 情况令
+\[
+B=U_B\Sigma_BV_B^\top,
+\qquad
+A=U_A\Sigma_AV_A^\top.
+\]
+写
+\[
+Z=V_B^\top D U_A,
+\]
+则 \(\|Z\|_{\op}\le \|D\|_{\op}\)，且
+\[
+\|BDA\|_F^2
+=\|\Sigma_B Z\Sigma_A\|_F^2.
+\]
+根据 von Neumann rearrangement inequality，
+\[
+\sup_{\|Z\|_{\op}\le 1}\|\Sigma_B Z\Sigma_A\|_F^2
+=
+\sum_i\sigma_i(B)^2\sigma_i(A)^2.
+\]
+取使奇异向量对齐的 partial isometry 可达等号。
+\end{proof}
+
+\subsection{Sandwiched stable rank}
+
+定义
+\[
+\boxed{
+\ssrank(B,A)=
+\frac{\sum_i\sigma_i(B)^2\sigma_i(A)^2}
+{\sigma_1(B)^2\sigma_1(A)^2}.
+}
+\]
+则
+\[
+\frac{K_S^2}{K_F^2}=\ssrank(B,A).
+\]
+并且
+\[
+1\le \ssrank(B,A)
+\le
+\min\{\srank(B),\srank(A)\}.
+\]
+特别地，当 \(B=I\) 时，
+\[
+\ssrank(I,A)=\srank(A).
+\]
+因此逐层 activation stable rank 是 downstream-aware sensitivity ratio 的特殊情形。
+
+对应的下游修正谱更新条件为
+\[
+\boxed{\nrank(G)>\ssrank(B,A).}
+\]
+该条件比 \(\nrank(G)>\srank(A)\) 更精细，因为它保留了下游 Jacobian 的奇异值谱。

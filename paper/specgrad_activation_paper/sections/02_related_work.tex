@@ -1,0 +1,19 @@
+\section{相关工作}
+
+\paragraph{谱梯度更新与 Muon.}
+谱梯度方法将矩阵梯度的奇异值替换为某种变换后的谱。极分解更新 \(G=U\Sigma V^\top\mapsto UV^\top\) 是 operator-norm 约束下一阶最速下降方向。Muon 可以视为这种谱更新思想的实际优化器实现或近似实现。\citet{chen2025muon} 将 Muon 解释为 Lion-\(\mathcal K\) 框架中核范数对应的情形，并分析其与谱范数约束优化之间的联系。
+
+\paragraph{层级 nuclear-rank vs stable-rank 条件.}
+\citet{davis2026spectral} 提出，谱更新的优势可由逐层条件解释：对于梯度矩阵 \(G_\ell\) 和输入激活矩阵 \(A_{\ell-1}\)，当
+\[
+\frac{\|G_\ell\|_*^2}{\|G_\ell\|_F^2}
+>
+\frac{\|A_{\ell-1}\|_F^2}{\|A_{\ell-1}\|_{\op}^2}
+\]
+时，谱更新相对于欧几里得更新具有更好的 one-step 保证下降。本文将这个条件解释为 \(B=I\) 的特殊情况，并引入下游敏感度 \(B\) 后的 sandwiched stable rank。
+
+\paragraph{Stable rank normalization.}
+稳定秩也出现在泛化与 Lipschitz 控制中。\citet{sanyal2020stable} 提出 Stable Rank Normalization，通过控制线性层稳定秩和经验 Lipschitz 行为来改善泛化。本文的 stable rank 用法不同：它不是直接作为正则项，而是作为局部扰动几何中的敏感度比。
+
+\paragraph{E11 实验套件定位.}
+本文使用的已有实验来自 E11 condition geometry 分支。该实验套件的问题设定是：Muon 是否作为 geometry-shaping optimizer 改变更新矩阵谱几何，以及这种几何是否解释 one-step 或短程优化进展。其当前 thesis 是：Muon 会产生更平、更高秩的 update spectrum，但是否有利取决于任务、层、范数约束、horizon 和调参。该实验套件在本文中作为局部谱几何机制证据，而非完整优化器性能证据。

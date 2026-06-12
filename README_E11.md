@@ -12,6 +12,11 @@ Current working thesis:
 
 ## Main Entry Points
 
+Paper draft and experiment triage:
+
+- `paper/specgrad_activation_paper/`: current LaTeX draft for the activation-geometry framing.
+- `paper/specgrad_activation_paper/notes/experiment_evaluation.md`: prioritized experiment evaluation for turning the draft into a project paper.
+
 Run the core experiment:
 
 ```bash
