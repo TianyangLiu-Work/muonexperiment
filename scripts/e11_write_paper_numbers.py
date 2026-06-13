@@ -73,6 +73,7 @@ def main() -> None:
     head_tail_alignment = pd.read_csv("results/e11_head_tail_alignment_ablation/summary.csv").set_index("setting")
     one_step_metrics = pd.read_csv("results/e11_long_tail_one_step/step_metrics.csv")
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
+    cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -512,6 +513,87 @@ def main() -> None:
             one_step,
             "tail_positive_margin_prediction_changed_fraction_spectral_ci95_low",
             "tail_positive_margin_prediction_changed_fraction_spectral_ci95_high",
+        ),
+        "",
+        "% CIFAR-100-LT ResNet18 one-step diagnostic",
+        macro("EelevenCifarResNetOneStepSeeds", int(cifar_resnet["seeds"])),
+        macro(
+            "EelevenCifarResNetOneStepDriftRatio",
+            fmt(cifar_resnet["geomean_tail_output_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetOneStepDriftRatio",
+            cifar_resnet,
+            "tail_output_drift_sq_ratio_ci95_low",
+            "tail_output_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetOneStepCenteredDriftRatio",
+            fmt(cifar_resnet["geomean_centered_tail_output_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetOneStepCenteredDriftRatio",
+            cifar_resnet,
+            "centered_tail_output_drift_sq_ratio_ci95_low",
+            "centered_tail_output_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetOneStepMarginDeltaRatio",
+            fmt(cifar_resnet["geomean_margin_delta_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetOneStepMarginDeltaRatio",
+            cifar_resnet,
+            "margin_delta_sq_ratio_ci95_low",
+            "margin_delta_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetOneStepSpectralLowerFraction",
+            fmt(cifar_resnet["spectral_less_tail_output_drift_fraction"]),
+        ),
+        macro(
+            "EelevenCifarResNetOneStepTailLossDiff",
+            fmt(cifar_resnet["mean_tail_loss_increase_diff_spectral_minus_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetOneStepTailLossDiff",
+            cifar_resnet,
+            "tail_loss_increase_diff_ci95_low",
+            "tail_loss_increase_diff_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetOneStepTailMarginDropDiff",
+            fmt(cifar_resnet["mean_tail_margin_drop_diff_spectral_minus_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetOneStepTailMarginDropDiff",
+            cifar_resnet,
+            "tail_margin_drop_diff_ci95_low",
+            "tail_margin_drop_diff_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetOneStepTailAccuracyDropDiff",
+            fmt(cifar_resnet["mean_tail_accuracy_drop_diff_spectral_minus_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetOneStepTailAccuracyDropDiff",
+            cifar_resnet,
+            "tail_accuracy_drop_diff_ci95_low",
+            "tail_accuracy_drop_diff_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetOneStepTailAccuracyBefore",
+            fmt(cifar_resnet["mean_tail_accuracy_before"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetOneStepTailAccuracyBefore",
+            cifar_resnet,
+            "tail_accuracy_before_ci95_low",
+            "tail_accuracy_before_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetOneStepMeanNrG",
+            fmt(cifar_resnet["mean_nrG"]),
         ),
         "",
         "% Local linearization quality",

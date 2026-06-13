@@ -12,7 +12,7 @@ Current working thesis:
 
 Current paper scope:
 
-> The active paper draft is a focused head-to-tail interference paper. Its current defensible claim is that an idealized spectral/polar direction can reduce tail-example logit drift at matched head gain in synthetic and small long-tailed diagnostics. The older E11 condition-geometry experiments are background evidence and guardrails; they should not be read as a broad claim that Muon is a generally better optimizer.
+> The active paper draft is a focused head-to-tail interference paper. Its current defensible claim is that an idealized spectral/polar direction can reduce tail-example logit drift at matched head gain in synthetic, small long-tailed, and CIFAR-100-LT ResNet diagnostics. The older E11 condition-geometry experiments are background evidence and guardrails; they should not be read as a broad claim that Muon is a generally better optimizer.
 
 ## Main Entry Points
 
@@ -30,6 +30,8 @@ python3 scripts/e11_run_equal_update_control.py
 python3 scripts/e11_run_head_tail_interference.py
 python3 scripts/e11_run_head_tail_alignment_ablation.py
 python3 scripts/e11_run_long_tail_one_step.py
+python3 scripts/e11_run_cifar100_lt_one_step.py --device cpu --no-download
+sbatch scripts/slurm/e11_cifar100_resnet_one_step.sbatch
 python3 scripts/e11_run_long_tail_imbalance_ablation.py
 python3 scripts/e11_run_long_tail_checkpoint_sweep.py
 python3 scripts/e11_run_long_tail_class_partition_sweep.py
@@ -69,7 +71,7 @@ python3 scripts/e11_run_optimizer_switch_lr_sweep.py
 python3 scripts/e11_run_boundary_predictor.py
 ```
 
-The MNIST probe downloads torchvision data into `data/`, which is intentionally git-ignored as a local cache.
+The MNIST and CIFAR probes download torchvision data into `data/`, which is intentionally git-ignored as a local cache.
 Generated animations/videos are also ignored by default; the current E11 evidence set uses static figures and Markdown/CSV artifacts.
 
 Training and diagnostic batch contract:
@@ -97,6 +99,8 @@ Equivalent make targets:
 
 ```bash
 make e11-main-results      # core trajectories, base figures, equal-update, head-tail, Muon-style compatibility, and spectral-allocation probes
+make e11-cifar-results     # CIFAR-100-LT MLP local matched-head-gain diagnostic
+make e11-cifar-resnet-results # submit the CIFAR-100-LT ResNet18 GPU diagnostic via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
@@ -131,6 +135,8 @@ Paper-facing synthesis:
 - `discussion/e11_head_tail_interference.md`
 - `discussion/e11_head_tail_alignment_ablation.md`
 - `discussion/e11_long_tail_one_step.md`
+- `discussion/e11_cifar100_lt_one_step.md`
+- `discussion/e11_cifar100_resnet_one_step.md`
 - `discussion/e11_long_tail_imbalance_ablation.md`
 - `discussion/e11_long_tail_checkpoint_sweep.md`
 - `discussion/e11_long_tail_class_partition_sweep.md`
@@ -166,6 +172,8 @@ Primary paper quantitative tables:
 - `results/e11_head_tail_interference/pair_summary.csv`
 - `results/e11_head_tail_alignment_ablation/summary.csv`
 - `results/e11_long_tail_one_step/pair_summary.csv`
+- `results/e11_cifar100_lt_one_step/pair_summary.csv`
+- `results/e11_cifar100_resnet_one_step/pair_summary.csv`
 - `results/e11_long_tail_imbalance_ablation/summary.csv`
 - `results/e11_long_tail_checkpoint_sweep/summary.csv`
 - `results/e11_long_tail_class_partition_sweep/summary.csv`
@@ -184,6 +192,8 @@ Primary paper figures:
 - `figures/e11_head_tail_interference/head_tail_drift_ratio.png`
 - `figures/e11_head_tail_alignment_ablation/head_tail_alignment_ablation.png`
 - `figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png`
+- `figures/e11_cifar100_lt_one_step/cifar100_lt_one_step_tail_response.png`
+- `figures/e11_cifar100_resnet_one_step/cifar100_resnet_one_step_tail_response.png`
 - `figures/e11_long_tail_imbalance_ablation/long_tail_imbalance_ablation.png`
 - `figures/e11_long_tail_checkpoint_sweep/long_tail_checkpoint_sweep.png`
 - `figures/e11_long_tail_class_partition_sweep/long_tail_class_partition_sweep.png`
@@ -206,23 +216,27 @@ Primary paper figures:
    - The spectral/Frobenius squared tail-example logit drift ratio is about `0.5501 [0.5101, 0.5931]`.
    - All 20 paired seeds have lower spectral tail drift.
    - Across `rho/L_H` values from `0.005` to `0.08`, the largest full-drift CI upper endpoint is about `0.5932`; the actual head-gain relative-error upper endpoint grows to about `0.1176`, so this is a local-scale robustness check rather than a large-step claim.
-3. The 8-step head-only forgetting diagnostic shows lower measured tail drift across the short horizon.
+3. The CIFAR-100-LT reruns provide a more appropriate visual-data architecture check.
+   - The two-layer CIFAR-100-LT MLP gives squared drift ratio about `0.1944 [0.1848, 0.2044]`, with lower spectral drift in all 5 seeds, but tail loss increase is slightly worse.
+   - The GPU ResNet18 CIFAR-100-LT diagnostic gives squared drift ratio about `0.5369 [0.3943, 0.7312]`, with lower spectral drift in all 3 seeds.
+   - In the ResNet diagnostic, tail-loss increase diff spectral-minus-Fro is about `-0.000604 [-0.000737, -0.000471]`; tail-accuracy-drop diff still crosses zero, so this remains a local drift/loss diagnostic rather than an accuracy claim.
+4. The 8-step head-only forgetting diagnostic shows lower measured tail drift across the short horizon.
    - Final squared drift ratio is about `0.6167 [0.5744, 0.6622]`.
    - Drift-area ratio is about `0.7787 [0.7549, 0.8033]`.
-4. The layerwise diagnostic identifies the mechanism boundary.
+5. The layerwise diagnostic identifies the mechanism boundary.
    - Unit-direction spectral JVP is larger than Frobenius in both layers.
    - Matched-head-gain scaled and observed drift are lower in both layers.
    - The current evidence is consistent with a scaled head-gain efficiency mechanism, not a claim that spectral directions are intrinsically less tail-sensitive.
-5. The Muon-style compatibility diagnostic connects the clean polar direction to sampled Muon-style state.
+6. The Muon-style compatibility diagnostic connects the clean polar direction to sampled Muon-style state.
    - `polar(M_t)` has squared tail-example logit drift ratio about `0.8199 [0.6951, 0.9672]` relative to Fro/GD at matched head gain.
    - Newton-Schulz `NS(M_t)` has squared drift ratio about `0.9116 [0.7696, 1.08]`, so this finite-iteration approximation is not yet a significant drift-reduction result.
-6. The short practical-Muon trajectory compatibility diagnostic extends this check to sampled trajectory states.
+7. The short practical-Muon trajectory compatibility diagnostic extends this check to sampled trajectory states.
    - Across 120 sampled state-step comparisons, `polar(M_t)` has squared drift ratio about `0.7292 [0.6891, 0.7717]`.
    - `NS(M_t)` has squared drift ratio about `0.8019 [0.7583, 0.848]`, while momentum-gradient cosine averages about `0.8589 [0.8328, 0.885]`.
-7. The Muon trajectory state-source control reduces the selected-state concern.
+8. The Muon trajectory state-source control reduces the selected-state concern.
    - On Fro/GD-style trajectory states with matched seeds, batches, length, and nominal trajectory learning rate, `polar(M_t)` has squared drift ratio about `0.7255 [0.686, 0.7672]`.
    - On the same Fro/GD-style states, `NS(M_t)` has squared drift ratio about `0.7973 [0.7546, 0.8425]`, so the short-trajectory compatibility signal is not unique to NS-Muon-style generated states.
-8. The practical imbalanced-training diagnostic is consistent with the drift story but still not a leaderboard result.
+9. The practical imbalanced-training diagnostic is consistent with the drift story but still not a leaderboard result.
    - At fixed lightweight hyperparameters on long-tailed digits, NS-Muon-style training has final train loss ratio about `0.6468 [0.604, 0.6926]` and tail eval loss ratio about `0.8549 [0.8319, 0.8786]` versus Adam.
    - Tail eval margin difference is about `1.955 [1.628, 2.281]`, and tail eval drift RMS ratio is about `0.7501 [0.7244, 0.7767]`, but tail accuracy difference is `0`, so this is a drift/loss/margin diagnostic rather than a broad accuracy claim.
    - LR sensitivity shows why this is not a monotone optimizer story: smaller `muon_lr` under-trains, while `muon_lr=0.1` lowers train loss further but worsens tail loss and drift.
@@ -247,9 +261,14 @@ Do not claim:
 - `e11_condition_geometry/diagnostics.py`: rank, spectrum, and one-step metrics.
 - `e11_condition_geometry/statistics.py`: summary tables and confidence intervals.
 - `e11_condition_geometry/long_tail_digits.py`: shared sklearn-digits long-tail data, MLP, update-direction, and layerwise diagnostic helpers.
+- `e11_condition_geometry/cifar100_long_tail.py`: CIFAR-100-LT two-layer MLP matched-head-gain diagnostic.
+- `e11_condition_geometry/cifar100_resnet_tail.py`: CIFAR-100-LT ResNet18 matched-head-gain diagnostic with Conv/Linear matrix-weight interventions.
 - `e11_condition_geometry/plots/`: static figure generation.
 - `e11_condition_geometry/reporting.py`: shared Markdown/report helpers.
 - `scripts/e11_run_*.py`: experiment runners.
+- `scripts/e11_run_cifar100_lt_one_step.py`: CIFAR-100-LT two-layer MLP runner.
+- `scripts/e11_run_cifar100_resnet_one_step.py`: CIFAR-100-LT ResNet18 runner called by the Slurm wrapper.
+- `scripts/slurm/e11_cifar100_resnet_one_step.sbatch`: GPU/Slurm submission wrapper for the ResNet18 diagnostic.
 - `scripts/e11_write_*.py`: generated discussion and paper-facing artifacts.
 - `tests/`: smoke and diagnostic tests.
 
@@ -259,7 +278,7 @@ The current evidence is consistent with a focused local-geometry paper. It is no
 
 Most important next steps:
 
-1. Add a real long-tailed benchmark if the paper wants to claim relevance beyond small diagnostics.
+1. Extend the new CIFAR-100-LT ResNet diagnostic with more seeds, stronger checkpoints, and ImageNet-LT or iNaturalist-style data if the paper wants benchmark-level relevance.
 2. Extend the current fixed-checkpoint, short-trajectory, and small practical-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
-3. Add a larger-architecture layerwise diagnostic if the mechanism is meant to survive beyond the current small MLP.
+3. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
 4. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.

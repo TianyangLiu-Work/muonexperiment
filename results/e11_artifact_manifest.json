@@ -5,43 +5,43 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 752073,
-      "size": "734.4 KB"
+      "size_bytes": 479744,
+      "size": "468.5 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2058613,
-      "size": "2.0 MB"
+      "size_bytes": 1033457,
+      "size": "1009.2 KB"
     },
     {
       "path": "tests",
       "role": "Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.",
       "commit_policy": "commit",
-      "size_bytes": 245742,
-      "size": "240.0 KB"
+      "size_bytes": 42350,
+      "size": "41.4 KB"
     },
     {
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 578957,
-      "size": "565.4 KB"
+      "size_bytes": 591323,
+      "size": "577.5 KB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 268173373,
+      "size_bytes": 268218035,
       "size": "255.8 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 28958828,
-      "size": "27.6 MB"
+      "size_bytes": 29221102,
+      "size": "27.9 MB"
     },
     {
       "path": "configs",
@@ -54,22 +54,22 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 3400721,
+      "size_bytes": 3315607,
       "size": "3.2 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 2863,
-      "size": "2.8 KB"
+      "size_bytes": 3089,
+      "size": "3.0 KB"
     },
     {
       "path": ".gitignore",
       "role": "Keeps local caches, datasets, and generated videos out of default commits.",
       "commit_policy": "commit",
-      "size_bytes": 470,
-      "size": "470 B"
+      "size_bytes": 479,
+      "size": "479 B"
     },
     {
       "path": ".gitattributes",
@@ -114,6 +114,36 @@
       "path": "results/e11_long_tail_one_step/layer_metrics.csv",
       "rows": 80,
       "size": "7.0 KB"
+    },
+    {
+      "path": "results/e11_cifar100_lt_one_step/step_metrics.csv",
+      "rows": 10,
+      "size": "10.3 KB"
+    },
+    {
+      "path": "results/e11_cifar100_lt_one_step/pair_summary.csv",
+      "rows": 1,
+      "size": "6.0 KB"
+    },
+    {
+      "path": "results/e11_cifar100_lt_one_step/layer_metrics.csv",
+      "rows": 20,
+      "size": "2.0 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_one_step/step_metrics.csv",
+      "rows": 6,
+      "size": "6.7 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_one_step/pair_summary.csv",
+      "rows": 1,
+      "size": "6.1 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_one_step/layer_metrics.csv",
+      "rows": 126,
+      "size": "10.1 KB"
     },
     {
       "path": "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
@@ -374,7 +404,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "15.5 KB"
+      "size": "17.2 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -398,11 +428,11 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "14.8 KB"
+      "size": "15.9 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
-      "size": "11.3 KB"
+      "size": "13.6 KB"
     },
     {
       "path": "discussion/e11_pasted_review_audit.md",
@@ -422,7 +452,7 @@
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
-      "size": "12.9 KB"
+      "size": "14.9 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",
@@ -438,13 +468,25 @@
     },
     {
       "path": "discussion/e11_claim_validity_audit.md",
-      "size": "7.0 KB"
+      "size": "8.6 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_lt_one_step.md",
+      "size": "2.2 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_resnet_one_step.md",
+      "size": "2.5 KB"
     }
   ],
   "ignore_policy": [
     {
       "path_or_pattern": "data/",
-      "reason": "Local torchvision/MNIST cache; downloaded by the MNIST probe and not part of the evidence set."
+      "reason": "Local torchvision dataset cache; downloaded by MNIST/CIFAR probes and not part of the evidence set."
+    },
+    {
+      "path_or_pattern": "outputs/",
+      "reason": "Local Slurm stdout/stderr logs; final CSV/Markdown/figure artifacts are committed separately."
     },
     {
       "path_or_pattern": ".pytest_cache/",

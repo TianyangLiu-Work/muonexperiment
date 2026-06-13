@@ -1613,6 +1613,46 @@ def main() -> None:
         and long_tail_row["mean_tail_positive_margin_prediction_changed_fraction_spectral"] == 0.0
     ):
         raise AssertionError("long-tail one-step absolute/certificate readout must support the stated tail caveat")
+    cifar_mlp_steps = pd.read_csv(Path("results/e11_cifar100_lt_one_step") / "step_metrics.csv")
+    cifar_mlp_summary = pd.read_csv(Path("results/e11_cifar100_lt_one_step") / "pair_summary.csv")
+    cifar_mlp_layers = pd.read_csv(Path("results/e11_cifar100_lt_one_step") / "layer_metrics.csv")
+    if len(cifar_mlp_steps) != 10 or len(cifar_mlp_layers) != 20:
+        raise AssertionError("CIFAR-100-LT MLP one-step diagnostic must contain 5 seeds x 2 geometries")
+    if set(cifar_mlp_steps["geometry"]) != {"frobenius", "spectral"} or cifar_mlp_steps["seed"].nunique() != 5:
+        raise AssertionError("CIFAR-100-LT MLP one-step diagnostic must compare Fro/GD and spectral on 5 seeds")
+    if len(cifar_mlp_summary) != 1:
+        raise AssertionError("CIFAR-100-LT MLP one-step summary must contain one paired-summary row")
+    cifar_mlp_row = cifar_mlp_summary.iloc[0]
+    if not (
+        cifar_mlp_row["tail_output_drift_sq_ratio_ci95_high"] < 1.0
+        and cifar_mlp_row["spectral_less_tail_output_drift_fraction"] == 1.0
+        and cifar_mlp_row["tail_loss_increase_diff_ci95_low"] > 0.0
+    ):
+        raise AssertionError("CIFAR-100-LT MLP diagnostic must preserve lower drift and the tail-loss caveat")
+    cifar_resnet_steps = pd.read_csv(Path("results/e11_cifar100_resnet_one_step") / "step_metrics.csv")
+    cifar_resnet_summary = pd.read_csv(Path("results/e11_cifar100_resnet_one_step") / "pair_summary.csv")
+    cifar_resnet_layers = pd.read_csv(Path("results/e11_cifar100_resnet_one_step") / "layer_metrics.csv")
+    cifar_resnet_config = json.loads((Path("results/e11_cifar100_resnet_one_step") / "config.json").read_text())
+    if len(cifar_resnet_steps) != 6 or len(cifar_resnet_layers) != 126:
+        raise AssertionError("CIFAR-100-LT ResNet18 one-step diagnostic must contain 3 seeds x 2 geometries")
+    if set(cifar_resnet_steps["geometry"]) != {"frobenius", "spectral"} or cifar_resnet_steps["seed"].nunique() != 3:
+        raise AssertionError("CIFAR-100-LT ResNet18 one-step diagnostic must compare Fro/GD and spectral on 3 seeds")
+    if set(cifar_resnet_steps["updated_parameter_subset"]) != {"conv_and_linear_weights_only"}:
+        raise AssertionError("CIFAR-100-LT ResNet18 diagnostic must update only Conv/Linear matrix weights")
+    if cifar_resnet_config["device"] != "cuda" or cifar_resnet_config["download"]:
+        raise AssertionError("CIFAR-100-LT ResNet18 diagnostic should be the Slurm/GPU no-download run")
+    if len(cifar_resnet_summary) != 1:
+        raise AssertionError("CIFAR-100-LT ResNet18 one-step summary must contain one paired-summary row")
+    cifar_resnet_row = cifar_resnet_summary.iloc[0]
+    if not (
+        cifar_resnet_row["tail_output_drift_sq_ratio_ci95_high"] < 1.0
+        and cifar_resnet_row["centered_tail_output_drift_sq_ratio_ci95_high"] < 1.0
+        and cifar_resnet_row["spectral_less_tail_output_drift_fraction"] == 1.0
+        and cifar_resnet_row["tail_loss_increase_diff_ci95_high"] < 0.0
+        and cifar_resnet_row["tail_accuracy_drop_diff_ci95_low"] < 0.0
+        and cifar_resnet_row["tail_accuracy_drop_diff_ci95_high"] > 0.0
+    ):
+        raise AssertionError("CIFAR-100-LT ResNet18 diagnostic must preserve lower drift, lower tail-loss increase, and inconclusive accuracy")
     imbalance_steps = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv")
     imbalance_summary = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "summary.csv")
     if len(imbalance_steps) != 160:
@@ -2172,6 +2212,15 @@ def main() -> None:
         "\\EelevenLongTailOneStepPredictionChangedSpectral",
         "\\EelevenLongTailOneStepPositivePredictionChangedFro",
         "\\EelevenLongTailOneStepPositivePredictionChangedSpectral",
+        "\\EelevenCifarResNetOneStepSeeds",
+        "\\EelevenCifarResNetOneStepDriftRatio",
+        "\\EelevenCifarResNetOneStepCenteredDriftRatio",
+        "\\EelevenCifarResNetOneStepMarginDeltaRatio",
+        "\\EelevenCifarResNetOneStepTailLossDiff",
+        "\\EelevenCifarResNetOneStepTailMarginDropDiff",
+        "\\EelevenCifarResNetOneStepTailAccuracyDropDiff",
+        "\\EelevenCifarResNetOneStepTailAccuracyBefore",
+        "\\EelevenCifarResNetOneStepMeanNrG",
         "\\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         "\\EelevenLocalLinearizationMaxRelativeErrorDirection",
         "\\EelevenLongTailImbalanceAblationSettings",
@@ -2258,6 +2307,9 @@ def main() -> None:
         r"\EelevenLongTailOneStepDriftRatio",
         r"\EelevenHeadTailAlignmentPositiveDriftRatio",
         r"\EelevenLongTailOneStepTailMarginDropDiff",
+        r"\EelevenCifarResNetOneStepDriftRatio",
+        r"\EelevenCifarResNetOneStepTailLossDiff",
+        r"\EelevenCifarResNetOneStepTailAccuracyDropDiff",
         r"\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         r"\EelevenLocalLinearizationMaxRelativeErrorDirection",
         r"\EelevenLongTailImbalanceWorstRatioCiHigh",
@@ -2294,6 +2346,7 @@ def main() -> None:
     reproduction_checklist = Path("discussion/e11_reproduction_checklist.md").read_text(encoding="utf-8")
     required_reproduction_phrases = [
         "make e11-main-results",
+        "make e11-cifar-resnet-results",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -2307,6 +2360,7 @@ def main() -> None:
         "not the main evidence table for the current paper draft",
         "Head-to-tail interference probe",
         "Long-tailed one-step diagnostic",
+        "CIFAR-100-LT ResNet18 one-step diagnostic",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -2325,6 +2379,7 @@ def main() -> None:
         raise AssertionError(f"reproduction checklist missing required content: {missing_reproduction}")
     current_reproduction_section = reproduction_checklist.split("## Background / Legacy E11 Evidence", 1)[0]
     required_current_reproduction_phrases = [
+        "CIFAR-100-LT ResNet18 one-step diagnostic",
         "Long-tailed practical training diagnostic",
         "Long-tailed practical training LR sensitivity",
     ]
@@ -2559,6 +2614,7 @@ def main() -> None:
         "make e11-check" not in readme
         or "make e11-full" not in readme
         or "make e11-main-results" not in readme
+        or "make e11-cifar-resnet-results" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
     ):

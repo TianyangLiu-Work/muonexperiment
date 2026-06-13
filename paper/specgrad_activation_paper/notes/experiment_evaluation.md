@@ -30,6 +30,7 @@ condition is
 |---|---|---|---|
 | Synthetic head-tail linear model | completed | The sign of `nrank(G_H) > ssrank(B_T,A_T)` matches whether spectral/polar has lower tail drift in controlled positive and negative boundary settings. | Synthetic construction controls singular values directly; it is a boundary sanity check, not a natural-data benchmark. |
 | Long-tailed digits one-step diagnostic | completed | On 20 paired seeds, spectral/polar produces lower held-out tail-example logit drift than Fro/GD after matching head first-order gain. | Tail loss and margin do not improve in the same direction; the supported quantity is tail-example logit drift. |
+| CIFAR-100-LT ResNet18 one-step diagnostic | completed | On 3 GPU-rerun seeds, a CIFAR-stem ResNet18 gives lower matched-head-gain squared tail-example logit drift: ratio `0.5369 [0.3943, 0.7312]`, with spectral lower in all seeds. | This is still a local one-step diagnostic with fixed BatchNorm state and Conv/Linear matrix-weight interventions, not a full long-tail optimizer benchmark. |
 | Long-tailed digits Muon bridge diagnostic | completed | `polar(M_t)` still has lower matched-head-gain tail drift than Fro/GD: squared drift ratio `0.8199 [0.6951, 0.9672]`. | Newton-Schulz `NS(M_t)` is weaker: `0.9116 [0.7696, 1.080]`, so this is a local bridge, not a full practical-Muon training claim. |
 | Short practical-Muon trajectory bridge | completed | Across 120 sampled state-step comparisons, `polar(M_t)` and `NS(M_t)` both have lower matched-head-gain squared tail-example logit drift than Fro/GD: ratios `0.7292 [0.6891, 0.7717]` and `0.8019 [0.7583, 0.848]`. | This is still a short local diagnostic on sampled states; it does not establish final tail accuracy, long-horizon training behavior, or hyperparameter robustness. |
 | Practical imbalanced-training diagnostic | completed | On the same small long-tailed digits task, NS-Muon-style training has lower final train loss, lower final tail eval loss, and lower tail output drift than Adam at the chosen lightweight hyperparameters. | Tail accuracy does not improve; this is not a tuned optimizer leaderboard and still needs larger long-tail benchmarks. |
@@ -41,6 +42,8 @@ condition is
 
 - Synthetic results: `results/e11_head_tail_interference/`.
 - One-step long-tail results: `results/e11_long_tail_one_step/`.
+- CIFAR-100-LT MLP results: `results/e11_cifar100_lt_one_step/`.
+- CIFAR-100-LT ResNet18 results: `results/e11_cifar100_resnet_one_step/`.
 - Muon bridge results: `results/e11_long_tail_muon_bridge/`.
 - Practical-Muon trajectory bridge results: `results/e11_long_tail_practical_muon_bridge/`.
 - Practical training results: `results/e11_long_tail_practical_training/`.
@@ -61,8 +64,8 @@ condition is
 ## Claims Currently Supported
 
 1. Under matched head gain, spectral/polar directions can reduce held-out tail
-   logit drift relative to Fro/GD in the tested synthetic and small long-tail
-   digits settings.
+   logit drift relative to Fro/GD in the tested synthetic, small long-tail
+   digits, and CIFAR-100-LT ResNet18 settings.
 2. The relevant theory quantity is head-to-tail function drift, not final
    classification performance.
 3. Layerwise evidence supports a scaled-step mechanism: spectral/polar may have
@@ -82,17 +85,18 @@ condition is
   fixed-checkpoint bridge.
 - Do not claim lower tail-example logit drift automatically implies lower tail loss,
   better tail margin, or higher tail accuracy.
-- Do not claim the sklearn-digits evidence is sufficient for CIFAR-100-LT,
-  ImageNet-LT, or iNaturalist.
+- Do not claim the new CIFAR-100-LT ResNet18 one-step diagnostic is sufficient
+  for ImageNet-LT, iNaturalist, or a full long-tail benchmark claim.
 - Do not claim the small fixed-hyperparameter practical run is a full Muon
   benchmark.
 
 ## Remaining Experiments for a Publishable Empirical Paper
 
-1. **Real long-tail benchmark.** Run the same matched-head-gain diagnostic on
-   CIFAR-100-LT, ImageNet-LT, or iNaturalist checkpoints. Required outputs:
-   matched head loss decrease, tail-example logit drift, tail loss increase, tail
-   margin drop, and paired confidence intervals.
+1. **Stronger real long-tail benchmark.** Extend the new CIFAR-100-LT ResNet18
+   diagnostic with more seeds, stronger checkpoints, and ImageNet-LT or
+   iNaturalist-style data. Required outputs: matched head loss decrease,
+   tail-example logit drift, tail loss increase, tail margin drop, accuracy, and
+   paired confidence intervals.
 2. **Architecture-level layerwise diagnostic.** Repeat the layerwise JVP and
    scaled-drift check on a modern classifier with convolutional or transformer
    blocks. The current two-layer MLP is useful for mechanism debugging but too
@@ -107,5 +111,6 @@ condition is
 ## Decision
 
 The current draft is viable as a focused theory-and-diagnostic paper about
-head-to-tail function drift. It is not yet viable as a broad empirical claim
-about long-tailed classification performance or Muon's full training behavior.
+head-to-tail function drift, now with a CIFAR-100-LT ResNet18 architecture
+robustness check. It is not yet viable as a broad empirical claim about
+long-tailed classification performance or Muon's full training behavior.

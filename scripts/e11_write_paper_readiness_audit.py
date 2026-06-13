@@ -29,6 +29,7 @@ def main() -> None:
     synthetic = pd.read_csv("results/e11_head_tail_interference/pair_summary.csv")
     one_step_steps = pd.read_csv("results/e11_long_tail_one_step/step_metrics.csv")
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
+    cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -62,10 +63,29 @@ def main() -> None:
                     f"8-step final ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}; "
                     f"drift-area ratio={fmt(forgetting['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} "
-                    f"CI={interval(forgetting, 'tail_output_drift_area_ratio_ci95_low', 'tail_output_drift_area_ratio_ci95_high')}."
+                    f"CI={interval(forgetting, 'tail_output_drift_area_ratio_ci95_low', 'tail_output_drift_area_ratio_ci95_high')}. "
+                    f"CIFAR-100-LT ResNet18 squared drift ratio={fmt(cifar_resnet['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')} "
+                    f"with spectral-lower fraction={fmt(cifar_resnet['spectral_less_tail_output_drift_fraction'])} over "
+                    f"{int(cifar_resnet['seeds'])} seeds."
                 ),
                 "why_it_is_ready": "It is measured under the paper's matched-head-gain protocol with paired confidence intervals and explicit norm-specific scaling readouts.",
-                "remaining_risk": "The evidence is still scikit-learn digits scale; it is a mechanism diagnostic, not a full long-tail benchmark.",
+                "remaining_risk": "The strongest new evidence is still a local diagnostic, not a retuned long-horizon long-tail benchmark.",
+            },
+            {
+                "claim": "The matched-head-gain drift readout survives a more appropriate CIFAR-100-LT ResNet architecture.",
+                "readiness": "supporting robustness check",
+                "evidence": (
+                    f"ResNet18 with CIFAR stem, fixed BatchNorm at measurement time, and Conv/Linear matrix-weight interventions gives "
+                    f"squared tail-example logit drift ratio={fmt(cifar_resnet['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"tail-loss increase diff spectral-minus-Fro={fmt(cifar_resnet['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
+                    f"CI={interval(cifar_resnet, 'tail_loss_increase_diff_ci95_low', 'tail_loss_increase_diff_ci95_high')}; "
+                    f"tail-accuracy-drop diff={fmt(cifar_resnet['mean_tail_accuracy_drop_diff_spectral_minus_fro'])} "
+                    f"CI={interval(cifar_resnet, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')}."
+                ),
+                "why_it_is_ready": "It was rerun on GPU with a convolutional architecture and CIFAR-100-LT split, addressing the pure two-layer-MLP concern.",
+                "remaining_risk": "Only three seeds and a one-step local intervention; BatchNorm/bias are frozen during the diagnostic and this is not a full practical Muon run.",
             },
             {
                 "claim": "The condition nrank(G_H) > ssrank(B_T,A_T) is a useful mechanism boundary.",
@@ -93,7 +113,7 @@ def main() -> None:
                     f"{fmt(layer_2['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}."
                 ),
                 "why_it_is_ready": "Both layers have unit-JVP squared drift ratio above 1 but scaled and observed squared drift ratios below 1; the one-step diagnostic also shows smaller operator norm but larger Frobenius norm after matching head gain.",
-                "remaining_risk": "The current layerwise test is only a two-layer digits MLP.",
+                "remaining_risk": "The ResNet run checks architecture-level drift, but the detailed unit-JVP/scaled-JVP decomposition is still only a two-layer digits MLP.",
             },
             {
                 "claim": "Lower tail-example logit drift implies better tail loss, margin, or accuracy.",
@@ -121,7 +141,7 @@ def main() -> None:
                     f"CI={interval(state_control.loc[('fro_gd_trajectory', 'ns_momentum')], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
                 ),
                 "why_it_is_ready": "The compatibility check is measured at a fixed checkpoint, along a short practical NS-Muon-style trajectory, and on a Fro/GD trajectory state-source control.",
-                "remaining_risk": "This is still a local matched-head-gain diagnostic on scikit-learn digits, not a full long-tail training or final-performance claim.",
+                "remaining_risk": "Muon-style momentum evidence is still local and mostly on scikit-learn digits; the new CIFAR-100-LT ResNet run is an ideal polar/spectral intervention, not a Muon optimizer run.",
             },
             {
                 "claim": "A small practical NS-Muon-style training loop has lower measured drift/loss in this fixed diagnostic.",
@@ -143,7 +163,7 @@ def main() -> None:
                     f"{fmt(lr_sweep.loc[0.1, 'geomean_final_tail_eval_drift_rms_ratio_muon_over_adam'])}."
                 ),
                 "why_it_is_ready": "It uses paired seeds, identical mini-batch/noise schedules, and explicit final train/head/tail metrics.",
-                "remaining_risk": "The LR sweep is coarse and still on scikit-learn digits; real long-tail datasets and larger models are still needed.",
+                "remaining_risk": "The LR sweep is coarse and still on scikit-learn digits; the new ResNet result is one-step only, so practical optimizer benchmarking remains needed.",
             },
         ]
     )
@@ -164,7 +184,7 @@ def main() -> None:
             },
             {
                 "section": "Evidence",
-                "content": "Synthetic boundary, one-step digits, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
+                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
             },
             {
                 "section": "Boundary",
@@ -176,10 +196,10 @@ def main() -> None:
     next_experiments = pd.DataFrame(
         [
             {
-                "priority": "must-have for stronger empirical paper",
+                "priority": "partly complete; extend for stronger empirical paper",
                 "experiment": "Real long-tail benchmark",
                 "purpose": "Test whether matched-head-gain tail drift reduction appears beyond scikit-learn digits.",
-                "minimum_standard": "CIFAR-100-LT, ImageNet-LT, or iNaturalist probe with tail drift, tail loss, margin, accuracy, and paired confidence intervals.",
+                "minimum_standard": "The new CIFAR-100-LT ResNet diagnostic is a first pass; strengthen it with more seeds, stronger checkpoints, ImageNet-LT/iNaturalist-style data, and class-wise metrics.",
             },
             {
                 "priority": "must-have for full empirical optimizer claim",

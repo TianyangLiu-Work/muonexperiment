@@ -21,6 +21,8 @@ def main() -> None:
     current_stages = {
         "Head-to-tail interference probe",
         "Long-tailed one-step diagnostic",
+        "CIFAR-100-LT MLP one-step diagnostic",
+        "CIFAR-100-LT ResNet18 one-step diagnostic",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed Muon state-source control",
@@ -75,6 +77,8 @@ This generated checklist separates the minimal main-paper evidence from appendix
 
 ```bash
 make e11-main-results      # core trajectories, equal-update, head-to-tail probes, and spectral-allocation
+make e11-cifar-results     # CIFAR-100-LT MLP local matched-head-gain diagnostic
+make e11-cifar-resnet-results # submit the CIFAR-100-LT ResNet18 GPU diagnostic via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets

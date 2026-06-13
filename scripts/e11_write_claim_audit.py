@@ -29,6 +29,7 @@ def main() -> None:
     head_tail = pd.read_csv("results/e11_head_tail_interference/pair_summary.csv").set_index("setting")
     one_step_steps = pd.read_csv("results/e11_long_tail_one_step/step_metrics.csv")
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
+    cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
@@ -57,7 +58,7 @@ def main() -> None:
             },
             {
                 "claim": "Spectral/polar one-step updates reduce held-out tail-example logit drift at matched head gain.",
-                "status": "supported in small long-tailed digits",
+                "status": "supported in small digits and CIFAR-100-LT ResNet diagnostic",
                 "evidence": (
                     f"Drift-squared ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={ci(one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
@@ -65,7 +66,11 @@ def main() -> None:
                     f"Frobenius-norm ratio={fmt(update_fro_ratio)}; "
                     f"operator-norm ratio={fmt(update_op_ratio)}; "
                     f"spectral-lower paired fraction={fmt(one_step['spectral_less_tail_output_drift_fraction'])} over "
-                    f"{int(one_step['seeds'])} seeds."
+                    f"{int(one_step['seeds'])} digits seeds. CIFAR-100-LT ResNet18 gives drift-squared ratio="
+                    f"{fmt(cifar_resnet['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={ci(cifar_resnet, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')} "
+                    f"with spectral-lower fraction={fmt(cifar_resnet['spectral_less_tail_output_drift_fraction'])} "
+                    f"over {int(cifar_resnet['seeds'])} seeds."
                 ),
                 "main_loophole": "The result is about logits/function drift; the matched step is norm-specific, not uniformly smaller, and it is not a tail-accuracy claim.",
             },
@@ -77,9 +82,14 @@ def main() -> None:
                     f"{fmt(one_step['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
                     f"CI={ci(one_step, 'tail_loss_increase_diff_ci95_low', 'tail_loss_increase_diff_ci95_high')}; "
                     f"tail-accuracy-drop difference={fmt(one_step['mean_tail_accuracy_drop_diff_spectral_minus_fro'])} "
-                    f"CI={ci(one_step, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')}."
+                    f"CI={ci(one_step, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')}. "
+                    f"CIFAR-100-LT ResNet18 has lower one-step tail-loss increase "
+                    f"diff={fmt(cifar_resnet['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
+                    f"CI={ci(cifar_resnet, 'tail_loss_increase_diff_ci95_low', 'tail_loss_increase_diff_ci95_high')}, "
+                    f"but tail-accuracy-drop diff still crosses zero "
+                    f"CI={ci(cifar_resnet, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')}."
                 ),
-                "main_loophole": "Performance claims need real long-tail training and class-wise outcome metrics.",
+                "main_loophole": "One-step tail-loss improvement in the ResNet diagnostic is encouraging but still not a retuned long-horizon classification result.",
             },
             {
                 "claim": "The tail-drift reduction persists across a short head-only horizon.",
@@ -140,6 +150,11 @@ def main() -> None:
                 "role": "Matched-head-gain held-out tail-example logit drift and performance caveat.",
             },
             {
+                "table": "CIFAR-100-LT ResNet18 one-step",
+                "path": "results/e11_cifar100_resnet_one_step/pair_summary.csv",
+                "role": "Larger visual-data architecture check for matched-head-gain tail drift under fixed BatchNorm state.",
+            },
+            {
                 "table": "Long-tail Muon-style compatibility",
                 "path": "results/e11_long_tail_muon_bridge/pair_summary.csv",
                 "role": "Fixed-checkpoint compatibility check for polar(G_t), polar(M_t), and Newton-Schulz directions under matched head gain.",
@@ -182,10 +197,10 @@ The current data do **not** justify saying that this already proves better tail 
 
 ## Strongest Remaining Loopholes
 
-1. The real-data evidence is small long-tailed digits, not a modern long-tail benchmark.
+1. The CIFAR-100-LT ResNet evidence is still a local one-step diagnostic with three seeds, not a modern long-tail benchmark or full benchmark.
 2. The Muon-style compatibility evidence is local and small-scale; real long-tail practical Muon training remains unchecked.
 3. The current performance evidence is weaker than the function-drift evidence.
-4. The layerwise mechanism has only been checked in the current small MLP.
+4. The detailed layerwise JVP mechanism has only been checked in the current small MLP.
 """
     write_markdown(OUTPUT_PATH, text)
     print(f"saved claim audit to {OUTPUT_PATH}")

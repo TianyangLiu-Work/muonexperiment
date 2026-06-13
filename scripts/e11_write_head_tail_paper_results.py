@@ -22,6 +22,7 @@ def ci(mean: float, low: float, high: float) -> str:
 def main() -> None:
     head_tail = pd.read_csv("results/e11_head_tail_interference/pair_summary.csv")
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
+    cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
@@ -76,6 +77,21 @@ def main() -> None:
                 one_step["tail_loss_increase_diff_ci95_high"],
             )
             + " \\\\"
+        ),
+        (
+            "CIFAR-100-LT ResNet18 one-step & "
+            + ci(
+                cifar_resnet["geomean_tail_output_drift_sq_ratio_spectral_over_fro"],
+                cifar_resnet["tail_output_drift_sq_ratio_ci95_low"],
+                cifar_resnet["tail_output_drift_sq_ratio_ci95_high"],
+            )
+            + " & tail loss diff = "
+            + ci(
+                cifar_resnet["mean_tail_loss_increase_diff_spectral_minus_fro"],
+                cifar_resnet["tail_loss_increase_diff_ci95_low"],
+                cifar_resnet["tail_loss_increase_diff_ci95_high"],
+            )
+            + "; accuracy diff CI crosses 0; fixed-BN local check \\\\"
         ),
         (
             "8-step head-only forgetting & "

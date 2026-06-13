@@ -14,6 +14,7 @@ data/
 # Force-add a specific file only when explicitly requested.
 *.gif
 *.mp4
+outputs/
 
 # LaTeX build byproducts
 *.aux

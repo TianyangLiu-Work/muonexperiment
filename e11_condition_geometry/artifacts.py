@@ -68,6 +68,12 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_long_tail_one_step/step_metrics.csv",
     "results/e11_long_tail_one_step/pair_summary.csv",
     "results/e11_long_tail_one_step/layer_metrics.csv",
+    "results/e11_cifar100_lt_one_step/step_metrics.csv",
+    "results/e11_cifar100_lt_one_step/pair_summary.csv",
+    "results/e11_cifar100_lt_one_step/layer_metrics.csv",
+    "results/e11_cifar100_resnet_one_step/step_metrics.csv",
+    "results/e11_cifar100_resnet_one_step/pair_summary.csv",
+    "results/e11_cifar100_resnet_one_step/layer_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/summary.csv",
     "results/e11_long_tail_checkpoint_sweep/step_metrics.csv",
@@ -140,13 +146,19 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_research_synthesis.md",
     "discussion/e11_research_direction_map.md",
     "discussion/e11_claim_validity_audit.md",
+    "discussion/e11_cifar100_lt_one_step.md",
+    "discussion/e11_cifar100_resnet_one_step.md",
 )
 
 
 IGNORE_POLICY: tuple[dict[str, str], ...] = (
     {
         "path_or_pattern": "data/",
-        "reason": "Local torchvision/MNIST cache; downloaded by the MNIST probe and not part of the evidence set.",
+        "reason": "Local torchvision dataset cache; downloaded by MNIST/CIFAR probes and not part of the evidence set.",
+    },
+    {
+        "path_or_pattern": "outputs/",
+        "reason": "Local Slurm stdout/stderr logs; final CSV/Markdown/figure artifacts are committed separately.",
     },
     {
         "path_or_pattern": ".pytest_cache/",
@@ -170,6 +182,8 @@ MAIN_RESULT_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_run_head_tail_interference.py",
     "scripts/e11_run_head_tail_alignment_ablation.py",
     "scripts/e11_run_long_tail_one_step.py",
+    "scripts/e11_run_cifar100_lt_one_step.py",
+    "scripts/e11_run_cifar100_resnet_one_step.py",
     "scripts/e11_run_long_tail_imbalance_ablation.py",
     "scripts/e11_run_long_tail_checkpoint_sweep.py",
     "scripts/e11_run_long_tail_class_partition_sweep.py",
@@ -221,6 +235,18 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "python3 scripts/e11_run_long_tail_one_step.py",
         "produces": "results/e11_long_tail_one_step/* and figures/e11_long_tail_one_step/*",
         "paper_role": "Real-data matched-head-gain check on held-out tail examples.",
+    },
+    {
+        "stage": "CIFAR-100-LT MLP one-step diagnostic",
+        "command": "python3 scripts/e11_run_cifar100_lt_one_step.py --device cpu --no-download",
+        "produces": "results/e11_cifar100_lt_one_step/* and figures/e11_cifar100_lt_one_step/*",
+        "paper_role": "Larger visual-data matched-head-gain check using an exactly controlled two-matrix MLP intervention.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 one-step diagnostic",
+        "command": "sbatch scripts/slurm/e11_cifar100_resnet_one_step.sbatch",
+        "produces": "results/e11_cifar100_resnet_one_step/* and figures/e11_cifar100_resnet_one_step/*",
+        "paper_role": "GPU ResNet18 architecture robustness check for matched-head-gain tail drift.",
     },
     {
         "stage": "Long-tailed imbalance ablation",
