@@ -3,7 +3,7 @@
 This probe implements a synthetic one-step linear classification experiment for the
 head-to-tail interference note. For each seed, it compares a Frobenius-normalized
 gradient step and a spectral/polar step scaled to the same first-order head gain.
-The tail batch is held out; the reported drift is the change in tail logits after
+The tail batch is held out; the reported drift is the change in logits on tail examples after
 the head-only step.
 
 - Seeds: 80
@@ -15,7 +15,7 @@ the head-only step.
 Ratio columns are spectral divided by Frobenius. Values below 1 mean the spectral
 step disturbed the tail outputs less.
 
-| setting | predicted spectral less drift | nrank(G_H) | srank(A_T) | ssrank(B_T,A_T) | theory ratio | observed drift-sq ratio 95% CI | spectral less drift fraction | CE increase diff 95% CI | margin drop diff 95% CI |
+| setting | predicted spectral less drift | nrank(G_H) | srank(A_T) | ssrank(B_T,A_T) | theory ratio | observed squared drift ratio 95% CI | spectral less drift fraction | CE increase diff 95% CI | margin drop diff 95% CI |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | high_head_rank_low_tail_srank | True | 8.607 | 1.002 | 1 | 0.1162 | 0.3403 [0.3403, 0.3403] | 1 | 2.684e-05 [-0.0001661, 0.0002198] | 0.0001355 [-0.001351, 0.001622] |
 | low_head_rank_high_tail_srank | False | 1.387 | 24 | 10 | 7.208 | 7.208 [7.208, 7.208] | 0 | -6.28e-05 [-0.000279, 0.0001534] | -9.879e-05 [-0.001074, 0.0008766] |

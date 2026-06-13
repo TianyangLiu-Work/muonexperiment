@@ -38,7 +38,7 @@ def write_figure(pair_summary):
         [value + width / 2 for value in x],
         plot_data["geomean_tail_output_drift_sq_ratio_spectral_over_fro"],
         width=width,
-        label="observed drift-sq ratio",
+        label="observed squared drift ratio",
     )
     ax.axhline(1.0, color="black", linewidth=1.0, linestyle="--")
     ax.set_yscale("log")
@@ -61,7 +61,7 @@ def write_discussion(config: HeadTailConfig, pair_summary, figure_path: Path) ->
         "This probe implements a synthetic one-step linear classification experiment for the",
         "head-to-tail interference note. For each seed, it compares a Frobenius-normalized",
         "gradient step and a spectral/polar step scaled to the same first-order head gain.",
-        "The tail batch is held out; the reported drift is the change in tail logits after",
+        "The tail batch is held out; the reported drift is the change in logits on tail examples after",
         "the head-only step.",
         "",
         f"- Seeds: {len(config.seeds)}",
@@ -73,7 +73,7 @@ def write_discussion(config: HeadTailConfig, pair_summary, figure_path: Path) ->
         "Ratio columns are spectral divided by Frobenius. Values below 1 mean the spectral",
         "step disturbed the tail outputs less.",
         "",
-        "| setting | predicted spectral less drift | nrank(G_H) | srank(A_T) | ssrank(B_T,A_T) | theory ratio | observed drift-sq ratio 95% CI | spectral less drift fraction | CE increase diff 95% CI | margin drop diff 95% CI |",
+        "| setting | predicted spectral less drift | nrank(G_H) | srank(A_T) | ssrank(B_T,A_T) | theory ratio | observed squared drift ratio 95% CI | spectral less drift fraction | CE increase diff 95% CI | margin drop diff 95% CI |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in pair_summary.to_dict(orient="records"):

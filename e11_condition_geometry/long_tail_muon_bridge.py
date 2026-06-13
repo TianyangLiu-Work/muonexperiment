@@ -16,6 +16,7 @@ from .long_tail_digits import (
     batch,
     dtype_from_name,
     full_metrics,
+    local_linearization_metrics,
     make_generator,
     restore,
     snapshot,
@@ -188,7 +189,16 @@ def evaluate_bridge_direction(
     apply_direction(params, before, directions, step_size)
     after_head = full_metrics(model, x, y, head_batch)
     after_tail = full_metrics(model, x, y, tail_eval)
-    output_delta = model.logits(x[tail_eval]).detach() - base_tail_logits
+    after_tail_logits = model.logits(x[tail_eval]).detach()
+    output_delta = after_tail_logits - base_tail_logits
+    linearization = local_linearization_metrics(
+        x[tail_eval],
+        base_tail_logits,
+        after_tail_logits,
+        before,
+        directions,
+        step_size,
+    )
     restore(params, before)
     return {
         "head_loss_before": base_head["loss"],
@@ -206,6 +216,7 @@ def evaluate_bridge_direction(
         "tail_margin_drop": base_tail["mean_margin"] - after_tail["mean_margin"],
         "tail_output_drift_fro": float(torch.linalg.norm(output_delta).cpu()),
         "tail_output_drift_rms": float(torch.sqrt(torch.mean(output_delta.square())).cpu()),
+        **linearization,
         "update_fro_norm": update_fro,
         "update_op_norm": update_op,
         "step_size": float(step_size),
@@ -464,6 +475,22 @@ def summarize_long_tail_muon_bridge(step_metrics: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _seed_clustered_log_ratio_ci95(paired: pd.DataFrame, column: str) -> tuple[float, float, float]:
+    positive = paired[paired[column] > 0].copy()
+    if positive.empty:
+        return math.nan, math.nan, math.nan
+    seed_log_means = positive.assign(log_ratio=positive[column].map(math.log)).groupby(
+        "seed",
+        observed=True,
+    )["log_ratio"].mean()
+    return log_ratio_ci95(seed_log_means.map(math.exp))
+
+
+def _seed_clustered_ci95(paired: pd.DataFrame, column: str) -> tuple[float, float, float]:
+    seed_means = paired.groupby("seed", observed=True)[column].mean()
+    return ci95(seed_means)
+
+
 def summarize_long_tail_practical_muon_bridge(step_metrics: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for direction, group in step_metrics.groupby("direction", observed=True, sort=False):
@@ -501,13 +528,17 @@ def summarize_long_tail_practical_muon_bridge(step_metrics: pd.DataFrame) -> pd.
                 }
             )
         paired = pd.DataFrame(ratio_rows)
-        drift_fro, drift_fro_low, drift_fro_high = log_ratio_ci95(paired["tail_output_drift_sq_ratio_vs_fro"])
-        drift_polar, drift_polar_low, drift_polar_high = log_ratio_ci95(paired["tail_output_drift_sq_ratio_vs_polar_grad"])
-        head_diff, head_diff_low, head_diff_high = ci95(paired["actual_head_loss_decrease_diff_vs_fro"])
-        loss_diff, loss_diff_low, loss_diff_high = ci95(paired["tail_loss_increase_diff_vs_fro"])
-        cosine, cosine_low, cosine_high = ci95(paired["direction_cosine_to_polar_grad"])
-        align_ratio, align_ratio_low, align_ratio_high = log_ratio_ci95(paired["alignment_ratio_to_polar_grad"])
-        momentum_cosine, momentum_cosine_low, momentum_cosine_high = ci95(paired["gradient_momentum_cosine"])
+        drift_fro, drift_fro_low, drift_fro_high = _seed_clustered_log_ratio_ci95(paired, "tail_output_drift_sq_ratio_vs_fro")
+        drift_polar, drift_polar_low, drift_polar_high = _seed_clustered_log_ratio_ci95(paired, "tail_output_drift_sq_ratio_vs_polar_grad")
+        head_diff, head_diff_low, head_diff_high = _seed_clustered_ci95(paired, "actual_head_loss_decrease_diff_vs_fro")
+        loss_diff, loss_diff_low, loss_diff_high = _seed_clustered_ci95(paired, "tail_loss_increase_diff_vs_fro")
+        cosine, cosine_low, cosine_high = _seed_clustered_ci95(paired, "direction_cosine_to_polar_grad")
+        align_ratio, align_ratio_low, align_ratio_high = _seed_clustered_log_ratio_ci95(paired, "alignment_ratio_to_polar_grad")
+        momentum_cosine, momentum_cosine_low, momentum_cosine_high = _seed_clustered_ci95(paired, "gradient_momentum_cosine")
+        seed_flags = paired.groupby("seed", observed=True).agg(
+            less_tail_drift_than_fro=("less_tail_drift_than_fro", "mean"),
+            less_tail_drift_than_polar_grad=("less_tail_drift_than_polar_grad", "mean"),
+        )
         rows.append(
             {
                 "direction": direction,
@@ -520,8 +551,8 @@ def summarize_long_tail_practical_muon_bridge(step_metrics: pd.DataFrame) -> pd.
                 "geomean_tail_output_drift_sq_ratio_vs_polar_grad": drift_polar,
                 "tail_output_drift_sq_ratio_vs_polar_grad_ci95_low": drift_polar_low,
                 "tail_output_drift_sq_ratio_vs_polar_grad_ci95_high": drift_polar_high,
-                "less_tail_drift_than_fro_fraction": float(paired["less_tail_drift_than_fro"].mean()),
-                "less_tail_drift_than_polar_grad_fraction": float(paired["less_tail_drift_than_polar_grad"].mean()),
+                "less_tail_drift_than_fro_fraction": float(seed_flags["less_tail_drift_than_fro"].mean()),
+                "less_tail_drift_than_polar_grad_fraction": float(seed_flags["less_tail_drift_than_polar_grad"].mean()),
                 "mean_actual_head_loss_decrease_diff_vs_fro": head_diff,
                 "actual_head_loss_decrease_diff_vs_fro_ci95_low": head_diff_low,
                 "actual_head_loss_decrease_diff_vs_fro_ci95_high": head_diff_high,

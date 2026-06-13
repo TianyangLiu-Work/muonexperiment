@@ -34,8 +34,8 @@ def main() -> None:
             {
                 "讨论点": "Synthetic boundary",
                 "发现": (
-                    f"正例 drift ratio={fmt(stats.synthetic_positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}，"
-                    f"反例 drift ratio={fmt(stats.synthetic_negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}。"
+                    f"正例 squared drift ratio={fmt(stats.synthetic_positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}，"
+                    f"反例 squared drift ratio={fmt(stats.synthetic_negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}。"
                 ),
                 "证据": "results/e11_head_tail_interference/pair_summary.csv",
                 "解释": "nrank(G_H) 与 ssrank(B_T,A_T) 的不等式至少有可 falsify 的符号含义。",
@@ -43,19 +43,19 @@ def main() -> None:
             {
                 "讨论点": "One-step long-tail drift",
                 "发现": (
-                    f"20 seeds 下 spectral/Frobenius tail-drift-squared ratio="
+                    f"20 seeds 下 spectral/Frobenius squared tail-example logit drift ratio="
                     f"{fmt(stats.long_tail_one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{ci(stats.long_tail_one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}。"
                 ),
                 "证据": "results/e11_long_tail_one_step/pair_summary.csv",
-                "解释": "matched head gain 下 spectral/polar 对 held-out tail logits 的扰动更小。",
+                "解释": "matched head gain 下 spectral/polar 对 held-out tail examples 上的 logits 扰动更小。",
             },
             {
                 "讨论点": "Muon-style compatibility",
                 "发现": (
-                    f"polar(M_t) drift ratio={fmt(stats.muon_bridge_polar_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"polar(M_t) squared drift ratio={fmt(stats.muon_bridge_polar_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{ci(stats.muon_bridge_polar_momentum, 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}；"
-                    f"NS(M_t) ratio={fmt(stats.muon_bridge_ns_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"NS(M_t) squared drift ratio={fmt(stats.muon_bridge_ns_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{ci(stats.muon_bridge_ns_momentum, 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}。"
                 ),
                 "证据": "results/e11_long_tail_muon_bridge/pair_summary.csv",
@@ -64,10 +64,10 @@ def main() -> None:
             {
                 "讨论点": "Practical Muon trajectory compatibility",
                 "发现": (
-                    f"120 个 state-step comparisons 下 polar(M_t) ratio="
+                    f"120 个 state-step comparisons 下 polar(M_t) squared drift ratio="
                     f"{fmt(stats.practical_muon_bridge_polar_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{ci(stats.practical_muon_bridge_polar_momentum, 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}；"
-                    f"NS(M_t) ratio={fmt(stats.practical_muon_bridge_ns_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"NS(M_t) squared drift ratio={fmt(stats.practical_muon_bridge_ns_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{ci(stats.practical_muon_bridge_ns_momentum, 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}。"
                 ),
                 "证据": "results/e11_long_tail_practical_muon_bridge/summary.csv",
@@ -85,7 +85,7 @@ def main() -> None:
             {
                 "讨论点": "8-step forgetting",
                 "发现": (
-                    f"final drift ratio={fmt(stats.long_tail_forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"final squared drift ratio={fmt(stats.long_tail_forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{ci(stats.long_tail_forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}；"
                     f"area ratio={fmt(stats.long_tail_forgetting['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} "
                     f"{ci(stats.long_tail_forgetting, 'tail_output_drift_area_ratio_ci95_low', 'tail_output_drift_area_ratio_ci95_high')}。"
@@ -113,7 +113,7 @@ def main() -> None:
 
 ## 当前讨论主线
 
-当前 paper 应写成 **head-to-tail interference mechanism paper**：在长尾小批量训练中，head-only update 可能在 tail 样本缺席时扰动 tail logits；我们研究 idealized spectral/polar direction 是否能在 matched head gain 下减少这种扰动。
+当前 paper 应写成 **head-to-tail interference mechanism paper**：在长尾小批量训练中，head-only update 可能在 tail 样本缺席时扰动这些 tail examples 上的 logits；我们研究 idealized spectral/polar direction 是否能在 matched head gain 下减少这种扰动。
 
 旧的 Muon/Adam condition-geometry 结果只作为 guardrail：它提醒我们不能把 spectral/rank geometry 直接写成优化器全局更优、最终 tail accuracy 更好，或完整 Muon 机制已经被解释。
 

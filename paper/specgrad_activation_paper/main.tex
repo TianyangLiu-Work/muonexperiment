@@ -1,6 +1,12 @@
 \documentclass{article}
 
+\input{glyphtounicode}
+\pdfgentounicode=1
+\usepackage[T1]{fontenc}
 \usepackage{iclr2025_conference,times}
+\ClearShipoutPicture
+\fancyhead{}
+\renewcommand{\headrulewidth}{0pt}
 \usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools,bm}
 \usepackage{booktabs,array}
 \usepackage{float}
@@ -34,23 +40,19 @@
 \newcommand{\Tr}{\operatorname{tr}}
 \input{tables/e11_paper_numbers.tex}
 
-\title{Spectral Head-to-Tail Interference}
+\title{Head-to-Tail Interference\\in Long-Tailed Small-Batch Training}
 \author{Tianyang Liu\\UCDavis\\\texttt{tlyliu@ucdavis.edu}}
 
 %\iclrfinalcopy
 
-% Local build override: keep the ICLR review page style, but suppress the
-% automatic anonymous-review title block.
+% Local build override: keep the ICLR page geometry, but suppress the
+% automatic anonymous-review title block and review-status header.
 \makeatletter
 \def\@maketitle{\vbox{\hsize\textwidth
 {\LARGE\sc \@title\par}
 \vskip 0.12in
 {\large \@author\par}
-\ificlrfinal
-    \lhead{Published as a conference paper}
-\else
-    \lhead{Under review as a conference paper}
-\fi
+\lhead{}
 \vskip 0.3in minus 0.1in}}
 \makeatother
 
@@ -58,7 +60,7 @@
 \maketitle
 
 \begin{abstract}
-Long-tailed small-batch training exposes a local stability problem not captured by ordinary loss-decrease comparisons: a head-class mini-batch update can improve the current batch while perturbing rare-tail logits absent from the update. We study a local mechanism question: after matching the same first-order head-batch gain, which update direction perturbs the held-out tail function less? We make four contributions. We introduce a matched-gain head-to-tail drift diagnostic, define a head-to-tail interference coefficient, derive a downstream-aware rank boundary for sandwich matrix blocks, and test the mechanism in controlled matrix blocks and long-tailed digits experiments with selected-state Muon-style directions. The central condition is quantitative: for \(J_T(D)=B_TDA_T\), spectral/polar geometry has the smaller worst-case matched-gain drift bound when \(\nrank(G_H)>\ssrank(B_T,A_T)\). The evidence is diagnostic rather than benchmark-driven. Reversing the synthetic rank condition changes the spectral/Frobenius drift ratio from \(\EelevenHeadTailPositiveDriftRatio\) to \(\EelevenHeadTailNegativeDriftRatio\); on long-tailed digits, spectral/polar gives a matched-gain tail-drift ratio of \(\EelevenLongTailOneStepDriftRatio\,\EelevenLongTailOneStepDriftRatioCi\); and along a short practical Muon-style trajectory, NS\((M_t)\) gives ratio \(\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio\,\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatioCi\). Lower logit drift, however, does not automatically improve tail cross-entropy, margin, or accuracy. These results identify a local mechanism for spectral updates in long-tailed small-batch training, distinct from an optimizer-level benchmark claim.
+Long-tailed small-batch training creates a local stability problem: a head-class update can improve the current mini-batch while perturbing logits on rare tail examples that are absent from the update. We study this problem through a matched-head-gain diagnostic: after two update directions make the same first-order progress on the head batch, compare their squared logit drift on held-out tail examples. For a sandwich matrix block \(J_T(D)=B_TDA_T\), the resulting interference coefficient predicts a smaller worst-case drift bound for spectral/polar geometry when \(\nrank(G_H)>\ssrank(B_T,A_T)\), where \(\ssrank(B_T,A_T)\) is a downstream-aware stable-rank quantity. We make four contributions: a matched-head-gain formulation, the sandwich-block condition, an arbitrary-direction protocol for Muon-style directions, and controlled diagnostics that test the claim boundary. Controlled boundary experiments reverse the spectral/Frobenius squared drift ratio from \(\EelevenHeadTailPositiveDriftRatio\) to \(\EelevenHeadTailNegativeDriftRatio\), and a controlled long-tailed digits diagnostic gives a spectral/Frobenius squared tail-example logit drift ratio of \(\EelevenLongTailOneStepDriftRatio ~\EelevenLongTailOneStepDriftRatioCi\). The result is a local function-drift mechanism, not an optimizer-level performance claim: lower logit drift does not automatically improve tail cross-entropy, margin, or accuracy.
 \end{abstract}
 
 \section{Introduction}
@@ -78,28 +80,30 @@ We make four contributions:
   \item We formulate a local head-to-tail interference problem: after matching the same first-order head-batch gain, compare how much different update geometries perturb a held-out tail function.
   \item We define a head-to-tail interference coefficient and prove a matched-gain drift bound for any norm geometry.
   \item For a matrix block \(J_T(D)=B_TDA_T\), we derive the spectral-vs-Frobenius condition \(\nrank(G_H)>\ssrank(B_T,A_T)\).
-  \item We provide empirical diagnostics on a synthetic boundary case and a long-tailed digits MLP, including selected-state compatibility checks for Muon-style momentum and Newton--Schulz directions.
+  \item We provide empirical diagnostics on a synthetic boundary case and a controlled long-tailed digits MLP, including selected-state compatibility checks for Muon-style momentum and Newton--Schulz directions.
 \end{enumerate}
 
-The experiments are diagnostic rather than benchmark-driven. They test whether the local drift mechanism appears in controlled matrix blocks, in a trained long-tailed digits MLP, and along short Muon-style trajectories. The main empirical signal is tail-logit drift under matched head gain: the synthetic positive and negative boundary constructions give drift ratios \(\EelevenHeadTailPositiveDriftRatio\) and \(\EelevenHeadTailNegativeDriftRatio\), the long-tailed digits one-step diagnostic gives ratio \(\EelevenLongTailOneStepDriftRatio\,\EelevenLongTailOneStepDriftRatioCi\), and the short practical Muon-style trajectory gives NS\((M_t)\) ratio \(\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio\,\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatioCi\). Accordingly, tail loss, margin, and accuracy are reported separately to avoid conflating local function preservation with final classification performance.
+The experiments are diagnostic rather than benchmark-driven. They test whether the local drift mechanism appears in controlled matrix blocks, in a controlled long-tailed digits MLP, and along short Muon-style direction trajectories. The main empirical signal is the matched-head-gain squared tail-example logit drift ratio. The synthetic positive and negative boundary constructions give squared drift ratios \(\EelevenHeadTailPositiveDriftRatio\) and \(\EelevenHeadTailNegativeDriftRatio\); the controlled long-tailed digits one-step diagnostic gives squared drift ratio \(\EelevenLongTailOneStepDriftRatio ~\EelevenLongTailOneStepDriftRatioCi\); and the short Muon-style direction trajectory gives NS\((M_t)\) squared drift ratio \(\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio ~\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatioCi\). Accordingly, tail loss, margin, and accuracy are reported separately to avoid conflating local function-drift reduction with final classification performance.
+
+The supported mechanism is also narrower than ``spectral directions are always safer''. The layerwise diagnostic shows that polar unit directions can have larger tail JVPs, while matched-head-gain scaling can still reduce observed drift. Thus the empirical claim is about tail drift after head progress has been matched, not about uniformly lower tail sensitivity of every spectral unit direction.
 
 \section{Related Work}
 
 \subsection{Local Geometry of Spectral Gradients and Muon}
 
-Spectral-gradient theory provides the local geometry that motivates this paper, but it usually studies a same-batch objective. \citet{davis2026spectral} give the layerwise condition \(\nrank(G)>\srank(A)\), under which a spectral update can obtain a larger local decrease than a Frobenius update. Other recent work studies spectral constraints, spectral anisotropy, or spectrum-shaping optimizer behavior in large-model training \citep{chen2025muon,spectra2026,spectralclipping2026,muonvit2026}. These works motivate the idea that update geometry can matter beyond scalar learning-rate choice.
+Spectral-gradient theory provides the local geometry that motivates this paper, but it usually studies a same-batch objective. \citet{davis2025spectral} give the layerwise condition \(\nrank(G)>\srank(A)\), under which a spectral update can obtain a larger local decrease than a Frobenius update. Other recent work analyzes Muon through spectral-norm constraints \citep{chen2025muon}, studies spectral anisotropy or spectral clipping in LLM training \citep{spectra2026,spectralclipping2026}, and examines Muon recipe interactions and gradient spectra in vision transformers \citep{muonvit2026}. These works motivate the idea that update geometry can matter beyond scalar learning-rate choice.
 
 We use the same geometric distinction for a different local question. Rather than asking whether a spectral update decreases the head-batch loss more, we ask whether it perturbs a held-out tail function less after the head-batch gain has been matched. The resulting condition, \(\nrank(G_H)>\ssrank(B_T,A_T)\), is cross-distribution: the left-hand side comes from the head gradient, while the right-hand side comes from tail activations and the downstream Jacobian.
 
 \subsection{Long-Tailed Learning and Optimizer Geometry}
 
-Classical long-tailed recognition methods address imbalance through sampling, losses, margins, or classifier calibration, including class-balanced loss \citep{cui2019classbalanced}, LDAM \citep{cao2019ldam}, OLTR \citep{liu2019oltr}, and decoupled training \citep{kang2020decoupling}. These methods primarily change the training objective, data distribution, or classifier calibration so that rare classes receive more effective supervision. Our diagnostic studies a different failure mode: even before the next tail sample appears, a head-only update can move the tail logits.
+Classical long-tailed recognition methods address imbalance through sampling, losses, margins, or classifier calibration, including class-balanced loss \citep{cui2019classbalanced}, LDAM \citep{cao2019ldam}, OLTR \citep{liu2019oltr}, and decoupled training \citep{kang2020decoupling}. These methods primarily change the training objective, data distribution, or classifier calibration so that rare classes receive more effective supervision. Our diagnostic studies a different failure mode: even before the next tail sample appears, a head-only update can move the model outputs on held-out tail examples.
 
-Recent work has also connected Muon to long-tailed data \citep{promo2026} and tail-end associative memory learning \citep{muonmemory2025}. This paper is complementary to those lines, but it asks a narrower mechanism question. It does not introduce a re-weighting method, and it does not claim a full long-tailed benchmark improvement. Instead, it isolates a local quantity that can be measured at a fixed checkpoint: when tail samples are absent, how much do head-only updates perturb tail logits?
+Recent work has also connected Muon-style optimization to long-tailed recognition \citep{promo2026} and tail-end associative memory learning \citep{muonmemory2025}. This paper is complementary to those lines, but it asks a narrower mechanism question. It does not introduce a re-weighting method, and it does not claim a full long-tailed benchmark improvement. Instead, it isolates a local quantity that can be measured at a fixed checkpoint: when tail samples are absent, how much do head-only updates perturb logits on held-out tail examples?
 
 \subsection{Scope and Relation to Full Muon}
 
-The theory analyzes an idealized SpecGrad/polar direction, while practical Muon contains additional optimizer state. Momentum, finite Newton--Schulz iterations, weight decay, schedules, and non-matrix parameter handling can all change the realized update. The theoretical conclusion should therefore be read as a local geometric mechanism: when \(\nrank(G_H)>\ssrank(B_T,A_T)\) holds, spectral geometry has a smaller worst-case matched-gain upper bound on tail drift. The Muon experiments in this paper test whether selected Muon-style directions exhibit drift ratios compatible with this local effect; they do not constitute a theory of complete Muon training.
+The theory analyzes an idealized spectral-gradient/polar direction, while practical Muon contains additional optimizer state. Momentum, finite Newton--Schulz iterations, weight decay, schedules, and non-matrix parameter handling can all change the realized update. The theoretical conclusion should therefore be read as a local geometric mechanism: when \(\nrank(G_H)>\ssrank(B_T,A_T)\) holds, spectral geometry has a smaller worst-case matched-gain upper bound on tail drift. The Muon experiments in this paper test whether selected Muon-style directions exhibit squared drift ratios compatible with this local effect; they do not constitute a theory of complete Muon training.
 
 \section{Problem Setup}
 
@@ -154,7 +158,26 @@ Therefore, among two update geometries with the same matched head gain, the geom
 \end{theorem}
 
 The proof is a direct dual-norm scaling argument and is included in Appendix \ref{app:proof-details}. The important point is the comparison protocol: raw progress is not enough; drift is compared only after the same first-order head gain has been fixed.
-The coefficient \(\I_N\) is a worst-case sensitivity. Direct drift measurements estimate the realized actual-direction quantity \(\widetilde{\I}_N(T\mid H)=\norm{J_Tu_N}^2/\norm{g_H}_{N,*}^2\le\I_N(T\mid H)\) after scaling. The difference between the bound and the measurement is an alignment factor between the chosen update direction and the tail Jacobian.
+
+\paragraph{Worst-case and realized coefficients.}
+The coefficient \(\I_N\) is a worst-case sensitivity over the whole norm unit ball. The experiments do not estimate this supremum. They estimate the realized actual-direction coefficient
+\[
+\widetilde{\I}_N(T\mid H)
+=
+\frac{\norm{J_Tu_N}^2}{\norm{g_H}_{N,*}^2}
+\le
+\I_N(T\mid H),
+\]
+where \(u_N\) is the update direction actually used. Thus the theorem compares worst-case sensitivity-per-progress, while observed drift also depends on alignment between \(u_N\) and the tail Jacobian. The synthetic boundary experiment is designed to test when the worst-case comparison is directionally informative; the neural diagnostics report realized drift rather than claiming equality with the bound.
+
+\paragraph{Arbitrary-direction matched gain.}
+Muon-style momentum directions require a slightly more general normalization because \(\polar(M_t)\) and finite \(\mathrm{NS}(M_t)\) are not steepest directions for the current gradient \(g_H\). For any descent direction \(d\) satisfying \(\inner{g_H}{d}>0\), we use the matched-gain step
+\[
+\Delta_d=-\rho\frac{d}{\inner{g_H}{d}},
+\qquad
+C(d;T\mid H)=\frac{\norm{J_Td}^2}{\inner{g_H}{d}^2}.
+\]
+The measured drift is then \(\norm{J_T\Delta_d}^2=\rho^2C(d;T\mid H)\). When \(d\) is a norm-steepest unit direction, \(\inner{g_H}{d}=\norm{g_H}_{N,*}\), and this reduces to the realized coefficient above. For \(\polar(M_t)\) and \(\mathrm{NS}(M_t)\), all reported Muon-style ratios use this actual head-alignment denominator \(\inner{g_H}{d}\), not the dual norm of the current gradient or momentum state.
 
 \subsection{Matrix-Block Spectral Condition}
 
@@ -166,68 +189,92 @@ For this sandwich block, Appendix \ref{app:matrix-block-derivation} derives the 
 \nrank(G_H)>\ssrank(B_T,A_T).
 }
 \]
-
-Here \(\nrank(G_H)\) measures how spectrally spread the head gradient is, while \(\ssrank(B_T,A_T)\) measures how many tail-sensitive directions remain visible through the downstream tail Jacobian. The condition says that the spectral matched-gain drift bound is smaller when the head gradient is spread enough to offset downstream tail sensitivity. It is still a worst-case sensitivity upper bound: the observed drift of \(u_S=\polar(G_H)\) can also depend on the alignment between the singular vectors of \(G_H\) and the tail Jacobian. The experiments therefore report both condition-side quantities and directly measured tail-output drift.
+The downstream-aware stable-rank term is
+\[
+\ssrank(B_T,A_T)
+=
+\frac{
+\sum_i\sigma_i(B_T)^2\sigma_i(A_T)^2
+}{
+\sigma_1(B_T)^2\sigma_1(A_T)^2
+},
+\]
+with singular values sorted in descending order and padded by zeros after the shorter sequence.
+Equivalently, the bound ratio is
+\[
+\frac{\I_S(T\mid H)}{\I_F(T\mid H)}
+=
+\frac{\ssrank(B_T,A_T)}{\nrank(G_H)}.
+\]
+Here \(\nrank(G_H)\) measures how spectrally spread the head gradient is, while \(\ssrank(B_T,A_T)\) is not merely the stable rank of tail activations: it pairs the singular spectrum of the downstream tail Jacobian with the singular spectrum of the tail activation matrix. The condition says that the spectral matched-gain drift bound is smaller when the head gradient is spread enough to offset downstream tail sensitivity. It is still a worst-case sensitivity upper bound: the observed drift of \(u_S=\polar(G_H)\) can also depend on the alignment between the singular vectors of \(G_H\) and the tail Jacobian. The experiments therefore report both condition-side quantities and directly measured tail-output drift.
 
 \section{Experiments}
 
 \subsection{Experiment Protocol Summary}
 \label{sec:experiment-protocol-summary}
 
-The experiments test the proposed mechanism through a sequence of increasingly realistic diagnostics. The synthetic matrix block asks whether the rank boundary can reverse the drift ordering. The long-tailed digits diagnostic asks whether the same matched-head-gain drift effect appears in a trained neural model. The Muon-style compatibility diagnostic asks whether selected momentum and Newton--Schulz directions have drift ratios compatible with the local polar mechanism. The layerwise diagnostic asks whether lower drift comes from intrinsically safer unit directions or from matched-head-gain scaling.
+The experiments test the proposed mechanism through a sequence of increasingly realistic diagnostics. The synthetic matrix block asks whether the rank boundary can reverse the drift ordering. The controlled long-tailed digits diagnostic asks whether the same matched-head-gain drift effect appears in a trained neural model. The Muon-style direction compatibility diagnostic asks whether selected momentum and Newton--Schulz directions have squared drift ratios compatible with the local polar mechanism. The layerwise diagnostic asks whether lower drift comes from intrinsically safer unit directions or from matched-head-gain scaling.
 
-All experiments use the same comparison principle unless stated otherwise: construct Frobenius/GD and spectral/polar/Muon-style directions on a head batch, scale them to the same first-order head gain \(\rho\), and then measure held-out tail-logit drift. Unless otherwise stated, ratios below are spectral/polar divided by Frobenius/GD; values below \(1\) mean less tail drift under matched head gain. Split, seed, batch, noise, warmup, finite-difference, and confidence-interval details are in Appendix \ref{app:repro}. These intervals quantify paired uncertainty under the tested distribution; they are not generalization guarantees.
+All experiments use the same comparison principle unless stated otherwise: construct Frobenius/GD and spectral/polar/Muon-style directions on a head batch, scale them to the same first-order head gain \(\rho\), and then measure held-out squared tail-example logit drift. Unless otherwise stated, ratios below are squared drift ratios, spectral/polar divided by Frobenius/GD; values below \(1\) mean less squared logit drift on held-out tail examples under matched head gain. Split, seed, batch, noise, warmup, finite-difference, and confidence-interval details are in Appendix \ref{app:repro}. These intervals quantify paired uncertainty under the tested distribution; they are not generalization guarantees.
+
+Throughout the experiments, tail-example logit drift means the drift of the full class-logit vector evaluated on held-out tail examples. It is not restricted to logits of tail classes only; head-class logits on tail examples are included because they affect cross-entropy, margins, and predictions.
+
+For the two-layer MLP diagnostics, the compared directions are blockwise matrix directions over the two weight matrices \(W_1,W_2\). The model has no bias, batch-normalization, or non-matrix parameters, so there are no classifier-bias or non-matrix update rules to specify. Frobenius/GD uses the globally Frobenius-normalized full gradient \(d_F=\{G_\ell\}_\ell/\sqrt{\sum_\ell\norm{G_\ell}_F^2}\). Spectral/polar uses the blockwise direction \(d_S=\{\polar(G_\ell)\}_{\ell=1}^2\), which is the steepest direction for a max-over-block spectral norm as noted in Appendix \ref{app:blockwise-geometry}. Muon-style directions replace \(G_\ell\) by the momentum state \(M_\ell\) and optionally apply finite Newton--Schulz iterations. All these directions are finally scaled by the same arbitrary-direction rule \(\Delta_d=-\rho d/\inner{g_H}{d}\), so the comparison is a blockwise geometry diagnostic rather than a single global spectral-norm theorem for complete training. Rank and activation diagnostics are computed on the full held-out tail probe set, while the update direction itself is formed from the head mini-batch.
+
+Because the theory is first-order, we also check the local linearization quality at the controlled long-tailed digits checkpoint. Appendix Table \ref{tab:local-linearization-error} reports \(\norm{F_T(\theta+\Delta)-F_T(\theta)-J_T\Delta}/\norm{J_T\Delta}\) for Fro/GD, \(\polar(G_t)\), \(\polar(M_t)\), and NS\((M_t)\); the largest reported 95\% upper endpoint is \(\EelevenLocalLinearizationMaxRelativeErrorCiHigh\), attained by \(\EelevenLocalLinearizationMaxRelativeErrorDirection\). Thus the matched-gain measurements in this diagnostic are not dominated by finite-step nonlinear drift at the chosen step scale.
 
 \subsection{Synthetic Head-to-Tail Linear Model}
 
-The synthetic experiment tests whether the theorem's boundary has operational content. We isolate the condition \(\nrank(G_H)>\ssrank(B_T,A_T)\) from modeling complications by constructing \(F(W;x)=Wx\), setting \(J_T(D)=B_TDA_T\), and controlling the singular values of \(G_H,A_T,B_T\). After matching first-order head gain, we measure the spectral/Frobenius tail-drift-squared ratio.
+The synthetic experiment tests whether the theorem's boundary has operational content. We isolate the condition \(\nrank(G_H)>\ssrank(B_T,A_T)\) from modeling complications by constructing a linear sandwich tail map \(F_T(W)=B_TWA_T\), so that the local perturbation is \(J_T(D)=B_TDA_T\), and controlling the singular values and aligned singular-vector geometry of \(G_H,A_T,B_T\). After matching first-order head gain, we measure the spectral/Frobenius squared tail-output drift ratio. The random seeds in this diagnostic regenerate the controlled construction but do not introduce independent variation in the aligned spectra, so the confidence intervals collapse to point intervals; this should be read as a deterministic boundary check, not as a stochastic generalization experiment.
 
-The drift ordering changes with the boundary. In the positive construction, \(\nrank(G_H)=\EelevenHeadTailPositiveNrankG\) exceeds \(\ssrank(B_T,A_T)=\EelevenHeadTailPositiveSsrankBTA\), and the observed spectral/Frobenius drift-squared ratio is \(\EelevenHeadTailPositiveDriftRatio\,\EelevenHeadTailPositiveDriftRatioCi\). In the negative construction, \(\nrank(G_H)=\EelevenHeadTailNegativeNrankG\) is below \(\ssrank(B_T,A_T)=\EelevenHeadTailNegativeSsrankBTA\), and the observed ratio becomes \(\EelevenHeadTailNegativeDriftRatio\,\EelevenHeadTailNegativeDriftRatioCi\).
+The drift ordering changes with the boundary. In the positive construction, \(\nrank(G_H)=\EelevenHeadTailPositiveNrankG\) exceeds \(\ssrank(B_T,A_T)=\EelevenHeadTailPositiveSsrankBTA\), and the observed spectral/Frobenius squared tail-output drift ratio is \(\EelevenHeadTailPositiveDriftRatio ~\EelevenHeadTailPositiveDriftRatioCi\). In the negative construction, \(\nrank(G_H)=\EelevenHeadTailNegativeNrankG\) is below \(\ssrank(B_T,A_T)=\EelevenHeadTailNegativeSsrankBTA\), and the observed squared drift ratio becomes \(\EelevenHeadTailNegativeDriftRatio ~\EelevenHeadTailNegativeDriftRatioCi\).
 This sign change is the key boundary check: \(\ssrank(B_T,A_T)\) is not merely notation, but the tail-side quantity that determines when the sandwich worst-case bound favors spectral geometry.
+
+The same synthetic setup also shows why the condition should not be overread as a realized-drift predictor by itself. Appendix Figure \ref{fig:head-tail-alignment-ablation} keeps the same positive singular spectra, so the bound ratio remains \(\EelevenHeadTailAlignmentPositiveTheoryRatio\), but randomizes the singular-vector alignment among \(G_H,A_T,B_T\). Under this randomized alignment, the observed squared drift ratio is \(\EelevenHeadTailAlignmentPositiveDriftRatio ~\EelevenHeadTailAlignmentPositiveDriftRatioCi\), with median \(\EelevenHeadTailAlignmentPositiveMedianDriftRatio\), and spectral has lower drift in only \(\EelevenHeadTailAlignmentPositiveSpectralLowerFraction\) of \(\EelevenHeadTailAlignmentAblationSeeds\) trials. The rank condition is therefore a bound-ordering condition; realized drift also depends on alignment with the tail perturbation operator.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.78\linewidth]{figures/head_tail_drift_ratio.png}
-\caption{Synthetic head-to-tail boundary diagnostic. The figure compares high-head-rank / low-tail-sensitivity and low-head-rank / high-tail-sensitivity constructions. In this controlled sandwich block, when \(\nrank(G_H)\) exceeds \(\ssrank(B_T,A_T)\), the spectral/polar direction has lower matched-head-gain tail drift; reversing the construction reverses the conclusion.}
+\caption{Synthetic head-to-tail boundary diagnostic. The figure compares high-head-rank / low-tail-sensitivity and low-head-rank / high-tail-sensitivity constructions. In this controlled sandwich block, when the head-gradient nuclear rank is above the downstream-aware tail sensitivity rank \(\ssrank(B_T,A_T)\), the spectral/polar direction has a lower matched-head-gain squared tail-output drift ratio; reversing the construction reverses the conclusion.}
 \label{fig:head-tail-boundary}
 \end{figure}
 
-\subsection{One-Step Diagnostic on Long-Tailed Digits}
+\subsection{One-Step Diagnostic on Controlled Long-Tailed Digits}
 
-The long-tailed digits diagnostic asks whether the same drift reduction appears away from the controlled linear block. We use a digits image dataset with classes \(0\)--\(4\) as head classes and classes \(5\)--\(9\) as tail classes. A two-layer MLP is trained to a head-heavy checkpoint; a head-only batch defines the update and a held-out tail set measures drift.
+The controlled long-tailed digits diagnostic asks whether the same drift reduction appears away from the controlled linear block. We use the scikit-learn \(8\times 8\) digits image dataset \citep{pedregosa2011scikit}, scale pixel values to the unit interval, fix classes \(0\)--\(4\) as head classes and classes \(5\)--\(9\) as tail classes, and sample the per-class train/evaluation split independently for each seed. A bias-free two-layer MLP is trained to a head-heavy checkpoint; a head-only batch defines the update and a held-out tail set measures drift. This is a mechanism probe, not a standard long-tailed benchmark.
 
-In the one-step diagnostic, spectral/polar reduces tail-logit drift in every tested seed (\(\EelevenLongTailOneStepSeeds\) total). The paired drift-squared ratio is \(\EelevenLongTailOneStepDriftRatio\,\EelevenLongTailOneStepDriftRatioCi\). This is consistent with the local function-drift mechanism in a trained neural model.
+In the one-step diagnostic, spectral/polar reduces squared tail-example logit drift in every tested seed (\(\EelevenLongTailOneStepSeeds\) total). The paired squared drift ratio is \(\EelevenLongTailOneStepDriftRatio ~\EelevenLongTailOneStepDriftRatioCi\). Centering each tail-example logit vector gives almost the same ratio, \(\EelevenLongTailOneStepCenteredDriftRatio ~\EelevenLongTailOneStepCenteredDriftRatioCi\), so the effect is not only a common-mode logit shift. The margin-relevant components are more mixed: the top-competitor logit-delta ratio is \(\EelevenLongTailOneStepCompetitorLogitDriftRatio ~\EelevenLongTailOneStepCompetitorLogitDriftRatioCi\), the margin-delta ratio is \(\EelevenLongTailOneStepMarginDeltaRatio ~\EelevenLongTailOneStepMarginDeltaRatioCi\), but the true-class logit-delta ratio is \(\EelevenLongTailOneStepTrueLogitDriftRatio ~\EelevenLongTailOneStepTrueLogitDriftRatioCi\). This supports a drift claim while keeping the CE/margin claim narrow. Appendix Figures \ref{fig:long-tail-imbalance-ablation}, \ref{fig:long-tail-checkpoint-sweep}, \ref{fig:long-tail-class-partition-sweep}, and \ref{fig:long-tail-rho-sweep} stress-test this readout across \(\EelevenLongTailImbalanceAblationSettings\) tail-sample levels, \(\EelevenLongTailCheckpointSweepSettings\) warmup checkpoints, \(\EelevenLongTailClassPartitionSweepSettings\) head/tail class partitions, and \(\EelevenLongTailRhoSweepSettings\) target head-gain fractions. The largest squared drift-ratio upper endpoints are \(\EelevenLongTailImbalanceWorstRatioCiHigh\) across imbalance settings, \(\EelevenLongTailCheckpointSweepWorstRatioCiHigh\) across checkpoint settings, \(\EelevenLongTailClassPartitionWorstRatioCiHigh\) across class partitions, and \(\EelevenLongTailRhoSweepWorstRatioCiHigh\) across target head-gain fractions, so the lower-drift readout is not restricted to the default \(100{:}40\), 80-step, low-vs-high digit state or to the default \(\rho=0.02L_H\) scale. However, this checkpoint sweep still does not show preservation of a high-quality tail predictor: across the tested checkpoints, pre-update tail accuracy spans only \(\EelevenLongTailCheckpointSweepTailAccuracyRange\), so stronger tail-knowledge claims require checkpoints or benchmarks where the tail function is already useful.
 
-Tail loss and margin respond differently from logit drift in this diagnostic. The tail-loss increase difference, spectral minus Frobenius, is \(\EelevenLongTailOneStepTailLossDiff\,\EelevenLongTailOneStepTailLossDiffCi\), and the tail-margin drop difference is \(\EelevenLongTailOneStepTailMarginDropDiff\,\EelevenLongTailOneStepTailMarginDropDiffCi\).
-Because the tail-loss interval is positive, lower logit drift does not imply lower cross-entropy loss here; in this diagnostic, spectral/polar slightly increases tail loss more than Frobenius/GD. This separates the paper's local mechanism from a performance claim: classification loss also depends on whether the logit movement helps or hurts the class margin.
+Table \ref{tab:one-step-tail-outcomes} also reports the head-alignment and norm readouts behind the matched-gain scaling. In this diagnostic, the spectral/polar head-alignment denominator is \(\EelevenLongTailOneStepAlignmentRatio ~\EelevenLongTailOneStepAlignmentRatioCi\) times the Frobenius/GD denominator. After scaling to the same head gain, the spectral/Frobenius update has a larger Frobenius norm, \(\EelevenLongTailOneStepUpdateFroNormRatio ~\EelevenLongTailOneStepUpdateFroNormRatioCi\), but a smaller operator norm, \(\EelevenLongTailOneStepUpdateOpNormRatio ~\EelevenLongTailOneStepUpdateOpNormRatioCi\). Thus the mechanism should be described in norm-specific terms rather than as a uniformly smaller parameter step.
+
+Tail loss and margin respond differently from logit drift in this diagnostic. The tail-loss increase difference, spectral minus Frobenius, is \(\EelevenLongTailOneStepTailLossDiff ~\EelevenLongTailOneStepTailLossDiffCi\), and the tail-margin drop difference is \(\EelevenLongTailOneStepTailMarginDropDiff ~\EelevenLongTailOneStepTailMarginDropDiffCi\).
+Because the tail-loss interval is positive, lower logit drift does not imply lower cross-entropy loss here; in this diagnostic, spectral/polar slightly increases tail loss more than Frobenius/GD. The absolute scale in Appendix Table \ref{tab:one-step-tail-outcomes} shows why this is a caveat rather than a performance result: the tail CE is \(\EelevenLongTailOneStepTailLossBefore ~\EelevenLongTailOneStepTailLossBeforeCi\) before the update, and the spectral-minus-Frobenius CE change is only \(\EelevenLongTailOneStepTailLossDiff ~\EelevenLongTailOneStepTailLossDiffCi\). This separates the paper's local mechanism from a performance claim: classification loss also depends on the direction of logit movement, including its projection onto the true-class-versus-competing-class margin direction.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.78\linewidth]{figures/long_tail_one_step_tail_response.png}
-\caption{Long-tailed digits one-step diagnostic. The left panel shows that the spectral/polar direction causes lower held-out tail-logit drift after matching head gain. The right panel shows that the tail-loss response does not support an equally strong performance claim.}
+\caption{Controlled long-tailed digits one-step diagnostic. The left panel shows that the spectral/polar direction causes lower held-out squared tail-example logit drift after matching head gain. The right panel shows that the tail-loss response does not support an equally strong performance claim.}
 \label{fig:long-tail-one-step}
 \end{figure}
 
-\subsection{Selected-State Compatibility with Muon-Style Directions}
+\subsection{Muon-Style Direction Compatibility}
 
-The next diagnostic connects the ideal polar direction to practical Muon-style updates. The theory uses the exact polar direction of the current head gradient, \(\polar(G_t)\), whereas practical Muon-style updates use a momentum state and a finite Newton--Schulz approximation, closer to \(\polar(M_t)\) or \(\mathrm{NS}(M_t)\). At a fixed long-tailed digits checkpoint, momentum polar has a matched-gain drift ratio below \(1\): the \(\polar(M_t)\) drift ratio is \(\EelevenLongTailMuonBridgePolarMomentumDriftRatio\,\EelevenLongTailMuonBridgePolarMomentumDriftRatioCi\). The finite Newton--Schulz direction is weaker, with ratio \(\EelevenLongTailMuonBridgeNsMomentumDriftRatio\,\EelevenLongTailMuonBridgeNsMomentumDriftRatioCi\); because this interval crosses \(1\), this particular diagnostic is not stable evidence that the finite-step NS direction alone lowers drift.
+The next diagnostic connects the ideal polar direction to practical Muon-style update directions, while keeping the claim explicitly local. The theory uses the exact polar direction of the current head gradient, \(\polar(G_t)\), whereas practical Muon-style updates use a momentum state and a finite Newton--Schulz approximation, closer to \(\polar(M_t)\) or \(\mathrm{NS}(M_t)\). At a fixed controlled long-tailed digits checkpoint, momentum polar has a matched-head-gain squared drift ratio below \(1\): the \(\polar(M_t)\) squared drift ratio is \(\EelevenLongTailMuonBridgePolarMomentumDriftRatio ~\EelevenLongTailMuonBridgePolarMomentumDriftRatioCi\). The finite Newton--Schulz direction is weaker, with squared drift ratio \(\EelevenLongTailMuonBridgeNsMomentumDriftRatio ~\EelevenLongTailMuonBridgeNsMomentumDriftRatioCi\); because this interval crosses \(1\), this particular diagnostic is not stable evidence that the finite-step NS direction alone lowers drift.
 
-We then run a 6-step NS-Muon-style head-only trajectory and re-run the matched-head-gain diagnostic at each sampled state. Across \(\EelevenLongTailPracticalMuonBridgeComparisons\) state-step comparisons, the \(\polar(M_t)\) drift ratio is \(\EelevenLongTailPracticalMuonBridgePolarMomentumDriftRatio\,\EelevenLongTailPracticalMuonBridgePolarMomentumDriftRatioCi\), while the \(\mathrm{NS}(M_t)\) ratio is \(\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio\,\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatioCi\). The mean momentum-gradient cosine is \(\EelevenLongTailPracticalMuonBridgeMomentumCosine\,\EelevenLongTailPracticalMuonBridgeMomentumCosineCi\), so \(M_t\) is not identical to \(G_t\). This result is a selected-state compatibility check: some Muon-style directions have drift ratios compatible with the local polar mechanism, while the finite-step approximation remains a separate source of variation. Additional fixed-checkpoint compatibility results are reported in Appendix \ref{app:aux-figures}.
+We then run a 6-step NS-Muon-style head-only trajectory and re-run the matched-head-gain diagnostic at each sampled state. Across \(\EelevenLongTailPracticalMuonBridgeComparisons\) state-step comparisons, the \(\polar(M_t)\) squared drift ratio is \(\EelevenLongTailPracticalMuonBridgePolarMomentumDriftRatio ~\EelevenLongTailPracticalMuonBridgePolarMomentumDriftRatioCi\), while the \(\mathrm{NS}(M_t)\) squared drift ratio is \(\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio ~\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatioCi\). The mean momentum-gradient cosine is \(\EelevenLongTailPracticalMuonBridgeMomentumCosine ~\EelevenLongTailPracticalMuonBridgeMomentumCosineCi\), so \(M_t\) is not identical to \(G_t\). To reduce state-selection concern, Appendix Figure \ref{fig:long-tail-muon-state-source-control} repeats the same diagnostic on states generated by a Fro/GD-style trajectory with the same seeds, batches, length, and nominal trajectory learning rate. On those Fro/GD-generated states, \(\polar(M_t)\) gives squared drift ratio \(\EelevenLongTailMuonStateSourceControlFroPolarMomentumDriftRatio ~\EelevenLongTailMuonStateSourceControlFroPolarMomentumDriftRatioCi\), and \(\mathrm{NS}(M_t)\) gives \(\EelevenLongTailMuonStateSourceControlFroNsMomentumDriftRatio ~\EelevenLongTailMuonStateSourceControlFroNsMomentumDriftRatioCi\). This result remains a direction-compatibility check, not an optimizer benchmark; the practical-training diagnostic and its learning-rate caveat are moved to Appendix \ref{app:aux-figures}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.78\linewidth]{figures/long_tail_practical_muon_bridge.png}
-\caption{Short practical NS-Muon trajectory compatibility diagnostic. The left panel reports the matched-head-gain tail-drift ratio at each sampled trajectory state. The right panel shows momentum-gradient alignment over trajectory steps. The figure evaluates local compatibility of Muon-style directions with the spectral/polar mechanism and does not measure final tail accuracy or full-optimizer benchmark performance.}
+\caption{Muon-style direction compatibility diagnostic along a short NS-Muon-style trajectory. The left panel reports the matched-head-gain squared tail-example logit drift ratio at each sampled trajectory state. The right panel shows momentum-gradient alignment over trajectory steps. The figure evaluates local compatibility of Muon-style directions with the spectral/polar mechanism and does not measure final tail accuracy or full-optimizer benchmark performance.}
 \label{fig:long-tail-practical-muon-bridge}
 \end{figure}
 
 \subsection{Layerwise Diagnostic}
 
-The layerwise diagnostic separates unit-direction tail sensitivity from matched-gain step-size scaling. Lower matched-gain drift need not mean that the spectral unit direction is always less tail-sensitive. For each matrix block \(W_\ell\) in the two-layer MLP, we record \(\nrank(G_{H,\ell})\) and \(\srank(A_{T,\ell})\), estimate the unit-direction tail JVP by finite differences, and then measure layer-only drift after matching first-order head gain.
-Because this diagnostic does not reconstruct the full downstream operator \(B_{T,\ell}\), \(\srank(A_{T,\ell})\) is only a proxy for the theorem's downstream-aware \(\ssrank(B_{T,\ell},A_{T,\ell})\), not a direct measurement of that condition.
+The layerwise diagnostic separates unit-direction tail sensitivity from matched-gain step-size scaling. For each matrix block \(W_\ell\) in the two-layer MLP, we record \(\nrank(G_{H,\ell})\), estimate the unit-direction tail JVP by finite differences, and measure layer-only drift after matching first-order head gain. For the final linear layer, the local map is an exact sandwich block with \(\nrank(G_{H,2})/\ssrank(B_{T,2},A_{T,2})=\EelevenLayerTwoTheoremConditionScore\). For the first ReLU layer, gates vary across tail samples, so we report the frozen-gate local-operator score \(\nrank(G_{H,1})/\srank(J_{T,1})=\EelevenLayerOneLocalOperatorConditionScore\).
 
-The unit-JVP drift ratio is above \(1\) in both layers: \(\EelevenLayerOneUnitJvpDriftRatio\,\EelevenLayerOneUnitJvpDriftRatioCi\) and \(\EelevenLayerTwoUnitJvpDriftRatio\,\EelevenLayerTwoUnitJvpDriftRatioCi\). Thus the spectral/polar unit direction is not inherently less tail-sensitive. After matched-head-gain step-size scaling, however, the scaled-JVP ratios agree with observed drift. In layer 1, the scaled-JVP ratio is \(\EelevenLayerOneScaledJvpDriftRatio\,\EelevenLayerOneScaledJvpDriftRatioCi\) versus observed drift ratio \(\EelevenLayerOneObservedDriftRatio\,\EelevenLayerOneObservedDriftRatioCi\); in layer 2, the corresponding ratios are \(\EelevenLayerTwoScaledJvpDriftRatio\,\EelevenLayerTwoScaledJvpDriftRatioCi\) and \(\EelevenLayerTwoObservedDriftRatio\,\EelevenLayerTwoObservedDriftRatioCi\).
-The mechanism is therefore more precise than ``spectral directions are always safer'': in this experiment, spectral/polar obtains the same head gain with a smaller scaled parameter step, and that scaling accounts for the lower observed drift.
+The unit-JVP squared drift ratio is above \(1\) in both layers: \(\EelevenLayerOneUnitJvpDriftRatio\) and \(\EelevenLayerTwoUnitJvpDriftRatio\), so the spectral/polar unit direction is not inherently less tail-sensitive. After matched-head-gain scaling, however, the scaled-JVP and observed squared drift ratios agree: \(\EelevenLayerOneScaledJvpDriftRatio\) and \(\EelevenLayerOneObservedDriftRatio\) in layer 1, and \(\EelevenLayerTwoScaledJvpDriftRatio\) and \(\EelevenLayerTwoObservedDriftRatio\) in layer 2. Table \ref{tab:head-tail-results} gives intervals. The mechanism is therefore more precise than ``spectral directions are always safer'': in this experiment, the lower observed drift comes from smaller matched-gain step scaling.
 
 The corresponding layerwise figure is reported in Appendix \ref{app:aux-figures}.
 
@@ -235,61 +282,25 @@ The corresponding layerwise figure is reported in Appendix \ref{app:aux-figures}
 
 \subsection{What the Evidence Establishes}
 
-Table \ref{tab:claim-boundary} separates the current diagnostic claims from stronger claims that require additional experiments. The claim boundary is local: after matching head-batch gain, spectral/polar directions can reduce tail-logit drift in the tested settings. The Muon results are selected-state compatibility checks from ideal polar directions to Muon-style directions, not evidence that Muon is generally better on long-tailed classification.
+Table \ref{tab:claim-boundary} separates the current diagnostic claims from stronger claims that require additional experiments. The claim boundary is local: after matching head-batch gain, spectral/polar directions can reduce squared logit drift on held-out tail examples in the tested settings. The Muon results are selected-state compatibility checks from ideal polar directions to Muon-style directions, not evidence that Muon is generally better on long-tailed classification.
 
-\begin{table}[H]
-\centering
-\caption{Claim boundary. All reported numbers come from matched-head-gain diagnostics unless explicitly marked as practical training; intervals are paired confidence intervals.}
-\label{tab:claim-boundary}
-\footnotesize
-\setlength{\tabcolsep}{2pt}
-\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.28\linewidth}>{\raggedright\arraybackslash}p{0.42\linewidth}>{\raggedright\arraybackslash}p{0.22\linewidth}@{}}
-\toprule
-Claim & Evidence & Boundary \\
-\midrule
-Matched-head-gain spectral/polar directions can reduce tail-logit drift. &
-Long-tailed digits one-step drift ratio \(\EelevenLongTailOneStepDriftRatio\,\EelevenLongTailOneStepDriftRatioCi\); 8-step final drift ratio \(\EelevenLongTailForgettingFinalDriftRatio\,\EelevenLongTailForgettingFinalDriftRatioCi\). &
-Does not imply tail loss, margin, or accuracy must improve; the one-step CE tail-loss interval is positive. \\
-\addlinespace
-\(\polar(M_t)\) and NS\((M_t)\) provide selected-state compatibility checks for Muon-style directions. &
-Fixed checkpoint: \(\polar(M_t)\) ratio \(\EelevenLongTailMuonBridgePolarMomentumDriftRatio\,\EelevenLongTailMuonBridgePolarMomentumDriftRatioCi\), NS ratio \(\EelevenLongTailMuonBridgeNsMomentumDriftRatio\,\EelevenLongTailMuonBridgeNsMomentumDriftRatioCi\); short trajectory: NS ratio \(\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio\,\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatioCi\). &
-Local compatibility only; fixed-checkpoint NS has a CI crossing \(1\), so this evidence does not explain full Muon training. \\
-\addlinespace
-\(\nrank(G_H)>\ssrank(B_T,A_T)\) is a discriminative mechanism boundary. &
-Synthetic positive-boundary ratio \(\EelevenHeadTailPositiveDriftRatio\,\EelevenHeadTailPositiveDriftRatioCi\); negative-boundary ratio \(\EelevenHeadTailNegativeDriftRatio\,\EelevenHeadTailNegativeDriftRatioCi\), with direction matching the condition. &
-Mechanism boundary check; does not predict standard benchmark performance. \\
-\addlinespace
-Layerwise drift reduction mainly comes from head-gain scaling, not lower unit-direction tail sensitivity. &
-Both unit-JVP ratios exceed \(1\), but scaled/observed ratios are near \(\EelevenLayerOneScaledJvpDriftRatio\,\EelevenLayerOneScaledJvpDriftRatioCi\) and \(\EelevenLayerTwoScaledJvpDriftRatio\,\EelevenLayerTwoScaledJvpDriftRatioCi\). &
-Spectral/polar unit directions are not always safer. \\
-\bottomrule
-\end{tabular}
-\end{table}
+The detailed claim boundary is reported in Appendix Table \ref{tab:claim-boundary}. The main limitations are: lower squared logit drift on held-out tail examples does not imply lower tail cross-entropy or higher accuracy; fixed-checkpoint Muon-style directions are local compatibility checks rather than a theory of complete Muon training; the synthetic boundary validates a mechanism sign, not a natural-task predictor; and layerwise evidence shows that the lower observed drift comes from matched-head-gain scaling, not from uniformly lower unit-direction tail sensitivity.
 
-\subsection{From Spectral Gradients to Muon}
-
-The core theory applies to the idealized spectral gradient direction \(\polar(G)=UV^\top\). Practical Muon uses momentum and a finite Newton--Schulz approximation, so its matrix direction is closer to \(\polar(M_t)\) or \(\mathrm{NS}(M_t)\) than to \(\polar(G_t)\). A faithful Muon analysis must therefore include a momentum-gradient alignment factor. Figures \ref{fig:long-tail-practical-muon-bridge} and \ref{fig:long-tail-muon-bridge} show selected-state compatibility checks; Figure \ref{fig:long-tail-practical-training} is a controlled practical-training diagnostic. These observations motivate using Muon-style directions as local implementation probes for spectral/polar geometry, while leaving a full theory of Muon training to future work.
-In the practical diagnostic, the Muon-style run has a final train-loss ratio of \(\EelevenLongTailPracticalTrainingTrainLossRatio\,\EelevenLongTailPracticalTrainingTrainLossRatioCi\) and a tail-margin difference of \(\EelevenLongTailPracticalTrainingTailMarginDiff\,\EelevenLongTailPracticalTrainingTailMarginDiffCi\) relative to Adam, but this evidence is insufficient for an optimizer-level comparison. The learning-rate sweep limits the interpretation: at the largest tested Muon learning rate, the tail-loss ratio rises to \(\EelevenLongTailPracticalTrainingLrSweepLargeTailLossRatio\). We therefore treat this experiment as a consistency check for the local mechanism, not as a tuned Adam-vs-Muon comparison.
-
-\subsection{Mini-Batch Noise and Long-Tailed Learning}
-
-A full polar update equalizes all nonzero singular directions. If small singular directions of the head gradient are mini-batch noise, spectral geometry may increase tail drift. This is one reason the paper focuses on matched-head-gain diagnostics rather than claiming a universal optimizer advantage. In long-tailed learning, the proposed mechanism is tail-function preservation between rare tail batches. Whether this becomes lower tail loss, larger margin, or higher tail accuracy requires longer training studies and standard long-tailed benchmarks.
-
-\subsection{Remaining Evidence Needed}
-
-The current evidence is consistent with a local mechanism claim, not a complete optimizer benchmark. Moving from mechanism to optimizer-level claims requires standard long-tailed benchmarks, and practical Muon training needs more complete ablation over schedules, weight decay, and checkpoints. For future work, larger-architecture layerwise diagnostics should also record \(\nrank(G_{H,\ell})\), \(\ssrank(B_{T,\ell},A_{T,\ell})\), matched drift ratio, and per-layer contributions. The important next test is not only whether spectral geometry lowers matched-gain drift, but when the measurable condition accounts for tail drift and when it fails because of mini-batch noise, momentum misalignment, or layerwise sensitivity structure.
+Additional discussion of the gap between ideal spectral gradients and practical Muon-style updates, the role of mini-batch noise, and the remaining experiments needed for optimizer-level claims is deferred to Appendix \ref{app:additional-discussion}.
 
 \section{Conclusion}
 
 This paper develops a function-drift view of long-tailed small-batch training: match head progress, then measure tail drift. The core technical object is the head-to-tail interference coefficient, which compares update geometries by their worst-case tail-output drift per unit first-order head gain. For a sandwich matrix block \(J_T(D)=B_TDA_T\), this comparison yields the condition \(\nrank(G_H)>\ssrank(B_T,A_T)\): spectral geometry is favored when the head gradient is sufficiently spectrally spread relative to downstream tail sensitivity.
 
-The experiments support this local mechanism while also delimiting it. The controlled synthetic boundary reverses the drift ordering when the rank condition is reversed, changing the spectral/Frobenius drift ratio from \(\EelevenHeadTailPositiveDriftRatio\) to \(\EelevenHeadTailNegativeDriftRatio\). The long-tailed digits diagnostics then show lower matched-gain tail-logit drift for spectral/polar and selected Muon-style directions, with one-step ratio \(\EelevenLongTailOneStepDriftRatio\,\EelevenLongTailOneStepDriftRatioCi\) and short-trajectory NS\((M_t)\) ratio \(\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio\,\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatioCi\). These results make the mechanism measurable, but they do not make it a performance theorem: lower logit drift does not automatically imply lower tail cross-entropy, larger margin, or higher accuracy, and practical Muon introduces momentum and approximation effects that require separate analysis. The paper is therefore a theory and initial empirical study of head-to-tail function drift, rather than a complete long-tailed classification optimizer benchmark.
+The experiments support this local mechanism while also delimiting it. The controlled synthetic boundary reverses the drift ordering when the rank condition is reversed, changing the spectral/Frobenius squared drift ratio from \(\EelevenHeadTailPositiveDriftRatio\) to \(\EelevenHeadTailNegativeDriftRatio\). The controlled long-tailed digits diagnostics then show lower matched-gain squared tail-example logit drift for spectral/polar and selected Muon-style directions, with one-step squared drift ratio \(\EelevenLongTailOneStepDriftRatio ~\EelevenLongTailOneStepDriftRatioCi\) and short-trajectory NS\((M_t)\) squared drift ratio \(\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio ~\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatioCi\). These results make the mechanism measurable, but not a performance theorem: lower logit drift need not imply lower tail cross-entropy, larger margin, or higher accuracy, and practical Muon introduces momentum and approximation effects. The paper is therefore a theory and initial empirical study of head-to-tail function drift, not a complete long-tailed classification optimizer benchmark.
 
 \bibliography{references}
 \bibliographystyle{iclr2025_conference}
 
 \clearpage
 \appendix
+
+The appendix provides supporting definitions and checks in the order they are used in the paper: notation and norm preliminaries; proofs and the matrix-block derivation; multi-step drift and margin-certificate consequences; the relation to existing layerwise spectral-update theory; blockwise spectral geometry for the MLP diagnostics; additional discussion of practical Muon-style directions; reproducibility details; auxiliary tables; and auxiliary figures.
 
 \section{Preliminaries}
 \label{app:preliminaries}
@@ -315,7 +326,7 @@ Symbol & Meaning \\
 \(\rho\) & The matched first-order head gain imposed before comparing tail drift. \\
 \(\nrank(G_H)\) & The nuclear rank of the head matrix gradient, \(\norm{G_H}_*^2/\norm{G_H}_F^2\). \\
 \(\srank(A_T)\) & The stable rank of the tail activation matrix, \(\norm{A_T}_F^2/\norm{A_T}_{\op}^2\). \\
-\(\ssrank(B_T,A_T)\) & The downstream-aware tail stable rank formed by pairing the singular spectra of \(B_T\) and \(A_T\); the full formula appears in Appendix \ref{app:matrix-block-derivation}. \\
+\(\ssrank(B_T,A_T)\) & The downstream-aware stable-rank quantity formed by pairing the singular spectra of \(B_T\) and \(A_T\): \(\sum_i\sigma_i(B_T)^2\sigma_i(A_T)^2/[\sigma_1(B_T)^2\sigma_1(A_T)^2]\). \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -510,7 +521,7 @@ Spectral geometry has the smaller worst-case matched-gain tail-drift bound when 
 \sigma_1(B_T)^2\sigma_1(A_T)^2
 }.
 \]
-We call the right-hand side the downstream-aware tail stable rank:
+We call the right-hand side the downstream-aware stable-rank quantity:
 \[
 \ssrank(B_T,A_T)
 =
@@ -520,12 +531,12 @@ We call the right-hand side the downstream-aware tail stable rank:
 \sigma_1(B_T)^2\sigma_1(A_T)^2
 }.
 \]
-This ratio is defined for nondegenerate tail-sensitive sandwich blocks with \(\sigma_1(B_T)\sigma_1(A_T)>0\). If \(\sigma_1(B_T)\sigma_1(A_T)=0\), then \(B_TDA_T=0\) for all \(D\), the sandwich tail sensitivity is zero, and the rank ratio is not an informative boundary. Since \(\nrank(G_H)=\norm{G_H}_*^2/\norm{G_H}_F^2\), the condition becomes
+This bound ratio is defined for nondegenerate tail-sensitive sandwich blocks with \(\sigma_1(B_T)\sigma_1(A_T)>0\). If \(\sigma_1(B_T)\sigma_1(A_T)=0\), then \(B_TDA_T=0\) for all \(D\), the sandwich tail sensitivity is zero, and the rank ratio is not an informative boundary. Since \(\nrank(G_H)=\norm{G_H}_*^2/\norm{G_H}_F^2\), the condition becomes
 \[
 \nrank(G_H)>\ssrank(B_T,A_T).
 \]
 
-\section{Tail Preservation across Multiple Head-Only Steps}
+\section{Tail Drift across Multiple Head-Only Steps}
 
 In long-tailed small-batch training, tail batches are often separated by several head-only steps. Suppose a tail batch appears every \(n\) head batches on average. During these \(n\) head-only steps, let the parameter updates be
 \[
@@ -587,7 +598,8 @@ n\rho\sqrt{\I_N}.
 
 This shows why tail rarity matters for the local mechanism: the larger \(n\) is, the more important it is for the update geometry to have small head-to-tail interference. Otherwise, the model may undergo substantial tail drift before tail samples appear again.
 
-\section{Tail Margin Preservation}
+\section{Tail Margin Certificate}
+\label{app:tail-margin}
 
 Controlling tail-output drift alone is not enough; we also want tail predictions to remain unchanged. Consider a tail sample \(x\) with true class \(y\) and logits \(f(x)\). Define the tail margin:
 \[
@@ -602,7 +614,7 @@ If a logit perturbation \(\delta f(x)\) satisfies
 \frac12 m_T(x),
 \]
 then the classification of this sample is unchanged.
-This is a preservation certificate only for samples that are currently classified correctly with \(m_T(x)>0\). If \(m_T(x)\le 0\), the sample is already non-positive-margin and this bound does not certify label preservation.
+This is a margin certificate only for samples that are currently classified correctly with \(m_T(x)>0\). If \(m_T(x)\le 0\), the sample is already non-positive-margin and this bound does not certify unchanged prediction.
 
 Let the minimum margin on the tail batch be
 \[
@@ -626,7 +638,7 @@ n\rho\sqrt{\I_N^\infty}
 \]
 then head-only updates do not change the predictions on the tail batch. Here \(\I_N^\infty\) is the head-to-tail interference coefficient defined using logit \(\ell_\infty\) drift.
 
-This gives a direct tail-preservation condition:
+This gives a sufficient unchanged-prediction condition on the tail batch:
 \[
 \boxed{
 n\rho\sqrt{\I_N^\infty}
@@ -671,57 +683,253 @@ but
 \]
 The left-hand side comes from the head gradient, while the right-hand side comes from tail functional sensitivity. This is a head-to-tail cross-distribution condition.
 
+\section{Blockwise Spectral Geometry}
+\label{app:blockwise-geometry}
+
+The MLP diagnostics use blockwise polar directions, one matrix direction per layer. This direction has a simple norm interpretation. For matrix blocks \(D=(D_1,\ldots,D_L)\), define
+\[
+\norm{D}_{\mathrm{maxop}}=\max_\ell \norm{D_\ell}_{\op}.
+\]
+
+\begin{proposition}[Blockwise polar steepest direction]
+\label{prop:blockwise-polar}
+Let \(G=(G_1,\ldots,G_L)\) be a collection of matrix gradients and let \(\norm{D}_{\mathrm{maxop}}=\max_\ell\norm{D_\ell}_{\op}\). The dual norm is
+\[
+\norm{G}_{*,1}=\sum_\ell \norm{G_\ell}_*,
+\]
+and the blockwise polar direction \(D_\ell=\polar(G_\ell)\) for each nonzero block is a maximizer of the linearized gain over the \(\norm{\cdot}_{\mathrm{maxop}}\) unit ball:
+\[
+\sup_{\norm{D}_{\mathrm{maxop}}\le 1}\sum_\ell \inner{G_\ell}{D_\ell}
+=
+\sum_\ell \norm{G_\ell}_*.
+\]
+\end{proposition}
+
+\begin{proof}
+For any feasible \(D\), von Neumann's trace inequality gives \(\inner{G_\ell}{D_\ell}\le\norm{G_\ell}_*\norm{D_\ell}_{\op}\le\norm{G_\ell}_*\) for each block. Summing over blocks gives the upper bound \(\sum_\ell\norm{G_\ell}_*\). If \(G_\ell=U_\ell\Sigma_\ell V_\ell^\top\), choosing \(D_\ell=U_\ell V_\ell^\top=\polar(G_\ell)\) for each nonzero block has \(\norm{D_\ell}_{\op}=1\) and attains equality in every block, so it attains the supremum.
+\end{proof}
+
+Thus the empirical direction \(d_S=\{\polar(G_\ell)\}_\ell\) is the steepest direction for this blockwise spectral geometry. In the neural diagnostics we still scale the resulting full direction by the actual head alignment \(\inner{g_H}{d_S}\), so the reported comparisons remain matched-head-gain measurements rather than a claim about complete optimizer dynamics.
+
+\section{Additional Discussion}
+\label{app:additional-discussion}
+
+The core theory applies to the idealized spectral gradient direction \(\polar(G)=UV^\top\). Practical Muon uses momentum and a finite Newton--Schulz approximation, so its matrix direction is closer to \(\polar(M_t)\) or \(\mathrm{NS}(M_t)\) than to \(\polar(G_t)\). A faithful Muon analysis must therefore include a momentum-gradient alignment factor and a state-distribution question: which checkpoints are being probed? Figures \ref{fig:long-tail-practical-muon-bridge} and \ref{fig:long-tail-muon-bridge} show selected-state compatibility checks, and Figure \ref{fig:long-tail-muon-state-source-control} repeats the short-trajectory diagnostic on Fro/GD-generated states to reduce state-selection concern. Figure \ref{fig:long-tail-practical-training} is a controlled practical-training diagnostic kept in Appendix \ref{app:aux-figures}. These observations motivate using Muon-style directions as local implementation probes for spectral/polar geometry, while leaving a full theory of Muon training to future work.
+
+In the practical diagnostic, the Muon-style run has a final train-loss ratio of \(\EelevenLongTailPracticalTrainingTrainLossRatio ~\EelevenLongTailPracticalTrainingTrainLossRatioCi\) and a tail-margin difference of \(\EelevenLongTailPracticalTrainingTailMarginDiff ~\EelevenLongTailPracticalTrainingTailMarginDiffCi\) relative to Adam, but this evidence is insufficient for an optimizer-level comparison. The learning-rate sweep limits the interpretation: at the largest tested Muon learning rate, the tail-loss ratio rises to \(\EelevenLongTailPracticalTrainingLrSweepLargeTailLossRatio\). We therefore treat this experiment as a consistency check for the local mechanism, not as a tuned Adam-vs-Muon comparison.
+
+A full polar update equalizes all nonzero singular directions. If small singular directions of the head gradient are mini-batch noise, spectral geometry may increase tail drift. This is one reason the paper focuses on matched-head-gain diagnostics rather than claiming a universal optimizer advantage. In long-tailed learning, the proposed mechanism is tail-function drift reduction between rare tail batches. Whether this becomes lower tail loss, larger margin, or higher tail accuracy requires longer training studies and standard long-tailed benchmarks.
+
+The current evidence supports a local mechanism claim within the tested matched-head-gain diagnostics, not a complete optimizer benchmark. Moving from mechanism to optimizer-level claims requires standard long-tailed benchmarks, and practical Muon training needs more complete ablation over schedules, weight decay, and checkpoints. For future work, larger-architecture layerwise diagnostics should also record \(\nrank(G_{H,\ell})\), \(\ssrank(B_{T,\ell},A_{T,\ell})\), matched squared drift ratio, and per-layer contributions. The important next test is not only whether spectral geometry lowers matched-gain drift, but when the measurable condition accounts for tail drift and when it fails because of mini-batch noise, momentum misalignment, or layerwise sensitivity structure.
+
 \section{Reproducibility Details}
 \label{app:repro}
 
-This appendix specifies the reproduction parameters used for the main experiments. The synthetic head-to-tail boundary experiment uses 80 random seeds and explicitly controls the singular-value structure of \(G_H,A_T,B_T\). The long-tailed digits matched-head-gain experiments use 20 seeds. In each seed, digits classes \(0\)--\(4\) are head classes and classes \(5\)--\(9\) are tail classes. The training split uses 100 samples per head class and 40 samples per tail class, and the held-out tail evaluation set uses 40 samples per tail class. The model is a two-layer MLP with hidden dimension 32.
+This appendix specifies the reproduction parameters used for the main experiments. The synthetic head-to-tail boundary experiment uses 80 random seeds and explicitly controls the singular values and aligned singular-vector structure of \(G_H,A_T,B_T\). Because the construction fixes the relevant spectra and their alignment, the reported ratios are effectively deterministic across seeds and the intervals collapse to point intervals. The controlled long-tailed digits matched-head-gain experiments use 20 seeds and the scikit-learn \(8\times 8\) digits dataset \citep{pedregosa2011scikit}. Across all default seeds, digits classes \(0\)--\(4\) are fixed as head classes and classes \(5\)--\(9\) are fixed as tail classes; the random seed only changes the within-class sample split, mini-batches, noise draws, and initialization. The training split uses 100 samples per head class and 40 samples per tail class, and the held-out tail evaluation set uses 40 samples per tail class. This is a controlled head-heavy digits diagnostic rather than a standard long-tailed benchmark. The model is a two-layer MLP with hidden dimension 32 and no bias, batch-normalization, classifier-only head, or other non-matrix parameters.
 
-The long-tailed digits checkpoint is obtained by 80 noisy mini-batch warmup steps, with batch size 64 and input-noise standard deviation \(0.05\). The one-step and layerwise matched-head-gain experiments use
+The long-tailed digits checkpoint is obtained by 80 noisy mini-batch warmup steps, with batch size 64 and input-noise standard deviation \(0.05\). The fixed-checkpoint one-step, layerwise, and fixed-checkpoint Muon-style diagnostics then form the head gradient on a clean head mini-batch and measure drift, activations, ranks, and losses on the clean held-out tail probe set. The short practical NS-Muon trajectory forms each trajectory head gradient on a noisy head mini-batch before re-running the matched-gain diagnostic at that state. The Muon state-source control repeats this trajectory-level diagnostic on Fro/GD-style trajectory states, using the same seeds, batch draws, trajectory length, and nominal trajectory learning rate, to check whether the Muon-style direction readout is unique to NS-Muon-generated states. The imbalance ablation repeats the one-step diagnostic with tail training examples per class \(80,40,20,10\), while keeping the held-out tail evaluation set at 40 examples per tail class. The checkpoint sweep repeats the one-step diagnostic after \(20,40,80,120,160\) warmup steps. The class-partition sweep repeats it across five balanced 5-class head / 5-class tail partitions. The one-step and layerwise matched-head-gain experiments use
 \[
 \rho=0.02\,\Loss_H(\theta)
 \]
-as the target first-order head gain. The head-only forgetting experiment uses the same head-batch schedule and the same \(\rho_t\) schedule over 8 consecutive head-only steps. Layerwise finite-difference JVP uses \(\epsilon=10^{-4}\).
+as the target first-order head gain. Let \(G_\ell\) denote the head-batch gradient for matrix layer \(\ell\). The Frobenius/GD direction is \(d_F=\{G_\ell\}_\ell/\sqrt{\sum_\ell\norm{G_\ell}_F^2}\), while the spectral/polar direction is \(d_S=\{\polar(G_\ell)\}_\ell\). For a Muon-style direction, \(G_\ell\) is replaced by the momentum state \(M_\ell\), and the finite Newton--Schulz direction is computed blockwise after reshaping each parameter tensor to its matrix view. All directions are scaled by \(\Delta_d=-\rho d/\inner{g_H}{d}\), using the actual head-gradient alignment of the full direction.
 
-The practical imbalanced-training diagnostic does not use the matched-head-gain protocol. Instead, it directly compares Adam and finite-Newton--Schulz Muon-style updates from the same initialization under the same noisy mini-batch schedule. This experiment uses 10 training samples per tail class and keeps 40 held-out tail-evaluation samples per tail class. Training runs for \EelevenLongTailPracticalTrainingSteps{} noisy mini-batch steps. Adam uses learning rate \(\EelevenLongTailPracticalTrainingAdamLr\), and the Muon-style update uses learning rate \(\EelevenLongTailPracticalTrainingMuonLr\), momentum \(\beta=0.9\), and 5 Newton--Schulz approximation steps.
+In the head-only forgetting experiment, the head mini-batches and target gains are precomputed once per seed from the initial checkpoint before either geometry is rolled out. Specifically, for each scheduled head-only step \(t\), the experiment stores the same noisy head batch and the same reference target \(\rho_t=0.02\,\Loss_H(\theta_0;B_t)\) for both Frobenius/GD and spectral/polar trajectories. The two trajectories then start from the same checkpoint and apply their own matched-gain directions using that shared \(\rho_t\) sequence. Thus the intended first-order head-gain budget is matched per seed and step; the realized nonlinear head-loss decrease is measured after each update and is not assumed to be exactly identical. Layerwise finite-difference JVP uses \(\epsilon=10^{-4}\).
 
-All confidence intervals reported in this paper are across-seed paired estimates. For ratio metrics, we first compute the spectral/Frobenius or Muon/Adam ratio within each seed, compute a 95\% confidence interval on the log scale, and map the result back to the original scale. For difference metrics, such as tail-loss increase difference or margin difference, we compute a 95\% confidence interval directly on the paired difference.
+The finite Newton--Schulz approximation normalizes each matrix by its spectral norm, returns the zero direction for a zero matrix, and otherwise iterates
+\[
+X_{k+1}=1.5X_k-0.5X_kX_k^\top X_k
+\]
+for the configured number of steps. The practical imbalanced-training diagnostic does not use the matched-head-gain protocol. Instead, it directly compares Adam and finite-Newton--Schulz Muon-style updates from the same initialization under the same noisy mini-batch schedule. This experiment uses 10 training samples per tail class and keeps 40 held-out tail-evaluation samples per tail class. Training runs for \EelevenLongTailPracticalTrainingSteps{} noisy mini-batch steps. Adam uses learning rate \(\EelevenLongTailPracticalTrainingAdamLr\), and the Muon-style update uses learning rate \(\EelevenLongTailPracticalTrainingMuonLr\), momentum \(\beta=0.9\), 5 Newton--Schulz approximation steps, no weight decay, no learning-rate schedule, and no gradient clipping.
+
+All confidence intervals reported in this paper are across-seed paired estimates. For ratio metrics, we first compute the spectral/Frobenius or Muon/Adam ratio within each seed, compute a 95\% confidence interval on the log scale, and map the result back to the original scale. For trajectory diagnostics with multiple sampled states per seed, we first average log-ratios over sampled states within each seed, then compute the paired CI across seeds. For difference metrics, such as tail-loss increase difference or margin difference, we compute a 95\% confidence interval directly on the paired difference, with the same seed-level aggregation for trajectory diagnostics.
 
 \clearpage
 \section{Additional Empirical Tables}
 \label{app:appendix-tables}
 
+\begin{table}[H]
+\centering
+\caption{Claim boundary. All reported numbers come from matched-head-gain diagnostics unless explicitly marked as practical training; intervals are paired confidence intervals.}
+\label{tab:claim-boundary}
+\footnotesize
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.28\linewidth}>{\raggedright\arraybackslash}p{0.42\linewidth}>{\raggedright\arraybackslash}p{0.22\linewidth}@{}}
+\toprule
+Claim & Evidence & Boundary \\
+\midrule
+Matched-head-gain spectral/polar directions can reduce squared logit drift on held-out tail examples. &
+Controlled long-tailed digits one-step squared drift ratio \(\EelevenLongTailOneStepDriftRatio ~\EelevenLongTailOneStepDriftRatioCi\); spectral/Fro head-alignment ratio \(\EelevenLongTailOneStepAlignmentRatio ~\EelevenLongTailOneStepAlignmentRatioCi\); matched operator-norm ratio \(\EelevenLongTailOneStepUpdateOpNormRatio ~\EelevenLongTailOneStepUpdateOpNormRatioCi\); 8-step final squared drift ratio \(\EelevenLongTailForgettingFinalDriftRatio ~\EelevenLongTailForgettingFinalDriftRatioCi\). &
+Does not imply tail loss, margin, or accuracy must improve; the one-step CE tail-loss interval is positive, and matched scaling is norm-specific rather than a uniformly smaller parameter step. \\
+\addlinespace
+\(\polar(M_t)\) and NS\((M_t)\) provide selected-state compatibility checks for Muon-style directions. &
+Fixed checkpoint: \(\polar(M_t)\) squared drift ratio \(\EelevenLongTailMuonBridgePolarMomentumDriftRatio ~\EelevenLongTailMuonBridgePolarMomentumDriftRatioCi\), NS squared drift ratio \(\EelevenLongTailMuonBridgeNsMomentumDriftRatio ~\EelevenLongTailMuonBridgeNsMomentumDriftRatioCi\); short trajectory: NS squared drift ratio \(\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio ~\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatioCi\); Fro/GD-state control: NS squared drift ratio \(\EelevenLongTailMuonStateSourceControlFroNsMomentumDriftRatio ~\EelevenLongTailMuonStateSourceControlFroNsMomentumDriftRatioCi\). &
+Local compatibility only; fixed-checkpoint NS has a CI crossing \(1\), and the Fro/GD-state control reduces but does not eliminate state-selection risk. \\
+\addlinespace
+\(\nrank(G_H)>\ssrank(B_T,A_T)\) is a discriminative mechanism boundary. &
+Synthetic positive-boundary squared drift ratio \(\EelevenHeadTailPositiveDriftRatio ~\EelevenHeadTailPositiveDriftRatioCi\); negative-boundary squared drift ratio \(\EelevenHeadTailNegativeDriftRatio ~\EelevenHeadTailNegativeDriftRatioCi\), with direction matching the condition. &
+Mechanism boundary check; does not predict standard benchmark performance. \\
+\addlinespace
+Layerwise drift reduction mainly comes from head-gain scaling, not lower unit-direction tail sensitivity. &
+Both unit-JVP squared drift ratios exceed \(1\), but scaled and observed squared drift ratios are near \(\EelevenLayerOneScaledJvpDriftRatio ~\EelevenLayerOneScaledJvpDriftRatioCi\) and \(\EelevenLayerTwoScaledJvpDriftRatio ~\EelevenLayerTwoScaledJvpDriftRatioCi\). &
+Spectral/polar unit directions are not always safer. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Tail outcomes, margin-relevant drift, and head-gain readouts for the controlled one-step digits diagnostic. Small post-update effects are reported as changes from the pre-update tail state so that rounding of absolute CE or margin values does not hide the relevant comparison. The certificate fraction is computed only among tail samples with positive pre-update margin.}
+\label{tab:one-step-tail-outcomes}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.48\linewidth}>{\raggedright\arraybackslash}p{0.47\linewidth}@{}}
+\toprule
+Readout & Value \\
+\midrule
+Pre-update tail CE &
+\(\EelevenLongTailOneStepTailLossBefore\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailLossBeforeCi} \\
+Tail CE increase, Fro/GD &
+\(\EelevenLongTailOneStepTailLossIncreaseFro\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailLossIncreaseFroCi} \\
+Tail CE increase, spectral/polar &
+\(\EelevenLongTailOneStepTailLossIncreaseSpectral\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailLossIncreaseSpectralCi} \\
+Tail CE increase difference, spectral--Fro &
+\(\EelevenLongTailOneStepTailLossDiff\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailLossDiffCi} \\
+Pre-update mean margin &
+\(\EelevenLongTailOneStepTailMarginBefore\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailMarginBeforeCi} \\
+Margin drop, Fro/GD &
+\(\EelevenLongTailOneStepTailMarginDropFro\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailMarginDropFroCi} \\
+Margin drop, spectral/polar &
+\(\EelevenLongTailOneStepTailMarginDropSpectral\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailMarginDropSpectralCi} \\
+Margin-drop difference, spectral--Fro &
+\(\EelevenLongTailOneStepTailMarginDropDiff\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailMarginDropDiffCi} \\
+Pre-update tail accuracy &
+\(\EelevenLongTailOneStepTailAccuracyBefore\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailAccuracyBeforeCi} \\
+Accuracy drop, Fro/GD &
+\(\EelevenLongTailOneStepTailAccuracyDropFro\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailAccuracyDropFroCi} \\
+Accuracy drop, spectral/polar &
+\(\EelevenLongTailOneStepTailAccuracyDropSpectral\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailAccuracyDropSpectralCi} \\
+Accuracy-drop difference, spectral--Fro &
+\(\EelevenLongTailOneStepTailAccuracyDropDiff\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTailAccuracyDropDiffCi} \\
+Full tail-example logit drift, spectral/Fro &
+\(\EelevenLongTailOneStepDriftRatio\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepDriftRatioCi} \\
+Centered-logit drift, spectral/Fro &
+\(\EelevenLongTailOneStepCenteredDriftRatio\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepCenteredDriftRatioCi} \\
+True-class logit delta, spectral/Fro &
+\(\EelevenLongTailOneStepTrueLogitDriftRatio\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepTrueLogitDriftRatioCi} \\
+Top-competitor logit delta, spectral/Fro &
+\(\EelevenLongTailOneStepCompetitorLogitDriftRatio\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepCompetitorLogitDriftRatioCi} \\
+Margin delta, spectral/Fro &
+\(\EelevenLongTailOneStepMarginDeltaRatio\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepMarginDeltaRatioCi} \\
+Actual head-gain relative error, Fro; spectral &
+\(\EelevenLongTailOneStepHeadGainErrorFro\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepHeadGainErrorFroCi}; \(\EelevenLongTailOneStepHeadGainErrorSpectral\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepHeadGainErrorSpectralCi} \\
+Head-alignment denominator, spectral/Fro &
+\(\EelevenLongTailOneStepAlignmentRatio\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepAlignmentRatioCi} \\
+Matched update Frobenius norm, spectral/Fro &
+\(\EelevenLongTailOneStepUpdateFroNormRatio\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepUpdateFroNormRatioCi} \\
+Matched update operator norm, spectral/Fro &
+\(\EelevenLongTailOneStepUpdateOpNormRatio\)\hspace{0.35em}\mbox{\EelevenLongTailOneStepUpdateOpNormRatioCi} \\
+Positive-margin fraction &
+\(\EelevenLongTailOneStepPositiveMarginFraction\) \\
+Certified unchanged-prediction fraction, Fro; spectral &
+\(\EelevenLongTailOneStepCertifiedFractionFro\); \(\EelevenLongTailOneStepCertifiedFractionSpectral\) \\
+All-tail prediction changed, Fro; spectral &
+\(\EelevenLongTailOneStepPredictionChangedFro\); \(\EelevenLongTailOneStepPredictionChangedSpectral\) \\
+Positive-margin prediction changed, Fro; spectral &
+\(\EelevenLongTailOneStepPositivePredictionChangedFro\); \(\EelevenLongTailOneStepPositivePredictionChangedSpectral\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Appendix \ref{app:tail-margin} gives the sufficient margin certificate used in Table \ref{tab:one-step-tail-outcomes}. Only \(\EelevenLongTailOneStepPositiveMarginFraction\) of tail examples have positive pre-update margin, with 95\% CI \(\EelevenLongTailOneStepPositiveMarginFractionCi\). Among these examples, the certified unchanged-prediction fractions are \(\EelevenLongTailOneStepCertifiedFractionFro\) for Fro/GD and \(\EelevenLongTailOneStepCertifiedFractionSpectral\) for spectral/polar. The positive-margin prediction-change rate is zero for both directions, so the certificate check should be read as a consistency check on unchanged predictions among already-positive-margin examples, not as evidence of improved tail accuracy.
+
 \input{tables/head_tail_empirical_results}
+
+\input{tables/local_linearization_errors}
 
 \clearpage
 \section{Auxiliary Diagnostic Figures}
 \label{app:aux-figures}
 
-The fixed-checkpoint Muon-style compatibility diagnostic tests whether replacing \(\polar(G_t)\) by Muon-style state gives a compatible local drift signal. Figure \ref{fig:long-tail-muon-bridge} shows that \(\polar(M_t)\) has a matched-head-gain drift ratio below \(1\) at the same checkpoint, while the finite-step Newton--Schulz approximation has an interval crossing \(1\). Accordingly, this result provides selected-state compatibility evidence from \(\polar(G_t)\) to Muon-style directions, rather than an optimizer-level performance claim.
+The synthetic alignment ablation keeps the singular values from the boundary diagnostic but randomizes the singular vectors of the head gradient, tail activation, and downstream tail map. Figure \ref{fig:head-tail-alignment-ablation} shows that the positive-spectrum bound ratio remains below \(1\), while the realized drift ratio becomes mixed under random alignment. This is a direct caveat on interpreting \(\nrank(G_H)>\ssrank(B_T,A_T)\): the condition orders worst-case sensitivity bounds, whereas realized polar drift also depends on singular-vector alignment.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/head_tail_alignment_ablation.png}
+\caption{Synthetic singular-vector alignment ablation. Each point randomizes the singular-vector alignment of \(G_H,A_T,B_T\) while preserving the singular values used in the synthetic boundary diagnostic. The dotted horizontal markers show the theory ratio \(\ssrank(B_T,A_T)/\nrank(G_H)\); black diamonds report the geomean realized squared drift ratio with 95\% intervals. In the positive-spectrum setting, the bound favors spectral geometry, but randomized alignment makes the realized drift ratio mixed.}
+\label{fig:head-tail-alignment-ablation}
+\end{figure}
+
+The fixed-checkpoint Muon-style compatibility diagnostic tests whether replacing \(\polar(G_t)\) by Muon-style state gives a compatible local drift signal. Figure \ref{fig:long-tail-muon-bridge} shows that \(\polar(M_t)\) has a matched-head-gain squared tail-example logit drift ratio below \(1\) at the same checkpoint, while the finite-step Newton--Schulz approximation has a squared drift-ratio interval crossing \(1\). Accordingly, this result provides selected-state compatibility evidence from \(\polar(G_t)\) to Muon-style directions, rather than an optimizer-level performance claim.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{figures/long_tail_muon_bridge.png}
-\caption{Fixed-checkpoint Muon-style compatibility diagnostic on long-tailed digits. The left panel compares the matched-head-gain tail-drift-squared ratio of several directions relative to Frobenius/GD. The right panel reports their cosine with the ideal \(\polar(G_t)\). Momentum polar has a drift ratio below \(1\), while the finite Newton--Schulz approximation has an interval crossing \(1\).}
+\caption{Fixed-checkpoint Muon-style direction compatibility diagnostic on controlled long-tailed digits. The left panel compares the matched-head-gain squared tail-example logit drift ratio of several directions relative to Frobenius/GD. The right panel reports their cosine with the ideal \(\polar(G_t)\). Momentum polar has a squared drift ratio below \(1\), while the finite Newton--Schulz approximation has a squared drift-ratio interval crossing \(1\).}
 \label{fig:long-tail-muon-bridge}
 \end{figure}
 
-The practical imbalanced-training diagnostic asks whether the local drift pattern appears in a direct Adam-vs-Muon-style run under a controlled imbalanced-training protocol. Figure \ref{fig:long-tail-practical-training} reports lower measured tail drift and a higher measured tail-margin reading for the Muon-style run in this setting. The experiment is still not a complete optimizer benchmark because tail accuracy does not improve stably and standard long-tailed visual benchmarks are not covered.
-The final train-loss ratio is \(\EelevenLongTailPracticalTrainingTrainLossRatio\,\EelevenLongTailPracticalTrainingTrainLossRatioCi\), and the tail-margin difference is \(\EelevenLongTailPracticalTrainingTailMarginDiff\,\EelevenLongTailPracticalTrainingTailMarginDiffCi\). The learning-rate sweep is a caveat: the largest Muon learning rate raises the tail-loss ratio to \(\EelevenLongTailPracticalTrainingLrSweepLargeTailLossRatio\), indicating sensitivity to step size rather than a monotone improvement from larger Muon updates.
+The state-source control asks whether the short-trajectory Muon-style signal depends on evaluating Muon-style directions only at states generated by the same NS-Muon-style family. Figure \ref{fig:long-tail-muon-state-source-control} repeats the matched-head-gain diagnostic at states generated by either NS-Muon-style updates or Fro/GD-style updates. The Fro/GD-state control gives \(\polar(M_t)\) squared drift ratio \(\EelevenLongTailMuonStateSourceControlFroPolarMomentumDriftRatio ~\EelevenLongTailMuonStateSourceControlFroPolarMomentumDriftRatioCi\) and NS\((M_t)\) ratio \(\EelevenLongTailMuonStateSourceControlFroNsMomentumDriftRatio ~\EelevenLongTailMuonStateSourceControlFroNsMomentumDriftRatioCi\) across \(\EelevenLongTailMuonStateSourceControlComparisons\) comparisons, reducing but not eliminating state-selection risk.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.84\linewidth]{figures/long_tail_muon_state_source_control.png}
+\caption{Muon-style direction compatibility by trajectory state source. The diagnostic is evaluated on sampled states from the original short NS-Muon-style trajectory and from a Fro/GD-style trajectory with matched seeds and batches. Values below \(1\) mean lower held-out squared tail-example logit drift than the Fro/GD direction at the same state after matching first-order head gain.}
+\label{fig:long-tail-muon-state-source-control}
+\end{figure}
+
+The imbalance ablation repeats the one-step matched-head-gain diagnostic while varying the number of tail training examples per class. Figure \ref{fig:long-tail-imbalance-ablation} shows that the spectral/Frobenius squared drift-ratio confidence intervals remain below \(1\) across the tested \(100{:}80\), \(100{:}40\), \(100{:}20\), and \(100{:}10\) splits. The strongest-imbalance case has squared drift ratio \(\EelevenLongTailImbalanceStrongRatio ~\EelevenLongTailImbalanceStrongRatioCi\), but its positive-margin tail fraction is \(\EelevenLongTailImbalanceStrongPositiveMarginFraction ~\EelevenLongTailImbalanceStrongPositiveMarginFractionCi\), so margin-certificate conclusions are not meaningful there.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\linewidth]{figures/long_tail_imbalance_ablation.png}
+\caption{Imbalance ablation for the controlled long-tailed digits one-step diagnostic. The head split remains fixed at 100 training examples per head class, while tail training examples per class vary. Values below \(1\) mean lower held-out squared tail-example logit drift for spectral/polar after matching first-order head gain.}
+\label{fig:long-tail-imbalance-ablation}
+\end{figure}
+
+The checkpoint sweep repeats the same matched-head-gain diagnostic at multiple warmup states instead of reporting only the default 80-step checkpoint. Figure \ref{fig:long-tail-checkpoint-sweep} shows that the full tail-example squared logit drift ratio remains below \(1\) across \(\EelevenLongTailCheckpointSweepSettings\) checkpoints; the worst upper endpoint is \(\EelevenLongTailCheckpointSweepWorstRatioCiHigh\) at \(\EelevenLongTailCheckpointSweepWorstWarmupSteps\) warmup steps. The squared margin-delta ratio is less uniform: its worst interval is \(\EelevenLongTailCheckpointSweepWorstMarginRatio ~\EelevenLongTailCheckpointSweepWorstMarginRatioCi\) at \(\EelevenLongTailCheckpointSweepWorstMarginWarmupSteps\) warmup steps, so the checkpoint sweep supports the logit drift claim more directly than a margin-delta claim. This check reduces single-checkpoint state-selection risk for the drift readout, but it does not yet show preservation of a high-quality tail predictor: across the tested checkpoints, pre-update tail accuracy spans only \(\EelevenLongTailCheckpointSweepTailAccuracyRange\), and the positive-margin tail fraction spans \(\EelevenLongTailCheckpointSweepPositiveMarginRange\). A stronger tail-knowledge preservation claim therefore requires checkpoints or benchmarks where the tail function is already useful, not only less perturbed.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\linewidth]{figures/long_tail_checkpoint_sweep.png}
+\caption{Checkpoint sweep for the controlled long-tailed digits one-step diagnostic. Each point repeats the matched-head-gain Frobenius/GD versus spectral/polar comparison at a different warmup checkpoint. Values below \(1\) mean lower held-out squared tail-example logit drift or lower squared margin delta for spectral/polar after matching first-order head gain.}
+\label{fig:long-tail-checkpoint-sweep}
+\end{figure}
+
+The class-partition sweep changes which digit classes serve as head and tail classes. Figure \ref{fig:long-tail-class-partition-sweep} shows that the full and centered tail-example squared logit drift ratios remain below \(1\) across \(\EelevenLongTailClassPartitionSweepSettings\) balanced partitions. The weakest full tail-example squared logit drift case is \(\EelevenLongTailClassPartitionWorstPartition\), with ratio \(\EelevenLongTailClassPartitionWorstRatio ~\EelevenLongTailClassPartitionWorstRatioCi\); the weakest centered squared logit drift case is \(\EelevenLongTailClassPartitionCenteredWorstPartition\), with ratio \(\EelevenLongTailClassPartitionCenteredWorstRatio ~\EelevenLongTailClassPartitionCenteredWorstRatioCi\). This reduces the risk that the result is an artifact of using digits \(0\)--\(4\) as head classes and \(5\)--\(9\) as tail classes, while still remaining within the same small dataset.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{figures/long_tail_class_partition_sweep.png}
+\caption{Class-partition sweep for the controlled long-tailed digits one-step diagnostic. Each point repeats the matched-head-gain comparison after changing which five digit classes are head classes and which five are tail classes. Values below \(1\) mean lower held-out squared tail-example logit drift for spectral/polar after matching first-order head gain.}
+\label{fig:long-tail-class-partition-sweep}
+\end{figure}
+
+The matched-gain rho sweep changes the target first-order head gain \(\rho\) while keeping the same controlled digits checkpoint distribution. Figure \ref{fig:long-tail-rho-sweep} shows that the full and centered tail-example squared logit drift ratios remain below \(1\) across \(\EelevenLongTailRhoSweepSettings\) tested fractions. The weakest full tail-example squared logit drift case is \(\rho/L_H=\EelevenLongTailRhoSweepWorstFraction\), with ratio \(\EelevenLongTailRhoSweepWorstRatio ~\EelevenLongTailRhoSweepWorstRatioCi\); the weakest centered squared logit drift case is \(\rho/L_H=\EelevenLongTailRhoSweepCenteredWorstFraction\), with ratio \(\EelevenLongTailRhoSweepCenteredWorstRatio ~\EelevenLongTailRhoSweepCenteredWorstRatioCi\). At the largest tested scale, the one-step approximation is less exact: the largest actual-head-gain relative-error upper endpoint across both geometries is \(\EelevenLongTailRhoSweepWorstHeadGainErrorCiHigh\) at \(\rho/L_H=\EelevenLongTailRhoSweepWorstHeadGainErrorFraction\). Thus the sweep supports the drift readout across local step scales, while preserving the paper's first-order scope.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.94\linewidth]{figures/long_tail_rho_sweep.png}
+\caption{Target head-gain fraction sweep for the controlled long-tailed digits one-step diagnostic. The left panel reports full and centered squared tail-example logit drift ratios after matching first-order head gain. The right panel reports the actual head-gain relative error, which increases with \(\rho/L_H\) and marks the finite-step cost of leaving the most local regime.}
+\label{fig:long-tail-rho-sweep}
+\end{figure}
+
+The practical imbalanced-training diagnostic is a non-matched-gain sanity check reported for context, not evidence for the main theorem. Figure \ref{fig:long-tail-practical-training} compares Adam and a finite-Newton--Schulz Muon-style update under one controlled imbalanced-training protocol. The experiment is not a complete optimizer benchmark because tail accuracy does not improve stably, hyperparameters are lightweight, and standard long-tailed visual benchmarks are not covered.
+The final train-loss ratio is \(\EelevenLongTailPracticalTrainingTrainLossRatio ~\EelevenLongTailPracticalTrainingTrainLossRatioCi\), and the tail-margin difference is \(\EelevenLongTailPracticalTrainingTailMarginDiff ~\EelevenLongTailPracticalTrainingTailMarginDiffCi\). The learning-rate sweep is a caveat: the largest Muon learning rate raises the tail-loss ratio to \(\EelevenLongTailPracticalTrainingLrSweepLargeTailLossRatio\), indicating sensitivity to step size rather than a monotone improvement from larger Muon updates.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{figures/long_tail_practical_training.png}
-\caption{Long-tailed digits practical training diagnostic. Adam and the finite-Newton--Schulz Muon-style update start from the same initialization and use the same noisy mini-batch schedule. In this controlled imbalanced setting, the Muon-style run reports lower measured tail drift, a higher measured tail-margin reading, and lower late-stage head loss; this protocol does not constitute a complete optimizer benchmark.}
+\caption{Controlled long-tailed digits practical training diagnostic. Adam and the finite-Newton--Schulz Muon-style update start from the same initialization and use the same noisy mini-batch schedule. In this controlled imbalanced setting, the Muon-style run reports lower tail loss, a higher measured tail-margin reading, and lower late-stage head loss; this protocol does not constitute a complete optimizer benchmark.}
 \label{fig:long-tail-practical-training}
 \end{figure}
 
-The forgetting probe repeats head-only updates before rechecking the tail set. Figure \ref{fig:long-tail-forgetting} is consistent with lower tail-logit drift over a short head-only horizon, but the intervals for tail loss and margin are still insufficient to support a performance claim.
-The final tail-margin drop difference is \(\EelevenLongTailForgettingFinalTailMarginDropDiff\,\EelevenLongTailForgettingFinalTailMarginDropDiffCi\). We therefore treat the forgetting probe as drift evidence rather than a tail-performance claim.
+The forgetting probe repeats head-only updates before rechecking the tail set. Figure \ref{fig:long-tail-forgetting} reports lower tail-example logit drift over a short head-only horizon, but the intervals for tail loss and margin are still insufficient to support a performance claim.
+The final tail-margin drop difference is \(\EelevenLongTailForgettingFinalTailMarginDropDiff ~\EelevenLongTailForgettingFinalTailMarginDropDiffCi\). We therefore treat the forgetting probe as drift evidence rather than a tail-performance claim.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{figures/long_tail_head_only_forgetting.png}
-\caption{Tail forgetting probe under consecutive head-only steps. The left panel shows that spectral/polar tail-logit drift remains below Frobenius/GD across the short horizon. The right panel shows a weaker tail-loss-increase difference, which does not establish a stable performance claim.}
+\caption{Tail forgetting probe under consecutive head-only steps. The left panel shows that spectral/polar squared tail-example logit drift remains below Frobenius/GD across the short horizon. The right panel shows a weaker tail-loss-increase difference, which does not establish a stable performance claim.}
 \label{fig:long-tail-forgetting}
 \end{figure}
 
@@ -730,7 +938,7 @@ Figure \ref{fig:long-tail-layerwise} reports the layerwise drift diagnostic disc
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{figures/long_tail_layerwise_drift.png}
-\caption{Layerwise tail-drift diagnostic. Both layers have unit-direction JVP ratios above \(1\), showing that spectral/polar unit directions are not always less tail-perturbing. After matched-head-gain scaling, however, both scaled JVP and observed drift fall below the Frobenius/GD baseline.}
+\caption{Layerwise tail-drift diagnostic. Both layers have unit-direction JVP squared drift ratios above \(1\), showing that spectral/polar unit directions are not always less tail-perturbing. After matched-head-gain scaling, however, both scaled JVP and observed squared drift ratios fall below the Frobenius/GD baseline. The right panel uses the exact frozen-gate local operator score; for the final layer this is supplemented in the text by the exact sandwich quantity \(\ssrank(B_{T,2},A_{T,2})\).}
 \label{fig:long-tail-layerwise}
 \end{figure}
 

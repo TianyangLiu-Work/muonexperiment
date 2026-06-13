@@ -7,9 +7,15 @@ e11-main-results:
 	$(PYTHON) scripts/e11_make_figures.py
 	$(PYTHON) scripts/e11_run_equal_update_control.py
 	$(PYTHON) scripts/e11_run_head_tail_interference.py
+	$(PYTHON) scripts/e11_run_head_tail_alignment_ablation.py
 	$(PYTHON) scripts/e11_run_long_tail_one_step.py
+	$(PYTHON) scripts/e11_run_long_tail_imbalance_ablation.py
+	$(PYTHON) scripts/e11_run_long_tail_checkpoint_sweep.py
+	$(PYTHON) scripts/e11_run_long_tail_class_partition_sweep.py
+	$(PYTHON) scripts/e11_run_long_tail_rho_sweep.py
 	$(PYTHON) scripts/e11_run_long_tail_muon_bridge.py
 	$(PYTHON) scripts/e11_run_long_tail_practical_muon_bridge.py
+	$(PYTHON) scripts/e11_run_long_tail_muon_state_source_control.py
 	$(PYTHON) scripts/e11_run_long_tail_practical_training.py
 	$(PYTHON) scripts/e11_run_long_tail_practical_training_lr_sweep.py
 	$(PYTHON) scripts/e11_run_long_tail_forgetting.py
@@ -48,7 +54,7 @@ e11-guardrail-assets:
 
 e11-all-assets: e11-paper-assets e11-guardrail-assets
 
-e11-paper-pdf:
+e11-paper-pdf: e11-paper-assets
 	$(MAKE) -C paper/specgrad_activation_paper
 
 e11-artifacts: e11-paper-assets

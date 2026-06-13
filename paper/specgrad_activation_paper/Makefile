@@ -1,6 +1,8 @@
-.PHONY: all two-page clean
+.PHONY: all main two-page clean
 
-all:
+all: main two-page
+
+main:
 	pdflatex main.tex
 	bibtex main
 	pdflatex main.tex

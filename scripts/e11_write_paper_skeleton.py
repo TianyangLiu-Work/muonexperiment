@@ -36,14 +36,14 @@ def main() -> None:
         {
             "claim": "Head-only updates create a measurable head-to-tail function-drift problem.",
             "status": "paper framing claim",
-            "evidence": "Long-tail digits probes explicitly separate head batch gain from held-out tail logit drift.",
+            "evidence": "Long-tail digits probes explicitly separate head batch gain from held-out tail-example logit drift.",
             "figure_or_table": "one-step and 8-step tail response figures",
         },
         {
-            "claim": "Matched-head-gain spectral/polar directions reduce tail logit drift in the tested diagnostics.",
+            "claim": "Matched-head-gain spectral/polar directions reduce tail-example logit drift in the tested diagnostics.",
             "status": "main empirical claim",
             "evidence": (
-                f"One-step drift-sq ratio {fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                f"One-step squared drift ratio {fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                 f"{interval(one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
                 f"8-step final ratio {fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                 f"{interval(forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}."
@@ -63,9 +63,9 @@ def main() -> None:
             "claim": "Muon-style momentum polar is compatible with part of the ideal polar drift signal.",
             "status": "selected-state compatibility claim",
             "evidence": (
-                f"polar(M_t) drift-sq ratio {fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                f"polar(M_t) squared drift ratio {fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                 f"{interval(muon_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
-                f"NS(M_t) ratio {fmt(muon_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                f"NS(M_t) squared drift ratio {fmt(muon_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                 f"{interval(muon_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
             ),
             "figure_or_table": "Muon-style compatibility diagnostic figure",
@@ -75,15 +75,15 @@ def main() -> None:
             "status": "trajectory compatibility claim",
             "evidence": (
                 f"Across {int(practical_bridge.loc['ns_momentum', 'comparisons'])} state-step comparisons, "
-                f"polar(M_t) ratio {fmt(practical_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                f"polar(M_t) squared drift ratio {fmt(practical_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                 f"{interval(practical_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
-                f"NS(M_t) ratio {fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                f"NS(M_t) squared drift ratio {fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                 f"{interval(practical_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
             ),
             "figure_or_table": "practical Muon trajectory compatibility figure",
         },
         {
-            "claim": "A small practical NS-Muon-style training run has lower measured tail drift and tail loss in a fixed diagnostic.",
+            "claim": "A small practical NS-Muon-style training run has lower tail loss and higher measured tail margin in a fixed diagnostic.",
             "status": "practical sanity-check claim",
             "evidence": (
                 f"Final train loss ratio {fmt(practical_training['geomean_final_train_loss_ratio_muon_over_adam'])} "
@@ -103,7 +103,7 @@ def main() -> None:
             "claim": "The observed layerwise mechanism is smaller matched-head-gain step size, not lower unit-direction tail sensitivity.",
             "status": "mechanism clarification",
             "evidence": (
-                f"Layer 1 unit-JVP/scaled/observed ratios {fmt(layer_1['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                f"Layer 1 unit-JVP/scaled/observed squared drift ratios {fmt(layer_1['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
                 f"{fmt(layer_1['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
                 f"{fmt(layer_1['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}; "
                 f"layer 2 {fmt(layer_2['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
@@ -113,7 +113,7 @@ def main() -> None:
             "figure_or_table": "layerwise diagnostic figure",
         },
         {
-            "claim": "Lower tail logit drift does not automatically imply better tail loss, margin, or accuracy.",
+            "claim": "Lower tail-example logit drift does not automatically imply better tail loss, margin, or accuracy.",
             "status": "required caveat",
             "evidence": (
                 f"One-step tail loss-increase diff {fmt(one_step['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
@@ -135,9 +135,9 @@ def main() -> None:
 
     figure_plan = pd.DataFrame([
         {"slot": "Figure 1", "artifact": "figures/e11_head_tail_interference/head_tail_drift_ratio.png", "message": "The synthetic boundary flips with nrank(G_H) versus ssrank(B_T,A_T)."},
-        {"slot": "Figure 2", "artifact": "figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png", "message": "On long-tailed digits, spectral/polar reduces held-out tail logit drift at matched head gain."},
+        {"slot": "Figure 2", "artifact": "figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png", "message": "On long-tailed digits, spectral/polar reduces held-out tail-example logit drift at matched head gain."},
         {"slot": "Figure 3", "artifact": "figures/e11_long_tail_muon_bridge/long_tail_muon_bridge.png", "message": "Momentum polar gives a selected-state compatibility check for Muon-style state; finite Newton-Schulz is weaker."},
-        {"slot": "Figure 4", "artifact": "figures/e11_long_tail_practical_muon_bridge/long_tail_practical_muon_bridge.png", "message": "Short practical NS-Muon trajectory states show drift ratios compatible with the local matched-head-gain mechanism."},
+        {"slot": "Figure 4", "artifact": "figures/e11_long_tail_practical_muon_bridge/long_tail_practical_muon_bridge.png", "message": "Short practical NS-Muon trajectory states show squared drift ratios compatible with the local matched-head-gain mechanism."},
         {"slot": "Figure 5", "artifact": "figures/e11_long_tail_practical_training/long_tail_practical_training.png", "message": "A small practical imbalanced-training sanity check has lower measured drift/loss in this fixed diagnostic, but not better tail accuracy."},
         {"slot": "Figure 6", "artifact": "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png", "message": "The drift reduction persists over an 8-step head-only horizon."},
         {"slot": "Figure 7", "artifact": "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png", "message": "Layerwise results show scaled head-gain efficiency rather than lower unit-direction tail sensitivity."},
@@ -154,7 +154,7 @@ Head-to-Tail Interference in Long-Tailed Small-Batch Training: A Function-Drift 
 
 ## Abstract Sketch
 
-Long-tailed small-batch training creates long stretches of head-only updates between rare tail batches. This paper studies those updates as perturbations to held-out tail functions. We define a head-to-tail interference coefficient and show that, for matrix blocks with local tail map `J_T(D)=B_T D A_T`, spectral geometry has a smaller worst-case matched-head-gain drift bound when `nrank(G_H) > ssrank(B_T,A_T)`. Lightweight diagnostics on a synthetic boundary and long-tailed digits show that idealized spectral/polar directions reduce tail logit drift at matched head gain, while tail loss and margin do not automatically improve. Fixed-checkpoint and short-trajectory Muon-style diagnostics show selected-state compatibility between momentum/NS directions and the local polar mechanism. The paper is therefore a local mechanism study of SpecGrad/polar geometry, not a broad optimizer-performance claim.
+Long-tailed small-batch training creates long stretches of head-only updates between rare tail batches. This paper studies those updates as perturbations to held-out tail functions. We define a head-to-tail interference coefficient and show that, for matrix blocks with local tail map `J_T(D)=B_T D A_T`, spectral geometry has a smaller worst-case matched-head-gain drift bound when `nrank(G_H) > ssrank(B_T,A_T)`. Lightweight diagnostics on a synthetic boundary and long-tailed digits show that idealized spectral-gradient/polar directions reduce tail-example logit drift at matched head gain, while tail loss and margin do not automatically improve. Fixed-checkpoint and short-trajectory Muon-style diagnostics show selected-state compatibility between momentum/NS directions and the local polar mechanism. The paper is therefore a local mechanism study of spectral-gradient/polar geometry, not a broad optimizer-performance claim.
 
 ## Core Claims
 

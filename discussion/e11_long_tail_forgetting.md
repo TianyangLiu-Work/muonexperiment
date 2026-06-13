@@ -4,7 +4,11 @@ This probe starts from the same imbalanced sklearn digits MLP checkpoint as the
 one-step diagnostic, then runs several consecutive head-only updates while
 tail classes 5-9 are held out. Frobenius/GD and spectral/polar directions use
 the same precomputed head mini-batches and the same target first-order head
-gain schedule for each seed.
+gain schedule for each seed. The schedule stores each target gain as
+`0.02 * reference head-batch loss` at the initial checkpoint before either
+geometry is rolled out, so the intended first-order head-gain budget is
+matched per seed and step; realized nonlinear head-loss decreases are only
+measured after each update.
 
 - Seeds: 20
 - Head-only steps: 8
@@ -18,10 +22,10 @@ gain schedule for each seed.
 
 | quantity | value |
 |---|---:|
-| final tail drift-sq ratio, spectral/Fro | 0.6167 [0.5744, 0.6622] |
-| spectral lower final tail drift fraction | 0.95 |
-| tail-drift area ratio, spectral/Fro | 0.7787 [0.7549, 0.8033] |
-| spectral lower tail-drift area fraction | 1 |
+| final squared tail-example logit drift ratio, spectral/Fro | 0.6167 [0.5744, 0.6622] |
+| spectral lower final squared tail-example logit drift fraction | 0.95 |
+| squared tail-example logit drift area ratio, spectral/Fro | 0.7787 [0.7549, 0.8033] |
+| spectral lower squared tail-example logit drift area fraction | 1 |
 | final tail loss increase diff, spectral - Fro | -0.003538 [-0.007721, 0.0006445] |
 | final tail margin drop diff, spectral - Fro | -0.003658 [-0.009636, 0.00232] |
 | spectral proxy-drift Spearman | 0.9739 [0.9643, 0.9809] |

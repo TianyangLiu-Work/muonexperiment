@@ -95,8 +95,8 @@ def write_figure(step_metrics: pd.DataFrame, step_summary: pd.DataFrame) -> Path
         )
     axes[0].axhline(1.0, color="black", linestyle="--", linewidth=1)
     axes[0].set_xlabel("practical NS-Muon trajectory step")
-    axes[0].set_ylabel("tail drift-sq ratio vs Fro/GD")
-    axes[0].set_title("Matched-head-gain drift along trajectory")
+    axes[0].set_ylabel("squared tail-example logit drift ratio vs Fro/GD")
+    axes[0].set_title("Matched-head-gain squared tail drift")
     axes[0].legend(frameon=False)
 
     momentum = (
@@ -146,7 +146,7 @@ def write_discussion(
     ns_momentum = by_direction.loc["ns_momentum"]
 
     table = [
-        "| direction | comparisons | drift-sq ratio vs Fro/GD | cosine to polar(G_t) | gradient-momentum cosine |",
+        "| direction | comparisons | squared drift ratio vs Fro/GD | cosine to polar(G_t) | gradient-momentum cosine |",
         "|---|---:|---:|---:|---:|",
     ]
     for direction in ["polar_grad", "polar_momentum", "ns_momentum"]:
@@ -188,10 +188,10 @@ matched-head-gain diagnostic for Fro/GD, `polar(G_t)`, `polar(M_t)`, and
 ## Interpretation
 
 Across `{int(polar_momentum['comparisons'])}` paired state-step comparisons,
-`polar(M_t)` has tail drift-squared ratio
+`polar(M_t)` has squared tail-example logit drift ratio
 `{_fmt(polar_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])}`
 `[{_fmt(polar_momentum['tail_output_drift_sq_ratio_vs_fro_ci95_low'])}, {_fmt(polar_momentum['tail_output_drift_sq_ratio_vs_fro_ci95_high'])}]`
-relative to Fro/GD. The practical finite-step `NS(M_t)` direction has ratio
+relative to Fro/GD. The practical finite-step `NS(M_t)` direction has squared drift ratio
 `{_fmt(ns_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])}`
 `[{_fmt(ns_momentum['tail_output_drift_sq_ratio_vs_fro_ci95_low'])}, {_fmt(ns_momentum['tail_output_drift_sq_ratio_vs_fro_ci95_high'])}]`.
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 
@@ -19,11 +20,20 @@ def interval(row: pd.Series, low: str, high: str) -> str:
     return f"[{fmt(row[low])}, {fmt(row[high])}]"
 
 
+def paired_geomean_ratio(step_metrics: pd.DataFrame, numerator: str, denominator: str, column: str) -> float:
+    wide = step_metrics.pivot(index="seed", columns="geometry", values=column)
+    return math.exp((wide[numerator] / wide[denominator]).map(math.log).mean())
+
+
 def main() -> None:
     synthetic = pd.read_csv("results/e11_head_tail_interference/pair_summary.csv")
+    one_step_steps = pd.read_csv("results/e11_long_tail_one_step/step_metrics.csv")
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
+    state_control = pd.read_csv(
+        "results/e11_long_tail_muon_state_source_control/summary.csv"
+    ).set_index(["state_source", "direction"])
     practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
     practical_lr_sweep = pd.read_csv("results/e11_long_tail_practical_training_lr_sweep/sweep_summary.csv")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
@@ -34,22 +44,28 @@ def main() -> None:
     layer_1 = layerwise[layerwise["layer"].eq(1)].iloc[0]
     layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
     lr_sweep = practical_lr_sweep.assign(muon_lr_rounded=practical_lr_sweep["muon_lr"].round(3)).set_index("muon_lr_rounded")
+    alignment_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "alignment")
+    update_fro_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "update_fro_norm")
+    update_op_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "update_op_norm")
 
     claim_status = pd.DataFrame(
         [
             {
-                "claim": "Matched-head-gain spectral/polar directions reduce held-out tail logit drift in the tested long-tail diagnostics.",
+                "claim": "Matched-head-gain spectral/polar directions reduce held-out tail-example logit drift in the tested long-tail diagnostics.",
                 "readiness": "current core empirical claim",
                 "evidence": (
-                    f"One-step digits tail drift-sq ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"One-step digits squared tail-example logit drift ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"head-alignment ratio={fmt(alignment_ratio)}, "
+                    f"Frobenius-norm ratio={fmt(update_fro_ratio)}, "
+                    f"operator-norm ratio={fmt(update_op_ratio)}; "
                     f"8-step final ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}; "
                     f"drift-area ratio={fmt(forgetting['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} "
                     f"CI={interval(forgetting, 'tail_output_drift_area_ratio_ci95_low', 'tail_output_drift_area_ratio_ci95_high')}."
                 ),
-                "why_it_is_ready": "It is measured under the paper's matched-head-gain protocol with paired confidence intervals.",
-                "remaining_risk": "The evidence is still sklearn-digits scale; it is a mechanism diagnostic, not a full long-tail benchmark.",
+                "why_it_is_ready": "It is measured under the paper's matched-head-gain protocol with paired confidence intervals and explicit norm-specific scaling readouts.",
+                "remaining_risk": "The evidence is still scikit-learn digits scale; it is a mechanism diagnostic, not a full long-tail benchmark.",
             },
             {
                 "claim": "The condition nrank(G_H) > ssrank(B_T,A_T) is a useful mechanism boundary.",
@@ -57,30 +73,30 @@ def main() -> None:
                 "evidence": (
                     f"Positive setting: nrank={fmt(positive['mean_head_gradient_nuclear_rank'])}, "
                     f"ssrank={fmt(positive['mean_tail_downstream_aware_stable_rank'])}, "
-                    f"drift-sq ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
+                    f"squared drift ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
                     f"Negative setting: nrank={fmt(negative['mean_head_gradient_nuclear_rank'])}, "
                     f"ssrank={fmt(negative['mean_tail_downstream_aware_stable_rank'])}, "
-                    f"drift-sq ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}."
+                    f"squared drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}."
                 ),
                 "why_it_is_ready": "The synthetic construction flips the theory inequality and the observed tail drift direction flips with it.",
                 "remaining_risk": "This is not yet a held-out predictor for natural tasks or larger architectures.",
             },
             {
-                "claim": "The mechanism is scaled head-gain efficiency, not lower unit-direction tail sensitivity.",
+                "claim": "The mechanism is norm-specific scaled head-gain efficiency, not lower unit-direction tail sensitivity.",
                 "readiness": "current mechanism explanation",
                 "evidence": (
-                    f"Layer 1 unit-JVP ratio={fmt(layer_1['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}, "
-                    f"scaled/observed ratios={fmt(layer_1['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"Layer 1 unit-JVP squared drift ratio={fmt(layer_1['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}, "
+                    f"scaled/observed squared drift ratios={fmt(layer_1['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
                     f"{fmt(layer_1['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}. "
-                    f"Layer 2 unit-JVP ratio={fmt(layer_2['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}, "
-                    f"scaled/observed ratios={fmt(layer_2['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"Layer 2 unit-JVP squared drift ratio={fmt(layer_2['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}, "
+                    f"scaled/observed squared drift ratios={fmt(layer_2['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
                     f"{fmt(layer_2['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}."
                 ),
-                "why_it_is_ready": "Both layers have unit-JVP ratio above 1 but scaled and observed drift ratios below 1.",
+                "why_it_is_ready": "Both layers have unit-JVP squared drift ratio above 1 but scaled and observed squared drift ratios below 1; the one-step diagnostic also shows smaller operator norm but larger Frobenius norm after matching head gain.",
                 "remaining_risk": "The current layerwise test is only a two-layer digits MLP.",
             },
             {
-                "claim": "Lower tail logit drift implies better tail loss, margin, or accuracy.",
+                "claim": "Lower tail-example logit drift implies better tail loss, margin, or accuracy.",
                 "readiness": "not supported",
                 "evidence": (
                     f"One-step tail loss-increase diff spectral-minus-fro={fmt(one_step['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
@@ -95,14 +111,17 @@ def main() -> None:
                 "claim": "The ideal polar direction has selected-state compatibility with Muon-style momentum directions.",
                 "readiness": "supported compatibility check, not final-performance claim",
                 "evidence": (
-                    f"polar(M_t) drift-sq ratio vs Fro/GD={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"polar(M_t) squared drift ratio vs Fro/GD={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"CI={interval(muon_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
-                    f"short-trajectory NS(M_t) ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"short-trajectory NS(M_t) squared drift ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"CI={interval(practical_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')} "
-                    f"over {int(practical_bridge.loc['ns_momentum', 'comparisons'])} state-step comparisons."
+                    f"over {int(practical_bridge.loc['ns_momentum', 'comparisons'])} state-step comparisons; "
+                    f"Fro/GD-state NS(M_t) squared drift ratio="
+                    f"{fmt(state_control.loc[('fro_gd_trajectory', 'ns_momentum'), 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"CI={interval(state_control.loc[('fro_gd_trajectory', 'ns_momentum')], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
                 ),
-                "why_it_is_ready": "The compatibility check is measured both at a fixed checkpoint and along a short practical NS-Muon-style trajectory.",
-                "remaining_risk": "This is still a local matched-head-gain diagnostic on sklearn digits, not a full long-tail training or final-performance claim.",
+                "why_it_is_ready": "The compatibility check is measured at a fixed checkpoint, along a short practical NS-Muon-style trajectory, and on a Fro/GD trajectory state-source control.",
+                "remaining_risk": "This is still a local matched-head-gain diagnostic on scikit-learn digits, not a full long-tail training or final-performance claim.",
             },
             {
                 "claim": "A small practical NS-Muon-style training loop has lower measured drift/loss in this fixed diagnostic.",
@@ -124,7 +143,7 @@ def main() -> None:
                     f"{fmt(lr_sweep.loc[0.1, 'geomean_final_tail_eval_drift_rms_ratio_muon_over_adam'])}."
                 ),
                 "why_it_is_ready": "It uses paired seeds, identical mini-batch/noise schedules, and explicit final train/head/tail metrics.",
-                "remaining_risk": "The LR sweep is coarse and still on sklearn digits; real long-tail datasets and larger models are still needed.",
+                "remaining_risk": "The LR sweep is coarse and still on scikit-learn digits; real long-tail datasets and larger models are still needed.",
             },
         ]
     )
@@ -159,7 +178,7 @@ def main() -> None:
             {
                 "priority": "must-have for stronger empirical paper",
                 "experiment": "Real long-tail benchmark",
-                "purpose": "Test whether matched-head-gain tail drift reduction appears beyond sklearn digits.",
+                "purpose": "Test whether matched-head-gain tail drift reduction appears beyond scikit-learn digits.",
                 "minimum_standard": "CIFAR-100-LT, ImageNet-LT, or iNaturalist probe with tail drift, tail loss, margin, accuracy, and paired confidence intervals.",
             },
             {
@@ -195,7 +214,7 @@ This generated audit now tracks the current head-to-tail interference paper, not
 
 ## Proposed Paper Thesis
 
-In long-tailed small-batch training, head-only updates can perturb held-out tail predictions. Under a matched-head-gain protocol, idealized spectral/polar directions can reduce tail logit drift when the head gradient has enough nuclear rank relative to the tail downstream-aware stable rank.
+In long-tailed small-batch training, head-only updates can perturb held-out tail predictions. Under a matched-head-gain protocol, idealized spectral/polar directions can reduce tail-example logit drift when the head gradient has enough nuclear rank relative to the tail downstream-aware stable rank.
 
 ## Claim Readiness
 
@@ -211,8 +230,8 @@ In long-tailed small-batch training, head-only updates can perturb held-out tail
 
 ## What Not To Claim
 
-1. Do not claim SpecGrad or Muon is generally better for long-tailed classification.
-2. Do not claim lower tail logit drift automatically improves tail loss, margin, or accuracy.
+1. Do not claim spectral-gradient/polar geometry or Muon is generally better for long-tailed classification.
+2. Do not claim lower tail-example logit drift automatically improves tail loss, margin, or accuracy.
 3. Do not claim the current local polar(M_t)/Newton-Schulz compatibility checks prove full practical Muon training behavior.
 4. Do not claim the synthetic nrank-vs-ssrank boundary is already predictive for unseen real tasks.
 

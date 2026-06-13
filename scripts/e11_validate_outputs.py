@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import json
+import math
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +18,7 @@ from e11_condition_geometry.artifacts import (
     APPENDIX_RUNNER_SCRIPTS,
     ARTIFACT_DIRS,
     IGNORE_POLICY,
+    KEY_DOCUMENTS,
     KEY_TABLES,
     MAIN_RESULT_SCRIPTS,
 )
@@ -77,6 +82,25 @@ def assert_latex_log_has_no_serious_warnings(log_path: Path) -> None:
         raise AssertionError("serious LaTeX log issues found: " + "; ".join(violations))
 
 
+def assert_latex_log_has_no_box_warnings(log_path: Path) -> None:
+    """Fail on any overfull or underfull box warning in compact deliverables."""
+
+    if not log_path.exists():
+        return
+    box_patterns = [
+        r"Underfull \\hbox",
+        r"Overfull \\hbox",
+        r"Underfull \\vbox",
+        r"Overfull \\vbox",
+    ]
+    violations: list[str] = []
+    for lineno, line in enumerate(log_path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1):
+        if any(re.search(pattern, line) for pattern in box_patterns):
+            violations.append(f"{log_path}:{lineno}: {line}")
+    if violations:
+        raise AssertionError("LaTeX box warnings found: " + "; ".join(violations))
+
+
 def assert_pdf_artifact_is_valid(pdf_path: Path, min_size_bytes: int = 1000) -> None:
     """Validate that a rendered PDF artifact exists and is not a placeholder."""
 
@@ -91,8 +115,71 @@ def assert_pdf_artifact_is_valid(pdf_path: Path, min_size_bytes: int = 1000) -> 
         raise AssertionError(f"PDF artifact does not start with %PDF header: {pdf_path}")
 
 
+def assert_pdf_text_has_no_known_artifacts(pdf_path: Path) -> None:
+    """Use Ghostscript text extraction, when available, to catch copy-text artifacts."""
+
+    gs_path = shutil.which("gs")
+    if gs_path is None:
+        return
+    with tempfile.NamedTemporaryFile(suffix=".txt") as handle:
+        result = subprocess.run(
+            [
+                gs_path,
+                "-q",
+                "-dNOPAUSE",
+                "-dBATCH",
+                "-sDEVICE=txtwrite",
+                f"-sOutputFile={handle.name}",
+                str(pdf_path),
+            ],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        if result.returncode != 0:
+            raise AssertionError(
+                f"Ghostscript text extraction failed for {pdf_path}: {result.stderr.strip()}"
+            )
+        text = Path(handle.name).read_text(encoding="utf-8", errors="replace")
+    bad_fragments = [
+        "¿",
+        "�",
+        "￾",
+        "exceedsssrank",
+        "Anonymous authors",
+        "Paper under double-blind review",
+        "Under review as a conference paper",
+        "undefined citations",
+        "undefined references",
+    ]
+    present = [fragment for fragment in bad_fragments if fragment in text]
+    if present:
+        raise AssertionError(f"{pdf_path} text layer contains known artifacts: {present}")
+    if re.search(r"(?m)^\s*0{2,3}\s+\S", text):
+        raise AssertionError(f"{pdf_path} text layer appears to contain ICLR review line numbers")
+    compact_numeric_ci = re.search(r"\[-?\d[\d.eE+-]*,-?\d", text)
+    if compact_numeric_ci:
+        raise AssertionError(
+            f"{pdf_path} text layer contains a numeric CI without comma spacing: "
+            f"{compact_numeric_ci.group(0)}"
+        )
+    table_three_match = re.search(
+        r"Table 3: Tail outcomes, margin-relevant drift, and head-gain readouts(?P<table>.*?)(?:Appendix E|Table 4:)",
+        text,
+        flags=re.S,
+    )
+    table_three_text = table_three_match.group("table") if table_three_match else ""
+    compact_estimate_ci = re.search(r"[-−]?\d[\d.eE+\-−]*\[-?\d", table_three_text)
+    if compact_estimate_ci:
+        raise AssertionError(
+            f"{pdf_path} Table 3 text layer contains an estimate directly attached to a numeric CI: "
+            f"{compact_estimate_ci.group(0)}"
+        )
+
+
 def assert_bibtex_citations_are_defined(tex_path: Path, bibliography_path: Path) -> None:
-    """Keep paper citations backed by the ICLR BibTeX bibliography."""
+    """Keep paper citations and the ICLR BibTeX bibliography in one-to-one sync."""
 
     tex_text = tex_path.read_text(encoding="utf-8")
     bibliography_text = bibliography_path.read_text(encoding="utf-8")
@@ -103,6 +190,20 @@ def assert_bibtex_citations_are_defined(tex_path: Path, bibliography_path: Path)
     missing_keys = sorted(cited_keys - bibliography_keys)
     if missing_keys:
         raise AssertionError(f"paper citations are missing from references.bib: missing={missing_keys}")
+    unused_keys = sorted(bibliography_keys - cited_keys)
+    if unused_keys:
+        raise AssertionError(f"references.bib has entries not cited by main.tex: unused={unused_keys}")
+
+
+def bibtex_entry_body(bibliography_text: str, key: str) -> tuple[str, str]:
+    entry = re.search(
+        rf"@(?P<kind>\w+)\{{{re.escape(key)},(?P<body>.*?)\n\}}",
+        bibliography_text,
+        flags=re.DOTALL,
+    )
+    if entry is None:
+        raise AssertionError(f"paper bibliography missing {key} entry")
+    return entry.group("kind"), entry.group("body")
 
 
 def assert_no_unguarded_overclaims(paths: list[Path]) -> None:
@@ -167,6 +268,12 @@ def assert_valid_artifact_manifest(manifest_json: dict) -> None:
     ]
     if bad_manifest_tables:
         raise AssertionError(f"artifact manifest has non-positive row counts: {bad_manifest_tables}")
+    required_manifest_documents = set(KEY_DOCUMENTS)
+    manifest_documents = {item.get("path") for item in manifest_json.get("key_documents", [])}
+    if not required_manifest_documents.issubset(manifest_documents):
+        raise AssertionError(
+            f"artifact manifest missing key documents: {required_manifest_documents - manifest_documents}"
+        )
     required_ignored = {item["path_or_pattern"] for item in IGNORE_POLICY}
     manifest_ignored = {item.get("path_or_pattern") for item in manifest_json.get("ignore_policy", [])}
     if not required_ignored.issubset(manifest_ignored):
@@ -449,13 +556,34 @@ def main() -> None:
         Path("results/e11_head_tail_interference") / "pair_summary.csv",
         Path("figures/e11_head_tail_interference") / "head_tail_drift_ratio.png",
         Path("discussion/e11_head_tail_interference.md"),
+        Path("results/e11_head_tail_alignment_ablation") / "step_metrics.csv",
+        Path("results/e11_head_tail_alignment_ablation") / "summary.csv",
+        Path("figures/e11_head_tail_alignment_ablation") / "head_tail_alignment_ablation.png",
+        Path("discussion/e11_head_tail_alignment_ablation.md"),
         Path("results/e11_long_tail_one_step") / "step_metrics.csv",
         Path("results/e11_long_tail_one_step") / "pair_summary.csv",
         Path("results/e11_long_tail_one_step") / "layer_metrics.csv",
         Path("figures/e11_long_tail_one_step") / "long_tail_one_step_tail_response.png",
         Path("discussion/e11_long_tail_one_step.md"),
+        Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv",
+        Path("results/e11_long_tail_imbalance_ablation") / "summary.csv",
+        Path("figures/e11_long_tail_imbalance_ablation") / "long_tail_imbalance_ablation.png",
+        Path("discussion/e11_long_tail_imbalance_ablation.md"),
+        Path("results/e11_long_tail_checkpoint_sweep") / "step_metrics.csv",
+        Path("results/e11_long_tail_checkpoint_sweep") / "summary.csv",
+        Path("figures/e11_long_tail_checkpoint_sweep") / "long_tail_checkpoint_sweep.png",
+        Path("discussion/e11_long_tail_checkpoint_sweep.md"),
+        Path("results/e11_long_tail_class_partition_sweep") / "step_metrics.csv",
+        Path("results/e11_long_tail_class_partition_sweep") / "summary.csv",
+        Path("figures/e11_long_tail_class_partition_sweep") / "long_tail_class_partition_sweep.png",
+        Path("discussion/e11_long_tail_class_partition_sweep.md"),
+        Path("results/e11_long_tail_rho_sweep") / "step_metrics.csv",
+        Path("results/e11_long_tail_rho_sweep") / "summary.csv",
+        Path("figures/e11_long_tail_rho_sweep") / "long_tail_rho_sweep.png",
+        Path("discussion/e11_long_tail_rho_sweep.md"),
         Path("results/e11_long_tail_muon_bridge") / "step_metrics.csv",
         Path("results/e11_long_tail_muon_bridge") / "pair_summary.csv",
+        Path("results/e11_local_linearization") / "summary.csv",
         Path("figures/e11_long_tail_muon_bridge") / "long_tail_muon_bridge.png",
         Path("discussion/e11_long_tail_muon_bridge.md"),
         Path("results/e11_long_tail_practical_muon_bridge") / "step_metrics.csv",
@@ -463,6 +591,10 @@ def main() -> None:
         Path("results/e11_long_tail_practical_muon_bridge") / "summary.csv",
         Path("figures/e11_long_tail_practical_muon_bridge") / "long_tail_practical_muon_bridge.png",
         Path("discussion/e11_long_tail_practical_muon_bridge.md"),
+        Path("results/e11_long_tail_muon_state_source_control") / "step_metrics.csv",
+        Path("results/e11_long_tail_muon_state_source_control") / "summary.csv",
+        Path("figures/e11_long_tail_muon_state_source_control") / "long_tail_muon_state_source_control.png",
+        Path("discussion/e11_long_tail_muon_state_source_control.md"),
         Path("results/e11_long_tail_practical_training") / "step_metrics.csv",
         Path("results/e11_long_tail_practical_training") / "summary.csv",
         Path("figures/e11_long_tail_practical_training") / "long_tail_practical_training.png",
@@ -479,13 +611,20 @@ def main() -> None:
         Path("figures/e11_long_tail_layerwise") / "long_tail_layerwise_drift.png",
         Path("discussion/e11_long_tail_layerwise.md"),
         Path("paper/specgrad_activation_paper/figures") / "head_tail_drift_ratio.png",
+        Path("paper/specgrad_activation_paper/figures") / "head_tail_alignment_ablation.png",
         Path("paper/specgrad_activation_paper/figures") / "long_tail_one_step_tail_response.png",
+        Path("paper/specgrad_activation_paper/figures") / "long_tail_imbalance_ablation.png",
+        Path("paper/specgrad_activation_paper/figures") / "long_tail_checkpoint_sweep.png",
+        Path("paper/specgrad_activation_paper/figures") / "long_tail_class_partition_sweep.png",
+        Path("paper/specgrad_activation_paper/figures") / "long_tail_rho_sweep.png",
         Path("paper/specgrad_activation_paper/figures") / "long_tail_muon_bridge.png",
         Path("paper/specgrad_activation_paper/figures") / "long_tail_practical_muon_bridge.png",
+        Path("paper/specgrad_activation_paper/figures") / "long_tail_muon_state_source_control.png",
         Path("paper/specgrad_activation_paper/figures") / "long_tail_practical_training.png",
         Path("paper/specgrad_activation_paper/figures") / "long_tail_head_only_forgetting.png",
         Path("paper/specgrad_activation_paper/figures") / "long_tail_layerwise_drift.png",
         Path("paper/specgrad_activation_paper/tables") / "head_tail_empirical_results.tex",
+        Path("paper/specgrad_activation_paper/tables") / "local_linearization_errors.tex",
         Path("paper/specgrad_activation_paper/tables") / "e11_paper_numbers.tex",
         Path("paper/specgrad_activation_paper/main.pdf"),
         Path("paper/specgrad_activation_paper/two_page.tex"),
@@ -504,6 +643,10 @@ def main() -> None:
         Path("discussion/e11_paper_numbers.tex"),
         Path("discussion/e11_reproduction_checklist.md"),
         Path("discussion/e11_reviewer_risk_audit.md"),
+        Path("discussion/e11_pasted_review_audit.md"),
+        Path("discussion/e11_completion_audit.md"),
+        Path("discussion/e11_end_of_draft_self_review.md"),
+        Path("discussion/e11_reference_audit.md"),
         Path("discussion/e11_artifact_manifest.md"),
         Path("results/e11_artifact_manifest.json"),
         Path("Makefile"),
@@ -552,25 +695,27 @@ def main() -> None:
         "focused head-to-tail interference paper",
         "background evidence and guardrails",
         "should not be read as a broad claim",
-        "spectral/Frobenius tail-drift-squared ratio is about `0.3403`",
-        "the ratio is about `7.208`",
-        "The spectral/Frobenius tail-drift-squared ratio is about `0.5501 [0.5101, 0.5931]`",
-        "`polar(M_t)` has tail drift-squared ratio about `0.8199 [0.6951, 0.9672]`",
-        "Newton-Schulz `NS(M_t)` has ratio about `0.9116 [0.7696, 1.08]`",
-        "Across 120 sampled state-step comparisons, `polar(M_t)` has ratio about `0.7292 [0.696, 0.7641]`",
-        "`NS(M_t)` has ratio about `0.8019 [0.7644, 0.8413]`",
+        "spectral/Frobenius squared tail-example logit drift ratio is about `0.3403`",
+        "the squared drift ratio is about `7.208`",
+        "The spectral/Frobenius squared tail-example logit drift ratio is about `0.5501 [0.5101, 0.5931]`",
+        "`polar(M_t)` has squared tail-example logit drift ratio about `0.8199 [0.6951, 0.9672]`",
+        "Newton-Schulz `NS(M_t)` has squared drift ratio about `0.9116 [0.7696, 1.08]`",
+        "Across 120 sampled state-step comparisons, `polar(M_t)` has squared drift ratio about `0.7292 [0.6891, 0.7717]`",
+        "`NS(M_t)` has squared drift ratio about `0.8019 [0.7583, 0.848]`",
+        "On Fro/GD-style trajectory states with matched seeds, batches, length, and nominal trajectory learning rate, `polar(M_t)` has squared drift ratio about `0.7255 [0.686, 0.7672]`",
+        "On the same Fro/GD-style states, `NS(M_t)` has squared drift ratio about `0.7973 [0.7546, 0.8425]`",
         "final train loss ratio about `0.6468 [0.604, 0.6926]`",
         "tail eval loss ratio about `0.8549 [0.8319, 0.8786]`",
         "Tail eval margin difference is about `1.955 [1.628, 2.281]`",
         "tail eval drift RMS ratio is about `0.7501 [0.7244, 0.7767]`",
         "LR sensitivity shows why this is not a monotone optimizer story",
-        "Final drift-squared ratio is about `0.6167 [0.5744, 0.6622]`",
+        "Final squared drift ratio is about `0.6167 [0.5744, 0.6622]`",
         "Unit-direction spectral JVP is larger than Frobenius in both layers",
         "make e11-all-results",
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
         "make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes",
-        "make e11-paper-pdf",
+        "make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf",
         "`diagnostic_A_definition == full_layer_input_activation`",
         *MAIN_RESULT_SCRIPTS,
         *APPENDIX_RUNNER_SCRIPTS,
@@ -597,6 +742,7 @@ def main() -> None:
         "tables/e11_paper_numbers.tex",
         "paper-local `figures/*.png`",
         "## Local Build",
+        "both the main paper and the two-page report",
     ]
     assert_required_phrases(
         "paper README root reproduction/build instructions",
@@ -631,21 +777,31 @@ def main() -> None:
         "Under Frobenius geometry",
         "Under spectral geometry",
         "Spectral geometry has the smaller worst-case matched-gain tail-drift bound",
-        "\\section{Tail Preservation across Multiple Head-Only Steps}",
-        "\\section{Tail Margin Preservation}",
+        "\\section{Tail Drift across Multiple Head-Only Steps}",
+        "\\section{Tail Margin Certificate}",
         "\\section{Relation to Existing Layerwise Spectral-Update Theory}",
-        "\\citet{davis2026spectral}",
-        "\\citep{chen2025muon,spectra2026,spectralclipping2026,muonvit2026}",
+        "\\citet{davis2025spectral}",
+        "Other recent work analyzes Muon through spectral-norm constraints \\citep{chen2025muon}",
+        "studies spectral anisotropy or spectral clipping in LLM training \\citep{spectra2026,spectralclipping2026}",
+        "examines Muon recipe interactions and gradient spectra in vision transformers \\citep{muonvit2026}",
         "\\citep{cui2019classbalanced}",
         "\\citep{cao2019ldam}",
         "\\citep{liu2019oltr}",
         "\\citep{kang2020decoupling}",
         "\\citep{promo2026}",
         "\\citep{muonmemory2025}",
-        "Spectral Head-to-Tail Interference",
+        "\\citep{pedregosa2011scikit}",
+        "fix classes \\(0\\)--\\(4\\) as head classes and classes \\(5\\)--\\(9\\) as tail classes",
+        "sample the per-class train/evaluation split independently for each seed",
+        "the random seed only changes the within-class sample split, mini-batches, noise draws, and initialization",
+        "Head-to-Tail Interference",
+        "in Long-Tailed Small-Batch Training",
         "function-drift view",
-        "We study a local mechanism question",
-        "distinct from an optimizer-level benchmark claim",
+        "We study this problem through a matched-head-gain diagnostic",
+        "We make four contributions: a matched-head-gain formulation",
+        "Controlled boundary experiments reverse the spectral/Frobenius squared drift ratio",
+        "a spectral/Frobenius squared tail-example logit drift ratio",
+        "not an optimizer-level performance claim",
         "do not constitute a theory of complete Muon training",
         "after matching the same head-batch gain, which update perturbs the tail function less",
         "We make four contributions",
@@ -653,9 +809,15 @@ def main() -> None:
         "including selected-state compatibility checks for Muon-style momentum and Newton--Schulz directions",
         "The experiments are diagnostic rather than benchmark-driven",
         "tail loss, margin, and accuracy are reported separately",
+        "local function-drift reduction",
+        "tail-example logit drift means the drift of the full class-logit vector",
+        "not restricted to logits of tail classes only",
         "Sandwiched sensitivity",
         "matched-head-gain",
         "worst-case sensitivity upper bound",
+        "\\widetilde{\\I}_N(T\\mid H)",
+        "\\ssrank(B_T,A_T)",
+        "\\sum_i\\sigma_i(B_T)^2\\sigma_i(A_T)^2",
         "observed drift",
         "singular vectors",
         "confidence interval",
@@ -665,22 +827,36 @@ def main() -> None:
         "\\subsection{Experiment Protocol Summary}",
         "\\label{sec:experiment-protocol-summary}",
         "All experiments use the same comparison principle unless stated otherwise",
-        "Unless otherwise stated, ratios below are spectral/polar divided by Frobenius/GD",
+        "Unless otherwise stated, ratios below are squared drift ratios, spectral/polar divided by Frobenius/GD",
+        "Because the theory is first-order, we also check the local linearization quality",
+        "\\input{tables/local_linearization_errors}",
         "\\subsection{Synthetic Head-to-Tail Linear Model}",
         "Synthetic head-to-tail boundary diagnostic",
-        "\\subsection{One-Step Diagnostic on Long-Tailed Digits}",
-        "Long-tailed digits one-step diagnostic",
-        "\\subsection{Selected-State Compatibility with Muon-Style Directions}",
-        "Short practical NS-Muon trajectory compatibility diagnostic",
+        "Synthetic singular-vector alignment ablation",
+        "\\subsection{One-Step Diagnostic on Controlled Long-Tailed Digits}",
+        "Controlled long-tailed digits one-step diagnostic",
+        "\\subsection{Muon-Style Direction Compatibility}",
+        "Muon-style direction compatibility diagnostic along a short NS-Muon-style trajectory",
         "\\subsection{Layerwise Diagnostic}",
         "Layerwise tail-drift diagnostic",
+        "\\nrank(G_{H,2})/\\ssrank(B_{T,2},A_{T,2})=\\EelevenLayerTwoTheoremConditionScore",
+        "For the first ReLU layer, gates vary across tail samples",
+        "frozen-gate local-operator score",
         "\\appendix",
+        "The appendix provides supporting definitions and checks in the order they are used in the paper",
+        "notation and norm preliminaries; proofs and the matrix-block derivation",
+        "multi-step drift and margin-certificate consequences",
+        "additional discussion of practical Muon-style directions; reproducibility details; auxiliary tables; and auxiliary figures",
         "\\section{Reproducibility Details}",
         "\\label{app:repro}",
+        "the head mini-batches and target gains are precomputed once per seed from the initial checkpoint",
+        "\\rho_t=0.02\\,\\Loss_H(\\theta_0;B_t)",
+        "the intended first-order head-gain budget is matched per seed and step",
+        "the realized nonlinear head-loss decrease is measured after each update and is not assumed to be exactly identical",
         "\\section{Auxiliary Diagnostic Figures}",
         "\\label{app:aux-figures}",
-        "Fixed-checkpoint Muon-style compatibility diagnostic on long-tailed digits",
-        "Long-tailed digits practical training diagnostic",
+        "Fixed-checkpoint Muon-style direction compatibility diagnostic on controlled long-tailed digits",
+        "Controlled long-tailed digits practical training diagnostic",
         "Tail forgetting probe under consecutive head-only steps",
         "B_T\\in\\R^{q\\times m}",
         "A_T\\in\\R^{k\\times r}",
@@ -689,24 +865,71 @@ def main() -> None:
         "Table \\ref{tab:claim-boundary} separates the current diagnostic claims from stronger claims",
         "\\label{tab:claim-boundary}",
         "Claim boundary. All reported numbers come from matched-head-gain diagnostics unless explicitly marked as practical training",
-        "\\subsection{From Spectral Gradients to Muon}",
+        "spectral/Fro head-alignment ratio",
+        "matched operator-norm ratio",
+        "norm-specific rather than a uniformly smaller parameter step",
+        "\\section{Additional Discussion}",
+        "\\label{prop:blockwise-polar}",
+        "Blockwise polar steepest direction",
+        "\\norm{D}_{\\mathrm{maxop}}=\\max_\\ell\\norm{D_\\ell}_{\\op}",
+        "\\norm{G}_{*,1}=\\sum_\\ell \\norm{G_\\ell}_*",
+        "\\label{app:additional-discussion}",
         "These observations motivate using Muon-style directions as local implementation probes for spectral/polar geometry, while leaving a full theory of Muon training to future work",
         "We therefore treat this experiment as a consistency check for the local mechanism, not as a tuned Adam-vs-Muon comparison",
-        "\\subsection{Remaining Evidence Needed}",
-        "The current evidence is consistent with a local mechanism claim",
+        "Additional discussion of the gap between ideal spectral gradients and practical Muon-style updates",
+        "The current evidence supports a local mechanism claim within the tested matched-head-gain diagnostics",
         "standard long-tailed benchmarks",
         "practical Muon training needs more complete ablation",
         "larger-architecture layerwise diagnostics",
         "\\section{Conclusion}",
-        "rather than a complete long-tailed classification optimizer benchmark",
+        "not a complete long-tailed classification optimizer benchmark",
         "\\label{fig:head-tail-boundary}",
+        "\\label{fig:head-tail-alignment-ablation}",
         "\\label{fig:long-tail-one-step}",
+        "\\label{fig:long-tail-imbalance-ablation}",
+        "\\label{fig:long-tail-checkpoint-sweep}",
+        "\\label{fig:long-tail-class-partition-sweep}",
+        "\\label{fig:long-tail-rho-sweep}",
+        "\\label{tab:one-step-tail-outcomes}",
+        "Tail outcomes, margin-relevant drift, and head-gain readouts",
+        "Small post-update effects are reported as changes from the pre-update tail state",
+        "Pre-update tail CE",
+        "Tail CE increase, Fro/GD",
+        "Tail CE increase, spectral/polar",
+        "Tail CE increase difference, spectral--Fro",
+        "Pre-update mean margin",
+        "Margin-drop difference, spectral--Fro",
+        "Head-alignment denominator, spectral/Fro",
+        "Matched update Frobenius norm, spectral/Fro",
+        "Matched update operator norm, spectral/Fro",
+        "Pre-update tail accuracy",
+        "Accuracy-drop difference, spectral--Fro",
+        "Certified unchanged-prediction fraction, Fro; spectral",
+        "The positive-margin prediction-change rate is zero for both directions",
+        "The largest squared drift-ratio upper endpoints are \\(\\EelevenLongTailImbalanceWorstRatioCiHigh\\)",
+        "\\EelevenLongTailCheckpointSweepSettings\\) warmup checkpoints",
+        "\\EelevenLongTailClassPartitionSweepSettings\\) head/tail class partitions",
+        "\\EelevenLongTailRhoSweepSettings\\) target head-gain fractions",
+        "does not show preservation of a high-quality tail predictor",
+        "\\EelevenLongTailCheckpointSweepTailAccuracyRange",
+        "the worst upper endpoint is \\(\\EelevenLongTailCheckpointSweepWorstRatioCiHigh\\)",
+        "The weakest full tail-example squared logit drift case is \\(\\EelevenLongTailClassPartitionWorstPartition\\)",
+        "The weakest full tail-example squared logit drift case is \\(\\rho/L_H=\\EelevenLongTailRhoSweepWorstFraction\\)",
+        "Target head-gain fraction sweep for the controlled long-tailed digits one-step diagnostic",
+        "tail training examples per class \\(80,40,20,10\\)",
         "\\label{fig:long-tail-practical-muon-bridge}",
+        "\\label{fig:long-tail-muon-state-source-control}",
         "\\label{fig:long-tail-forgetting}",
         "\\label{fig:long-tail-layerwise}",
         "figures/head_tail_drift_ratio.png",
+        "figures/head_tail_alignment_ablation.png",
         "figures/long_tail_one_step_tail_response.png",
+        "figures/long_tail_imbalance_ablation.png",
+        "figures/long_tail_checkpoint_sweep.png",
+        "figures/long_tail_class_partition_sweep.png",
+        "figures/long_tail_rho_sweep.png",
         "figures/long_tail_practical_muon_bridge.png",
+        "figures/long_tail_muon_state_source_control.png",
         "figures/long_tail_head_only_forgetting.png",
         "figures/long_tail_layerwise_drift.png",
         "momentum-gradient alignment",
@@ -742,6 +965,8 @@ def main() -> None:
     forbidden_main_paper_phrases = [
         "Anonymous authors",
         "Paper under double-blind review",
+        "Under review as a conference paper",
+        "\\,\\Eeleven",
         "summary-table",
         "sklearn",
         "paper-facing",
@@ -755,6 +980,20 @@ def main() -> None:
         "over-simple story",
         "fully explained optimizer",
         "should be read only",
+        "SpecGrad/polar",
+        "ideal polar/SpecGrad",
+        "evidence consistent with lower",
+        "logit-drift",
+        "full tail-example drift ratio",
+        "weakest full-drift case",
+        "weakest centered-drift case",
+        "local function preservation",
+        "tail-function preservation between rare tail batches",
+        "Tail Preservation across Multiple Head-Only Steps",
+        "Tail Margin Preservation",
+        "This gives a direct tail-preservation condition",
+        "certify label preservation",
+        "Certified preserved fraction, Fro; spectral",
     ]
     assert_forbidden_phrases_absent(
         "paper main tex non-paper wording",
@@ -811,7 +1050,74 @@ def main() -> None:
     assert_includegraphics_files_exist(paper_path)
     assert_latex_log_has_no_serious_warnings(paper_path.with_suffix(".log"))
     assert_pdf_artifact_is_valid(paper_path.with_suffix(".pdf"), min_size_bytes=10_000)
+    assert_pdf_text_has_no_known_artifacts(paper_path.with_suffix(".pdf"))
     assert_bibtex_citations_are_defined(paper_path, paper_path.parent / "references.bib")
+    references_text = (paper_path.parent / "references.bib").read_text(encoding="utf-8")
+    required_reference_urls = [
+        "https://arxiv.org/abs/2512.04299",
+        "https://arxiv.org/abs/2506.15054",
+        "https://arxiv.org/abs/2602.11185",
+        "https://arxiv.org/abs/2603.14315",
+        "https://openreview.net/forum?id=go388T3QjQ",
+        "https://arxiv.org/abs/2509.26030",
+        "https://www.jmlr.org/papers/v12/pedregosa11a.html",
+        "https://openreview.net/forum?id=r1gRTCVFvB",
+    ]
+    assert_required_phrases("paper bibliography primary-source URLs", references_text, required_reference_urls)
+    spectral_clipping_kind, spectral_clipping_body = bibtex_entry_body(references_text, "spectralclipping2026")
+    if spectral_clipping_kind != "misc":
+        raise AssertionError("spectralclipping2026 should remain an arXiv preprint entry unless proceedings metadata is verified")
+    if "ICML 2026" in spectral_clipping_body:
+        raise AssertionError("spectralclipping2026 bibliography entry should cite arXiv only until proceedings metadata is verified")
+    if "Proceedings of the 43rd International Conference on Machine Learning" in spectral_clipping_body:
+        raise AssertionError("spectralclipping2026 must not claim unverified ICML proceedings metadata")
+    promo_kind, promo_body = bibtex_entry_body(references_text, "promo2026")
+    if promo_kind != "misc":
+        raise AssertionError("promo2026 should remain a misc OpenReview submission entry unless its venue status is verified")
+    required_promo_phrases = [
+        "Submitted to ICLR 2026, OpenReview",
+        "https://openreview.net/forum?id=go388T3QjQ",
+    ]
+    assert_required_phrases("promo2026 conservative submission citation", promo_body, required_promo_phrases)
+    forbidden_submission_claims = [
+        "Accepted to",
+        "accepted to",
+        "Published in",
+        "published in",
+        "International Conference on Learning Representations 2026",
+        "ICLR 2026 Conference",
+        "Proceedings",
+    ]
+    assert_forbidden_phrases_absent("promo2026 unverified venue status", promo_body, forbidden_submission_claims)
+    for arxiv_key in [
+        "davis2025spectral",
+        "chen2025muon",
+        "spectra2026",
+        "muonmemory2025",
+        "muonvit2026",
+    ]:
+        arxiv_kind, arxiv_body = bibtex_entry_body(references_text, arxiv_key)
+        if arxiv_kind != "misc":
+            raise AssertionError(f"{arxiv_key} should remain a misc arXiv entry unless proceedings metadata is verified")
+        assert_required_phrases(f"{arxiv_key} arXiv metadata", arxiv_body, ["archivePrefix = {arXiv}", "note          = {arXiv:"])
+    local_linearization_table_text = (paper_path.parent / "tables/local_linearization_errors.tex").read_text(
+        encoding="utf-8"
+    )
+    required_local_linearization_table_phrases = [
+        "\\label{tab:local-linearization-error}",
+        "Relative error",
+        "$\\norm{J_T\\Delta}_F$",
+        "Residual norm",
+        "Fro/GD",
+        "$\\polar(G_t)$",
+        "$\\polar(M_t)$",
+        "NS$(M_t)$",
+    ]
+    assert_required_phrases(
+        "local linearization error table",
+        local_linearization_table_text,
+        required_local_linearization_table_phrases,
+    )
     two_page_path = paper_path.parent / "two_page.tex"
     two_page_text = two_page_path.read_text(encoding="utf-8")
     required_two_page_phrases = [
@@ -825,8 +1131,32 @@ def main() -> None:
         "\\section*{6. Claim Boundary}",
         "\\section*{7. Conclusion}",
         "This report studies a local stability question",
+        "change logits on rare tail examples before tail samples reappear",
+        "Tail-example logit drift always means drift of the full class-logit vector",
+        "not only tail-class logits",
+        "scikit-learn \\(8\\times 8\\) digits data",
+        "fixed head classes \\(0\\)--\\(4\\)",
+        "fixed tail classes \\(5\\)--\\(9\\)",
+        "20 random within-class splits",
+        "tested split/seed distribution",
+        "not generalization guarantees",
+        "\\EelevenLongTailOneStepAlignmentRatio",
+        "\\EelevenLongTailOneStepUpdateFroNormRatio",
+        "\\EelevenLongTailOneStepUpdateOpNormRatio",
+        "the scaling effect is norm-specific",
+        "direct non-synthetic evidence for lower matched-gain tail-example logit drift",
         "The supported claims are deliberately local",
+        "smaller operator-norm step despite a larger Frobenius-norm step",
+        "alignment ablation shows that this is a bound-ordering condition",
+        "rather than a standalone realized-drift predictor",
+        "selected-state compatibility checks",
+        "state selection remain separate sources of variation",
         "The mechanism should be evaluated before making optimizer-level claims",
+        "The current evidence supports a local mechanism claim",
+        "protection of a high-quality tail predictor",
+        "\\textbf{References.}",
+        "Pedregosa et al.",
+        "\\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         "standard long-tailed benchmarks",
         "Tianyang Liu",
         "UCDavis",
@@ -839,6 +1169,9 @@ def main() -> None:
         "A Two-Page Summary",
         "Reading.",
         "over-simple story",
+        "change rare tail-class logits",
+        "cautious mechanism paper",
+        "smaller effective parameter step",
         "real long-tailed benchmarks",
         "sklearn",
         "summary-table",
@@ -849,6 +1182,13 @@ def main() -> None:
         "paper-facing",
         "TODO",
         "TBD",
+        "evidence consistent with lower",
+        "SpecGrad/polar",
+        "ideal polar/SpecGrad",
+        "tail stable rank",
+        "logit-drift",
+        "fixed \\(\\polar(M_t)\\) ratio",
+        "short-trajectory NS\\((M_t)\\) ratio",
     ]
     assert_forbidden_phrases_absent(
         "two-page paper summary non-paper wording",
@@ -856,28 +1196,45 @@ def main() -> None:
         forbidden_two_page_phrases,
     )
     assert_latex_log_has_no_serious_warnings(two_page_path.with_suffix(".log"))
+    assert_latex_log_has_no_box_warnings(two_page_path.with_suffix(".log"))
     assert_pdf_artifact_is_valid(two_page_path.with_suffix(".pdf"), min_size_bytes=10_000)
+    assert_pdf_text_has_no_known_artifacts(two_page_path.with_suffix(".pdf"))
     paper_readme_text = Path("paper/specgrad_activation_paper/README.md").read_text(encoding="utf-8")
     required_paper_readme_phrases = [
         "worst-case sensitivity-bound condition",
         "singular-vector alignment",
+        "suppresses the anonymous-author block",
+        "the review-status header while keeping the ICLR page geometry",
         "paper-local copies of the paper-facing figures",
         "scripts/e11_write_paper_figures.py",
+        "two_page.tex",
+        "two_page.pdf",
         "head_tail_drift_ratio.png",
+        "head_tail_alignment_ablation.png",
         "long_tail_one_step_tail_response.png",
+        "long_tail_imbalance_ablation.png",
+        "long_tail_checkpoint_sweep.png",
+        "long_tail_class_partition_sweep.png",
+        "long_tail_rho_sweep.png",
         "long_tail_muon_bridge.png",
         "long_tail_practical_muon_bridge.png",
+        "long_tail_muon_state_source_control.png",
         "long_tail_practical_training.png",
         "long_tail_head_only_forgetting.png",
         "long_tail_layerwise_drift.png",
         "tables/",
         "e11_paper_numbers.tex",
         "head_tail_empirical_results.tex",
+        "local_linearization_errors.tex",
         "scripts/e11_write_head_tail_paper_results.py",
+        "scripts/e11_write_local_linearization_table.py",
+        "make two-page",
     ]
     missing_paper_readme_phrases = [phrase for phrase in required_paper_readme_phrases if phrase not in paper_readme_text]
     if missing_paper_readme_phrases:
         raise AssertionError(f"paper README missing current source inventory: {missing_paper_readme_phrases}")
+    if "neutral review header" in paper_readme_text:
+        raise AssertionError("paper README must not claim that the local build uses a neutral review header")
     step_metric_paths = sorted(Path("results").glob("**/step_metrics.csv"))
     step_metric_paths.extend(
         [
@@ -1112,6 +1469,32 @@ def main() -> None:
         and head_tail_negative["spectral_less_tail_output_drift_fraction"] == 0.0
     ):
         raise AssertionError("head-tail negative setting must have CI-bounded higher spectral drift")
+    alignment_steps = pd.read_csv(Path("results/e11_head_tail_alignment_ablation") / "step_metrics.csv")
+    alignment_summary = pd.read_csv(Path("results/e11_head_tail_alignment_ablation") / "summary.csv")
+    if len(alignment_steps) != 1000:
+        raise AssertionError(
+            f"head-tail alignment ablation row count mismatch: expected 1000, got {len(alignment_steps)}"
+        )
+    alignment_by_setting = alignment_summary.set_index("setting")
+    alignment_positive = alignment_by_setting.loc["high_head_rank_low_tail_srank"]
+    if not (
+        int(alignment_positive["seeds"]) == 500
+        and bool(alignment_positive["predicted_spectral_less_drift"])
+        and alignment_positive["mean_theory_ratio_spectral_over_fro"] < 1.0
+        and alignment_positive["tail_output_drift_sq_ratio_ci95_low"] > 1.0
+        and 0.2 < alignment_positive["spectral_less_tail_output_drift_fraction"] < 0.8
+    ):
+        raise AssertionError(
+            "head-tail alignment ablation must show positive spectra with mixed realized drift under random alignment"
+        )
+    alignment_negative = alignment_by_setting.loc["low_head_rank_high_tail_srank"]
+    if not (
+        int(alignment_negative["seeds"]) == 500
+        and not bool(alignment_negative["predicted_spectral_less_drift"])
+        and alignment_negative["mean_theory_ratio_spectral_over_fro"] > 1.0
+        and alignment_negative["tail_output_drift_sq_ratio_ci95_low"] > 1.0
+    ):
+        raise AssertionError("head-tail alignment ablation must preserve the negative-spectrum boundary")
     long_tail_steps = pd.read_csv(Path("results/e11_long_tail_one_step") / "step_metrics.csv")
     long_tail_summary = pd.read_csv(Path("results/e11_long_tail_one_step") / "pair_summary.csv")
     long_tail_layers = pd.read_csv(Path("results/e11_long_tail_one_step") / "layer_metrics.csv")
@@ -1123,6 +1506,32 @@ def main() -> None:
         raise AssertionError("long-tail one-step must compare frobenius and spectral geometries")
     if long_tail_steps["seed"].nunique() != 20:
         raise AssertionError("long-tail one-step must include 20 seeds")
+    required_one_step_columns = {
+        "tail_positive_margin_fraction_before",
+        "tail_margin_certified_preserved_fraction",
+        "tail_prediction_changed_fraction",
+        "tail_positive_margin_prediction_changed_fraction",
+        "centered_tail_output_drift_fro",
+        "true_logit_delta_fro",
+        "competitor_logit_delta_fro",
+        "margin_delta_fro",
+        "actual_head_gain_relative_error",
+        "alignment",
+        "update_fro_norm",
+        "update_op_norm",
+    }
+    missing_one_step_columns = required_one_step_columns - set(long_tail_steps.columns)
+    if missing_one_step_columns:
+        raise AssertionError(f"long-tail one-step missing tail absolute/certificate columns: {missing_one_step_columns}")
+    one_step_fraction_columns = [
+        "tail_positive_margin_fraction_before",
+        "tail_margin_certified_preserved_fraction",
+        "tail_prediction_changed_fraction",
+        "tail_positive_margin_prediction_changed_fraction",
+    ]
+    for column in one_step_fraction_columns:
+        if ((long_tail_steps[column] < 0.0) | (long_tail_steps[column] > 1.0)).any():
+            raise AssertionError(f"long-tail one-step fraction column out of [0, 1]: {column}")
     head_gain_gap = (
         long_tail_steps.pivot_table(index="seed", columns="geometry", values="matched_first_order_head_gain")
         .diff(axis=1)
@@ -1132,12 +1541,152 @@ def main() -> None:
     )
     if float(head_gain_gap) > 1e-12:
         raise AssertionError("long-tail one-step head first-order gains must be exactly matched per seed")
+    one_step_wide = long_tail_steps.pivot(index="seed", columns="geometry")
+    alignment_ratio = one_step_wide["alignment"]["spectral"] / one_step_wide["alignment"]["frobenius"]
+    update_fro_ratio = one_step_wide["update_fro_norm"]["spectral"] / one_step_wide["update_fro_norm"]["frobenius"]
+    update_op_ratio = one_step_wide["update_op_norm"]["spectral"] / one_step_wide["update_op_norm"]["frobenius"]
+    if not (
+        alignment_ratio.min() > 1.0
+        and update_fro_ratio.min() > 1.0
+        and update_op_ratio.max() < 1.0
+    ):
+        raise AssertionError(
+            "long-tail one-step head-alignment and norm ratios must support the norm-specific scaling statement"
+        )
     long_tail_row = long_tail_summary.iloc[0]
     if not (
         long_tail_row["tail_output_drift_sq_ratio_ci95_high"] < 1.0
         and long_tail_row["spectral_less_tail_output_drift_fraction"] == 1.0
     ):
-        raise AssertionError("long-tail one-step must have CI-bounded lower spectral tail-logit drift")
+        raise AssertionError("long-tail one-step must have CI-bounded lower spectral tail-example logit drift")
+    required_one_step_summary_columns = {
+        "geomean_centered_tail_output_drift_sq_ratio_spectral_over_fro",
+        "centered_tail_output_drift_sq_ratio_ci95_low",
+        "centered_tail_output_drift_sq_ratio_ci95_high",
+        "geomean_true_logit_delta_sq_ratio_spectral_over_fro",
+        "true_logit_delta_sq_ratio_ci95_low",
+        "true_logit_delta_sq_ratio_ci95_high",
+        "geomean_competitor_logit_delta_sq_ratio_spectral_over_fro",
+        "competitor_logit_delta_sq_ratio_ci95_low",
+        "competitor_logit_delta_sq_ratio_ci95_high",
+        "geomean_margin_delta_sq_ratio_spectral_over_fro",
+        "margin_delta_sq_ratio_ci95_low",
+        "margin_delta_sq_ratio_ci95_high",
+        "mean_actual_head_gain_relative_error_frobenius",
+        "actual_head_gain_relative_error_frobenius_ci95_low",
+        "actual_head_gain_relative_error_frobenius_ci95_high",
+        "mean_actual_head_gain_relative_error_spectral",
+        "actual_head_gain_relative_error_spectral_ci95_low",
+        "actual_head_gain_relative_error_spectral_ci95_high",
+        "mean_tail_loss_before",
+        "mean_tail_loss_after_frobenius",
+        "mean_tail_loss_after_spectral",
+        "mean_tail_positive_margin_fraction_before",
+        "mean_tail_margin_certified_preserved_fraction_frobenius",
+        "mean_tail_margin_certified_preserved_fraction_spectral",
+        "mean_tail_prediction_changed_fraction_frobenius",
+        "mean_tail_prediction_changed_fraction_spectral",
+        "mean_tail_positive_margin_prediction_changed_fraction_frobenius",
+        "mean_tail_positive_margin_prediction_changed_fraction_spectral",
+    }
+    missing_one_step_summary_columns = required_one_step_summary_columns - set(long_tail_summary.columns)
+    if missing_one_step_summary_columns:
+        raise AssertionError(
+            f"long-tail one-step summary missing absolute/certificate columns: {missing_one_step_summary_columns}"
+        )
+    if not (
+        long_tail_row["centered_tail_output_drift_sq_ratio_ci95_high"] < 1.0
+        and long_tail_row["competitor_logit_delta_sq_ratio_ci95_high"] < 1.0
+        and long_tail_row["margin_delta_sq_ratio_ci95_high"] < 1.0
+        and long_tail_row["true_logit_delta_sq_ratio_ci95_low"] > 1.0
+        and long_tail_row["actual_head_gain_relative_error_frobenius_ci95_high"] < 0.05
+        and long_tail_row["actual_head_gain_relative_error_spectral_ci95_high"] < 0.05
+    ):
+        raise AssertionError(
+            "long-tail one-step margin-relevant/head-gain readouts must match the stated narrowed claim"
+        )
+    if not (
+        long_tail_row["mean_tail_loss_before"] > 1.0
+        and long_tail_row["mean_tail_margin_certified_preserved_fraction_frobenius"] > 0.95
+        and long_tail_row["mean_tail_margin_certified_preserved_fraction_spectral"] > 0.95
+        and long_tail_row["mean_tail_positive_margin_prediction_changed_fraction_frobenius"] == 0.0
+        and long_tail_row["mean_tail_positive_margin_prediction_changed_fraction_spectral"] == 0.0
+    ):
+        raise AssertionError("long-tail one-step absolute/certificate readout must support the stated tail caveat")
+    imbalance_steps = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv")
+    imbalance_summary = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "summary.csv")
+    if len(imbalance_steps) != 160:
+        raise AssertionError(f"long-tail imbalance ablation row count mismatch: expected 160, got {len(imbalance_steps)}")
+    if set(imbalance_summary["tail_train_per_class"]) != {10, 20, 40, 80}:
+        raise AssertionError("long-tail imbalance ablation must cover tail_train_per_class values 80, 40, 20, and 10")
+    if (imbalance_summary["seeds"] != 20).any():
+        raise AssertionError("long-tail imbalance ablation must use 20 seeds in each split")
+    if not (imbalance_summary["tail_output_drift_sq_ratio_ci95_high"] < 1.0).all():
+        raise AssertionError("long-tail imbalance ablation must keep spectral/Fro drift-ratio CI upper endpoints below 1")
+    if not (imbalance_summary["spectral_less_tail_output_drift_fraction"] == 1.0).all():
+        raise AssertionError("long-tail imbalance ablation must have spectral lower drift in every paired seed")
+    checkpoint_steps = pd.read_csv(Path("results/e11_long_tail_checkpoint_sweep") / "step_metrics.csv")
+    checkpoint_summary = pd.read_csv(Path("results/e11_long_tail_checkpoint_sweep") / "summary.csv")
+    if len(checkpoint_steps) != 200:
+        raise AssertionError(f"long-tail checkpoint sweep row count mismatch: expected 200, got {len(checkpoint_steps)}")
+    if set(checkpoint_summary["warmup_steps"]) != {20, 40, 80, 120, 160}:
+        raise AssertionError("long-tail checkpoint sweep must cover warmup steps 20, 40, 80, 120, and 160")
+    if (checkpoint_summary["seeds"] != 20).any():
+        raise AssertionError("long-tail checkpoint sweep must use 20 seeds at each checkpoint")
+    if not (
+        (checkpoint_summary["tail_output_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (checkpoint_summary["centered_tail_output_drift_sq_ratio_ci95_high"] < 1.0).all()
+    ):
+        raise AssertionError(
+            "long-tail checkpoint sweep must keep full and centered spectral/Fro CI upper endpoints below 1"
+        )
+    if not (checkpoint_summary["margin_delta_sq_ratio_ci95_high"].max() > 1.0):
+        raise AssertionError("long-tail checkpoint sweep should preserve the stated caveat that margin-delta is mixed")
+    class_partition_steps = pd.read_csv(Path("results/e11_long_tail_class_partition_sweep") / "step_metrics.csv")
+    class_partition_summary = pd.read_csv(Path("results/e11_long_tail_class_partition_sweep") / "summary.csv")
+    if len(class_partition_steps) != 200:
+        raise AssertionError(
+            f"long-tail class-partition sweep row count mismatch: expected 200, got {len(class_partition_steps)}"
+        )
+    expected_partitions = {"low_vs_high", "even_vs_odd", "mixed_a", "mixed_b", "mixed_c"}
+    if set(class_partition_summary["partition_name"]) != expected_partitions:
+        raise AssertionError("long-tail class-partition sweep must cover the expected five head/tail partitions")
+    if (class_partition_summary["seeds"] != 20).any():
+        raise AssertionError("long-tail class-partition sweep must use 20 seeds in each partition")
+    if not (
+        (class_partition_summary["tail_output_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (class_partition_summary["centered_tail_output_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (class_partition_summary["spectral_less_tail_output_drift_fraction"] == 1.0).all()
+    ):
+        raise AssertionError(
+            "long-tail class-partition sweep must keep full and centered spectral/Fro CI upper endpoints below 1"
+        )
+    rho_steps = pd.read_csv(Path("results/e11_long_tail_rho_sweep") / "step_metrics.csv")
+    rho_summary = pd.read_csv(Path("results/e11_long_tail_rho_sweep") / "summary.csv")
+    if len(rho_steps) != 200:
+        raise AssertionError(f"long-tail rho sweep row count mismatch: expected 200, got {len(rho_steps)}")
+    expected_rho_values = {0.005, 0.01, 0.02, 0.04, 0.08}
+    rounded_rho_values = {round(float(value), 3) for value in rho_summary["target_head_gain_fraction"]}
+    if rounded_rho_values != expected_rho_values:
+        raise AssertionError("long-tail rho sweep must cover target head-gain fractions 0.005, 0.01, 0.02, 0.04, and 0.08")
+    if (rho_summary["seeds"] != 20).any():
+        raise AssertionError("long-tail rho sweep must use 20 seeds at each target head-gain fraction")
+    if not (
+        (rho_summary["tail_output_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (rho_summary["centered_tail_output_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (rho_summary["spectral_less_tail_output_drift_fraction"] == 1.0).all()
+    ):
+        raise AssertionError("long-tail rho sweep must keep full and centered spectral/Fro CI upper endpoints below 1")
+    rho_head_gain_error_high = rho_summary[
+        [
+            "actual_head_gain_relative_error_frobenius_ci95_high",
+            "actual_head_gain_relative_error_spectral_ci95_high",
+        ]
+    ].max(axis=1)
+    if not (rho_head_gain_error_high.max() < 0.15 and rho_head_gain_error_high.max() > 0.05):
+        raise AssertionError(
+            "long-tail rho sweep should record bounded but visible finite-step head-gain error at larger rho"
+        )
     muon_bridge_steps = pd.read_csv(Path("results/e11_long_tail_muon_bridge") / "step_metrics.csv")
     muon_bridge_summary = pd.read_csv(Path("results/e11_long_tail_muon_bridge") / "pair_summary.csv")
     if len(muon_bridge_steps) != 80:
@@ -1168,6 +1717,19 @@ def main() -> None:
         < 1.0
     ):
         raise AssertionError("long-tail Muon bridge must record nontrivial momentum-polar deviation from polar(G_t)")
+    required_linearization_columns = {
+        "tail_output_jvp_fro",
+        "tail_output_linearization_residual_fro",
+        "tail_output_linearization_relative_error",
+    }
+    missing_linearization_columns = required_linearization_columns - set(muon_bridge_steps.columns)
+    if missing_linearization_columns:
+        raise AssertionError(f"long-tail Muon bridge missing local linearization columns: {sorted(missing_linearization_columns)}")
+    local_linearization_summary = pd.read_csv(Path("results/e11_local_linearization") / "summary.csv")
+    if set(local_linearization_summary["direction"]) != {"frobenius_grad", "polar_grad", "polar_momentum", "ns_momentum"}:
+        raise AssertionError("local linearization summary must cover Fro/GD, polar(G_t), polar(M_t), and NS(M_t)")
+    if not (local_linearization_summary["relative_error_ci95_high"] < 0.003).all():
+        raise AssertionError("local linearization relative-error CI upper bounds should stay below 0.003")
     practical_bridge_steps = pd.read_csv(Path("results/e11_long_tail_practical_muon_bridge") / "step_metrics.csv")
     practical_bridge_step_summary = pd.read_csv(Path("results/e11_long_tail_practical_muon_bridge") / "step_summary.csv")
     practical_bridge_summary = pd.read_csv(Path("results/e11_long_tail_practical_muon_bridge") / "summary.csv")
@@ -1209,6 +1771,54 @@ def main() -> None:
         raise AssertionError("long-tail practical Muon bridge must show CI-bounded lower drift for polar(M_t) and NS(M_t)")
     if int(practical_bridge_by_direction.loc["ns_momentum", "comparisons"]) != 120:
         raise AssertionError("long-tail practical Muon bridge must summarize 120 state-step comparisons")
+    state_source_steps = pd.read_csv(
+        Path("results/e11_long_tail_muon_state_source_control") / "step_metrics.csv"
+    )
+    state_source_summary = pd.read_csv(
+        Path("results/e11_long_tail_muon_state_source_control") / "summary.csv"
+    )
+    if len(state_source_steps) != 960:
+        raise AssertionError(
+            "long-tail Muon state-source control row count mismatch: "
+            f"expected 960, got {len(state_source_steps)}"
+        )
+    expected_state_sources = {"muon_ns_trajectory", "fro_gd_trajectory"}
+    if set(state_source_steps["state_source"]) != expected_state_sources:
+        raise AssertionError("long-tail Muon state-source control must compare NS-Muon and Fro/GD state sources")
+    if set(state_source_steps["direction"]) != {"frobenius_grad", "polar_grad", "polar_momentum", "ns_momentum"}:
+        raise AssertionError("long-tail Muon state-source control must compare Fro/GD, polar(G_t), polar(M_t), and NS(M_t)")
+    if state_source_steps["seed"].nunique() != 20 or set(state_source_steps["trajectory_step"]) != set(range(6)):
+        raise AssertionError("long-tail Muon state-source control must include 20 seeds and 6 trajectory steps")
+    if len(state_source_summary) != 6:
+        raise AssertionError("long-tail Muon state-source control summary must have 2 state sources times 3 directions")
+    state_source_by_key = state_source_summary.set_index(["state_source", "direction"])
+    expected_summary_keys = {
+        ("muon_ns_trajectory", "polar_grad"),
+        ("muon_ns_trajectory", "polar_momentum"),
+        ("muon_ns_trajectory", "ns_momentum"),
+        ("fro_gd_trajectory", "polar_grad"),
+        ("fro_gd_trajectory", "polar_momentum"),
+        ("fro_gd_trajectory", "ns_momentum"),
+    }
+    if set(state_source_by_key.index) != expected_summary_keys:
+        raise AssertionError("long-tail Muon state-source control summary keys are incomplete")
+    if not (
+        state_source_by_key.loc[
+            ("fro_gd_trajectory", "polar_momentum"),
+            "tail_output_drift_sq_ratio_vs_fro_ci95_high",
+        ]
+        < 1.0
+        and state_source_by_key.loc[
+            ("fro_gd_trajectory", "ns_momentum"),
+            "tail_output_drift_sq_ratio_vs_fro_ci95_high",
+        ]
+        < 1.0
+    ):
+        raise AssertionError(
+            "long-tail Muon state-source control must show CI-bounded lower drift on Fro/GD-generated states"
+        )
+    if int(state_source_by_key.loc[("fro_gd_trajectory", "ns_momentum"), "comparisons"]) != 120:
+        raise AssertionError("long-tail Muon state-source control must summarize 120 Fro/GD-state comparisons")
     practical_training_steps = pd.read_csv(Path("results/e11_long_tail_practical_training") / "step_metrics.csv")
     practical_training_summary = pd.read_csv(Path("results/e11_long_tail_practical_training") / "summary.csv")
     if len(practical_training_steps) != 3240:
@@ -1301,6 +1911,36 @@ def main() -> None:
         raise AssertionError("long-tail layerwise must include 20 seeds")
     if len(layerwise_summary) != 2:
         raise AssertionError("long-tail layerwise summary must have one row per layer")
+    required_layerwise_metric_columns = {
+        "tail_sandwiched_stable_rank",
+        "tail_local_operator_stable_rank",
+        "theorem_condition_score",
+        "local_operator_condition_score",
+    }
+    missing_layerwise_metric_columns = required_layerwise_metric_columns - set(layerwise_metrics.columns)
+    if missing_layerwise_metric_columns:
+        raise AssertionError(f"long-tail layerwise metrics missing downstream-aware rank columns: {missing_layerwise_metric_columns}")
+    required_layerwise_summary_columns = {
+        "mean_tail_sandwiched_stable_rank",
+        "mean_tail_local_operator_stable_rank",
+        "mean_theorem_condition_score",
+        "mean_local_operator_condition_score",
+        "local_operator_score_observed_ratio_spearman_all_layers",
+    }
+    missing_layerwise_summary_columns = required_layerwise_summary_columns - set(layerwise_summary.columns)
+    if missing_layerwise_summary_columns:
+        raise AssertionError(f"long-tail layerwise summary missing downstream-aware rank columns: {missing_layerwise_summary_columns}")
+    layerwise_by_layer = layerwise_summary.set_index("layer")
+    if not math.isnan(float(layerwise_by_layer.loc[1, "mean_tail_sandwiched_stable_rank"])):
+        raise AssertionError("long-tail layer 1 should not report a single-sandwich ssrank under sample-dependent ReLU gates")
+    if not (
+        math.isfinite(float(layerwise_by_layer.loc[2, "mean_tail_sandwiched_stable_rank"]))
+        and float(layerwise_by_layer.loc[2, "mean_tail_sandwiched_stable_rank"]) > 0.0
+        and math.isfinite(float(layerwise_by_layer.loc[2, "mean_theorem_condition_score"]))
+    ):
+        raise AssertionError("long-tail layer 2 must report a finite exact sandwich ssrank and theorem condition score")
+    if not (layerwise_summary["mean_tail_local_operator_stable_rank"] > 0.0).all():
+        raise AssertionError("long-tail layerwise must report positive frozen-gate local operator stable ranks")
     if not (layerwise_summary["jvp_tail_drift_sq_ratio_ci95_low"] > 1.0).all():
         raise AssertionError("long-tail layerwise unit-JVP ratio should preserve the sensitivity caveat")
     if not (
@@ -1408,12 +2048,16 @@ def main() -> None:
         "figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png",
         "figures/e11_long_tail_muon_bridge/long_tail_muon_bridge.png",
         "figures/e11_long_tail_practical_muon_bridge/long_tail_practical_muon_bridge.png",
+        "figures/e11_long_tail_muon_state_source_control/long_tail_muon_state_source_control.png",
         "figures/e11_long_tail_practical_training/long_tail_practical_training.png",
         "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png",
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
         "seven figures plus one generated table",
         "paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex",
-        "legacy condition-geometry artifacts",
+        "older condition-geometry artifacts",
+        "discussion/e11_pasted_review_audit.md",
+        "discussion/e11_completion_audit.md",
+        "discussion/e11_end_of_draft_self_review.md",
         "discussion/e11_long_tail_practical_training_lr_sweep.md",
         "legacy optimizer-switch and broad LR-sweep figures",
         "This does not exclude the practical-training LR sensitivity note",
@@ -1433,7 +2077,7 @@ def main() -> None:
         "Figure 7",
         "figures/e11_long_tail_practical_training/long_tail_practical_training.png",
         "Caption Discipline",
-        "tail logit drift",
+        "tail-example logit drift",
         "tail loss, margin, accuracy",
         "nrank(G_H)",
         "ssrank(B_T,A_T)",
@@ -1465,14 +2109,18 @@ def main() -> None:
         "C1 -> C2 -> C6 -> C7 -> C4 -> C5",
         "head-to-tail interference paper",
         "Drift-squared ratio=0.5501",
-        "polar(M_t) drift-squared ratio vs Fro/GD=0.8199",
-        "short-trajectory NS(M_t) ratio=0.8019",
+        "polar(M_t) squared drift ratio vs Fro/GD=0.8199",
+        "short-trajectory NS(M_t) squared drift ratio=0.8019",
         "final train loss ratio Muon/Adam=0.6468",
         "tail eval loss ratio=0.8549",
         "tail margin diff=1.955",
         "tail drift RMS ratio=0.7501",
-        "Final drift-squared ratio=0.6167",
-        "Layer 1 unit/scaled/observed drift ratios=1.45/0.4766/0.4767",
+        "head-alignment ratio=2.083",
+        "Frobenius-norm ratio=3.112",
+        "operator-norm ratio=0.5543",
+        "Final squared drift ratio=0.6167",
+        "Layer 1 unit/scaled/observed squared drift ratios=1.45/0.4766/0.4767",
+        "smaller operator-norm step despite a larger Frobenius-norm step",
         "complete practical Muon training behavior",
     ]
     missing_claim_ledger = [phrase for phrase in required_claim_ledger_phrases if phrase not in claim_ledger]
@@ -1487,10 +2135,68 @@ def main() -> None:
         "\\EelevenHeadTailPositiveSsrankBTA",
         "\\EelevenHeadTailPositiveDriftRatio",
         "\\EelevenHeadTailNegativeDriftRatio",
+        "\\EelevenHeadTailAlignmentAblationSeeds",
+        "\\EelevenHeadTailAlignmentPositiveTheoryRatio",
+        "\\EelevenHeadTailAlignmentPositiveDriftRatio",
+        "\\EelevenHeadTailAlignmentPositiveMedianDriftRatio",
+        "\\EelevenHeadTailAlignmentPositiveSpectralLowerFraction",
         "\\EelevenLongTailOneStepSeeds",
         "\\EelevenLongTailOneStepDriftRatio",
+        "\\EelevenLongTailOneStepCenteredDriftRatio",
+        "\\EelevenLongTailOneStepTrueLogitDriftRatio",
+        "\\EelevenLongTailOneStepCompetitorLogitDriftRatio",
+        "\\EelevenLongTailOneStepMarginDeltaRatio",
         "\\EelevenLongTailOneStepTailLossDiff",
+        "\\EelevenLongTailOneStepTailLossIncreaseFro",
+        "\\EelevenLongTailOneStepTailLossIncreaseSpectral",
         "\\EelevenLongTailOneStepTailMarginDropDiff",
+        "\\EelevenLongTailOneStepTailMarginDropFro",
+        "\\EelevenLongTailOneStepTailMarginDropSpectral",
+        "\\EelevenLongTailOneStepTailAccuracyDropFro",
+        "\\EelevenLongTailOneStepTailAccuracyDropSpectral",
+        "\\EelevenLongTailOneStepHeadGainErrorFro",
+        "\\EelevenLongTailOneStepHeadGainErrorSpectral",
+        "\\EelevenLongTailOneStepTailLossBefore",
+        "\\EelevenLongTailOneStepTailLossAfterFro",
+        "\\EelevenLongTailOneStepTailLossAfterSpectral",
+        "\\EelevenLongTailOneStepTailMarginBefore",
+        "\\EelevenLongTailOneStepTailMarginAfterFro",
+        "\\EelevenLongTailOneStepTailMarginAfterSpectral",
+        "\\EelevenLongTailOneStepTailAccuracyBefore",
+        "\\EelevenLongTailOneStepTailAccuracyAfterFro",
+        "\\EelevenLongTailOneStepTailAccuracyAfterSpectral",
+        "\\EelevenLongTailOneStepPositiveMarginFraction",
+        "\\EelevenLongTailOneStepCertifiedFractionFro",
+        "\\EelevenLongTailOneStepCertifiedFractionSpectral",
+        "\\EelevenLongTailOneStepPredictionChangedFro",
+        "\\EelevenLongTailOneStepPredictionChangedSpectral",
+        "\\EelevenLongTailOneStepPositivePredictionChangedFro",
+        "\\EelevenLongTailOneStepPositivePredictionChangedSpectral",
+        "\\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
+        "\\EelevenLocalLinearizationMaxRelativeErrorDirection",
+        "\\EelevenLongTailImbalanceAblationSettings",
+        "\\EelevenLongTailImbalanceWorstTailTrainPerClass",
+        "\\EelevenLongTailImbalanceWorstRatio",
+        "\\EelevenLongTailImbalanceDefaultRatio",
+        "\\EelevenLongTailImbalanceStrongRatio",
+        "\\EelevenLongTailImbalanceStrongPositiveMarginFraction",
+        "\\EelevenLongTailCheckpointSweepSettings",
+        "\\EelevenLongTailCheckpointSweepWorstWarmupSteps",
+        "\\EelevenLongTailCheckpointSweepWorstRatio",
+        "\\EelevenLongTailCheckpointSweepWorstMarginWarmupSteps",
+        "\\EelevenLongTailCheckpointSweepWorstMarginRatio",
+        "\\EelevenLongTailClassPartitionSweepSettings",
+        "\\EelevenLongTailClassPartitionWorstPartition",
+        "\\EelevenLongTailClassPartitionWorstRatio",
+        "\\EelevenLongTailClassPartitionCenteredWorstPartition",
+        "\\EelevenLongTailClassPartitionCenteredWorstRatio",
+        "\\EelevenLongTailRhoSweepSettings",
+        "\\EelevenLongTailRhoSweepWorstFraction",
+        "\\EelevenLongTailRhoSweepWorstRatio",
+        "\\EelevenLongTailRhoSweepCenteredWorstFraction",
+        "\\EelevenLongTailRhoSweepCenteredWorstRatio",
+        "\\EelevenLongTailRhoSweepWorstHeadGainErrorFraction",
+        "\\EelevenLongTailRhoSweepWorstHeadGainErrorCiHigh",
         "\\EelevenLongTailMuonBridgePolarMomentumDriftRatio",
         "\\EelevenLongTailMuonBridgeNsMomentumDriftRatio",
         "\\EelevenLongTailMuonBridgePolarMomentumCosine",
@@ -1498,6 +2204,11 @@ def main() -> None:
         "\\EelevenLongTailPracticalMuonBridgePolarMomentumDriftRatio",
         "\\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio",
         "\\EelevenLongTailPracticalMuonBridgeMomentumCosine",
+        "\\EelevenLongTailMuonStateSourceControlComparisons",
+        "\\EelevenLongTailMuonStateSourceControlFroPolarMomentumDriftRatio",
+        "\\EelevenLongTailMuonStateSourceControlFroNsMomentumDriftRatio",
+        "\\EelevenLongTailMuonStateSourceControlMuonNsMomentumDriftRatio",
+        "\\EelevenLongTailMuonStateSourceControlFroNsLowerFraction",
         "\\EelevenLongTailPracticalTrainingSteps",
         "\\EelevenLongTailPracticalTrainingAdamLr",
         "\\EelevenLongTailPracticalTrainingMuonLr",
@@ -1526,11 +2237,40 @@ def main() -> None:
     missing_number_macros = [macro for macro in required_number_macros if macro not in paper_numbers]
     if missing_number_macros:
         raise AssertionError(f"paper number macros missing required content: {missing_number_macros}")
+    for range_macro in [
+        "EelevenLongTailCheckpointSweepTailAccuracyRange",
+        "EelevenLongTailCheckpointSweepPositiveMarginRange",
+    ]:
+        range_match = re.search(rf"\\newcommand\{{\\{range_macro}\}}\{{(?P<value>[^}}]*(?:\}}[^}}]*)?)\}}", paper_numbers)
+        if range_match is None:
+            raise AssertionError(f"paper number macro {range_macro} is missing")
+        range_value = range_match.group("value")
+        if "--" in range_value or r"\text{ to }" not in range_value:
+            raise AssertionError(
+                f"paper number macro {range_macro} should use math-safe '\\text{{ to }}' range text, "
+                f"not a double-minus range: {range_value}"
+            )
     paper_tex = Path("paper/specgrad_activation_paper/main.tex").read_text(encoding="utf-8")
+    if "Tail CE before; Fro after; spectral after" in paper_tex:
+        raise AssertionError("one-step tail outcome table should report small effects as deltas, not rounded after-values")
     required_paper_macro_phrases = [
         r"\input{tables/e11_paper_numbers.tex}",
         r"\EelevenLongTailOneStepDriftRatio",
+        r"\EelevenHeadTailAlignmentPositiveDriftRatio",
         r"\EelevenLongTailOneStepTailMarginDropDiff",
+        r"\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
+        r"\EelevenLocalLinearizationMaxRelativeErrorDirection",
+        r"\EelevenLongTailImbalanceWorstRatioCiHigh",
+        r"\EelevenLongTailCheckpointSweepWorstRatioCiHigh",
+        r"\EelevenLongTailCheckpointSweepTailAccuracyRange",
+        r"\EelevenLongTailCheckpointSweepPositiveMarginRange",
+        r"\EelevenLongTailClassPartitionWorstRatioCiHigh",
+        r"\EelevenLongTailRhoSweepWorstRatioCiHigh",
+        r"\EelevenLongTailRhoSweepWorstHeadGainErrorCiHigh",
+        r"\EelevenLongTailOneStepAlignmentRatio",
+        r"\EelevenLongTailOneStepUpdateFroNormRatio",
+        r"\EelevenLongTailOneStepUpdateOpNormRatio",
+        r"\EelevenLongTailMuonStateSourceControlFroNsMomentumDriftRatio",
         r"\EelevenLongTailPracticalTrainingTrainLossRatio",
         r"\EelevenLongTailPracticalTrainingTailMarginDiff",
         r"\EelevenLongTailPracticalTrainingLrSweepLargeTailLossRatio",
@@ -1544,6 +2284,7 @@ def main() -> None:
         raise AssertionError(f"paper main tex is not using generated paper-number macros: {missing_paper_macro_phrases}")
     forbidden_paper_tex_phrases = [
         "explain why some optimizers have better tail accuracy at the same head accuracy",
+        "2.05\\times 10^{-3}",
     ]
     assert_forbidden_phrases_absent(
         "paper main tex over-strong tail-accuracy wording",
@@ -1600,7 +2341,7 @@ def main() -> None:
         "Risk Table",
         "Claim Decisions",
         "current head-to-tail interference paper",
-        "lower tail logit drift",
+        "lower tail-example logit drift",
         "nrank-vs-ssrank condition",
         "Treat Muon as motivation",
         "legacy update-spectrum artifacts",
@@ -1608,6 +2349,80 @@ def main() -> None:
     missing_reviewer_risk = [phrase for phrase in required_reviewer_risk_phrases if phrase not in reviewer_risk]
     if missing_reviewer_risk:
         raise AssertionError(f"reviewer risk audit missing required content: {missing_reviewer_risk}")
+    pasted_review_audit = Path("discussion/e11_pasted_review_audit.md").read_text(encoding="utf-8")
+    required_pasted_review_phrases = [
+        "E11 Pasted Review Audit",
+        "arbitrary-direction matched-gain definition",
+        "two-layer MLP blockwise spectral construction",
+        "local first-order approximation",
+        "Trajectory CIs",
+        "Synthetic point CIs",
+        "central condition should be written as a direct bound ratio",
+        "Layerwise diagnostics should use downstream-aware quantities",
+        "Full-logit drift may not be margin-relevant drift",
+        "The one-step tail checkpoint may be too weak",
+        "protection of a high-quality tail predictor",
+        "| 18 |",
+        "Squared drift ratio and RMS drift ratio must not be mixed",
+        "The supported result is a local, matched-head-gain function-drift mechanism",
+        "| 15 |",
+    ]
+    missing_pasted_review = [
+        phrase for phrase in required_pasted_review_phrases if phrase not in pasted_review_audit
+    ]
+    if missing_pasted_review:
+        raise AssertionError(f"pasted review audit missing required content: {missing_pasted_review}")
+    completion_audit = Path("discussion/e11_completion_audit.md").read_text(encoding="utf-8")
+    required_completion_audit_phrases = [
+        "E11 Completion Audit",
+        "Requirement Status",
+        "Current Residual Risks",
+        "Latest Validation Command",
+        "Main paper uses a normal ICLR-style structure",
+        "Two-page final-report version exists and is exactly two pages",
+        "Major claims are tied to quantitative evidence",
+        "PDF/build/test gates pass",
+    ]
+    missing_completion_audit = [
+        phrase for phrase in required_completion_audit_phrases if phrase not in completion_audit
+    ]
+    if missing_completion_audit:
+        raise AssertionError(f"completion audit missing required content: {missing_completion_audit}")
+    end_self_review = Path("discussion/e11_end_of_draft_self_review.md").read_text(encoding="utf-8")
+    required_end_self_review_phrases = [
+        "E11 End-of-Draft Self-Review",
+        "Five-Dimension Review",
+        "Claim-Evidence Map",
+        "Required Manuscript Discipline",
+        "Current Residual Risks",
+        "pass for mechanism paper",
+        "not supported",
+        "selected-state compatibility",
+        "standard long-tail tasks",
+    ]
+    missing_end_self_review = [
+        phrase for phrase in required_end_self_review_phrases if phrase not in end_self_review
+    ]
+    if missing_end_self_review:
+        raise AssertionError(f"end-of-draft self-review missing required content: {missing_end_self_review}")
+    reference_audit = Path("discussion/e11_reference_audit.md").read_text(encoding="utf-8")
+    required_reference_audit_phrases = [
+        "E11 Reference Audit",
+        "davis2025spectral",
+        "chen2025muon",
+        "promo2026",
+        "pedregosa2011scikit",
+        "cui2019classbalanced",
+        "kang2020decoupling",
+        "preprint/submission caveat",
+        "There are no unused BibTeX entries",
+        "newer Muon/spectral papers should be used for positioning",
+    ]
+    missing_reference_audit = [
+        phrase for phrase in required_reference_audit_phrases if phrase not in reference_audit
+    ]
+    if missing_reference_audit:
+        raise AssertionError(f"reference audit missing required content: {missing_reference_audit}")
     theory_note = Path("discussion/e11_theory_note.md").read_text(encoding="utf-8")
     required_theory_phrases = [
         "Under the Frobenius ball",
@@ -1656,6 +2471,13 @@ def main() -> None:
         "figures/e11_long_tail_practical_training_lr_sweep/long_tail_practical_training_lr_sweep.png",
         "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png",
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
+        "squared drift ratio=0.5501",
+        "head-alignment ratio=2.083",
+        "Frobenius-norm ratio=3.112",
+        "operator-norm ratio=0.5543",
+        "polar(M_t) squared drift ratio=0.8199",
+        "trajectory NS(M_t) squared drift ratio=0.8019",
+        "final squared drift ratio=0.6167",
         "broad tail-accuracy or benchmark improvement",
         "narrow tail-loss/margin diagnostic",
         "Older condition-geometry artifacts remain useful guardrails",
@@ -1663,6 +2485,17 @@ def main() -> None:
     missing_evidence_index = [phrase for phrase in required_evidence_index_phrases if phrase not in evidence_index]
     if missing_evidence_index:
         raise AssertionError(f"evidence index missing current head-to-tail entries: {missing_evidence_index}")
+    assert_forbidden_phrases_absent(
+        "evidence index squared-drift wording",
+        evidence_index,
+        [
+            "polar(M_t) drift ratio=0.8199",
+            "trajectory NS(M_t) drift ratio=0.8019",
+            "| drift ratio=0.5501",
+            "| final drift ratio=0.6167",
+            "smaller effective step",
+        ],
+    )
     research_synthesis = Path("discussion/e11_research_synthesis.md").read_text(encoding="utf-8")
     required_research_synthesis_phrases = [
         "current paper-facing synthesis",
@@ -1692,11 +2525,13 @@ def main() -> None:
     claim_validity = Path("discussion/e11_claim_validity_audit.md").read_text(encoding="utf-8")
     required_claim_validity_phrases = [
         "current head-to-tail experiments",
-        "idealized spectral/polar directions can reduce head-to-tail logit drift",
+        "idealized spectral/polar directions can reduce head-to-tail drift on tail-example logits",
         "small-digits selected-state compatibility check",
         "short-trajectory",
         "not a modern long-tail benchmark",
         "do **not** justify saying",
+        "head-alignment ratio=2.083",
+        "operator-norm ratio=0.5543",
     ]
     missing_claim_validity = [phrase for phrase in required_claim_validity_phrases if phrase not in claim_validity]
     if missing_claim_validity:
@@ -1704,13 +2539,15 @@ def main() -> None:
     paper_readiness = Path("discussion/e11_paper_readiness_audit.md").read_text(encoding="utf-8")
     required_readiness_phrases = [
         "current head-to-tail interference paper",
-        "Matched-head-gain spectral/polar directions reduce held-out tail logit drift",
+        "Matched-head-gain spectral/polar directions reduce held-out tail-example logit drift",
         "nrank(G_H) > ssrank(B_T,A_T)",
         "Real long-tail benchmark",
         "Real long-tail practical Muon benchmark",
         "Larger-architecture layerwise diagnostic",
-        "lower tail logit drift automatically improves",
+        "lower tail-example logit drift automatically improves",
         "Head-to-Tail Interference in Long-Tailed Small-Batch Training",
+        "explicit norm-specific scaling readouts",
+        "smaller operator norm but larger Frobenius norm",
     ]
     missing_readiness = [phrase for phrase in required_readiness_phrases if phrase not in paper_readiness]
     if missing_readiness:
@@ -1727,7 +2564,14 @@ def main() -> None:
     ):
         raise AssertionError("README_E11.md must document E11 make targets")
     artifact_manifest = Path("discussion/e11_artifact_manifest.md").read_text(encoding="utf-8")
-    for phrase in ["Artifact Directories", "Ignored Local Artifacts", "results/e11_artifact_manifest.json"]:
+    for phrase in [
+        "Artifact Directories",
+        "Key Quantitative Tables",
+        "Key Paper Documents",
+        "discussion/e11_reference_audit.md",
+        "Ignored Local Artifacts",
+        "results/e11_artifact_manifest.json",
+    ]:
         if phrase not in artifact_manifest:
             raise AssertionError(f"artifact manifest missing required section or reference: {phrase}")
     manifest_json = json.loads(Path("results/e11_artifact_manifest.json").read_text(encoding="utf-8"))

@@ -47,8 +47,8 @@ def write_figure(pair_summary: pd.DataFrame) -> Path:
     axes[0].axhline(1.0, color="black", linestyle="--", linewidth=1)
     axes[0].set_xticks(list(x))
     axes[0].set_xticklabels([DISPLAY_NAMES[name] for name in order], rotation=15, ha="right")
-    axes[0].set_ylabel("tail drift-sq ratio vs Fro/GD")
-    axes[0].set_title("Matched-head-gain tail drift")
+    axes[0].set_ylabel("squared tail-example logit drift ratio vs Fro/GD")
+    axes[0].set_title("Matched-head-gain squared tail drift")
 
     axes[1].bar(
         x,
@@ -78,7 +78,7 @@ def write_discussion(config: LongTailMuonBridgeConfig, pair_summary: pd.DataFram
         return summary.loc[name]
 
     table_lines = [
-        "| direction | tail drift-sq ratio vs Fro/GD | drift ratio vs polar(G_t) | cosine to polar(G_t) | alignment ratio to polar(G_t) |",
+        "| direction | squared drift ratio vs Fro/GD | squared drift ratio vs polar(G_t) | cosine to polar(G_t) | alignment ratio to polar(G_t) |",
         "|---|---:|---:|---:|---:|",
     ]
     for direction in ["polar_grad", "polar_momentum", "ns_momentum"]:
@@ -151,11 +151,11 @@ If `polar(M_t)` and `NS(M_t)` have tail drift below Fro/GD while maintaining hig
 cosine and alignment with `polar(G_t)`, the paper can describe the sampled
 Muon-style directions as compatible with the ideal spectral direction in this
 local diagnostic. If these rows degrade, the safe statement remains only about
-SpecGrad/polar geometry.
+spectral-gradient/polar geometry.
 
-Current readout: `polar(M_t)` has tail drift-sq ratio
+Current readout: `polar(M_t)` has squared tail-example logit drift ratio
 `{_fmt(polar_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])}` vs Fro/GD,
-and `NS(M_t)` has ratio
+and `NS(M_t)` has squared drift ratio
 `{_fmt(ns_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])}`. This supports
 only a selected-state compatibility check; it still does not prove full Muon
 training performance.

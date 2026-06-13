@@ -23,6 +23,7 @@ def main() -> None:
         "Long-tailed one-step diagnostic",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
+        "Long-tailed Muon state-source control",
         "Long-tailed practical training diagnostic",
         "Long-tailed practical training LR sensitivity",
         "Head-only forgetting probe",
@@ -79,7 +80,7 @@ make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets
 make e11-guardrail-assets  # legacy condition-geometry guardrail notes
 make e11-all-assets        # current paper assets plus legacy guardrail notes
-make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf
+make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf
 make e11-check             # validation, tests, and whitespace check
 make e11-full              # paper assets, PDF build, and e11-check
 ```

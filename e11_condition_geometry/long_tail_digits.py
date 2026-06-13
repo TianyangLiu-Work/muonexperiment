@@ -190,6 +190,44 @@ def apply_direction(
             param.copy_(value - float(step_size) * direction)
 
 
+def tail_output_jvp(
+    tail_x: torch.Tensor,
+    before: list[torch.Tensor],
+    directions: list[torch.Tensor],
+    step_size: float,
+) -> torch.Tensor:
+    if len(before) != 2:
+        raise ValueError("TinyMLP tail-output JVP expects exactly two matrix parameters")
+
+    def logits_from_weights(w1: torch.Tensor, w2: torch.Tensor) -> torch.Tensor:
+        hidden = F.relu(tail_x @ w1.T)
+        return hidden @ w2.T
+
+    primals = tuple(weight.detach().clone().requires_grad_(True) for weight in before)
+    tangents = tuple(-float(step_size) * direction.detach() for direction in directions)
+    _base, jvp = torch.autograd.functional.jvp(logits_from_weights, primals, tangents, create_graph=False, strict=False)
+    return jvp.detach()
+
+
+def local_linearization_metrics(
+    tail_x: torch.Tensor,
+    base_tail_logits: torch.Tensor,
+    actual_tail_logits: torch.Tensor,
+    before: list[torch.Tensor],
+    directions: list[torch.Tensor],
+    step_size: float,
+) -> dict[str, float]:
+    actual_delta = actual_tail_logits.detach() - base_tail_logits.detach()
+    jvp_delta = tail_output_jvp(tail_x, before, directions, step_size)
+    residual = actual_delta - jvp_delta
+    jvp_norm = torch.linalg.norm(jvp_delta).clamp_min(torch.finfo(jvp_delta.dtype).eps)
+    return {
+        "tail_output_jvp_fro": float(torch.linalg.norm(jvp_delta).cpu()),
+        "tail_output_linearization_residual_fro": float(torch.linalg.norm(residual).cpu()),
+        "tail_output_linearization_relative_error": float((torch.linalg.norm(residual) / jvp_norm).cpu()),
+    }
+
+
 def update_norms(directions: list[torch.Tensor], step_size: float) -> tuple[float, float]:
     fro_sq = 0.0
     op_values = []
@@ -248,6 +286,62 @@ def activation_for_layer(model: TinyMLP, x: torch.Tensor, layer: int) -> torch.T
             return x.detach()
         if layer == 2:
             return F.relu(x @ model.w1.detach().T).detach()
+    raise ValueError(f"unknown layer: {layer}")
+
+
+def _sandwiched_stable_rank(b_sigmas: torch.Tensor, a_sigmas: torch.Tensor) -> float:
+    count = min(int(b_sigmas.numel()), int(a_sigmas.numel()))
+    if count == 0:
+        return math.nan
+    b_values = b_sigmas[:count]
+    a_values = a_sigmas[:count]
+    denom = b_values[0].square() * a_values[0].square()
+    if float(denom.detach().cpu()) <= 0.0:
+        return math.nan
+    value = torch.sum(b_values.square() * a_values.square()) / denom
+    return float(value.detach().cpu())
+
+
+def tail_downstream_rank_metrics(model: TinyMLP, tail_x: torch.Tensor, layer: int) -> dict[str, float]:
+    """Return downstream-aware tail-rank quantities at a fixed TinyMLP checkpoint.
+
+    Layer 2 is an exact sandwich block, with B=I and A equal to the hidden tail
+    activation matrix. Layer 1 has sample-dependent ReLU gates, so it is not a
+    single B D A sandwich; for that layer we report the exact local linear
+    operator stable rank under the frozen ReLU mask.
+    """
+
+    with torch.no_grad():
+        if layer == 1:
+            pre_activation = tail_x @ model.w1.detach().T
+            mask = (pre_activation > 0).to(tail_x.dtype)
+            operator = torch.einsum("ch,nh,ni->nchi", model.w2.detach(), mask, tail_x).reshape(
+                tail_x.shape[0] * model.w2.shape[0],
+                model.w1.numel(),
+            )
+            op_norm = torch.linalg.matrix_norm(operator, ord=2)
+            fro_sq = torch.sum(operator.square())
+            local_operator_stable_rank = fro_sq / op_norm.square().clamp_min(torch.finfo(tail_x.dtype).eps)
+            return {
+                "tail_sandwiched_stable_rank": math.nan,
+                "tail_local_operator_stable_rank": float(local_operator_stable_rank.cpu()),
+            }
+        if layer == 2:
+            hidden = F.relu(tail_x @ model.w1.detach().T)
+            a_sigmas = torch.linalg.svdvals(hidden.T)
+            b_sigmas = torch.ones(model.w2.shape[0], device=tail_x.device, dtype=tail_x.dtype)
+            ssrank = _sandwiched_stable_rank(b_sigmas, a_sigmas)
+            operator = (
+                torch.eye(model.w2.shape[0], device=tail_x.device, dtype=tail_x.dtype)[None, :, :, None]
+                * hidden[:, None, None, :]
+            ).reshape(tail_x.shape[0] * model.w2.shape[0], model.w2.numel())
+            op_norm = torch.linalg.matrix_norm(operator, ord=2)
+            fro_sq = torch.sum(operator.square())
+            local_operator_stable_rank = fro_sq / op_norm.square().clamp_min(torch.finfo(tail_x.dtype).eps)
+            return {
+                "tail_sandwiched_stable_rank": ssrank,
+                "tail_local_operator_stable_rank": float(local_operator_stable_rank.cpu()),
+            }
     raise ValueError(f"unknown layer: {layer}")
 
 

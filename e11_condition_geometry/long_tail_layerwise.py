@@ -21,6 +21,7 @@ from .long_tail_digits import (
     make_generator,
     restore_layer,
     split_long_tail_digits,
+    tail_downstream_rank_metrics,
     train_digits_checkpoint,
 )
 from .statistics import ci95, corr_ci95, log_ratio_ci95
@@ -93,6 +94,13 @@ def run_long_tail_layerwise(config: LongTailLayerwiseConfig) -> tuple[pd.DataFra
             nr_g = matrix_effective_rank(grad_sigmas)
             st_a = stable_rank(activation_sigmas)
             condition_score = nr_g / st_a if math.isfinite(st_a) and st_a > 0 else math.nan
+            downstream_rank = tail_downstream_rank_metrics(model, tail_x, layer)
+            tail_ssrank = downstream_rank["tail_sandwiched_stable_rank"]
+            tail_operator_srank = downstream_rank["tail_local_operator_stable_rank"]
+            theorem_condition_score = nr_g / tail_ssrank if math.isfinite(tail_ssrank) and tail_ssrank > 0 else math.nan
+            local_operator_condition_score = (
+                nr_g / tail_operator_srank if math.isfinite(tail_operator_srank) and tail_operator_srank > 0 else math.nan
+            )
             for geometry in ["frobenius", "spectral"]:
                 direction = layer_direction(param, geometry)
                 alignment = float(torch.sum(param.grad.detach() * direction).cpu())
@@ -124,6 +132,10 @@ def run_long_tail_layerwise(config: LongTailLayerwiseConfig) -> tuple[pd.DataFra
                         "head_gradient_nuclear_rank": nr_g,
                         "tail_activation_stable_rank": st_a,
                         "condition_score": condition_score,
+                        "tail_sandwiched_stable_rank": tail_ssrank,
+                        "tail_local_operator_stable_rank": tail_operator_srank,
+                        "theorem_condition_score": theorem_condition_score,
+                        "local_operator_condition_score": local_operator_condition_score,
                         "jvp_tail_drift_sq": jvp_tail_drift_sq_value,
                         "scaled_jvp_tail_drift_sq": float(step_size**2 * jvp_tail_drift_sq_value),
                         "tail_output_drift_fro": float(torch.linalg.norm(tail_delta).cpu()),
@@ -157,6 +169,10 @@ def summarize_long_tail_layerwise(metrics: pd.DataFrame) -> pd.DataFrame:
                 "seed": int(seed),
                 "layer": int(layer),
                 "condition_score": float(spectral["condition_score"]),
+                "tail_sandwiched_stable_rank": float(spectral["tail_sandwiched_stable_rank"]),
+                "tail_local_operator_stable_rank": float(spectral["tail_local_operator_stable_rank"]),
+                "theorem_condition_score": float(spectral["theorem_condition_score"]),
+                "local_operator_condition_score": float(spectral["local_operator_condition_score"]),
                 "jvp_tail_drift_sq_ratio_spectral_over_fro": float(
                     spectral["jvp_tail_drift_sq"] / max(fro["jvp_tail_drift_sq"], 1e-300)
                 ),
@@ -195,6 +211,10 @@ def summarize_long_tail_layerwise(metrics: pd.DataFrame) -> pd.DataFrame:
                 "layer": int(layer),
                 "seeds": int(group["seed"].nunique()),
                 "mean_condition_score": float(group["condition_score"].mean()),
+                "mean_tail_sandwiched_stable_rank": float(group["tail_sandwiched_stable_rank"].mean()),
+                "mean_tail_local_operator_stable_rank": float(group["tail_local_operator_stable_rank"].mean()),
+                "mean_theorem_condition_score": float(group["theorem_condition_score"].mean()),
+                "mean_local_operator_condition_score": float(group["local_operator_condition_score"].mean()),
                 "geomean_jvp_tail_drift_sq_ratio_spectral_over_fro": jvp_mean,
                 "jvp_tail_drift_sq_ratio_ci95_low": jvp_low,
                 "jvp_tail_drift_sq_ratio_ci95_high": jvp_high,
@@ -219,12 +239,12 @@ def summarize_long_tail_layerwise(metrics: pd.DataFrame) -> pd.DataFrame:
         )
     overall = paired.copy()
     corr, corr_low, corr_high, points = corr_ci95(
-        overall["condition_score"],
+        overall["local_operator_condition_score"],
         overall["observed_tail_drift_sq_ratio_spectral_over_fro"],
     )
     result = pd.DataFrame(rows)
-    result["condition_observed_ratio_spearman_all_layers"] = corr
-    result["condition_observed_ratio_spearman_ci95_low"] = corr_low
-    result["condition_observed_ratio_spearman_ci95_high"] = corr_high
-    result["condition_observed_ratio_spearman_points"] = points
+    result["local_operator_score_observed_ratio_spearman_all_layers"] = corr
+    result["local_operator_score_observed_ratio_spearman_ci95_low"] = corr_low
+    result["local_operator_score_observed_ratio_spearman_ci95_high"] = corr_high
+    result["local_operator_score_observed_ratio_spearman_points"] = points
     return result

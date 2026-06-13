@@ -10,21 +10,21 @@ matched-head-gain diagnostic for Fro/GD, `polar(G_t)`, `polar(M_t)`, and
 
 ## Summary
 
-| direction | comparisons | drift-sq ratio vs Fro/GD | cosine to polar(G_t) | gradient-momentum cosine |
+| direction | comparisons | squared drift ratio vs Fro/GD | cosine to polar(G_t) | gradient-momentum cosine |
 |---|---:|---:|---:|---:|
-| polar($G_t$) | 120 | 0.5604 [0.546, 0.5751] | 1 [1, 1] | 0.8589 [0.836, 0.8818] |
-| polar($M_t$) | 120 | 0.7292 [0.696, 0.7641] | 0.4764 [0.4519, 0.5008] | 0.8589 [0.836, 0.8818] |
-| NS($M_t$) | 120 | 0.8019 [0.7644, 0.8413] | 0.4361 [0.426, 0.4461] | 0.8589 [0.836, 0.8818] |
+| polar($G_t$) | 120 | 0.5604 [0.5449, 0.5763] | 1 [1, 1] | 0.8589 [0.8328, 0.885] |
+| polar($M_t$) | 120 | 0.7292 [0.6891, 0.7717] | 0.4764 [0.466, 0.4868] | 0.8589 [0.8328, 0.885] |
+| NS($M_t$) | 120 | 0.8019 [0.7583, 0.848] | 0.4361 [0.4275, 0.4446] | 0.8589 [0.8328, 0.885] |
 
 ## Interpretation
 
 Across `120` paired state-step comparisons,
-`polar(M_t)` has tail drift-squared ratio
+`polar(M_t)` has squared tail-example logit drift ratio
 `0.7292`
-`[0.696, 0.7641]`
-relative to Fro/GD. The practical finite-step `NS(M_t)` direction has ratio
+`[0.6891, 0.7717]`
+relative to Fro/GD. The practical finite-step `NS(M_t)` direction has squared drift ratio
 `0.8019`
-`[0.7644, 0.8413]`.
+`[0.7583, 0.848]`.
 
 This extends the fixed-checkpoint compatibility check by testing sampled states
 along a short practical Muon-like trajectory. It remains a local

@@ -39,17 +39,17 @@ def main() -> None:
                 "artifact": "figures/e11_head_tail_interference/head_tail_drift_ratio.png",
                 "claim": "The nrank-vs-ssrank condition has the correct sign in controlled positive and negative settings.",
                 "quantitative_anchor": (
-                    f"Positive drift ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}; "
-                    f"negative drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}."
+                    f"Positive squared drift ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}; "
+                    f"negative squared drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}."
                 ),
                 "reader_takeaway": "The theorem boundary is not decorative; flipping the constructed geometry flips the drift direction.",
             },
             {
                 "slot": "Figure 2",
                 "artifact": "figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png",
-                "claim": "Spectral/polar reduces held-out tail logit drift at matched head gain on long-tailed digits.",
+                "claim": "Spectral/polar reduces held-out tail-example logit drift at matched head gain on long-tailed digits.",
                 "quantitative_anchor": (
-                    f"Tail drift-sq ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"Squared tail-example logit drift ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{interval(one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
                     f"20/20 paired seeds lower drift."
                 ),
@@ -60,9 +60,9 @@ def main() -> None:
                 "artifact": "figures/e11_long_tail_muon_bridge/long_tail_muon_bridge.png",
                 "claim": "Momentum polar gives a selected-state compatibility check for Muon-style state.",
                 "quantitative_anchor": (
-                    f"polar(M_t) drift ratio={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"polar(M_t) squared drift ratio={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{interval(muon_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
-                    f"NS(M_t) ratio={fmt(muon_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"NS(M_t) squared drift ratio={fmt(muon_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{interval(muon_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
                 ),
                 "reader_takeaway": "Muon-style state is locally compatible in sampled states, but finite Newton-Schulz and trajectory-level behavior remain caveats.",
@@ -72,17 +72,17 @@ def main() -> None:
                 "artifact": "figures/e11_long_tail_practical_muon_bridge/long_tail_practical_muon_bridge.png",
                 "claim": "Muon-style directions show selected-state compatibility across a short practical NS-Muon trajectory.",
                 "quantitative_anchor": (
-                    f"trajectory polar(M_t) drift ratio={fmt(practical_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"trajectory polar(M_t) squared drift ratio={fmt(practical_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{interval(practical_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
-                    f"trajectory NS(M_t) ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"trajectory NS(M_t) squared drift ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{interval(practical_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
                 ),
-                "reader_takeaway": "Practical Muon-style states show drift ratios compatible with the local polar mechanism along sampled short-trajectory states.",
+                "reader_takeaway": "Practical Muon-style states show squared drift ratios compatible with the local polar mechanism along sampled short-trajectory states.",
             },
             {
                 "slot": "Figure 5",
                 "artifact": "figures/e11_long_tail_practical_training/long_tail_practical_training.png",
-                "claim": "A small practical imbalanced-training run is consistent with lower measured drift/loss in a fixed diagnostic.",
+                "claim": "A small practical imbalanced-training run reports lower tail loss, higher tail margin, and lower late-stage head loss in a fixed diagnostic.",
                 "quantitative_anchor": (
                     f"Train loss ratio={fmt(practical_training['geomean_final_train_loss_ratio_muon_over_adam'])} "
                     f"{interval(practical_training, 'final_train_loss_ratio_ci95_low', 'final_train_loss_ratio_ci95_high')}; "
@@ -100,7 +100,7 @@ def main() -> None:
                 "artifact": "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png",
                 "claim": "The lower measured tail drift remains visible over a short head-only horizon.",
                 "quantitative_anchor": (
-                    f"Final drift ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"Final squared drift ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{interval(forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}; "
                     f"area ratio={fmt(forgetting['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} "
                     f"{interval(forgetting, 'tail_output_drift_area_ratio_ci95_low', 'tail_output_drift_area_ratio_ci95_high')}."
@@ -135,6 +135,11 @@ def main() -> None:
         [
             {"artifact": "discussion/e11_paper_readiness_audit.md", "role": "Claim readiness, missing experiments, and paper title direction for the current head-to-tail draft."},
             {"artifact": "discussion/e11_reviewer_risk_audit.md", "role": "Reviewer objections and safe responses for function-drift claims."},
+            {"artifact": "discussion/e11_pasted_review_audit.md", "role": "Traceability from pasted reviewer-risk notes to current paper edits and residual risks."},
+            {"artifact": "discussion/e11_completion_audit.md", "role": "Requirement-by-requirement completion evidence for the current final-report paper package."},
+            {"artifact": "discussion/e11_end_of_draft_self_review.md", "role": "Five-dimension self-review and claim-evidence map for the current draft."},
+            {"artifact": "figures/e11_long_tail_muon_state_source_control/long_tail_muon_state_source_control.png", "role": "Appendix control for Muon trajectory state-selection risk; evaluates Muon-style directions on Fro/GD-generated states."},
+            {"artifact": "discussion/e11_long_tail_muon_state_source_control.md", "role": "Markdown summary and CSV links for the Muon state-source control."},
             {"artifact": "discussion/e11_long_tail_practical_training_lr_sweep.md", "role": "Supporting robustness check for the selected practical-training Muon learning rate."},
             {"artifact": "discussion/e11_activation_perturbation.md", "role": "Background activation-geometry evidence; not a current main result."},
             {"artifact": "discussion/e11_reproduction_checklist.md", "role": "Minimal reproduction and appendix/guardrail reproduction commands."},
@@ -144,7 +149,7 @@ def main() -> None:
 
     excluded = pd.DataFrame(
         [
-            {"artifact": "equal-update update-spectrum figures", "reason": "Legacy condition-geometry guardrails; they are not the current head-to-tail paper's main evidence."},
+            {"artifact": "equal-update update-spectrum figures", "reason": "Older condition-geometry guardrails; they are not the current head-to-tail paper's main evidence."},
             {"artifact": "legacy optimizer-switch and broad LR-sweep figures", "reason": "Useful overclaim controls, but too far from the current head-to-tail drift mechanism. This does not exclude the practical-training LR sensitivity note listed above."},
             {"artifact": "boundary predictor detailed tables", "reason": "The current paper does not claim a predictive boundary model for unseen tasks."},
         ]
@@ -152,7 +157,7 @@ def main() -> None:
 
     text = f"""# E11 Main Paper Package
 
-This generated note selects the smallest evidence package for the current head-to-tail interference manuscript. The main paper should be carried by seven figures plus one generated table, with legacy condition-geometry artifacts used only as appendix guardrails. The LR-sensitivity figure is supporting robustness evidence rather than a main figure.
+This generated note selects the smallest evidence package for the current head-to-tail interference manuscript. The main paper should be carried by seven figures plus one generated table, with older condition-geometry artifacts used only as appendix guardrails. The LR-sensitivity figure is supporting robustness evidence rather than a main figure.
 
 ## Main Figure/Table Package
 
@@ -170,7 +175,7 @@ This generated note selects the smallest evidence package for the current head-t
 
 1. Long-tailed small-batch training creates head-only updates that can perturb held-out tail functions.
 2. The local matched-head-gain theory predicts a spectral-vs-Frobenius drift boundary through `nrank(G_H) > ssrank(B_T,A_T)`.
-3. Synthetic and long-tailed digits diagnostics provide evidence consistent with lower tail logit drift for idealized spectral/polar directions.
+3. Synthetic and long-tailed digits diagnostics provide direct evidence for lower matched-head-gain tail-example logit drift for idealized spectral/polar directions in the tested settings.
 4. The Muon-style compatibility diagnostics provide selected fixed-state and trajectory-state checks.
 5. The result is about function drift under local matched-head-gain comparisons, not broad Muon performance or final tail accuracy.
 

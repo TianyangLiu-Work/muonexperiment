@@ -10,8 +10,28 @@ PAPER_FIGURE_SOURCES: tuple[tuple[Path, Path], ...] = (
         Path("paper/specgrad_activation_paper/figures/head_tail_drift_ratio.png"),
     ),
     (
+        Path("figures/e11_head_tail_alignment_ablation/head_tail_alignment_ablation.png"),
+        Path("paper/specgrad_activation_paper/figures/head_tail_alignment_ablation.png"),
+    ),
+    (
         Path("figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png"),
         Path("paper/specgrad_activation_paper/figures/long_tail_one_step_tail_response.png"),
+    ),
+    (
+        Path("figures/e11_long_tail_imbalance_ablation/long_tail_imbalance_ablation.png"),
+        Path("paper/specgrad_activation_paper/figures/long_tail_imbalance_ablation.png"),
+    ),
+    (
+        Path("figures/e11_long_tail_checkpoint_sweep/long_tail_checkpoint_sweep.png"),
+        Path("paper/specgrad_activation_paper/figures/long_tail_checkpoint_sweep.png"),
+    ),
+    (
+        Path("figures/e11_long_tail_class_partition_sweep/long_tail_class_partition_sweep.png"),
+        Path("paper/specgrad_activation_paper/figures/long_tail_class_partition_sweep.png"),
+    ),
+    (
+        Path("figures/e11_long_tail_rho_sweep/long_tail_rho_sweep.png"),
+        Path("paper/specgrad_activation_paper/figures/long_tail_rho_sweep.png"),
     ),
     (
         Path("figures/e11_long_tail_muon_bridge/long_tail_muon_bridge.png"),
@@ -20,6 +40,10 @@ PAPER_FIGURE_SOURCES: tuple[tuple[Path, Path], ...] = (
     (
         Path("figures/e11_long_tail_practical_muon_bridge/long_tail_practical_muon_bridge.png"),
         Path("paper/specgrad_activation_paper/figures/long_tail_practical_muon_bridge.png"),
+    ),
+    (
+        Path("figures/e11_long_tail_muon_state_source_control/long_tail_muon_state_source_control.png"),
+        Path("paper/specgrad_activation_paper/figures/long_tail_muon_state_source_control.png"),
     ),
     (
         Path("figures/e11_long_tail_practical_training/long_tail_practical_training.png"),

@@ -109,7 +109,7 @@ def write_discussion(config: LongTailPracticalTrainingConfig, summary, figure_pa
         "selected lightweight setting, the NS-Muon-style run has lower train/head",
         "loss, lower tail eval loss, and lower tail drift than Adam, while tail",
         "accuracy remains unchanged. This supports a narrow practical sanity check",
-        "and reinforces the paper's distinction between continuous tail logits,",
+        "and reinforces the paper's distinction between continuous logits on tail examples,",
         "tail loss/margin, and discrete classification accuracy.",
         "",
         "Caveats:",

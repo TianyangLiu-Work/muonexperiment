@@ -9,6 +9,7 @@ from e11_condition_geometry.artifacts import (
     APPENDIX_RUNNER_SCRIPTS,
     ARTIFACT_DIRS,
     IGNORE_POLICY,
+    KEY_DOCUMENTS,
     KEY_TABLES,
     LEGACY_GUARDRAIL_SCRIPTS,
     MAIN_EVIDENCE_STAGES,
@@ -139,6 +140,18 @@ def test_latex_log_guard_rejects_serious_warnings(tmp_path: Path) -> None:
         validator.assert_latex_log_has_no_serious_warnings(log_path)
 
 
+def test_latex_box_guard_rejects_vbox_warnings(tmp_path: Path) -> None:
+    validator = load_validator_module()
+    log_path = tmp_path / "two_page.log"
+    log_path.write_text(
+        "Overfull \\vbox (0.31131pt too high) has occurred while \\output is active []\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(AssertionError, match="LaTeX box warnings"):
+        validator.assert_latex_log_has_no_box_warnings(log_path)
+
+
 def test_pdf_artifact_guard_accepts_pdf_header_and_size(tmp_path: Path) -> None:
     validator = load_validator_module()
     pdf_path = tmp_path / "main.pdf"
@@ -167,8 +180,7 @@ def test_bibtex_citation_guard_accepts_defined_citations(tmp_path: Path) -> None
     tex_path.write_text(r"\citep{alpha,beta}" "\n", encoding="utf-8")
     bib_path.write_text(
         "@misc{alpha,\n  title={Alpha}\n}\n"
-        "@inproceedings{beta,\n  title={Beta}\n}\n"
-        "@article{unused,\n  title={Unused entries are okay}\n}\n",
+        "@inproceedings{beta,\n  title={Beta}\n}\n",
         encoding="utf-8",
     )
 
@@ -189,11 +201,27 @@ def test_bibtex_citation_guard_rejects_missing_items(tmp_path: Path) -> None:
         validator.assert_bibtex_citations_are_defined(tex_path, bib_path)
 
 
+def test_bibtex_citation_guard_rejects_unused_items(tmp_path: Path) -> None:
+    validator = load_validator_module()
+    tex_path = tmp_path / "main.tex"
+    bib_path = tmp_path / "references.bib"
+    tex_path.write_text(r"\citep{alpha}" "\n", encoding="utf-8")
+    bib_path.write_text(
+        "@misc{alpha,\n  title={Alpha}\n}\n"
+        "@article{unused,\n  title={Unused}\n}\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(AssertionError, match="entries not cited"):
+        validator.assert_bibtex_citations_are_defined(tex_path, bib_path)
+
+
 def valid_manifest() -> dict:
     return {
         "validation_command": "python3 scripts/e11_validate_outputs.py",
         "artifact_dirs": [{"path": item["path"]} for item in ARTIFACT_DIRS],
         "key_tables": [{"path": path, "rows": 1} for path in KEY_TABLES],
+        "key_documents": [{"path": path} for path in KEY_DOCUMENTS],
         "ignore_policy": [{"path_or_pattern": item["path_or_pattern"]} for item in IGNORE_POLICY],
     }
 
@@ -228,6 +256,7 @@ def test_artifact_registry_has_unique_entries() -> None:
 
     assert len(artifact_paths) == len(set(artifact_paths))
     assert len(KEY_TABLES) == len(set(KEY_TABLES))
+    assert len(KEY_DOCUMENTS) == len(set(KEY_DOCUMENTS))
     assert len(ignored_paths) == len(set(ignored_paths))
     assert len(MAIN_RESULT_SCRIPTS) == len(set(MAIN_RESULT_SCRIPTS))
     assert len(APPENDIX_RUNNER_SCRIPTS) == len(set(APPENDIX_RUNNER_SCRIPTS))

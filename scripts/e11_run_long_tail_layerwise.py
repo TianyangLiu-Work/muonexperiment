@@ -33,36 +33,36 @@ def write_figure(metrics, summary) -> Path:
         summary["geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro"],
         width=width,
         color="#0072B2",
-        label="scaled JVP drift ratio",
+        label="scaled JVP squared drift ratio",
     )
     axes[0].bar(
         [value + width / 2 for value in x],
         summary["geomean_observed_tail_drift_sq_ratio_spectral_over_fro"],
         width=width,
         color="#D55E00",
-        label="observed drift ratio",
+        label="observed squared drift ratio",
     )
     axes[0].axhline(1.0, color="black", linewidth=1.0, linestyle="--")
     axes[0].set_yscale("log")
     axes[0].set_xticks(list(x))
     axes[0].set_xticklabels([f"layer {int(layer)}" for layer in summary["layer"]])
     axes[0].set_ylabel("spectral / Fro")
-    axes[0].set_title("Layerwise tail-drift ratios")
+    axes[0].set_title("Layerwise squared tail-drift ratios")
     axes[0].legend(frameon=False)
 
     for geometry, color, label in [("frobenius", "#D55E00", "Fro/GD"), ("spectral", "#0072B2", "Spectral")]:
         subset = metrics[metrics["geometry"] == geometry]
         axes[1].scatter(
-            subset["condition_score"],
+            subset["local_operator_condition_score"],
             subset["tail_output_drift_fro"],
             s=28,
             alpha=0.75,
             color=color,
             label=label,
         )
-    axes[1].set_xlabel("layer condition score nr(G_l) / st(A_l)")
+    axes[1].set_xlabel("local operator score nr(G_l) / sr(J_T,l)")
     axes[1].set_ylabel("layer-only tail output drift")
-    axes[1].set_title("Condition proxy vs observed drift")
+    axes[1].set_title("Downstream-aware score vs observed drift")
     axes[1].legend(frameon=False)
     fig.tight_layout()
     path = FIGURE_DIR / "long_tail_layerwise_drift.png"
@@ -77,8 +77,9 @@ def write_discussion(config: LongTailLayerwiseConfig, summary, figure_path: Path
         "",
         "This probe uses the same imbalanced sklearn digits checkpoint as the one-step",
         "and head-only forgetting diagnostics. For each layer, it measures the head",
-        "gradient rank, tail activation stable rank, finite-difference tail JVP drift,",
-        "and layer-only tail drift under matched first-order head gain.",
+        "gradient rank, tail activation stable rank, downstream-aware tail rank,",
+        "finite-difference tail JVP drift, and layer-only tail drift under matched",
+        "first-order head gain.",
         "",
         f"- Seeds: {len(config.seeds)}",
         f"- Layers: 2",
@@ -89,10 +90,10 @@ def write_discussion(config: LongTailLayerwiseConfig, summary, figure_path: Path
         f"- JVP finite-difference epsilon: {config.jvp_epsilon}",
         "",
         "Ratio columns are spectral divided by Frobenius/GD. Values below 1 mean the",
-        "spectral layer direction disturbs held-out tail logits less.",
+        "spectral layer direction disturbs logits on held-out tail examples less.",
         "",
-        "| layer | condition score | unit-JVP drift-sq ratio 95% CI | scaled-JVP drift-sq ratio 95% CI | observed drift-sq ratio 95% CI | spectral lower observed fraction | tail loss diff 95% CI |",
-        "|---:|---:|---:|---:|---:|---:|---:|",
+        "| layer | activation-only score nr(G)/sr(A) | downstream-aware rank | local operator score | unit-JVP squared drift ratio 95% CI | scaled-JVP squared drift ratio 95% CI | observed squared drift ratio 95% CI | spectral lower observed fraction | tail loss diff 95% CI |",
+        "|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in summary.sort_values("layer").to_dict(orient="records"):
         lines.append(
@@ -101,6 +102,12 @@ def write_discussion(config: LongTailLayerwiseConfig, summary, figure_path: Path
                 [
                     str(int(row["layer"])),
                     _fmt(row["mean_condition_score"]),
+                    (
+                        _fmt(row["mean_tail_sandwiched_stable_rank"])
+                        if row["mean_tail_sandwiched_stable_rank"] == row["mean_tail_sandwiched_stable_rank"]
+                        else "n/a"
+                    ),
+                    _fmt(row["mean_local_operator_condition_score"]),
                     (
                         f"{_fmt(row['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])} "
                         f"[{_fmt(row['jvp_tail_drift_sq_ratio_ci95_low'])}, "
@@ -134,15 +141,21 @@ def write_discussion(config: LongTailLayerwiseConfig, summary, figure_path: Path
             "",
             "Main readout: this is a layer-level check of the head-to-tail mechanism.",
             "The strongest supported statement is whether finite-difference tail JVP",
-            "ratios, head-gain scaling, and layer-only observed drift ratios agree layer",
+            "squared drift ratios, head-gain scaling, and layer-only observed squared drift ratios agree layer",
             "by layer. Unit JVP drift measures tail sensitivity of the direction; scaled",
             "JVP drift also includes the smaller/larger step required to match head gain.",
+            "For layer 2, `downstream-aware rank` is the exact sandwich quantity",
+            "`ssrank(B_T,A_T)` because the final linear layer has a single downstream",
+            "matrix. For layer 1, ReLU gates vary across tail samples, so the layer is",
+            "not a single `B_T D A_T` block; the table instead reports the exact stable",
+            "rank of the frozen-gate local linear operator `J_{T,1}` through the",
+            "`local operator score`.",
             "",
-            "Across both layers, the Spearman correlation between condition score and",
-            "observed spectral/Fro drift ratio is "
-            f"{_fmt(first['condition_observed_ratio_spearman_all_layers'])} "
-            f"[{_fmt(first['condition_observed_ratio_spearman_ci95_low'])}, "
-            f"{_fmt(first['condition_observed_ratio_spearman_ci95_high'])}].",
+            "Across both layers, the Spearman correlation between local operator score and",
+            "the observed spectral/Frobenius squared drift ratio is "
+            f"{_fmt(first['local_operator_score_observed_ratio_spearman_all_layers'])} "
+            f"[{_fmt(first['local_operator_score_observed_ratio_spearman_ci95_low'])}, "
+            f"{_fmt(first['local_operator_score_observed_ratio_spearman_ci95_high'])}].",
             "",
             "Caveats:",
             "- This is still a small MLP diagnostic, not an exact matrix-block theorem check.",

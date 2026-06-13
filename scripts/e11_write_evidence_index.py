@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 
@@ -23,11 +24,20 @@ def ci(row: pd.Series, low: str, high: str) -> str:
     return f"[{fmt(row[low])}, {fmt(row[high])}]"
 
 
+def paired_geomean_ratio(step_metrics: pd.DataFrame, numerator: str, denominator: str, column: str) -> float:
+    wide = step_metrics.pivot(index="seed", columns="geometry", values=column)
+    return math.exp((wide[numerator] / wide[denominator]).map(math.log).mean())
+
+
 def main() -> None:
     head_tail = pd.read_csv("results/e11_head_tail_interference/pair_summary.csv").set_index("setting")
+    one_step_steps = pd.read_csv("results/e11_long_tail_one_step/step_metrics.csv")
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
+    state_control = pd.read_csv(
+        "results/e11_long_tail_muon_state_source_control/summary.csv"
+    ).set_index(["state_source", "direction"])
     practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
     practical_lr_sweep = pd.read_csv("results/e11_long_tail_practical_training_lr_sweep/sweep_summary.csv")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
@@ -38,6 +48,9 @@ def main() -> None:
     positive = head_tail.loc["high_head_rank_low_tail_srank"]
     negative = head_tail.loc["low_head_rank_high_tail_srank"]
     lr_sweep = practical_lr_sweep.assign(muon_lr_rounded=practical_lr_sweep["muon_lr"].round(3)).set_index("muon_lr_rounded")
+    alignment_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "alignment")
+    update_fro_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "update_fro_norm")
+    update_op_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "update_op_norm")
 
     evidence = pd.DataFrame(
         [
@@ -48,7 +61,7 @@ def main() -> None:
                 "quantitative_anchor": (
                     f"nrank(G_H)={fmt(positive['mean_head_gradient_nuclear_rank'])}; "
                     f"ssrank(B_T,A_T)={fmt(positive['mean_tail_downstream_aware_stable_rank'])}; "
-                    f"drift ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"squared drift ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{ci(positive, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
                 "how_to_read": "The spectral/polar direction causes less tail drift when head gradient nuclear rank exceeds the downstream tail sensitivity rank.",
@@ -61,22 +74,25 @@ def main() -> None:
                 "quantitative_anchor": (
                     f"nrank(G_H)={fmt(negative['mean_head_gradient_nuclear_rank'])}; "
                     f"ssrank(B_T,A_T)={fmt(negative['mean_tail_downstream_aware_stable_rank'])}; "
-                    f"drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"squared drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{ci(negative, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
                 "how_to_read": "When the rank/sensitivity inequality is reversed, spectral/polar drift is larger rather than smaller.",
                 "caveat": "The current negative case tests sign logic, not a learned predictor.",
             },
             {
-                "claim": "Long-tailed one-step updates reduce tail logit drift at matched head gain.",
+                "claim": "Long-tailed one-step updates reduce tail-example logit drift at matched head gain.",
                 "recommended_figure": link("figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png"),
                 "source_data": link("results/e11_long_tail_one_step/pair_summary.csv"),
                 "quantitative_anchor": (
-                    f"drift ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"squared drift ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{ci(one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"head-alignment ratio={fmt(alignment_ratio)}; "
+                    f"Frobenius-norm ratio={fmt(update_fro_ratio)}; "
+                    f"operator-norm ratio={fmt(update_op_ratio)}; "
                     f"paired fraction={fmt(one_step['spectral_less_tail_output_drift_fraction'])}."
                 ),
-                "how_to_read": "Ratios below 1 mean spectral/polar updates move tail logits less than Frobenius/GD-style updates for the same first-order head gain.",
+                "how_to_read": "Ratios below 1 mean spectral/polar updates move logits on held-out tail examples less than Frobenius/GD-style updates for the same first-order head gain; the matched step is smaller in operator norm but larger in Frobenius norm.",
                 "caveat": "Tail loss increases slightly more for spectral in this one-step table, so the result is about function drift.",
             },
             {
@@ -84,7 +100,7 @@ def main() -> None:
                 "recommended_figure": link("figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png"),
                 "source_data": link("results/e11_long_tail_forgetting/summary.csv"),
                 "quantitative_anchor": (
-                    f"final drift ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"final squared drift ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{ci(forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}; "
                     f"area ratio={fmt(forgetting['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} "
                     f"{ci(forgetting, 'tail_output_drift_area_ratio_ci95_low', 'tail_output_drift_area_ratio_ci95_high')}."
@@ -97,12 +113,12 @@ def main() -> None:
                 "recommended_figure": link("figures/e11_long_tail_muon_bridge/long_tail_muon_bridge.png"),
                 "source_data": link("results/e11_long_tail_muon_bridge/pair_summary.csv"),
                 "quantitative_anchor": (
-                    f"polar(M_t) drift ratio={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"polar(M_t) squared drift ratio={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{ci(muon_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
-                    f"NS(M_t) drift ratio={fmt(muon_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"NS(M_t) squared drift ratio={fmt(muon_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{ci(muon_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
                 ),
-                "how_to_read": "Momentum polar has a drift ratio below 1, while the finite Newton-Schulz approximation is weaker and its confidence interval crosses 1.",
+                "how_to_read": "Momentum polar has a squared drift ratio below 1, while the finite Newton-Schulz approximation is weaker and its confidence interval crosses 1.",
                 "caveat": "This is a selected-state local diagnostic at fixed checkpoints, not proof of full Muon training behavior.",
             },
             {
@@ -110,17 +126,32 @@ def main() -> None:
                 "recommended_figure": link("figures/e11_long_tail_practical_muon_bridge/long_tail_practical_muon_bridge.png"),
                 "source_data": link("results/e11_long_tail_practical_muon_bridge/summary.csv"),
                 "quantitative_anchor": (
-                    f"trajectory polar(M_t) drift ratio={fmt(practical_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"trajectory polar(M_t) squared drift ratio={fmt(practical_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{ci(practical_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
-                    f"trajectory NS(M_t) drift ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"trajectory NS(M_t) squared drift ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{ci(practical_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')} over "
                     f"{int(practical_bridge.loc['ns_momentum', 'comparisons'])} state-step comparisons."
                 ),
-                "how_to_read": "Sampled short-trajectory Muon-style states have matched-head-gain drift ratios below Fro/GD in this diagnostic.",
+                "how_to_read": "Sampled short-trajectory Muon-style states have matched-head-gain squared drift ratios below Fro/GD in this diagnostic.",
                 "caveat": "This is still a local diagnostic on small digits, not a final optimizer-performance benchmark.",
             },
             {
-                "claim": "A small practical imbalanced-training run is consistent with the tail-drift story.",
+                "claim": "The short-trajectory Muon-style compatibility signal is not unique to NS-Muon-generated states.",
+                "recommended_figure": link("figures/e11_long_tail_muon_state_source_control/long_tail_muon_state_source_control.png"),
+                "source_data": link("results/e11_long_tail_muon_state_source_control/summary.csv"),
+                "quantitative_anchor": (
+                    f"Fro/GD-state polar(M_t) squared drift ratio="
+                    f"{fmt(state_control.loc[('fro_gd_trajectory', 'polar_momentum'), 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{ci(state_control.loc[('fro_gd_trajectory', 'polar_momentum')], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
+                    f"Fro/GD-state NS(M_t) squared drift ratio="
+                    f"{fmt(state_control.loc[('fro_gd_trajectory', 'ns_momentum'), 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{ci(state_control.loc[('fro_gd_trajectory', 'ns_momentum')], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
+                ),
+                "how_to_read": "Evaluating Muon-style directions on Fro/GD-generated states reduces the concern that the trajectory diagnostic only works because states were generated by NS-Muon-style updates.",
+                "caveat": "This is one state-source control, not a random-checkpoint distribution or a full optimizer benchmark.",
+            },
+            {
+                "claim": "A small practical imbalanced-training run reports lower tail loss and higher measured tail margin in a fixed diagnostic.",
                 "recommended_figure": link("figures/e11_long_tail_practical_training/long_tail_practical_training.png"),
                 "source_data": link("results/e11_long_tail_practical_training/summary.csv"),
                 "quantitative_anchor": (
@@ -133,7 +164,7 @@ def main() -> None:
                     f"tail drift RMS ratio={fmt(practical_training['geomean_final_tail_eval_drift_rms_ratio_muon_over_adam'])} "
                     f"{ci(practical_training, 'final_tail_eval_drift_rms_ratio_ci95_low', 'final_tail_eval_drift_rms_ratio_ci95_high')}."
                 ),
-                "how_to_read": "The finite-NS Muon-style run has lower train/head loss, a higher measured tail-margin reading, and lower measured tail drift in this fixed lightweight training loop.",
+                "how_to_read": "The finite-NS Muon-style run reports lower train/head loss and a higher measured tail-margin reading in this fixed lightweight training loop; the drift RMS value is reported as a separate diagnostic number.",
                 "caveat": "Tail accuracy difference is 0 and hyperparameters are fixed; this is a sanity check, not a broad optimizer benchmark.",
             },
             {
@@ -142,7 +173,7 @@ def main() -> None:
                 "source_data": link("results/e11_long_tail_practical_training_lr_sweep/sweep_summary.csv"),
                 "quantitative_anchor": (
                     f"lr=0.003 train ratio={fmt(lr_sweep.loc[0.003, 'geomean_final_train_loss_ratio_muon_over_adam'])}; "
-                    f"lr=0.03 tail drift ratio={fmt(lr_sweep.loc[0.03, 'geomean_final_tail_eval_drift_rms_ratio_muon_over_adam'])}; "
+                    f"lr=0.03 tail drift RMS ratio={fmt(lr_sweep.loc[0.03, 'geomean_final_tail_eval_drift_rms_ratio_muon_over_adam'])}; "
                     f"lr=0.1 tail loss ratio={fmt(lr_sweep.loc[0.1, 'geomean_final_tail_eval_loss_ratio_muon_over_adam'])}."
                 ),
                 "how_to_read": "The selected lr=0.03 is a tested operating point between under-training and over-shooting the tail.",
@@ -160,7 +191,7 @@ def main() -> None:
                 "caveat": "This is the main mechanism caveat: direction alone is not enough.",
             },
             {
-                "claim": "Layerwise matched-head-gain scaling explains the observed lower drift.",
+                "claim": "Layerwise matched-head-gain scaling explains the observed lower drift in a norm-specific way.",
                 "recommended_figure": link("figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png"),
                 "source_data": link("results/e11_long_tail_layerwise/summary.csv"),
                 "quantitative_anchor": (
@@ -169,7 +200,7 @@ def main() -> None:
                     f"observed ratios: layer 1={fmt(layer_one['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}, "
                     f"layer 2={fmt(layer_two['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}."
                 ),
-                "how_to_read": "After matching the head gain, spectral/polar needs a smaller effective step and produces lower observed tail drift.",
+                "how_to_read": "After matching the head gain, spectral/polar can use a smaller operator-norm step despite a larger Frobenius-norm step, and the scaled readout matches observed lower tail drift.",
                 "caveat": "This is evidence for scaled head-gain efficiency, not a universal spectral-stability claim.",
             },
             {
@@ -182,7 +213,7 @@ def main() -> None:
                     f"tail-accuracy-drop diff={fmt(one_step['mean_tail_accuracy_drop_diff_spectral_minus_fro'])} "
                     f"{ci(one_step, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')}."
                 ),
-                "how_to_read": "The one-step table is about tail logit drift, while the small practical training run is only a narrow tail-loss/margin diagnostic.",
+                "how_to_read": "The one-step table is about tail-example logit drift, while the small practical training run is only a narrow tail-loss/margin diagnostic.",
                 "caveat": "A stronger claim needs real long-tail benchmarks and larger practical Muon training ablations.",
             },
         ]

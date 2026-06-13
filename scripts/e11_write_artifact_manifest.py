@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from e11_condition_geometry.artifacts import ARTIFACT_DIRS, IGNORE_POLICY, KEY_TABLES
+from e11_condition_geometry.artifacts import ARTIFACT_DIRS, IGNORE_POLICY, KEY_DOCUMENTS, KEY_TABLES
 from e11_condition_geometry.reporting import markdown_table, write_markdown
 
 
@@ -54,6 +54,13 @@ def main() -> None:
         }
         for path in KEY_TABLES
     ]
+    document_rows = [
+        {
+            "path": path,
+            "size": human_size(path_size_bytes(Path(path))),
+        }
+        for path in KEY_DOCUMENTS
+    ]
 
     ignore_policy = [dict(item) for item in IGNORE_POLICY]
 
@@ -61,6 +68,7 @@ def main() -> None:
         "purpose": "E11 reproducibility and artifact-boundary manifest.",
         "artifact_dirs": artifact_dirs,
         "key_tables": table_rows,
+        "key_documents": document_rows,
         "ignore_policy": ignore_policy,
         "validation_command": "make e11-check",
     }
@@ -69,6 +77,7 @@ def main() -> None:
 
     artifact_frame = pd.DataFrame(artifact_dirs)
     table_frame = pd.DataFrame(table_rows)
+    document_frame = pd.DataFrame(document_rows)
     ignore_frame = pd.DataFrame(ignore_policy)
     text = f"""# E11 Artifact Manifest
 
@@ -81,6 +90,10 @@ This generated manifest documents the current reproducibility boundary for E11. 
 ## Key Quantitative Tables
 
 {markdown_table(table_frame, ["path", "rows", "size"])}
+
+## Key Paper Documents
+
+{markdown_table(document_frame, ["path", "size"])}
 
 ## Ignored Local Artifacts
 

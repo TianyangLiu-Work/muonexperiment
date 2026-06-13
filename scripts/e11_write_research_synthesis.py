@@ -24,6 +24,9 @@ def main() -> None:
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
+    state_control = pd.read_csv(
+        "results/e11_long_tail_muon_state_source_control/summary.csv"
+    ).set_index(["state_source", "direction"])
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
     layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
     layer_one = layerwise[layerwise["layer"].eq(1)].iloc[0]
@@ -45,23 +48,23 @@ def main() -> None:
                 "claim": "The rank/sensitivity condition has the correct synthetic boundary behavior.",
                 "status": "supported",
                 "evidence": (
-                    f"Positive case ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"Positive case squared drift ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{ci(positive, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
-                    f"negative case ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"negative case squared drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{ci(negative, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
                 "interpretation": "The constructed examples verify that the theorem condition is not merely decorative.",
                 "caveat": "This does not by itself prove predictive power on natural tasks.",
             },
             {
-                "claim": "Long-tailed one-step diagnostics show lower tail logit drift.",
+                "claim": "Long-tailed one-step diagnostics show lower tail-example logit drift.",
                 "status": "supported",
                 "evidence": (
                     f"Drift-squared ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{ci(one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
                     f"spectral-lower paired fraction={fmt(one_step['spectral_less_tail_output_drift_fraction'])}."
                 ),
-                "interpretation": "At the same first-order head progress, spectral/polar updates perturb held-out tail logits less.",
+                "interpretation": "At the same first-order head progress, spectral/polar updates perturb logits on held-out tail examples less.",
                 "caveat": (
                     f"Tail-loss increase diff is {fmt(one_step['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
                     f"{ci(one_step, 'tail_loss_increase_diff_ci95_low', 'tail_loss_increase_diff_ci95_high')}, "
@@ -72,7 +75,7 @@ def main() -> None:
                 "claim": "The drift advantage persists in a short head-only forgetting horizon.",
                 "status": "supported",
                 "evidence": (
-                    f"Final drift ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"Final squared drift ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{ci(forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}; "
                     f"area ratio={fmt(forgetting['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} "
                     f"{ci(forgetting, 'tail_output_drift_area_ratio_ci95_low', 'tail_output_drift_area_ratio_ci95_high')}."
@@ -84,19 +87,22 @@ def main() -> None:
                 "claim": "Muon-style directions show selected-state compatibility across a short practical trajectory.",
                 "status": "supported as a compatibility diagnostic",
                 "evidence": (
-                    f"polar(M_t) drift ratio={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"polar(M_t) squared drift ratio={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{ci(muon_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
-                    f"short-trajectory NS(M_t) ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
-                    f"{ci(practical_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
+                    f"short-trajectory NS(M_t) squared drift ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{ci(practical_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
+                    f"Fro/GD-state NS(M_t) squared drift ratio="
+                    f"{fmt(state_control.loc[('fro_gd_trajectory', 'ns_momentum'), 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{ci(state_control.loc[('fro_gd_trajectory', 'ns_momentum')], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
                 ),
-                "interpretation": "Sampled Muon-style momentum/NS states have drift ratios compatible with the clean polar(G_t) mechanism.",
+                "interpretation": "Sampled Muon-style momentum/NS states have squared drift ratios compatible with the clean polar(G_t) mechanism, including on a Fro/GD-generated state-source control.",
                 "caveat": "This is still a local matched-head-gain diagnostic on small digits, not a full long-tail optimizer benchmark.",
             },
             {
                 "claim": "Layerwise evidence points to matched-head-gain scaling, not intrinsically safer directions.",
                 "status": "supported as a mechanism refinement",
                 "evidence": (
-                    f"Layer 1 unit/scaled/observed ratios="
+                    f"Layer 1 unit/scaled/observed squared drift ratios="
                     f"{fmt(layer_one['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
                     f"{fmt(layer_one['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
                     f"{fmt(layer_one['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}; "
@@ -139,7 +145,7 @@ For the figure/CSV source behind each claim, see [E11 evidence index](e11_eviden
 
 ## Current Thesis
 
-**The current paper is a head-to-tail interference mechanism paper.** In long-tailed small-batch training, head-only updates can perturb tail logits while tail examples are absent. The supported claim is that an idealized spectral/polar direction can reduce this tail logit drift at matched head gain under a measurable rank/sensitivity condition. Fixed-checkpoint and short-trajectory Muon-style directions show selected-state compatibility with the polar mechanism, but this is still not a claim that full Muon improves final tail accuracy.
+**The current paper is a head-to-tail interference mechanism paper.** In long-tailed small-batch training, head-only updates can perturb logits on held-out tail examples while those examples are absent from the update. The supported claim is that an idealized spectral/polar direction can reduce this tail-example logit drift at matched head gain under a measurable rank/sensitivity condition. Fixed-checkpoint and short-trajectory Muon-style directions show selected-state compatibility with the polar mechanism, but this is still not a claim that full Muon improves final tail accuracy.
 
 ## Claim Cards
 

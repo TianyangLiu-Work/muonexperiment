@@ -28,8 +28,10 @@ def write_figure(step_metrics, summary) -> Path:
     labels = {"frobenius": "Fro/GD", "spectral": "Spectral"}
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
 
+    step_metrics = step_metrics.copy()
+    step_metrics["tail_output_drift_rms_sq"] = step_metrics["tail_output_drift_rms"] ** 2
     grouped = step_metrics.groupby(["geometry", "step"], observed=True, sort=False).agg(
-        mean_tail_drift=("tail_output_drift_rms", "mean"),
+        mean_tail_drift=("tail_output_drift_rms_sq", "mean"),
         mean_tail_loss_increase=("tail_loss_increase", "mean"),
     )
     for geometry in ["frobenius", "spectral"]:
@@ -43,7 +45,7 @@ def write_figure(step_metrics, summary) -> Path:
             label=labels[geometry],
         )
     axes[0].set_xlabel("head-only step")
-    axes[0].set_ylabel("tail output drift RMS")
+    axes[0].set_ylabel("mean squared tail-example logit drift")
     axes[0].set_title("Tail function drift accumulates")
     axes[1].set_xlabel("head-only step")
     axes[1].set_ylabel("tail loss increase")
@@ -53,7 +55,7 @@ def write_figure(step_metrics, summary) -> Path:
     row = summary.iloc[0]
     fig.suptitle(
         "Head-only forgetting probe: "
-        f"final drift-sq ratio={row['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro']:.3g} "
+        f"final squared drift ratio={row['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro']:.3g} "
         f"[{row['final_tail_output_drift_sq_ratio_ci95_low']:.3g}, "
         f"{row['final_tail_output_drift_sq_ratio_ci95_high']:.3g}]"
     )
@@ -73,7 +75,11 @@ def write_discussion(config: LongTailForgettingConfig, summary, figure_path: Pat
         "one-step diagnostic, then runs several consecutive head-only updates while",
         "tail classes 5-9 are held out. Frobenius/GD and spectral/polar directions use",
         "the same precomputed head mini-batches and the same target first-order head",
-        "gain schedule for each seed.",
+        "gain schedule for each seed. The schedule stores each target gain as",
+        "`0.02 * reference head-batch loss` at the initial checkpoint before either",
+        "geometry is rolled out, so the intended first-order head-gain budget is",
+        "matched per seed and step; realized nonlinear head-loss decreases are only",
+        "measured after each update.",
         "",
         f"- Seeds: {len(config.seeds)}",
         f"- Head-only steps: {config.head_only_steps}",
@@ -87,10 +93,10 @@ def write_discussion(config: LongTailForgettingConfig, summary, figure_path: Pat
         "",
         "| quantity | value |",
         "|---|---:|",
-        f"| final tail drift-sq ratio, spectral/Fro | {_fmt(row['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} [{_fmt(row['final_tail_output_drift_sq_ratio_ci95_low'])}, {_fmt(row['final_tail_output_drift_sq_ratio_ci95_high'])}] |",
-        f"| spectral lower final tail drift fraction | {_fmt(row['spectral_less_final_tail_output_drift_fraction'])} |",
-        f"| tail-drift area ratio, spectral/Fro | {_fmt(row['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} [{_fmt(row['tail_output_drift_area_ratio_ci95_low'])}, {_fmt(row['tail_output_drift_area_ratio_ci95_high'])}] |",
-        f"| spectral lower tail-drift area fraction | {_fmt(row['spectral_less_tail_output_drift_area_fraction'])} |",
+        f"| final squared tail-example logit drift ratio, spectral/Fro | {_fmt(row['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} [{_fmt(row['final_tail_output_drift_sq_ratio_ci95_low'])}, {_fmt(row['final_tail_output_drift_sq_ratio_ci95_high'])}] |",
+        f"| spectral lower final squared tail-example logit drift fraction | {_fmt(row['spectral_less_final_tail_output_drift_fraction'])} |",
+        f"| squared tail-example logit drift area ratio, spectral/Fro | {_fmt(row['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} [{_fmt(row['tail_output_drift_area_ratio_ci95_low'])}, {_fmt(row['tail_output_drift_area_ratio_ci95_high'])}] |",
+        f"| spectral lower squared tail-example logit drift area fraction | {_fmt(row['spectral_less_tail_output_drift_area_fraction'])} |",
         f"| final tail loss increase diff, spectral - Fro | {_fmt(row['mean_final_tail_loss_increase_diff_spectral_minus_fro'])} [{_fmt(row['final_tail_loss_increase_diff_ci95_low'])}, {_fmt(row['final_tail_loss_increase_diff_ci95_high'])}] |",
         f"| final tail margin drop diff, spectral - Fro | {_fmt(row['mean_final_tail_margin_drop_diff_spectral_minus_fro'])} [{_fmt(row['final_tail_margin_drop_diff_ci95_low'])}, {_fmt(row['final_tail_margin_drop_diff_ci95_high'])}] |",
         f"| spectral proxy-drift Spearman | {_fmt(row.get('spectral_proxy_drift_spearman', float('nan')))} [{_fmt(row.get('spectral_proxy_drift_spearman_ci95_low', float('nan')))}, {_fmt(row.get('spectral_proxy_drift_spearman_ci95_high', float('nan')))}] |",

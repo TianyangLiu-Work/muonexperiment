@@ -41,9 +41,9 @@ def main() -> None:
                     "Controlled head-to-tail boundary check. In the positive setting, "
                     f"nrank(G_H)={fmt(positive['mean_head_gradient_nuclear_rank'])} exceeds "
                     f"ssrank(B_T,A_T)={fmt(positive['mean_tail_downstream_aware_stable_rank'])} and the spectral/Frobenius "
-                    f"tail drift-squared ratio is {fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
+                    f"squared tail-example logit drift ratio is {fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
                     f"In the negative setting, nrank(G_H)={fmt(negative['mean_head_gradient_nuclear_rank'])} is below "
-                    f"ssrank(B_T,A_T)={fmt(negative['mean_tail_downstream_aware_stable_rank'])} and the ratio is "
+                    f"ssrank(B_T,A_T)={fmt(negative['mean_tail_downstream_aware_stable_rank'])} and the squared drift ratio is "
                     f"{fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}."
                 ),
                 "interpretation": "This is consistent with the sign of the theorem boundary in a controlled construction, not a predictive claim for all natural tasks.",
@@ -53,20 +53,20 @@ def main() -> None:
                 "artifact": "figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png",
                 "caption": (
                     "One-step long-tailed digits diagnostic under matched head gain. The spectral/polar direction has "
-                    f"tail drift-squared ratio {fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"squared tail-example logit drift ratio {fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{interval(one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')} "
                     "relative to Frobenius/GD, with lower drift in all paired seeds."
                 ),
-                "interpretation": "The paper-facing quantity is held-out tail logit drift; the figure should not be read as a tail accuracy result.",
+                "interpretation": "The paper-facing quantity is held-out tail-example logit drift; the figure should not be read as a tail accuracy result.",
             },
             {
                 "slot": "Figure 3",
                 "artifact": "figures/e11_long_tail_muon_bridge/long_tail_muon_bridge.png",
                 "caption": (
                     "Local Muon-style compatibility diagnostic. Replacing the ideal current-gradient polar direction by momentum polar "
-                    f"gives tail drift-squared ratio {fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"gives squared tail-example logit drift ratio {fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{interval(muon_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')} "
-                    "relative to Frobenius/GD. The finite Newton-Schulz momentum approximation gives ratio "
+                    "relative to Frobenius/GD. The finite Newton-Schulz momentum approximation gives squared drift ratio "
                     f"{fmt(muon_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{interval(muon_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
                 ),
@@ -77,9 +77,9 @@ def main() -> None:
                 "artifact": "figures/e11_long_tail_practical_muon_bridge/long_tail_practical_muon_bridge.png",
                 "caption": (
                     "Short practical NS-Muon trajectory compatibility diagnostic. Across sampled trajectory states, momentum polar gives "
-                    f"tail drift-squared ratio {fmt(practical_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"squared tail-example logit drift ratio {fmt(practical_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{interval(practical_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}, "
-                    "and finite Newton-Schulz momentum gives ratio "
+                    "and finite Newton-Schulz momentum gives squared drift ratio "
                     f"{fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
                     f"{interval(practical_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
                 ),
@@ -106,7 +106,7 @@ def main() -> None:
                 "slot": "Figure 6",
                 "artifact": "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png",
                 "caption": (
-                    "Eight-step head-only forgetting probe. The final spectral/Frobenius tail drift-squared ratio is "
+                    "Eight-step head-only forgetting probe. The final spectral/Frobenius squared tail-example logit drift ratio is "
                     f"{fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"{interval(forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}, "
                     f"and the drift-area ratio is {fmt(forgetting['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} "
@@ -148,7 +148,7 @@ This generated note drafts paper-safe captions for the current head-to-tail pape
 ## Caption Discipline
 
 1. Every main caption should include a quantitative anchor.
-2. Captions should distinguish tail logit drift from tail loss, margin, accuracy, or final performance.
+2. Captions should distinguish tail-example logit drift from tail loss, margin, accuracy, or final performance.
 3. The wording should follow the claim boundaries in [e11_paper_readiness_audit.md](e11_paper_readiness_audit.md) and [e11_reviewer_risk_audit.md](e11_reviewer_risk_audit.md).
 """
     write_markdown(OUTPUT_PATH, text)

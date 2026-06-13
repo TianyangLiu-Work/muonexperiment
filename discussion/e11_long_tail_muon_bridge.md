@@ -24,7 +24,7 @@ Settings:
 
 ## Summary
 
-| direction | tail drift-sq ratio vs Fro/GD | drift ratio vs polar(G_t) | cosine to polar(G_t) | alignment ratio to polar(G_t) |
+| direction | squared drift ratio vs Fro/GD | squared drift ratio vs polar(G_t) | cosine to polar(G_t) | alignment ratio to polar(G_t) |
 |---|---:|---:|---:|---:|
 | polar($G_t$) | 0.5501 [0.5101, 0.5931] | 1 [1, 1] | 1 [1, 1] | 1 [1, 1] |
 | polar($M_t$) | 0.8199 [0.6951, 0.9672] | 1.491 [1.281, 1.735] | 0.3785 [0.3541, 0.4029] | 0.8179 [0.7544, 0.8867] |
@@ -46,11 +46,11 @@ If `polar(M_t)` and `NS(M_t)` have tail drift below Fro/GD while maintaining hig
 cosine and alignment with `polar(G_t)`, the paper can describe the sampled
 Muon-style directions as compatible with the ideal spectral direction in this
 local diagnostic. If these rows degrade, the safe statement remains only about
-SpecGrad/polar geometry.
+spectral-gradient/polar geometry.
 
-Current readout: `polar(M_t)` has tail drift-sq ratio
+Current readout: `polar(M_t)` has squared tail-example logit drift ratio
 `0.8199` vs Fro/GD,
-and `NS(M_t)` has ratio
+and `NS(M_t)` has squared drift ratio
 `0.9116`. This supports
 only a selected-state compatibility check; it still does not prove full Muon
 training performance.

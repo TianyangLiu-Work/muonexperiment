@@ -29,12 +29,12 @@ condition is
 | experiment | status | strongest supported statement | key caveat |
 |---|---|---|---|
 | Synthetic head-tail linear model | completed | The sign of `nrank(G_H) > ssrank(B_T,A_T)` matches whether spectral/polar has lower tail drift in controlled positive and negative boundary settings. | Synthetic construction controls singular values directly; it is a boundary sanity check, not a natural-data benchmark. |
-| Long-tailed digits one-step diagnostic | completed | On 20 paired seeds, spectral/polar produces lower held-out tail logit drift than Fro/GD after matching head first-order gain. | Tail loss and margin do not improve in the same direction; the supported quantity is tail logit drift. |
-| Long-tailed digits Muon bridge diagnostic | completed | `polar(M_t)` still has lower matched-head-gain tail drift than Fro/GD: drift-squared ratio `0.8199 [0.6951, 0.9672]`. | Newton-Schulz `NS(M_t)` is weaker: `0.9116 [0.7696, 1.080]`, so this is a local bridge, not a full practical-Muon training claim. |
-| Short practical-Muon trajectory bridge | completed | Across 120 sampled state-step comparisons, `polar(M_t)` and `NS(M_t)` both have lower matched-head-gain tail drift than Fro/GD: ratios `0.7292 [0.6960, 0.7641]` and `0.8019 [0.7644, 0.8413]`. | This is still a short local diagnostic on sampled states; it does not establish final tail accuracy, long-horizon training behavior, or hyperparameter robustness. |
+| Long-tailed digits one-step diagnostic | completed | On 20 paired seeds, spectral/polar produces lower held-out tail-example logit drift than Fro/GD after matching head first-order gain. | Tail loss and margin do not improve in the same direction; the supported quantity is tail-example logit drift. |
+| Long-tailed digits Muon bridge diagnostic | completed | `polar(M_t)` still has lower matched-head-gain tail drift than Fro/GD: squared drift ratio `0.8199 [0.6951, 0.9672]`. | Newton-Schulz `NS(M_t)` is weaker: `0.9116 [0.7696, 1.080]`, so this is a local bridge, not a full practical-Muon training claim. |
+| Short practical-Muon trajectory bridge | completed | Across 120 sampled state-step comparisons, `polar(M_t)` and `NS(M_t)` both have lower matched-head-gain squared tail-example logit drift than Fro/GD: ratios `0.7292 [0.6891, 0.7717]` and `0.8019 [0.7583, 0.848]`. | This is still a short local diagnostic on sampled states; it does not establish final tail accuracy, long-horizon training behavior, or hyperparameter robustness. |
 | Practical imbalanced-training diagnostic | completed | On the same small long-tailed digits task, NS-Muon-style training has lower final train loss, lower final tail eval loss, and lower tail output drift than Adam at the chosen lightweight hyperparameters. | Tail accuracy does not improve; this is not a tuned optimizer leaderboard and still needs larger long-tail benchmarks. |
 | Practical training LR sensitivity | completed | The selected `muon_lr=0.03` is a balanced tested setting: smaller Muon lrs under-train, while `muon_lr=0.1` over-optimizes train/head loss and worsens tail loss/drift. | This reduces cherry-picking risk for the small diagnostic but is still a coarse grid on sklearn digits. |
-| 8-step head-only forgetting probe | completed | Lower spectral/polar tail logit drift persists over a short head-only horizon and in drift area. | Final tail loss/margin confidence intervals cross zero. |
+| 8-step head-only forgetting probe | completed | Lower spectral/polar tail-example logit drift persists over a short head-only horizon and in drift area. | Final tail loss/margin confidence intervals cross zero. |
 | Long-tailed layerwise diagnostic | completed | Observed layerwise tail drift matches scaled JVP drift: spectral/polar is not lower-sensitivity per unit direction, but needs a smaller step to reach the same head gain. | Only a two-layer sklearn-digits MLP; layerwise conclusions need testing in larger architectures. |
 
 ## Evidence Artifacts
@@ -77,10 +77,10 @@ condition is
 
 ## Claims Not Yet Supported
 
-- Do not claim SpecGrad is generally better for long-tailed classification.
+- Do not claim spectral-gradient/polar geometry is generally better for long-tailed classification.
 - Do not claim full practical Muon training is explained by the current local
   fixed-checkpoint bridge.
-- Do not claim lower tail logit drift automatically implies lower tail loss,
+- Do not claim lower tail-example logit drift automatically implies lower tail loss,
   better tail margin, or higher tail accuracy.
 - Do not claim the sklearn-digits evidence is sufficient for CIFAR-100-LT,
   ImageNet-LT, or iNaturalist.
@@ -91,7 +91,7 @@ condition is
 
 1. **Real long-tail benchmark.** Run the same matched-head-gain diagnostic on
    CIFAR-100-LT, ImageNet-LT, or iNaturalist checkpoints. Required outputs:
-   matched head loss decrease, tail logit drift, tail loss increase, tail
+   matched head loss decrease, tail-example logit drift, tail loss increase, tail
    margin drop, and paired confidence intervals.
 2. **Architecture-level layerwise diagnostic.** Repeat the layerwise JVP and
    scaled-drift check on a modern classifier with convolutional or transformer

@@ -5,43 +5,43 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 691443,
-      "size": "675.2 KB"
+      "size_bytes": 752073,
+      "size": "734.4 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1774250,
-      "size": "1.7 MB"
+      "size_bytes": 2058613,
+      "size": "2.0 MB"
     },
     {
       "path": "tests",
       "role": "Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.",
       "commit_policy": "commit",
-      "size_bytes": 241790,
-      "size": "236.1 KB"
+      "size_bytes": 245742,
+      "size": "240.0 KB"
     },
     {
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 493368,
-      "size": "481.8 KB"
+      "size_bytes": 578957,
+      "size": "565.4 KB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 266911048,
-      "size": "254.5 MB"
+      "size_bytes": 268173373,
+      "size": "255.8 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 28318703,
-      "size": "27.0 MB"
+      "size_bytes": 28958828,
+      "size": "27.6 MB"
     },
     {
       "path": "configs",
@@ -54,15 +54,15 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 2165404,
-      "size": "2.1 MB"
+      "size_bytes": 3400721,
+      "size": "3.2 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 2493,
-      "size": "2.4 KB"
+      "size_bytes": 2863,
+      "size": "2.8 KB"
     },
     {
       "path": ".gitignore",
@@ -103,12 +103,12 @@
     {
       "path": "results/e11_long_tail_one_step/step_metrics.csv",
       "rows": 40,
-      "size": "18.1 KB"
+      "size": "26.4 KB"
     },
     {
       "path": "results/e11_long_tail_one_step/pair_summary.csv",
       "rows": 1,
-      "size": "1.0 KB"
+      "size": "5.9 KB"
     },
     {
       "path": "results/e11_long_tail_one_step/layer_metrics.csv",
@@ -116,9 +116,49 @@
       "size": "7.0 KB"
     },
     {
+      "path": "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
+      "rows": 160,
+      "size": "81.8 KB"
+    },
+    {
+      "path": "results/e11_long_tail_imbalance_ablation/summary.csv",
+      "rows": 4,
+      "size": "6.8 KB"
+    },
+    {
+      "path": "results/e11_long_tail_checkpoint_sweep/step_metrics.csv",
+      "rows": 200,
+      "size": "121.5 KB"
+    },
+    {
+      "path": "results/e11_long_tail_checkpoint_sweep/summary.csv",
+      "rows": 5,
+      "size": "10.1 KB"
+    },
+    {
+      "path": "results/e11_long_tail_class_partition_sweep/step_metrics.csv",
+      "rows": 200,
+      "size": "124.7 KB"
+    },
+    {
+      "path": "results/e11_long_tail_class_partition_sweep/summary.csv",
+      "rows": 5,
+      "size": "10.8 KB"
+    },
+    {
+      "path": "results/e11_long_tail_rho_sweep/step_metrics.csv",
+      "rows": 200,
+      "size": "123.2 KB"
+    },
+    {
+      "path": "results/e11_long_tail_rho_sweep/summary.csv",
+      "rows": 5,
+      "size": "10.1 KB"
+    },
+    {
       "path": "results/e11_long_tail_muon_bridge/step_metrics.csv",
       "rows": 80,
-      "size": "37.2 KB"
+      "size": "42.2 KB"
     },
     {
       "path": "results/e11_long_tail_muon_bridge/pair_summary.csv",
@@ -126,9 +166,14 @@
       "size": "2.1 KB"
     },
     {
+      "path": "results/e11_local_linearization/summary.csv",
+      "rows": 4,
+      "size": "1.0 KB"
+    },
+    {
       "path": "results/e11_long_tail_practical_muon_bridge/step_metrics.csv",
       "rows": 480,
-      "size": "223.5 KB"
+      "size": "253.2 KB"
     },
     {
       "path": "results/e11_long_tail_practical_muon_bridge/step_summary.csv",
@@ -139,6 +184,16 @@
       "path": "results/e11_long_tail_practical_muon_bridge/summary.csv",
       "rows": 3,
       "size": "2.2 KB"
+    },
+    {
+      "path": "results/e11_long_tail_muon_state_source_control/step_metrics.csv",
+      "rows": 960,
+      "size": "522.9 KB"
+    },
+    {
+      "path": "results/e11_long_tail_muon_state_source_control/summary.csv",
+      "rows": 6,
+      "size": "3.5 KB"
     },
     {
       "path": "results/e11_long_tail_practical_training/step_metrics.csv",
@@ -168,12 +223,12 @@
     {
       "path": "results/e11_long_tail_layerwise/metrics.csv",
       "rows": 80,
-      "size": "32.1 KB"
+      "size": "36.7 KB"
     },
     {
       "path": "results/e11_long_tail_layerwise/summary.csv",
       "rows": 2,
-      "size": "1.9 KB"
+      "size": "2.2 KB"
     },
     {
       "path": "results/e11_equal_update/step_metrics.csv",
@@ -304,6 +359,86 @@
       "path": "results/e11_boundary_predictor/boundary_predictor_uncertainty.csv",
       "rows": 8,
       "size": "1.6 KB"
+    },
+    {
+      "path": "results/e11_head_tail_alignment_ablation/step_metrics.csv",
+      "rows": 1000,
+      "size": "149.9 KB"
+    },
+    {
+      "path": "results/e11_head_tail_alignment_ablation/summary.csv",
+      "rows": 2,
+      "size": "1.2 KB"
+    }
+  ],
+  "key_documents": [
+    {
+      "path": "README_E11.md",
+      "size": "15.5 KB"
+    },
+    {
+      "path": "discussion/e11_paper_skeleton.md",
+      "size": "10.9 KB"
+    },
+    {
+      "path": "discussion/e11_main_paper_package.md",
+      "size": "10.5 KB"
+    },
+    {
+      "path": "discussion/e11_main_figure_captions.md",
+      "size": "6.5 KB"
+    },
+    {
+      "path": "discussion/e11_notation_glossary.md",
+      "size": "8.7 KB"
+    },
+    {
+      "path": "discussion/e11_quantitative_claim_ledger.md",
+      "size": "11.0 KB"
+    },
+    {
+      "path": "discussion/e11_reproduction_checklist.md",
+      "size": "14.8 KB"
+    },
+    {
+      "path": "discussion/e11_reviewer_risk_audit.md",
+      "size": "11.3 KB"
+    },
+    {
+      "path": "discussion/e11_pasted_review_audit.md",
+      "size": "8.3 KB"
+    },
+    {
+      "path": "discussion/e11_completion_audit.md",
+      "size": "4.8 KB"
+    },
+    {
+      "path": "discussion/e11_end_of_draft_self_review.md",
+      "size": "6.4 KB"
+    },
+    {
+      "path": "discussion/e11_reference_audit.md",
+      "size": "6.1 KB"
+    },
+    {
+      "path": "discussion/e11_paper_readiness_audit.md",
+      "size": "12.9 KB"
+    },
+    {
+      "path": "discussion/e11_evidence_index.md",
+      "size": "13.7 KB"
+    },
+    {
+      "path": "discussion/e11_research_synthesis.md",
+      "size": "7.8 KB"
+    },
+    {
+      "path": "discussion/e11_research_direction_map.md",
+      "size": "9.8 KB"
+    },
+    {
+      "path": "discussion/e11_claim_validity_audit.md",
+      "size": "7.0 KB"
     }
   ],
   "ignore_policy": [

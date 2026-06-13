@@ -17,17 +17,43 @@ gain before measuring tail function movement.
 - Target head first-order gain: 0.02 * head loss
 
 Ratio columns are spectral divided by Frobenius/GD. Values below 1 mean the
-spectral direction disturbed held-out tail logits less after matching head gain.
+spectral direction disturbed logits on held-out tail examples less after matching head gain.
 
 | quantity | value |
 |---|---:|
-| tail drift-sq ratio, spectral/Fro | 0.5501 [0.5101, 0.5931] |
-| spectral less tail drift fraction | 1 |
+| squared tail-example logit drift ratio, spectral/Fro | 0.5501 [0.5101, 0.5931] |
+| centered-logit squared drift ratio, spectral/Fro | 0.5493 [0.5093, 0.5923] |
+| true-class logit delta squared ratio, spectral/Fro | 1.68 [1.16, 2.431] |
+| top-competitor logit delta squared ratio, spectral/Fro | 0.6358 [0.5705, 0.7086] |
+| margin-delta squared ratio, spectral/Fro | 0.702 [0.6131, 0.8037] |
+| spectral lower squared tail-example logit drift fraction | 1 |
+| actual head-gain relative error, Fro/GD | 0.02533 [0.02052, 0.03013] |
+| actual head-gain relative error, spectral | 0.01662 [0.0148, 0.01845] |
+| tail loss increase, Fro/GD | -0.001154 [-0.004135, 0.001827] |
+| tail loss increase, spectral | 0.0002447 [-0.001859, 0.002348] |
 | tail loss increase diff, spectral - Fro | 0.001399 [0.0002379, 0.002559] |
+| tail margin drop, Fro/GD | 0.001372 [-0.002944, 0.005688] |
+| tail margin drop, spectral | 0.003264 [0.0004973, 0.006032] |
 | tail margin drop diff, spectral - Fro | 0.001892 [9.142e-05, 0.003693] |
+| tail accuracy drop, Fro/GD | -0.00025 [-0.00074, 0.00024] |
+| tail accuracy drop, spectral | -0.00025 [-0.00074, 0.00024] |
 | tail accuracy drop diff, spectral - Fro | 0 [0, 0] |
 | actual head loss decrease diff, spectral - Fro | 2.555e-05 [1.175e-05, 3.936e-05] |
 | mean tail diagnostic condition score | 2.373 |
+| tail CE before | 11.74 [11.5, 11.99] |
+| tail CE after Fro/GD | 11.74 [11.5, 11.99] |
+| tail CE after spectral | 11.74 [11.5, 11.99] |
+| tail margin before | -10.79 [-11.06, -10.52] |
+| tail margin after Fro/GD | -10.79 [-11.06, -10.52] |
+| tail margin after spectral | -10.79 [-11.06, -10.52] |
+| tail accuracy before | 0.1908 [0.1873, 0.1942] |
+| positive-margin tail fraction before | 0.1908 [0.1873, 0.1942] |
+| certified preserved fraction, Fro/GD | 0.9985 [0.9956, 1] |
+| certified preserved fraction, spectral | 0.9985 [0.9956, 1] |
+| all-tail prediction changed fraction, Fro/GD | 0.00625 [0.004386, 0.008114] |
+| all-tail prediction changed fraction, spectral | 0.00575 [0.003705, 0.007795] |
+| positive-margin prediction changed fraction, Fro/GD | 0 [0, 0] |
+| positive-margin prediction changed fraction, spectral | 0 [0, 0] |
 
 Figure: [figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png](../figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png)
 
@@ -40,7 +66,7 @@ alone.
 Caveats:
 - This is sklearn digits, not CIFAR-100-LT/ImageNet-LT/iNaturalist.
 - The spectral direction is an exact polar intervention, not a full Muon optimizer state.
-- Layerwise MLP nonlinearities make `stA_tail` a diagnostic proxy; direct tail drift is the primary measurement.
+- MLP nonlinearities make the closed-form sandwich condition layer-dependent; direct measured tail drift is the primary one-step quantity.
 
 Artifacts:
 - [step_metrics.csv](../results/e11_long_tail_one_step/step_metrics.csv)
