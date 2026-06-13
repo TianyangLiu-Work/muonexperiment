@@ -18,6 +18,18 @@ OUTPUT_PATH = Path("discussion/e11_reproduction_checklist.md")
 
 def main() -> None:
     main_sequence = pd.DataFrame([dict(item) for item in MAIN_EVIDENCE_STAGES])
+    current_stages = {
+        "Head-to-tail interference probe",
+        "Long-tailed one-step diagnostic",
+        "Long-tailed Muon-style compatibility diagnostic",
+        "Long-tailed practical-Muon trajectory compatibility",
+        "Long-tailed practical training diagnostic",
+        "Long-tailed practical training LR sensitivity",
+        "Head-only forgetting probe",
+        "Long-tailed layerwise diagnostic",
+    }
+    current_sequence = main_sequence[main_sequence["stage"].isin(current_stages)].reset_index(drop=True)
+    background_sequence = main_sequence[~main_sequence["stage"].isin(current_stages)].reset_index(drop=True)
 
     appendix_sequence = pd.DataFrame(
         [
@@ -40,8 +52,8 @@ def main() -> None:
                 "role": "Allowed wording, forbidden wording, quantitative anchors, and evidence links.",
             },
             {
-                "artifact": "discussion/e11_paper_numbers.tex",
-                "role": "LaTeX macros generated from the current result CSVs.",
+                "artifact": "paper/specgrad_activation_paper/tables/e11_paper_numbers.tex",
+                "role": "LaTeX macros generated from the current result CSVs and included by the paper draft.",
             },
             {
                 "artifact": "discussion/e11_paper_skeleton.md",
@@ -61,17 +73,28 @@ This generated checklist separates the minimal main-paper evidence from appendix
 ## Make Targets
 
 ```bash
-make e11-main-results      # core trajectories, base figures, equal-update control, and spectral-allocation probe
+make e11-main-results      # core trajectories, equal-update, head-to-tail probes, and spectral-allocation
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
-make e11-paper-assets      # generated Markdown/TeX paper assets after results exist
+make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets
+make e11-guardrail-assets  # legacy condition-geometry guardrail notes
+make e11-all-assets        # current paper assets plus legacy guardrail notes
+make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf
 make e11-check             # validation, tests, and whitespace check
-make e11-full              # paper assets plus e11-check
+make e11-full              # paper assets, PDF build, and e11-check
 ```
 
-## Minimal Main-Paper Evidence
+## Current Head-to-Tail Paper Evidence
 
-{markdown_table(main_sequence, ["stage", "command", "produces", "paper_role"])}
+{markdown_table(current_sequence, ["stage", "command", "produces", "paper_role"])}
+
+## Background / Legacy E11 Evidence
+
+These artifacts remain reproducible because they document the route to the
+current head-to-tail framing and provide guardrails against broader optimizer
+claims. They are not the main evidence table for the current paper draft.
+
+{markdown_table(background_sequence, ["stage", "command", "produces", "paper_role"])}
 
 ## Appendix / Guardrail Evidence
 
@@ -79,10 +102,16 @@ make e11-full              # paper assets plus e11-check
 
 ## Generated Paper-Facing Assets
 
-After the result CSVs and figures exist, regenerate paper-facing assets with:
+After the result CSVs and figures exist, regenerate the current head-to-tail paper assets with:
 
 ```bash
 make e11-paper-assets
+```
+
+Regenerate legacy condition-geometry guardrail notes separately with:
+
+```bash
+make e11-guardrail-assets
 ```
 
 {markdown_table(paper_artifacts, ["artifact", "role"])}
@@ -109,7 +138,7 @@ The stronger local gate is:
 make e11-full
 ```
 
-`make e11-full` regenerates discussion/paper-facing artifacts and then runs validation, tests, and whitespace checks. It assumes the longer experiment result CSVs already exist unless their writer script reruns the relevant probe.
+`make e11-full` regenerates current paper-facing artifacts, rebuilds the paper PDF, and then runs validation, tests, and whitespace checks. It assumes the longer experiment result CSVs already exist unless their writer script reruns the relevant probe. Legacy guardrail notes are intentionally not part of `e11-full`; use `make e11-guardrail-assets` when those background notes need refreshing.
 """
     write_markdown(OUTPUT_PATH, text)
     print(f"saved reproduction checklist to {OUTPUT_PATH}")

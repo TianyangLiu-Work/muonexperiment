@@ -9,160 +9,150 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from e11_condition_geometry.paper_stats import load_paper_stats
-from e11_condition_geometry.reporting import fmt, markdown_table, ratio_ci, write_markdown
+from e11_condition_geometry.reporting import fmt, markdown_table, write_markdown
 
 
 OUTPUT_PATH = Path("discussion/e11_main_paper_package.md")
 
 
+def interval(row: pd.Series, low: str, high: str) -> str:
+    return f"[{fmt(row[low])}, {fmt(row[high])}]"
+
+
 def main() -> None:
-    stats = load_paper_stats()
+    synthetic = pd.read_csv("results/e11_head_tail_interference/pair_summary.csv")
+    one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
+    muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
+    practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
+    practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
+    forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
+    layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
+    positive = synthetic[synthetic["setting"].eq("high_head_rank_low_tail_srank")].iloc[0]
+    negative = synthetic[synthetic["setting"].eq("low_head_rank_high_tail_srank")].iloc[0]
+    layer_1 = layerwise[layerwise["layer"].eq(1)].iloc[0]
+    layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
 
     main_items = pd.DataFrame(
         [
             {
                 "slot": "Figure 1",
-                "artifact": "figures/e11_equal_update/update_spectrum_robustness.png",
-                "claim": "Muon has a robust update-spectrum signature.",
+                "artifact": "figures/e11_head_tail_interference/head_tail_drift_ratio.png",
+                "claim": "The nrank-vs-ssrank condition has the correct sign in controlled positive and negative settings.",
                 "quantitative_anchor": (
-                    f"nrUpdate Muon/Adam={fmt(stats.nr_update['geomean_ratio_muon_over_adam'])} "
-                    f"{ratio_ci(stats.nr_update)}; "
-                    f"stUpdate={fmt(stats.st_update['geomean_ratio_muon_over_adam'])} {ratio_ci(stats.st_update)}."
+                    f"Positive drift ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}; "
+                    f"negative drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}."
                 ),
-                "reader_takeaway": "The reliable optimizer-intrinsic effect is spectrum shaping, not final-loss superiority.",
+                "reader_takeaway": "The theorem boundary is not decorative; flipping the constructed geometry flips the drift direction.",
             },
             {
                 "slot": "Figure 2",
-                "artifact": "figures/e11_equal_update/first_order_calibration.png",
-                "claim": "One-step progress is locally calibrated by gradient-update alignment.",
+                "artifact": "figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png",
+                "claim": "Spectral/polar reduces held-out tail logit drift at matched head gain on long-tailed digits.",
                 "quantitative_anchor": (
-                    f"Spearman(delta_loss, <G,D>)={fmt(stats.calibration_all['spearman_delta_vs_first_order'])} "
-                    f"[{fmt(stats.calibration_all['spearman_ci95_low'])}, "
-                    f"{fmt(stats.calibration_all['spearman_ci95_high'])}]."
+                    f"Tail drift-sq ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{interval(one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"20/20 paired seeds lower drift."
                 ),
-                "reader_takeaway": "It is meaningful to analyze the positive descent proxy `<G,D>` as a local bridge from geometry to loss decrease.",
+                "reader_takeaway": "The main empirical quantity is tail function drift, not final classification performance.",
             },
             {
                 "slot": "Figure 3",
-                "artifact": "figures/e11_spectral_allocation_probe/spectral_allocation_ratios.png",
-                "claim": "Flat/polar spectral allocation has a norm-geometry boundary.",
+                "artifact": "figures/e11_long_tail_muon_bridge/long_tail_muon_bridge.png",
+                "claim": "Momentum polar gives a selected-state compatibility check for Muon-style state.",
                 "quantitative_anchor": (
-                    f"Frobenius flat/GD={fmt(stats.spectral_fro['geomean_ratio'])} {ratio_ci(stats.spectral_fro)}; "
-                    f"operator-norm flat/GD={fmt(stats.spectral_op['geomean_ratio'])} {ratio_ci(stats.spectral_op)}."
+                    f"polar(M_t) drift ratio={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{interval(muon_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
+                    f"NS(M_t) ratio={fmt(muon_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{interval(muon_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
                 ),
-                "reader_takeaway": "Muon-like spectral spreading is locally useful only under the right norm geometry.",
+                "reader_takeaway": "Muon-style state is locally compatible in sampled states, but finite Newton-Schulz and trajectory-level behavior remain caveats.",
+            },
+            {
+                "slot": "Figure 4",
+                "artifact": "figures/e11_long_tail_practical_muon_bridge/long_tail_practical_muon_bridge.png",
+                "claim": "Muon-style directions show selected-state compatibility across a short practical NS-Muon trajectory.",
+                "quantitative_anchor": (
+                    f"trajectory polar(M_t) drift ratio={fmt(practical_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{interval(practical_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
+                    f"trajectory NS(M_t) ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{interval(practical_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
+                ),
+                "reader_takeaway": "Practical Muon-style states show drift ratios compatible with the local polar mechanism along sampled short-trajectory states.",
+            },
+            {
+                "slot": "Figure 5",
+                "artifact": "figures/e11_long_tail_practical_training/long_tail_practical_training.png",
+                "claim": "A small practical imbalanced-training run is consistent with lower measured drift/loss in a fixed diagnostic.",
+                "quantitative_anchor": (
+                    f"Train loss ratio={fmt(practical_training['geomean_final_train_loss_ratio_muon_over_adam'])} "
+                    f"{interval(practical_training, 'final_train_loss_ratio_ci95_low', 'final_train_loss_ratio_ci95_high')}; "
+                    f"tail eval loss ratio={fmt(practical_training['geomean_final_tail_eval_loss_ratio_muon_over_adam'])} "
+                    f"{interval(practical_training, 'final_tail_eval_loss_ratio_ci95_low', 'final_tail_eval_loss_ratio_ci95_high')}; "
+                    f"tail margin diff={fmt(practical_training['mean_final_tail_eval_margin_diff_muon_minus_adam'])} "
+                    f"{interval(practical_training, 'final_tail_eval_margin_diff_ci95_low', 'final_tail_eval_margin_diff_ci95_high')}; "
+                    f"tail drift RMS ratio={fmt(practical_training['geomean_final_tail_eval_drift_rms_ratio_muon_over_adam'])} "
+                    f"{interval(practical_training, 'final_tail_eval_drift_rms_ratio_ci95_low', 'final_tail_eval_drift_rms_ratio_ci95_high')}."
+                ),
+                "reader_takeaway": "The practical result is a fixed lightweight sanity check; tail accuracy is unchanged and benchmark claims remain open.",
+            },
+            {
+                "slot": "Figure 6",
+                "artifact": "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png",
+                "claim": "The lower measured tail drift remains visible over a short head-only horizon.",
+                "quantitative_anchor": (
+                    f"Final drift ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{interval(forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"area ratio={fmt(forgetting['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} "
+                    f"{interval(forgetting, 'tail_output_drift_area_ratio_ci95_low', 'tail_output_drift_area_ratio_ci95_high')}."
+                ),
+                "reader_takeaway": "The effect is visible beyond a single step, but tail loss and margin remain separate outcomes.",
+            },
+            {
+                "slot": "Figure 7",
+                "artifact": "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
+                "claim": "Layerwise drift reduction comes from matched-head-gain scaling, not safer unit directions.",
+                "quantitative_anchor": (
+                    f"Layer 1 unit/scaled/observed={fmt(layer_1['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(layer_1['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(layer_1['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}; "
+                    f"layer 2={fmt(layer_2['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(layer_2['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(layer_2['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}."
+                ),
+                "reader_takeaway": "Spectral/polar directions are not uniformly lower-sensitivity; the head-gain normalization matters.",
             },
             {
                 "slot": "Table 1",
-                "artifact": "results/e11_mechanism_boundary/mechanism_boundary_map.csv",
-                "claim": "The advantage flips across problem, layer, and control condition.",
-                "quantitative_anchor": (
-                    f"Boundary rows: {stats.boundary_counts.muon_flat_favorable} Muon/flat favorable, "
-                    f"{stats.boundary_counts.own_update_positive_control} own-update positive-control, "
-                    f"{stats.boundary_counts.unfavorable} unfavorable, "
-                    f"{stats.boundary_counts.mixed} mixed/uncertain."
-                ),
-                "reader_takeaway": "The paper is a boundary/mechanism paper, not a universal optimizer win paper.",
+                "artifact": "paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex",
+                "claim": "Paper-facing quantitative table summarizing the mechanism, drift evidence, and caveats.",
+                "quantitative_anchor": "Generated from the current head-to-tail result CSVs.",
+                "reader_takeaway": "The table keeps claim scope explicit for readers and reviewers.",
             },
         ]
     )
 
     appendix_items = pd.DataFrame(
         [
-            {
-                "artifact": "discussion/e11_mechanism_theorem_bridge.md",
-                "role": "States theorem assumptions, evidence mapping, and safe causal language.",
-            },
-            {
-                "artifact": "discussion/e11_main_figure_captions.md",
-                "role": "Paper-safe main figure/table captions with quantitative anchors and interpretation boundaries.",
-            },
-            {
-                "artifact": "discussion/e11_notation_glossary.md",
-                "role": "Shared notation source for gradients, updates, ranks, activation products, and recorded diagnostics.",
-            },
-            {
-                "artifact": "discussion/e11_deep_mnist_mlp_probe.md",
-                "role": (
-                    f"Neural negative control: Deep MNIST nrUpdate={fmt(stats.deep_nr['geomean_ratio_muon_over_adam'])} "
-                    f"{ratio_ci(stats.deep_nr)} but first-order="
-                    f"{fmt(stats.deep_first['geomean_ratio_muon_over_adam'])} {ratio_ci(stats.deep_first)}."
-                ),
-            },
-            {
-                "artifact": "discussion/e11_mnist_patch_probe.md",
-                "role": (
-                    f"Patch/shared-weight neural sanity check: nrUpdate={fmt(stats.patch_nr['geomean_ratio_muon_over_adam'])} "
-                    f"{ratio_ci(stats.patch_nr)} but first-order="
-                    f"{fmt(stats.patch_first['geomean_ratio_muon_over_adam'])} {ratio_ci(stats.patch_first)}."
-                ),
-            },
-            {
-                "artifact": "discussion/e11_mnist_conv_probe.md",
-                "role": (
-                    f"True Conv2d neural sanity check: nrUpdate={fmt(stats.conv_nr['geomean_ratio_muon_over_adam'])} "
-                    f"{ratio_ci(stats.conv_nr)} but first-order="
-                    f"{fmt(stats.conv_first['geomean_ratio_muon_over_adam'])} {ratio_ci(stats.conv_first)}."
-                ),
-            },
-            {
-                "artifact": "discussion/e11_stateless_optimizer_trajectory.md",
-                "role": (
-                    "Trajectory mechanism control: PolarMuon/GD total decrease="
-                    f"{fmt(stats.stateless_traj_decrease['geomean_ratio'])} "
-                    f"{ratio_ci(stats.stateless_traj_decrease)}."
-                ),
-            },
-            {
-                "artifact": "discussion/e11_boundary_predictor_audit.md",
-                "role": (
-                    "Predictive-boundary gap: best leave-setting-out balanced accuracy="
-                    f"{fmt(stats.predictor_best['mean_balanced_accuracy'])} from {stats.predictor_best['feature_set']}; "
-                    "chance-filled CI="
-                    f"[{fmt(stats.predictor_uncertainty_best['balanced_accuracy_ci95_low'])}, "
-                    f"{fmt(stats.predictor_uncertainty_best['balanced_accuracy_ci95_high'])}]."
-                ),
-            },
-            {
-                "artifact": "discussion/e11_reviewer_risk_audit.md",
-                "role": "Reviewer-risk map and claim discipline.",
-            },
-            {
-                "artifact": "discussion/e11_quantitative_claim_ledger.md",
-                "role": "Paper-writing claim ledger with allowed wording, forbidden wording, quantitative anchors, and evidence links.",
-            },
-            {
-                "artifact": "discussion/e11_paper_numbers.tex",
-                "role": "LaTeX macros for paper-facing quantitative anchors, generated directly from result CSVs.",
-            },
-            {
-                "artifact": "discussion/e11_reproduction_checklist.md",
-                "role": "Minimal main-paper and appendix reproduction map with validation commands.",
-            },
+            {"artifact": "discussion/e11_paper_readiness_audit.md", "role": "Claim readiness, missing experiments, and paper title direction for the current head-to-tail draft."},
+            {"artifact": "discussion/e11_reviewer_risk_audit.md", "role": "Reviewer objections and safe responses for function-drift claims."},
+            {"artifact": "discussion/e11_long_tail_practical_training_lr_sweep.md", "role": "Supporting robustness check for the selected practical-training Muon learning rate."},
+            {"artifact": "discussion/e11_activation_perturbation.md", "role": "Background activation-geometry evidence; not a current main result."},
+            {"artifact": "discussion/e11_reproduction_checklist.md", "role": "Minimal reproduction and appendix/guardrail reproduction commands."},
+            {"artifact": "discussion/e11_artifact_manifest.md", "role": "Commit boundary for paper evidence, generated results, figures, and ignored local caches."},
         ]
     )
 
     excluded = pd.DataFrame(
         [
-            {
-                "artifact": "optimizer switch and LR-sweep figures",
-                "reason": "Use as negative controls in appendix; too detailed for the main argument.",
-            },
-            {
-                "artifact": "all individual trajectory/3D figures",
-                "reason": "Useful exploratory evidence, but they dilute the main mechanism story.",
-            },
-            {
-                "artifact": "boundary predictor detailed per-setting table",
-                "reason": "Keep the main text to the failure summary; detailed rows belong in appendix.",
-            },
+            {"artifact": "equal-update update-spectrum figures", "reason": "Legacy condition-geometry guardrails; they are not the current head-to-tail paper's main evidence."},
+            {"artifact": "legacy optimizer-switch and broad LR-sweep figures", "reason": "Useful overclaim controls, but too far from the current head-to-tail drift mechanism. This does not exclude the practical-training LR sensitivity note listed above."},
+            {"artifact": "boundary predictor detailed tables", "reason": "The current paper does not claim a predictive boundary model for unseen tasks."},
         ]
     )
 
     text = f"""# E11 Main Paper Package
 
-This generated note selects the smallest evidence package for a focused manuscript. The point is to keep the main paper readable: three figures plus one table should carry the main claim, with the remaining probes used as safeguards and appendix evidence.
+This generated note selects the smallest evidence package for the current head-to-tail interference manuscript. The main paper should be carried by seven figures plus one generated table, with legacy condition-geometry artifacts used only as appendix guardrails. The LR-sensitivity figure is supporting robustness evidence rather than a main figure.
 
 ## Main Figure/Table Package
 
@@ -178,14 +168,15 @@ This generated note selects the smallest evidence package for a focused manuscri
 
 ## Main-Text Claim Order
 
-1. Muon changes update spectra robustly under matched update size.
-2. One-step loss decrease is well calibrated by `<G,D>`.
-3. The local value of flat/polar spectra depends on the norm geometry.
-4. Therefore Muon is a geometry-shaping optimizer with boundary-dependent progress, not a universally better optimizer.
+1. Long-tailed small-batch training creates head-only updates that can perturb held-out tail functions.
+2. The local matched-head-gain theory predicts a spectral-vs-Frobenius drift boundary through `nrank(G_H) > ssrank(B_T,A_T)`.
+3. Synthetic and long-tailed digits diagnostics provide evidence consistent with lower tail logit drift for idealized spectral/polar directions.
+4. The Muon-style compatibility diagnostics provide selected fixed-state and trajectory-state checks.
+5. The result is about function drift under local matched-head-gain comparisons, not broad Muon performance or final tail accuracy.
 
 ## Drafting Rule
 
-If a sentence cannot be supported by Figure 1, Figure 2, Figure 3, or Table 1, it should probably be in the appendix or discussion rather than in the main result section.
+If a sentence cannot be supported by Figure 1, Figure 2, Figure 3, Figure 4, Figure 5, Figure 6, Figure 7, or Table 1, it should probably be in the appendix or discussion rather than in the main result section.
 """
     write_markdown(OUTPUT_PATH, text)
     print(f"saved main paper package to {OUTPUT_PATH}")

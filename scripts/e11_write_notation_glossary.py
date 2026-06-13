@@ -71,7 +71,7 @@ def main() -> None:
             {
                 "symbol": "`nrUpdate`, `stUpdate`",
                 "definition": r"Numerical-rank and stable-rank diagnostics computed from the singular values of \(D_i\), equivalently \(\Delta W_i\).",
-                "scope": "Main update-spectrum signature.",
+                "scope": "Legacy condition-geometry guardrail and Muon-style compatibility background.",
             },
             {
                 "symbol": r"\(D_F^\star=rG/\|G\|_F\)",
@@ -133,8 +133,8 @@ This generated glossary fixes the notation used across the E11 paper-facing arti
 1. The strict activation-product definition of \\(A_i\\) applies to MF-with-input. Matrix Sensing and MLP diagnostics still report an \\(A_i\\)-like spectral quantity, but those are task-specific diagnostics rather than the same theoretical object.
 2. The default core E11 settings use noisy mini-batch optimization (`train_batch_size < num_samples`, `noise_std > 0`) while activation diagnostics use the full sampled problem instance.
 3. `delta_loss` is a same-batch pre/post-update quantity, not the difference between losses evaluated on two independently sampled training batches.
-4. The main paper claim is about update-spectrum shaping through the descent update \\(D_i\\), not about condition score alone.
-5. Higher \\(nr\\) or \\(sr\\) should not be read as better optimization without the one-step decrease or performance evidence tied to it.
+4. The current main paper claim is about head-to-tail function drift at matched head gain, not condition score or update rank alone.
+5. Higher \\(nr\\) or \\(sr\\) should not be read as better optimization without the drift, one-step decrease, or performance evidence tied to it.
 """
     write_markdown(OUTPUT_PATH, text)
     print(f"saved notation glossary to {OUTPUT_PATH}")

@@ -5,43 +5,43 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 452915,
-      "size": "442.3 KB"
+      "size_bytes": 691443,
+      "size": "675.2 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1527059,
-      "size": "1.5 MB"
+      "size_bytes": 1774250,
+      "size": "1.7 MB"
     },
     {
       "path": "tests",
       "role": "Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.",
       "commit_policy": "commit",
-      "size_bytes": 162921,
-      "size": "159.1 KB"
+      "size_bytes": 241790,
+      "size": "236.1 KB"
     },
     {
       "path": "discussion",
-      "role": "Generated paper-facing Markdown evidence and synthesis.",
+      "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 635999,
-      "size": "621.1 KB"
+      "size_bytes": 493368,
+      "size": "481.8 KB"
     },
     {
       "path": "results",
-      "role": "Generated CSV evidence used by discussion artifacts and validator.",
+      "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 265268988,
-      "size": "253.0 MB"
+      "size_bytes": 266911048,
+      "size": "254.5 MB"
     },
     {
       "path": "figures",
-      "role": "Static figures used by paper-facing Markdown artifacts.",
+      "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 27263546,
-      "size": "26.0 MB"
+      "size_bytes": 28318703,
+      "size": "27.0 MB"
     },
     {
       "path": "configs",
@@ -52,17 +52,17 @@
     },
     {
       "path": "paper",
-      "role": "LaTeX paper draft, paper-facing tables, and experiment triage notes.",
+      "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 416146,
-      "size": "406.4 KB"
+      "size_bytes": 2165404,
+      "size": "2.1 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 1825,
-      "size": "1.8 KB"
+      "size_bytes": 2493,
+      "size": "2.4 KB"
     },
     {
       "path": ".gitignore",
@@ -75,8 +75,8 @@
       "path": ".gitattributes",
       "role": "Marks generated evidence artifacts and binary files for cleaner GitHub review.",
       "commit_policy": "commit",
-      "size_bytes": 404,
-      "size": "404 B"
+      "size_bytes": 667,
+      "size": "667 B"
     }
   ],
   "key_tables": [
@@ -89,6 +89,91 @@
       "path": "results/e11/activation_perturbation_summary.csv",
       "rows": 60,
       "size": "12.6 KB"
+    },
+    {
+      "path": "results/e11_head_tail_interference/step_metrics.csv",
+      "rows": 320,
+      "size": "142.9 KB"
+    },
+    {
+      "path": "results/e11_head_tail_interference/pair_summary.csv",
+      "rows": 2,
+      "size": "2.0 KB"
+    },
+    {
+      "path": "results/e11_long_tail_one_step/step_metrics.csv",
+      "rows": 40,
+      "size": "18.1 KB"
+    },
+    {
+      "path": "results/e11_long_tail_one_step/pair_summary.csv",
+      "rows": 1,
+      "size": "1.0 KB"
+    },
+    {
+      "path": "results/e11_long_tail_one_step/layer_metrics.csv",
+      "rows": 80,
+      "size": "7.0 KB"
+    },
+    {
+      "path": "results/e11_long_tail_muon_bridge/step_metrics.csv",
+      "rows": 80,
+      "size": "37.2 KB"
+    },
+    {
+      "path": "results/e11_long_tail_muon_bridge/pair_summary.csv",
+      "rows": 3,
+      "size": "2.1 KB"
+    },
+    {
+      "path": "results/e11_long_tail_practical_muon_bridge/step_metrics.csv",
+      "rows": 480,
+      "size": "223.5 KB"
+    },
+    {
+      "path": "results/e11_long_tail_practical_muon_bridge/step_summary.csv",
+      "rows": 18,
+      "size": "3.3 KB"
+    },
+    {
+      "path": "results/e11_long_tail_practical_muon_bridge/summary.csv",
+      "rows": 3,
+      "size": "2.2 KB"
+    },
+    {
+      "path": "results/e11_long_tail_practical_training/step_metrics.csv",
+      "rows": 3240,
+      "size": "1.0 MB"
+    },
+    {
+      "path": "results/e11_long_tail_practical_training/summary.csv",
+      "rows": 1,
+      "size": "1.1 KB"
+    },
+    {
+      "path": "results/e11_long_tail_practical_training_lr_sweep/sweep_summary.csv",
+      "rows": 4,
+      "size": "2.0 KB"
+    },
+    {
+      "path": "results/e11_long_tail_forgetting/step_metrics.csv",
+      "rows": 360,
+      "size": "93.7 KB"
+    },
+    {
+      "path": "results/e11_long_tail_forgetting/summary.csv",
+      "rows": 1,
+      "size": "1.6 KB"
+    },
+    {
+      "path": "results/e11_long_tail_layerwise/metrics.csv",
+      "rows": 80,
+      "size": "32.1 KB"
+    },
+    {
+      "path": "results/e11_long_tail_layerwise/summary.csv",
+      "rows": 2,
+      "size": "1.9 KB"
     },
     {
       "path": "results/e11_equal_update/step_metrics.csv",

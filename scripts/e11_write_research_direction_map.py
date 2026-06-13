@@ -9,10 +9,14 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from e11_condition_geometry.reporting import fmt, markdown_table, ratio_ci, require_one, write_markdown
+from e11_condition_geometry.reporting import fmt, markdown_table, write_markdown
 
 
 OUTPUT_PATH = Path("discussion/e11_research_direction_map.md")
+
+
+def ci(row: pd.Series, low: str, high: str) -> str:
+    return f"[{fmt(row[low])}, {fmt(row[high])}]"
 
 
 def claim_row(
@@ -35,194 +39,150 @@ def claim_row(
 
 
 def main() -> None:
-    update_spectrum = pd.read_csv("results/e11_equal_update/update_spectrum_summary.csv")
-    first_order = pd.read_csv("results/e11_equal_update/first_order_pair_summary.csv")
-    calibration = pd.read_csv("results/e11_equal_update/first_order_calibration_summary.csv")
-    spectral = pd.read_csv("results/e11_spectral_allocation_probe/spectral_allocation_summary.csv")
-    stateless = pd.read_csv("results/e11_stateless_direction_ablation/stateless_direction_summary.csv")
-    stateless_traj = pd.read_csv("results/e11_stateless_optimizer_trajectory/stateless_optimizer_summary.csv")
-    boundary = pd.read_csv("results/e11_mechanism_boundary/mechanism_boundary_map.csv")
-    predictor = pd.read_csv("results/e11_boundary_predictor/boundary_predictor_summary.csv")
-    mnist_spectrum = pd.read_csv("results/e11_mnist_mlp_probe/update_spectrum_summary.csv")
-    mnist_pair = pd.read_csv("results/e11_mnist_mlp_probe/pair_summary.csv")
-    deep_mnist_spectrum = pd.read_csv("results/e11_deep_mnist_mlp_probe/update_spectrum_summary.csv")
-    deep_mnist_pair = pd.read_csv("results/e11_deep_mnist_mlp_probe/pair_summary.csv")
-    conv_spectrum = pd.read_csv("results/e11_mnist_conv_probe/update_spectrum_summary.csv")
-    conv_pair = pd.read_csv("results/e11_mnist_conv_probe/pair_summary.csv")
-    predictor_uncertainty = pd.read_csv("results/e11_boundary_predictor/boundary_predictor_uncertainty.csv")
+    head_tail = pd.read_csv("results/e11_head_tail_interference/pair_summary.csv").set_index("setting")
+    one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
+    muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
+    practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
+    practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
+    practical_lr_sweep = pd.read_csv("results/e11_long_tail_practical_training_lr_sweep/sweep_summary.csv")
+    forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
+    layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
 
-    nr_update = require_one(update_spectrum, problem_family="All", metric="nrUpdate")
-    st_update = require_one(update_spectrum, problem_family="All", metric="stUpdate")
-    calibration_all = require_one(calibration, group="All")
-    spectral_fro = require_one(
-        spectral,
-        group_type="budget_all",
-        budget="fro",
-        comparison="flat_polar_over_gd_spectrum",
-        metric="update_grad_inner",
-    )
-    spectral_op = require_one(
-        spectral,
-        group_type="budget_all",
-        budget="op",
-        comparison="flat_polar_over_gd_spectrum",
-        metric="update_grad_inner",
-    )
-    stateless_nr = require_one(
-        stateless,
-        group_type="all",
-        problem_family="All",
-        checkpoint_source="All",
-        comparison="PolarMuon/GD",
-        metric="nrUpdate",
-    )
-    stateless_inner = require_one(
-        stateless,
-        group_type="all",
-        problem_family="All",
-        checkpoint_source="All",
-        comparison="PolarMuon/GD",
-        metric="update_grad_inner",
-    )
-    traj_decrease = require_one(
-        stateless_traj,
-        group_type="all",
-        problem_family="All",
-        comparison="PolarMuon/GD",
-        metric="total_decrease",
-    )
-    ms_first_order = require_one(first_order, problem_family="MatrixSensing", metric="update_grad_inner")
-    mf_first_order = require_one(first_order, problem_family="MatrixFactorizationInput", metric="update_grad_inner")
-    mnist_nr_update = require_one(mnist_spectrum, problem_family="MNISTMLP", metric="nrUpdate")
-    mnist_st_update = require_one(mnist_spectrum, problem_family="MNISTMLP", metric="stUpdate")
-    mnist_h128 = require_one(mnist_pair, group_type="hidden_all_targets", hidden_dim="128", metric="update_grad_inner")
-    deep_nr = require_one(deep_mnist_spectrum, problem_family="DeepMNISTMLP", metric="nrUpdate")
-    deep_first = require_one(deep_mnist_pair, group_type="all", hidden_dim="All", num_factors="All", metric="update_grad_inner")
-    conv_nr = require_one(conv_spectrum, problem_family="MNISTConvNet", metric="nrUpdate")
-    conv_first = require_one(conv_pair, group_type="all", filters="All", kernel_size="All", metric="update_grad_inner")
-    predictor_uncertainty_best = (
-        predictor_uncertainty[predictor_uncertainty["target"].eq("update_grad_inner_muon_higher")]
-        .sort_values("mean_balanced_accuracy_chance_filled", ascending=False)
-        .iloc[0]
-    )
-
-    leave_setting = predictor[predictor["evaluation"].eq("leave_setting_out")].copy()
-    predictor_means = (
-        leave_setting.groupby("feature_set", as_index=False)["balanced_accuracy"].mean().sort_values("balanced_accuracy", ascending=False)
-    )
-    best_predictor = predictor_means.iloc[0]
-    favorable = int(boundary["direction"].isin(["Muon-favorable", "flat/polar-favorable", "own-update-favorable"]).sum())
-    unfavorable = int(
-        boundary["direction"].isin(["Adam/GD-favorable", "GD-spectrum-favorable", "weakly Adam/GD-favorable"]).sum()
-    )
+    positive = head_tail.loc["high_head_rank_low_tail_srank"]
+    negative = head_tail.loc["low_head_rank_high_tail_srank"]
+    layer_one = layerwise[layerwise["layer"].eq(1)].iloc[0]
+    layer_two = layerwise[layerwise["layer"].eq(2)].iloc[0]
+    lr_sweep = practical_lr_sweep.assign(muon_lr_rounded=practical_lr_sweep["muon_lr"].round(3)).set_index("muon_lr_rounded")
 
     claims = pd.DataFrame(
         [
             claim_row(
-                question="What is Muon's optimizer-intrinsic signature?",
-                claim="Muon is best framed as an update-spectrum shaping optimizer.",
-                status="strong core claim",
-                evidence=(
-                    f"equal-update nrUpdate Muon/Adam={fmt(nr_update['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(nr_update)}; stUpdate={fmt(st_update['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(st_update)}"
-                ),
-                interpretation=(
-                    "The cross-task effect that survives matched update size is spectral flattening/high-rank updates, "
-                    "not universal loss improvement."
-                ),
-                next_test="Add momentum-free/state-standardized optimizer variants to isolate polar spectrum from optimizer state.",
+                question="What is the current paper's mechanism target?",
+                claim="Head-only updates can interfere with tail logits while tail samples are absent.",
+                status="paper framing",
+                evidence="The current main experiments all use matched-head-gain spectral/polar versus Frobenius/GD-style updates.",
+                interpretation="This makes the project a local function-drift mechanism paper, not an optimizer leaderboard.",
+                next_test="Keep every main result normalized by matched head gain or explicitly explain why it is not.",
             ),
             claim_row(
-                question="Does this signature extend beyond toy matrix problems?",
-                claim="The update-spectrum signature appears in MNIST MLP and ConvNet probes too.",
-                status="supporting evidence",
+                question="When should spectral/polar updates reduce head-to-tail drift?",
+                claim="The rank/sensitivity condition predicts the synthetic positive and negative cases.",
+                status="supported mechanism boundary",
                 evidence=(
-                    f"MNIST nrUpdate Muon/Adam={fmt(mnist_nr_update['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(mnist_nr_update)}; stUpdate={fmt(mnist_st_update['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(mnist_st_update)}. Deep MNIST nrUpdate={fmt(deep_nr['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(deep_nr)} with first-order ratio={fmt(deep_first['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(deep_first)}. ConvNet nrUpdate={fmt(conv_nr['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(conv_nr)} with first-order ratio={fmt(conv_first['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(conv_first)}"
+                    f"Positive: nrank(G_H)={fmt(positive['mean_head_gradient_nuclear_rank'])}, "
+                    f"ssrank(B_T,A_T)={fmt(positive['mean_tail_downstream_aware_stable_rank'])}, "
+                    f"drift ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{ci(positive, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
+                    f"Negative: nrank(G_H)={fmt(negative['mean_head_gradient_nuclear_rank'])}, "
+                    f"ssrank(B_T,A_T)={fmt(negative['mean_tail_downstream_aware_stable_rank'])}, "
+                    f"drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{ci(negative, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
-                interpretation="The spectral-shaping effect is not limited to synthetic matrix objectives, but neural probes make the progress caveat sharper.",
-                next_test="Move from short MNIST sanity checks to a modern or longer-horizon benchmark only if neural performance claims become central.",
+                interpretation="The condition has falsifiable sign content in controlled examples.",
+                next_test="Add natural-task measurements of the same condition before presenting it as predictive beyond the constructed probe.",
             ),
             claim_row(
-                question="Does higher-rank update geometry automatically imply better progress?",
-                claim="No. Local progress is conditional on task and layer geometry.",
-                status="strong boundary claim",
+                question="Does the real-data one-step diagnostic support lower tail drift?",
+                claim="Yes, for tail logits at matched first-order head gain.",
+                status="supported in small long-tailed digits",
                 evidence=(
-                    f"MatrixSensing first-order Muon/Adam={fmt(ms_first_order['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(ms_first_order)}, but MF-with-input={fmt(mf_first_order['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(mf_first_order)}; boundary map has {favorable} favorable and {unfavorable} unfavorable rows."
+                    f"Drift-squared ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{ci(one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"spectral-lower paired fraction={fmt(one_step['spectral_less_tail_output_drift_fraction'])} over "
+                    f"{int(one_step['seeds'])} seeds."
                 ),
-                interpretation="The same optimizer-induced spectral bias can help or hurt depending on the local geometry.",
-                next_test="Replace the descriptive boundary map with a held-out predictive rule, then test on a new task family.",
+                interpretation="Spectral/polar updates perturb held-out tail logits less for the same head progress in this diagnostic.",
+                next_test="Replicate on a real long-tailed benchmark before claiming final tail-performance relevance.",
             ),
             claim_row(
-                question="What local quantity explains observed one-step decrease?",
-                claim="Observed one-step decrease is well calibrated by gradient-update alignment.",
-                status="paper-ready diagnostic",
+                question="Does the lower drift persist beyond one update?",
+                claim="The 8-step head-only forgetting probe keeps lower spectral tail drift.",
+                status="supported short-horizon diagnostic",
                 evidence=(
-                    f"Spearman(delta_loss, <G,D>)={fmt(calibration_all['spearman_delta_vs_first_order'])} "
-                    f"CI=[{fmt(calibration_all['spearman_ci95_low'])}, {fmt(calibration_all['spearman_ci95_high'])}], "
-                    f"within-factor-2={fmt(calibration_all['within_factor_2'])}"
+                    f"Final drift ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{ci(forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"drift-area ratio={fmt(forgetting['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} "
+                    f"{ci(forgetting, 'tail_output_drift_area_ratio_ci95_low', 'tail_output_drift_area_ratio_ci95_high')}."
                 ),
-                interpretation="The paper can use <G,D> as the local bridge between update geometry and loss change.",
-                next_test="Keep this claim local; validate separately if longer-horizon progress is discussed.",
+                interpretation="The one-step drift effect is not isolated to a single update in the current small diagnostic.",
+                next_test="Extend only after deciding whether the paper will include a full training benchmark.",
             ),
             claim_row(
-                question="Why can a flat/polar spectrum help in some regimes and hurt in others?",
-                claim="The sign flips with the norm budget, even though polar direction reliably raises update rank.",
-                status="mechanistic evidence",
+                question="Does the clean polar direction connect to Muon-style state?",
+                claim="There is selected-state compatibility through momentum polar and a short practical NS-Muon trajectory.",
+                status="supported compatibility check",
                 evidence=(
-                    f"flat_polar/GD under Frobenius budget={fmt(spectral_fro['geomean_ratio'])} "
-                    f"CI={ratio_ci(spectral_fro)}, but under operator budget={fmt(spectral_op['geomean_ratio'])} "
-                    f"CI={ratio_ci(spectral_op)}; stateless PolarMuon/GD nrUpdate={fmt(stateless_nr['geomean_ratio'])} "
-                    f"CI={ratio_ci(stateless_nr)} while Frobenius-matched update_grad_inner={fmt(stateless_inner['geomean_ratio'])} "
-                    f"CI={ratio_ci(stateless_inner)} and short-trajectory total_decrease={fmt(traj_decrease['geomean_ratio'])} "
-                    f"CI={ratio_ci(traj_decrease)}"
+                    f"polar(M_t) drift ratio={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{ci(muon_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}; "
+                    f"short-trajectory NS(M_t) drift ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{ci(practical_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
                 ),
-                interpretation="Flat spectral allocation is not intrinsically better; it matches operator-norm-like geometry better than Frobenius geometry.",
-                next_test="Formalize this as the main theorem/proposition and add trajectory-level optimizer variants.",
+                interpretation="Sampled Muon-style momentum/NS states have drift ratios compatible with the local polar mechanism.",
+                next_test="Test the same compatibility pattern on real long-tail benchmarks and larger models before claiming broad Muon training behavior.",
             ),
             claim_row(
-                question="Do current features predict where Muon wins?",
-                claim="Not yet at a publishable level.",
-                status="open gap",
+                question="What does the layerwise diagnostic say the mechanism is?",
+                claim="The supported mechanism is scaled head-gain efficiency, not lower unit-direction tail sensitivity.",
+                status="supported mechanism refinement",
                 evidence=(
-                    f"best leave-setting-out balanced accuracy={fmt(best_predictor['balanced_accuracy'])} "
-                    f"from {best_predictor['feature_set']} when degenerate settings are skipped; "
-                    f"chance-filled best={fmt(predictor_uncertainty_best['mean_balanced_accuracy_chance_filled'])} "
-                    f"CI=[{fmt(predictor_uncertainty_best['balanced_accuracy_ci95_low'])}, "
-                    f"{fmt(predictor_uncertainty_best['balanced_accuracy_ci95_high'])}]"
+                    f"Layer 1 unit/scaled/observed ratios="
+                    f"{fmt(layer_one['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(layer_one['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(layer_one['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}; "
+                    f"Layer 2="
+                    f"{fmt(layer_two['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(layer_two['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(layer_two['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}."
                 ),
-                interpretation="The current boundary is descriptive, not a reliable predictive theory for unseen settings.",
-                next_test="Use the new benchmark as a held-out test instead of selecting features after seeing all task families.",
+                interpretation="The spectral unit direction can be more tail-sensitive, but it needs less scaling to achieve the same head gain.",
+                next_test="Add a larger-architecture layerwise diagnostic if this mechanism is presented as architecture-level.",
             ),
             claim_row(
-                question="Does Muon's geometry guarantee neural performance gains?",
-                claim="No; MNIST hidden=128 is Adam-favorable in first-order progress.",
-                status="negative control",
+                question="What should remain outside the main claim?",
+                claim="Broad Muon training behavior, tail accuracy, and real benchmark performance remain open.",
+                status="scope boundary",
                 evidence=(
-                    f"MNIST hidden=128 first-order Muon/Adam={fmt(mnist_h128['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(mnist_h128)}"
+                    "One-step tail loss/accuracy do not improve, while the small practical run has "
+                    f"tail eval loss ratio={fmt(practical_training['geomean_final_tail_eval_loss_ratio_muon_over_adam'])} "
+                    f"but tail accuracy diff={fmt(practical_training['mean_final_tail_eval_accuracy_diff_muon_minus_adam'])}. "
+                    f"The LR sweep shows lr=0.1 worsens tail loss/drift ratios="
+                    f"{fmt(lr_sweep.loc[0.1, 'geomean_final_tail_eval_loss_ratio_muon_over_adam'])}/"
+                    f"{fmt(lr_sweep.loc[0.1, 'geomean_final_tail_eval_drift_rms_ratio_muon_over_adam'])}."
                 ),
-                interpretation="The neural evidence supports geometry shaping but warns against claiming optimizer superiority.",
-                next_test="Separate local update geometry, final training loss, and classification error in any neural section.",
+                interpretation="Muon and long-tail performance should be stated as a small sanity check plus future work unless real long-tail benchmark experiments are added.",
+                next_test="Run practical Muon training ablations on real long-tail benchmarks if Muon-specific performance claims become central.",
             ),
+        ]
+    )
+
+    paper_shape = pd.DataFrame(
+        [
+            {
+                "role": "Core positive result",
+                "content": "Matched-head-gain spectral/polar updates reduce tail logit drift in synthetic and small long-tailed diagnostics, with fixed-checkpoint and short-trajectory Muon-style compatibility checks.",
+            },
+            {
+                "role": "Mechanistic bridge",
+                "content": "Use the nrank(G_H) versus ssrank(B_T,A_T) condition plus layerwise scaling diagnostics.",
+            },
+            {
+                "role": "Negative control",
+                "content": "Show the reversed synthetic condition and the layerwise unit-direction caveat.",
+            },
+            {
+                "role": "Scope boundary",
+                "content": "Do not infer final tail accuracy, full Muon behavior, or broad optimizer superiority; the small practical training result is a sanity check with LR sensitivity, not a benchmark.",
+            },
         ]
     )
 
     text = f"""# E11 Research Direction Map
 
-This generated note is the compact paper-direction map for E11. It turns the current evidence into testable claims and explicit next experiments.
+This generated note is the compact paper-direction map for E11. It turns the current head-to-tail evidence into testable claims and explicit next experiments.
 
 ## Working Research Direction
 
-Muon should be studied as an **update-spectrum shaping optimizer**. Its robust effect is to produce flatter, higher-rank update matrices than Adam under matched update size. The open scientific question is not whether Muon is universally better, but when this induced update geometry aligns with the local loss geometry strongly enough to explain one-step decrease or optimization progress.
+The current project should be written as a **head-to-tail interference mechanism paper**. The central question is whether an idealized spectral/polar direction can achieve the same head progress while perturbing absent tail classes less than a Frobenius/GD-style direction. Older Muon/Adam condition-geometry results remain useful guardrails, but they are not the main paper thesis.
 
 ## Claim Map
 
@@ -232,34 +192,30 @@ Muon should be studied as an **update-spectrum shaping optimizer**. Its robust e
 
 The current best hypothesis is:
 
-> Muon imposes a flat/polar update-spectrum bias. This bias is a robust optimizer-level signature, but its optimization benefit is conditional: it helps when the local gradient/norm/task geometry rewards spectrally spread updates, and it hurts or becomes neutral otherwise.
+> In long-tailed small-batch training, spectral/polar updates can reduce head-to-tail function drift at matched head gain when the head-gradient rank is large relative to downstream tail sensitivity. Fixed-checkpoint and short-trajectory Muon-style compatibility checks support Muon-style momentum/NS directions as plausible local implementation paths, but broad Muon training behavior remains a separate claim.
 
 ## Current Paper Shape
 
-| role | content |
-|:--|:--|
-| Core positive result | Muon reliably induces higher-rank, flatter update spectra than Adam under matched update size. |
-| Mechanistic bridge | One-step loss decrease is well captured by `<G,D>`. |
-| Boundary result | Muon's first-order advantage changes sign across task family, width/layer control, and norm budget. |
-| Negative control | Higher rank does not imply lower loss, better final performance, or general stability. |
-| Main gap | The current boundary map is descriptive; a stronger paper needs a held-out predictive boundary test and, only for broader neural claims, modern/longer-horizon neural benchmarks. |
+{markdown_table(paper_shape, ["role", "content"])}
 
 ## Immediate Next Experiments
 
-1. Add a modern or longer-horizon neural benchmark with per-layer update spectra, first-order alignment, final loss, and classification error if neural performance claims become central.
-2. Add optimizer variants that separate polar spectrum shaping from momentum/state details.
-3. Turn the descriptive boundary map into a pre-specified predictor and test it on a genuinely held-out task or architecture.
+1. Run a real long-tailed benchmark only if the paper wants to discuss final tail performance.
+2. Add real long-tail practical Muon benchmarks only if Muon-specific performance claims become central.
+3. Add larger-architecture layerwise diagnostics only if architecture-level generality becomes central.
 
 ## Sources
 
 - [research synthesis](e11_research_synthesis.md)
 - [paper-readiness audit](e11_paper_readiness_audit.md)
-- [mechanism boundary map](e11_mechanism_boundary.md)
-- [boundary predictor baseline](e11_boundary_predictor.md)
-- [MNIST MLP probe](e11_mnist_mlp_probe.md)
-- [Deep MNIST MLP probe](e11_deep_mnist_mlp_probe.md)
-- [stateless direction ablation](e11_stateless_direction_ablation.md)
-- [stateless optimizer trajectory ablation](e11_stateless_optimizer_trajectory.md)
+- [evidence index](e11_evidence_index.md)
+- [quantitative claim ledger](e11_quantitative_claim_ledger.md)
+- [head-tail interference note](e11_head_tail_interference.md)
+- [long-tail one-step note](e11_long_tail_one_step.md)
+- [long-tail Muon-style compatibility note](e11_long_tail_muon_bridge.md)
+- [long-tail practical-Muon trajectory compatibility note](e11_long_tail_practical_muon_bridge.md)
+- [long-tail forgetting note](e11_long_tail_forgetting.md)
+- [long-tail layerwise note](e11_long_tail_layerwise.md)
 """
     write_markdown(OUTPUT_PATH, text)
     print(f"saved research direction map to {OUTPUT_PATH}")

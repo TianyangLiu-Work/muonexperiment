@@ -1,20 +1,24 @@
-# E11 Condition Geometry
+# E11 Head-to-Tail Paper Evidence
 
-This directory-level note documents the current E11 experiment suite for the Muon condition-geometry paper project. The goal is to keep the codebase reproducible while the research question evolves.
+This directory-level note documents the current E11 evidence package for the head-to-tail interference paper, plus the older condition-geometry experiments that now serve as background guardrails. The goal is to keep the paper evidence, generated artifacts, and legacy diagnostics reproducible without blurring their roles.
 
-## Research Question
+## Current Paper Question
 
-Does Muon act as a geometry-shaping optimizer, and when does that geometry explain one-step loss decrease or short-horizon optimization progress?
+Can an idealized spectral/polar update direction reduce head-to-tail function interference in long-tailed small-batch training, once we match the amount of head progress?
 
 Current working thesis:
 
-> Muon is an update-spectrum shaping optimizer. It consistently produces flatter, higher-rank update spectra than Adam at matched update size, but this spectral bias helps optimization only under specific local task/layer/norm geometry.
+> Head-only updates can damage tail logits while tail samples are absent. Under a measurable rank/sensitivity condition, an idealized spectral/polar direction causes less tail logit drift than a Frobenius/GD-style direction at matched head gain.
+
+Current paper scope:
+
+> The active paper draft is a focused head-to-tail interference paper. Its current defensible claim is that an idealized spectral/polar direction can reduce tail logit drift at matched head gain in synthetic and small long-tailed diagnostics. The older E11 condition-geometry experiments are background evidence and guardrails; they should not be read as a broad claim that Muon is a generally better optimizer.
 
 ## Main Entry Points
 
 Paper draft and experiment triage:
 
-- `paper/specgrad_activation_paper/`: current LaTeX draft for the activation-geometry framing.
+- `paper/specgrad_activation_paper/`: current LaTeX draft for the head-to-tail interference framing.
 - `paper/specgrad_activation_paper/notes/experiment_evaluation.md`: prioritized experiment evaluation for turning the draft into a project paper.
 
 Run the core experiment:
@@ -23,10 +27,18 @@ Run the core experiment:
 python3 scripts/e11_run_experiments.py
 python3 scripts/e11_make_figures.py
 python3 scripts/e11_run_equal_update_control.py
+python3 scripts/e11_run_head_tail_interference.py
+python3 scripts/e11_run_long_tail_one_step.py
+python3 scripts/e11_run_long_tail_muon_bridge.py
+python3 scripts/e11_run_long_tail_practical_muon_bridge.py
+python3 scripts/e11_run_long_tail_practical_training.py
+python3 scripts/e11_run_long_tail_practical_training_lr_sweep.py
+python3 scripts/e11_run_long_tail_forgetting.py
+python3 scripts/e11_run_long_tail_layerwise.py
 python3 scripts/e11_run_spectral_allocation_probe.py
 ```
 
-Run the current paper-supporting follow-up experiments:
+Run appendix and guardrail follow-up experiments:
 
 ```bash
 python3 scripts/e11_run_overlap_followup.py
@@ -78,12 +90,15 @@ git diff --check
 Equivalent make targets:
 
 ```bash
-make e11-main-results      # core trajectories, base figures, equal-update control, and spectral-allocation probe
+make e11-main-results      # core trajectories, base figures, equal-update, head-tail, Muon-style compatibility, and spectral-allocation probes
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
-make e11-paper-assets      # regenerate paper-facing Markdown/TeX artifacts after results exist
+make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
+make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes
+make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes
+make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf
 make e11-check             # validate outputs, run tests, and check whitespace
-make e11-full              # regenerate discussion artifacts, then run e11-check
+make e11-full              # regenerate paper artifacts, rebuild the PDF, then run e11-check
 ```
 
 ## Core Artifacts
@@ -95,7 +110,8 @@ Paper-facing synthesis:
 - `discussion/e11_main_figure_captions.md`
 - `discussion/e11_notation_glossary.md`
 - `discussion/e11_quantitative_claim_ledger.md`
-- `discussion/e11_paper_numbers.tex`
+- `paper/specgrad_activation_paper/tables/e11_paper_numbers.tex`
+- `discussion/e11_paper_numbers.tex` (mirror copy for paper-facing discussion artifacts)
 - `discussion/e11_reproduction_checklist.md`
 - `discussion/e11_paper_readiness_audit.md`
 - `discussion/e11_reviewer_risk_audit.md`
@@ -103,6 +119,14 @@ Paper-facing synthesis:
 - `discussion/e11_evidence_index.md`
 - `discussion/e11_artifact_manifest.md`
 - `discussion/e11_activation_perturbation.md`
+- `discussion/e11_head_tail_interference.md`
+- `discussion/e11_long_tail_one_step.md`
+- `discussion/e11_long_tail_muon_bridge.md`
+- `discussion/e11_long_tail_practical_muon_bridge.md`
+- `discussion/e11_long_tail_practical_training.md`
+- `discussion/e11_long_tail_practical_training_lr_sweep.md`
+- `discussion/e11_long_tail_forgetting.md`
+- `discussion/e11_long_tail_layerwise.md`
 
 Mechanism and boundary evidence:
 
@@ -122,60 +146,54 @@ Mechanism and boundary evidence:
 - `discussion/e11_optimizer_invariance_audit.md`
 - `discussion/e11_claim_validity_audit.md`
 
-Primary quantitative tables:
+Primary paper quantitative tables:
 
-- `results/e11_equal_update/update_spectrum_summary.csv`
-- `results/e11_equal_update/activation_perturbation_summary.csv`
-- `results/e11_equal_update/first_order_calibration_summary.csv`
-- `results/e11_cross_task_signature/cross_task_signature_summary.csv`
-- `results/e11_mechanism_boundary/mechanism_boundary_map.csv`
-- `results/e11_boundary_predictor/boundary_predictor_summary.csv`
-- `results/e11_boundary_predictor/boundary_predictor_uncertainty.csv`
-- `results/e11_stateless_direction_ablation/stateless_direction_summary.csv`
-- `results/e11_stateless_optimizer_trajectory/stateless_optimizer_summary.csv`
-- `results/e11_spectral_allocation_probe/spectral_allocation_summary.csv`
-- `results/e11_mnist_mlp_probe/pair_summary.csv`
-- `results/e11_deep_mnist_mlp_probe/pair_summary.csv`
-- `results/e11_mnist_patch_probe/pair_summary.csv`
-- `results/e11_mnist_conv_probe/pair_summary.csv`
+- `results/e11_head_tail_interference/pair_summary.csv`
+- `results/e11_long_tail_one_step/pair_summary.csv`
+- `results/e11_long_tail_muon_bridge/pair_summary.csv`
+- `results/e11_long_tail_practical_muon_bridge/summary.csv`
+- `results/e11_long_tail_practical_training/summary.csv`
+- `results/e11_long_tail_practical_training_lr_sweep/sweep_summary.csv`
+- `results/e11_long_tail_forgetting/summary.csv`
+- `results/e11_long_tail_layerwise/summary.csv`
+- `paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex`
 
-Primary figures:
+Primary paper figures:
 
-- `figures/e11_equal_update/update_spectrum_robustness.png`
-- `figures/e11_equal_update/first_order_calibration.png`
-- `figures/e11_stateless_direction_ablation/stateless_direction_ratios.png`
-- `figures/e11_stateless_optimizer_trajectory/stateless_optimizer_trajectory_ratios.png`
-- `figures/e11_spectral_allocation_probe/spectral_allocation_ratios.png`
-- `figures/e11_target_update_sweep/target_update_first_order_ratios.png`
-- `figures/e11_mnist_mlp_probe/mnist_mlp_first_order_ratios.png`
-- `figures/e11_deep_mnist_mlp_probe/deep_mnist_mlp_first_order_ratios.png`
-- `figures/e11_mnist_patch_probe/mnist_patch_first_order_ratios.png`
-- `figures/e11_mnist_conv_probe/mnist_conv_first_order_ratios.png`
+- `figures/e11_head_tail_interference/head_tail_drift_ratio.png`
+- `figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png`
+- `figures/e11_long_tail_muon_bridge/long_tail_muon_bridge.png`
+- `figures/e11_long_tail_practical_muon_bridge/long_tail_practical_muon_bridge.png`
+- `figures/e11_long_tail_practical_training/long_tail_practical_training.png`
+- `figures/e11_long_tail_practical_training_lr_sweep/long_tail_practical_training_lr_sweep.png`
+- `figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png`
+- `figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png`
 
-Paper draft tables:
+## Current Diagnostic Claims
 
-- `paper/specgrad_activation_paper/tables/e11_activation_perturbation.tex`
-
-## Claims That Currently Survive
-
-1. Muon reliably changes update spectra.
-   - Equal-update `nrUpdate` ratio is about `2.017`.
-   - Equal-update `stUpdate` ratio is about `4.765`.
-2. One-step loss decrease is locally well explained by `<G,D>`, where `D` is the positive descent update.
-   - Spearman correlation is about `0.9803` in the equal-update calibration summary.
-3. Flat/polar update allocation has a norm-geometry boundary.
-   - It loses under Frobenius budget and wins under operator-norm budget in the spectral-allocation probe.
-   - The stateless direction ablation shows polar direction alone raises update rank but still loses to GD under matched Frobenius update size.
-   - The stateless optimizer trajectory ablation shows the same pattern across short matched-update trajectories.
-   - The local theory note states the matching first-order constrained problem.
-   - The optimizer ablation map records which controls isolate update size, layer allocation, stateless direction choice, singular-value allocation, singular-vector geometry, and continuation effects.
-4. Muon's local advantage is conditional.
-   - The sign flips across Matrix Sensing, MF-with-input, MLP width, and update-size controls.
-5. The current boundary map is not yet a strong predictive law.
-   - The leave-setting-out boundary predictor is weak and should be treated as a baseline.
-6. Neural MNIST sanity checks preserve update-spectrum shaping but remain Adam-favorable for first-order progress in wider/deeper/local models.
-   - Deep MNIST, patch/shared-weight, and true ConvNet probes all keep the Muon update-spectrum signature while showing Adam-favorable first-order ratios.
-   - This is a neural negative control against claiming high-rank updates directly improve progress.
+1. The synthetic head-to-tail condition has the expected sign.
+   - When `nrank(G_H) > ssrank(B_T,A_T)`, the spectral/Frobenius tail-drift-squared ratio is about `0.3403`.
+   - When the inequality is reversed, the ratio is about `7.208`.
+2. The long-tailed one-step diagnostic is consistent with lower tail logit drift at matched head gain.
+   - The spectral/Frobenius tail-drift-squared ratio is about `0.5501 [0.5101, 0.5931]`.
+   - All 20 paired seeds have lower spectral tail drift.
+3. The 8-step head-only forgetting diagnostic shows lower measured tail drift across the short horizon.
+   - Final drift-squared ratio is about `0.6167 [0.5744, 0.6622]`.
+   - Drift-area ratio is about `0.7787 [0.7549, 0.8033]`.
+4. The layerwise diagnostic identifies the mechanism boundary.
+   - Unit-direction spectral JVP is larger than Frobenius in both layers.
+   - Matched-head-gain scaled and observed drift are lower in both layers.
+   - The current evidence is consistent with a scaled head-gain efficiency mechanism, not a claim that spectral directions are intrinsically less tail-sensitive.
+5. The Muon-style compatibility diagnostic connects the clean polar direction to sampled Muon-style state.
+   - `polar(M_t)` has tail drift-squared ratio about `0.8199 [0.6951, 0.9672]` relative to Fro/GD at matched head gain.
+   - Newton-Schulz `NS(M_t)` has ratio about `0.9116 [0.7696, 1.08]`, so this finite-iteration approximation is not yet a significant drift-reduction result.
+6. The short practical-Muon trajectory compatibility diagnostic extends this check to sampled trajectory states.
+   - Across 120 sampled state-step comparisons, `polar(M_t)` has ratio about `0.7292 [0.696, 0.7641]`.
+   - `NS(M_t)` has ratio about `0.8019 [0.7644, 0.8413]`, while momentum-gradient cosine averages about `0.8589 [0.836, 0.8818]`.
+7. The practical imbalanced-training diagnostic is consistent with the drift story but still not a leaderboard result.
+   - At fixed lightweight hyperparameters on long-tailed digits, NS-Muon-style training has final train loss ratio about `0.6468 [0.604, 0.6926]` and tail eval loss ratio about `0.8549 [0.8319, 0.8786]` versus Adam.
+   - Tail eval margin difference is about `1.955 [1.628, 2.281]`, and tail eval drift RMS ratio is about `0.7501 [0.7244, 0.7767]`, but tail accuracy difference is `0`, so this is a drift/loss/margin diagnostic rather than a broad accuracy claim.
+   - LR sensitivity shows why this is not a monotone optimizer story: smaller `muon_lr` under-trains, while `muon_lr=0.1` lowers train loss further but worsens tail loss and drift.
 
 ## Claims To Avoid
 
@@ -185,6 +203,9 @@ Do not claim:
 - Higher rank/stable rank directly implies lower loss.
 - Muon is generally more stable.
 - The current boundary map is already a predictive theory for unseen tasks.
+- Lower tail logit drift automatically improves tail accuracy or final tail loss.
+- The idealized polar/spectral direction already explains full Muon optimizer behavior.
+- The current small practical NS-Muon-style run is sufficient as a broad optimizer benchmark.
 
 ## Code Organization
 
@@ -193,6 +214,7 @@ Do not claim:
 - `e11_condition_geometry/runner.py`: shared training and equal-update execution.
 - `e11_condition_geometry/diagnostics.py`: rank, spectrum, and one-step metrics.
 - `e11_condition_geometry/statistics.py`: summary tables and confidence intervals.
+- `e11_condition_geometry/long_tail_digits.py`: shared sklearn-digits long-tail data, MLP, update-direction, and layerwise diagnostic helpers.
 - `e11_condition_geometry/plots/`: static figure generation.
 - `e11_condition_geometry/reporting.py`: shared Markdown/report helpers.
 - `scripts/e11_run_*.py`: experiment runners.
@@ -201,11 +223,11 @@ Do not claim:
 
 ## Current Publication Gaps
 
-The current evidence supports a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
+The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
 
 Most important next steps:
 
-1. Add a modern or longer-horizon neural benchmark with explicit handling of non-matrix parameters only if broader neural-performance claims become central.
-2. Define and test a stronger predictive boundary model for when Muon's flat/polar update improves `<G,D>`.
-3. Add true trajectory-level optimizer variants that separate polar spectrum shaping from momentum/state details.
-4. Turn the current local theory note into a polished theorem/proof section with exact assumptions.
+1. Add a real long-tailed benchmark if the paper wants to claim relevance beyond small diagnostics.
+2. Extend the current fixed-checkpoint, short-trajectory, and small practical-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
+3. Add a larger-architecture layerwise diagnostic if the mechanism is meant to survive beyond the current small MLP.
+4. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.

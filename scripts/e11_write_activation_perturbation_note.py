@@ -11,7 +11,6 @@ if str(ROOT) not in sys.path:
 
 
 OUTPUT_PATH = Path("discussion/e11_activation_perturbation.md")
-TABLE_PATH = Path("paper/specgrad_activation_paper/tables/e11_activation_perturbation.tex")
 
 
 def _row(frame: pd.DataFrame, metric: str, family: str) -> pd.Series:
@@ -40,41 +39,9 @@ def _interpret(row: pd.Series, lower_label: str, higher_label: str) -> str:
     return "inconclusive"
 
 
-def write_latex_table(equal_update: pd.DataFrame) -> None:
-    metrics = [
-        ("relative_activation_delta_fro_norm", "Relative $\\|D_iA_i\\|_F$"),
-        ("relative_activation_delta_op_norm", "Relative $\\|D_iA_i\\|_{op}$"),
-        ("max_relative_sample_activation_delta", "Max per-sample $\\|D_ia_b\\|/\\|a_b\\|$"),
-        ("mean_relative_sample_activation_delta", "Mean per-sample $\\|D_ia_b\\|/\\|a_b\\|$"),
-    ]
-    families = [
-        ("All", "All activation-defined tasks"),
-        ("MatrixFactorizationInput", "MF-with-input"),
-        ("SmallMLPDigits", "Small MLP digits"),
-    ]
-    lines = [
-        "\\begin{table}[t]",
-        "\\centering",
-        "\\caption{Equal-update activation perturbation diagnostics. Ratios are Muon/Adam geomeans with 95\\% confidence intervals. Matrix Sensing is excluded because its diagnostic $A$ is a measurement-operator proxy, not a layer activation matrix.}",
-        "\\label{tab:e11-activation-perturbation}",
-        "\\begin{tabular}{llll}",
-        "\\toprule",
-        "Metric & Task group & Muon/Adam ratio & Interpretation \\\\",
-        "\\midrule",
-    ]
-    for metric, label in metrics:
-        for family, family_label in families:
-            row = _row(equal_update, metric, family)
-            interpretation = _interpret(row, "Muon lower", "Muon higher")
-            lines.append(f"{label} & {family_label} & ${_ratio(row)}$ & {interpretation} \\\\")
-    lines.extend(["\\bottomrule", "\\end{tabular}", "\\end{table}"])
-    TABLE_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-
 def main() -> None:
     raw = pd.read_csv("results/e11/activation_perturbation_summary.csv")
     equal = pd.read_csv("results/e11_equal_update/activation_perturbation_summary.csv")
-    write_latex_table(equal)
 
     equal_all_fro = _row(equal, "relative_activation_delta_fro_norm", "All")
     equal_all_op = _row(equal, "relative_activation_delta_op_norm", "All")
@@ -86,7 +53,7 @@ def main() -> None:
 
     text = f"""# E11 Activation Perturbation Diagnostics
 
-This note reports the first direct activation-perturbation diagnostic for the SpecGrad activation-geometry paper draft.
+This note reports the E11 direct activation-perturbation diagnostic. It is kept as supporting evidence for the broader optimizer-geometry project, but it is no longer part of the current head-to-tail interference paper draft.
 
 ## Definition
 
@@ -128,11 +95,9 @@ The result does **not** justify saying that Muon is generally more stable. A saf
 - [Equal-update activation perturbation summary](../results/e11_equal_update/activation_perturbation_summary.csv)
 - [Raw layer metrics](../results/e11/layer_metrics.csv)
 - [Equal-update layer metrics](../results/e11_equal_update/layer_metrics.csv)
-- [LaTeX table](../paper/specgrad_activation_paper/tables/e11_activation_perturbation.tex)
 """
     OUTPUT_PATH.write_text(text, encoding="utf-8")
     print(f"wrote {OUTPUT_PATH}")
-    print(f"wrote {TABLE_PATH}")
 
 
 if __name__ == "__main__":

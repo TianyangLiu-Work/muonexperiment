@@ -10,162 +10,124 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from e11_condition_geometry.paper_stats import load_paper_stats
-from e11_condition_geometry.reporting import fmt, markdown_table, ratio_ci, write_markdown
+from e11_condition_geometry.reporting import fmt, markdown_table, write_markdown
 
 
 OUTPUT_PATH = Path("discussion/e11_result_for_discussion.md")
 
 
-def read_optional_csv(path: str) -> pd.DataFrame:
-    csv_path = Path(path)
-    if not csv_path.exists():
-        return pd.DataFrame()
-    return pd.read_csv(csv_path)
-
-
-def safe_ratio_ci(row: pd.Series) -> str:
-    if "ratio_ci95_low" not in row or "ratio_ci95_high" not in row:
-        return "N/A"
-    return ratio_ci(row)
+def ci(row: pd.Series, low: str, high: str) -> str:
+    return f"[{fmt(row[low])}, {fmt(row[high])}]"
 
 
 def main() -> None:
     stats = load_paper_stats()
-    cross_task = read_optional_csv("results/e11_cross_task_signature/cross_task_signature_summary.csv")
-    mechanism = read_optional_csv("results/e11_mechanism_boundary/mechanism_boundary_map.csv")
-    predictor = read_optional_csv("results/e11_boundary_predictor/boundary_predictor_summary.csv")
-    predictor_uncertainty = read_optional_csv("results/e11_boundary_predictor/boundary_predictor_uncertainty.csv")
-
-    cross_task_pass = cross_task[cross_task.get("passes_cross_task_screen", False).astype(bool)] if not cross_task.empty else pd.DataFrame()
-    boundary_pass_rows = mechanism[mechanism.get("direction", "").isin(["Muon-favorable", "flat/polar-favorable", "own-update-favorable"])] if not mechanism.empty else pd.DataFrame()
-    boundary_unfavorable_rows = mechanism[mechanism.get("direction", "").isin(["Adam/GD-favorable", "GD-spectrum-favorable"])] if not mechanism.empty else pd.DataFrame()
-
-    predictor_best = None
-    if not predictor.empty:
-        pred_focus = predictor[
-            (predictor.get("target") == "update_grad_inner_muon_higher")
-            & (predictor.get("evaluation") == "leave_setting_out")
-        ]
-        if not pred_focus.empty:
-            predictor_best = pred_focus.sort_values("balanced_accuracy", ascending=False).iloc[0].to_dict()
-
-    predictor_uncertainty_best = None
-    if not predictor_uncertainty.empty:
-        p = predictor_uncertainty[predictor_uncertainty.get("target") == "update_grad_inner_muon_higher"]
-        if not p.empty:
-            predictor_uncertainty_best = p.sort_values(
-                "mean_balanced_accuracy_chance_filled", ascending=False
-            ).iloc[0].to_dict()
 
     claim_rows = pd.DataFrame(
         [
             {
-                "claim": "主结论 1",
-                "summary": "Muon 在匹配更新规模下显著改变更新矩阵光谱几何。",
-                "evidence": (
-                    f"nrUpdate Muon/Adam={fmt(stats.nr_update['geomean_ratio_muon_over_adam'])} "
-                    f"{safe_ratio_ci(stats.nr_update)}；stUpdate={fmt(stats.st_update['geomean_ratio_muon_over_adam'])} "
-                    f"{safe_ratio_ci(stats.st_update)}。"
-                ),
-                "caveat": "这是优化器内禀谱几何效应，不是完整泛化/最终损失性能声明。",
+                "讨论点": "G 和 A 的当前定义",
+                "发现": "主文中严格使用 head gradient 与 downstream tail sensitivity；旧 MF/condition-score 诊断只作背景。",
+                "证据": "paper main.tex 的 matched-head-gain / B_T D A_T 定义，以及当前四组 head-to-tail CSV。",
+                "解释": "这样可以避免把旧 A_i proxy 和当前 tail activation product 混在一起。",
             },
             {
-                "claim": "主结论 2",
-                "summary": "在当前短步长范围里，one-step 减少由梯度-更新对齐度主导。",
-                "evidence": (
-                    f"Spearman(ΔL, <G,D>)={fmt(stats.calibration_all['spearman_delta_vs_first_order'])} "
-                    f"[{fmt(stats.calibration_all['spearman_ci95_low'])}, {fmt(stats.calibration_all['spearman_ci95_high'])}]；"
-                    f"within-factor-2={fmt(stats.calibration_all['within_factor_2'])}。"
+                "讨论点": "Synthetic boundary",
+                "发现": (
+                    f"正例 drift ratio={fmt(stats.synthetic_positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}，"
+                    f"反例 drift ratio={fmt(stats.synthetic_negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}。"
                 ),
-                "caveat": "不对应于长程收敛或分类性能；需谨慎外推。",
+                "证据": "results/e11_head_tail_interference/pair_summary.csv",
+                "解释": "nrank(G_H) 与 ssrank(B_T,A_T) 的不等式至少有可 falsify 的符号含义。",
             },
             {
-                "claim": "主结论 3",
-                "summary": "谱分配的“有用/无用”有明显的范数边界。",
-                "evidence": (
-                    f"flat/polar 对比GD：Frobenius 条件下比值={fmt(stats.spectral_fro['geomean_ratio'])} {safe_ratio_ci(stats.spectral_fro)}；"
-                    f"operator 条件下比值={fmt(stats.spectral_op['geomean_ratio'])} {safe_ratio_ci(stats.spectral_op)}。"
+                "讨论点": "One-step long-tail drift",
+                "发现": (
+                    f"20 seeds 下 spectral/Frobenius tail-drift-squared ratio="
+                    f"{fmt(stats.long_tail_one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{ci(stats.long_tail_one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}。"
                 ),
-                "caveat": "此结论来自局部一阶控制的 probe，对长程训练和不同任务仍有限。",
+                "证据": "results/e11_long_tail_one_step/pair_summary.csv",
+                "解释": "matched head gain 下 spectral/polar 对 held-out tail logits 的扰动更小。",
             },
             {
-                "claim": "主结论 4",
-                "summary": "优势是条件化而非全局：跨任务可翻转。",
-                "evidence": (
-                    f"机制表中 Muon/flat 有利={stats.boundary_counts.muon_flat_favorable}，不利={stats.boundary_counts.unfavorable}，"
-                    f"混合/不确定={stats.boundary_counts.mixed}。"
+                "讨论点": "Muon-style compatibility",
+                "发现": (
+                    f"polar(M_t) drift ratio={fmt(stats.muon_bridge_polar_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{ci(stats.muon_bridge_polar_momentum, 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}；"
+                    f"NS(M_t) ratio={fmt(stats.muon_bridge_ns_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{ci(stats.muon_bridge_ns_momentum, 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}。"
                 ),
-                "caveat": "不宜写成“稳定更优”或“普适更快收敛”。",
+                "证据": "results/e11_long_tail_muon_bridge/pair_summary.csv",
+                "解释": "momentum polar 是 selected-state compatibility check；finite Newton-Schulz 近似较弱，不能直接推出完整 Muon training。",
+            },
+            {
+                "讨论点": "Practical Muon trajectory compatibility",
+                "发现": (
+                    f"120 个 state-step comparisons 下 polar(M_t) ratio="
+                    f"{fmt(stats.practical_muon_bridge_polar_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{ci(stats.practical_muon_bridge_polar_momentum, 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}；"
+                    f"NS(M_t) ratio={fmt(stats.practical_muon_bridge_ns_momentum['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{ci(stats.practical_muon_bridge_ns_momentum, 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}。"
+                ),
+                "证据": "results/e11_long_tail_practical_muon_bridge/summary.csv",
+                "解释": "短 trajectory 上 Muon-style directions 与局部 polar mechanism 兼容，但仍不是 final performance benchmark。",
+            },
+            {
+                "讨论点": "性能 caveat",
+                "发现": (
+                    f"one-step tail loss diff={fmt(stats.long_tail_one_step['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
+                    f"{ci(stats.long_tail_one_step, 'tail_loss_increase_diff_ci95_low', 'tail_loss_increase_diff_ci95_high')}。"
+                ),
+                "证据": "results/e11_long_tail_one_step/pair_summary.csv",
+                "解释": "当前结果支持 function drift claim，不支持 tail accuracy / final performance claim。",
+            },
+            {
+                "讨论点": "8-step forgetting",
+                "发现": (
+                    f"final drift ratio={fmt(stats.long_tail_forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{ci(stats.long_tail_forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}；"
+                    f"area ratio={fmt(stats.long_tail_forgetting['geomean_tail_output_drift_area_ratio_spectral_over_fro'])} "
+                    f"{ci(stats.long_tail_forgetting, 'tail_output_drift_area_ratio_ci95_low', 'tail_output_drift_area_ratio_ci95_high')}。"
+                ),
+                "证据": "results/e11_long_tail_forgetting/summary.csv",
+                "解释": "drift reduction 不只是单步现象，但仍然只是短程诊断。",
+            },
+            {
+                "讨论点": "Layerwise mechanism",
+                "发现": (
+                    f"layer 1 unit/scaled/observed={fmt(stats.layer_one['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(stats.layer_one['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(stats.layer_one['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}；"
+                    f"layer 2={fmt(stats.layer_two['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(stats.layer_two['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}/"
+                    f"{fmt(stats.layer_two['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}。"
+                ),
+                "证据": "results/e11_long_tail_layerwise/summary.csv",
+                "解释": "机制应写成 matched-head-gain scaling efficiency，而不是“spectral direction 本身更不扰动 tail”。",
             },
         ]
     )
 
-    neural_rows = pd.DataFrame(
-        [
-            {
-                "任务族": "Deep MNIST MLP",
-                "nrUpdate (Muon/Adam)": f"{fmt(stats.deep_nr['geomean_ratio_muon_over_adam'])} {safe_ratio_ci(stats.deep_nr)}",
-                "stUpdate (Muon/Adam)": f"{fmt(stats.deep_st['geomean_ratio_muon_over_adam'])} {safe_ratio_ci(stats.deep_st)}",
-                "one-step对齐 (Muon/Adam)": f"{fmt(stats.deep_first['geomean_ratio_muon_over_adam'])} {safe_ratio_ci(stats.deep_first)}",
-            },
-            {
-                "任务族": "MNIST Patch + 共享权重",
-                "nrUpdate (Muon/Adam)": f"{fmt(stats.patch_nr['geomean_ratio_muon_over_adam'])} {safe_ratio_ci(stats.patch_nr)}",
-                "stUpdate (Muon/Adam)": f"{fmt(stats.patch_st['geomean_ratio_muon_over_adam'])} {safe_ratio_ci(stats.patch_st)}",
-                "one-step对齐 (Muon/Adam)": f"{fmt(stats.patch_first['geomean_ratio_muon_over_adam'])} {safe_ratio_ci(stats.patch_first)}",
-            },
-            {
-                "任务族": "MNIST ConvNet",
-                "nrUpdate (Muon/Adam)": f"{fmt(stats.conv_nr['geomean_ratio_muon_over_adam'])} {safe_ratio_ci(stats.conv_nr)}",
-                "stUpdate (Muon/Adam)": f"{fmt(stats.conv_st['geomean_ratio_muon_over_adam'])} {safe_ratio_ci(stats.conv_st)}",
-                "one-step对齐 (Muon/Adam)": f"{fmt(stats.conv_first['geomean_ratio_muon_over_adam'])} {safe_ratio_ci(stats.conv_first)}",
-            },
-        ]
-    )
+    text = f"""# result for discussion
 
-    cross_task_text = "目前仅有 update-spectrum 相关指标通过了三任务一致性筛选。"
-    if not cross_task.empty:
-        pass_count = int(cross_task["passes_cross_task_screen"].sum()) if "passes_cross_task_screen" in cross_task.columns else 0
-        total = int(len(cross_task))
-        cross_task_text = f"跨任务筛选通过率为 {pass_count}/{total}；通过项可见于下表。"
+## 当前讨论主线
 
-    text = f"""# E11 讨论稿（可发表版本草案）
+当前 paper 应写成 **head-to-tail interference mechanism paper**：在长尾小批量训练中，head-only update 可能在 tail 样本缺席时扰动 tail logits；我们研究 idealized spectral/polar direction 是否能在 matched head gain 下减少这种扰动。
 
-## 研究问题
+旧的 Muon/Adam condition-geometry 结果只作为 guardrail：它提醒我们不能把 spectral/rank geometry 直接写成优化器全局更优、最终 tail accuracy 更好，或完整 Muon 机制已经被解释。
 
-Muon 是否能作为 geometry-shaping 优化器在局部 step 上系统性改变更新矩阵的谱几何？该谱几何是否能解释 one-step 的损失下降方向与幅度？
+## 会议讨论点
 
-## 核心结论（按证据优先级）
+{markdown_table(claim_rows, ["讨论点", "发现", "证据", "解释"])}
 
-{markdown_table(claim_rows, ["claim", "summary", "evidence", "caveat"])}
+## 建议会议结论
 
-## 神经网络 sanity check（避免“高秩即更好”误读）
-
-{markdown_table(neural_rows, ["任务族", "nrUpdate (Muon/Adam)", "stUpdate (Muon/Adam)", "one-step对齐 (Muon/Adam)"])}
-
-## 跨任务一致性与边界
-
-- {cross_task_text}
-- 边界表倾向性：有利 {stats.boundary_counts.muon_flat_favorable + stats.boundary_counts.own_update_positive_control} 条， 不利 {stats.boundary_counts.unfavorable} 条，混合/不确定 {stats.boundary_counts.mixed} 条。
-- 预测器能力（保守）：
-- Leave-setting-out 最佳特征集: {predictor_best['feature_set'] if predictor_best else 'N/A'}，均值平衡准确率: {fmt(predictor_best['balanced_accuracy']) if predictor_best is not None else 'N/A'}。
-  - 机会补齐评估（不确定性控制后）: {fmt(predictor_uncertainty_best['mean_balanced_accuracy_chance_filled']) if predictor_uncertainty_best is not None else 'N/A'}，置信区间 [{fmt(predictor_uncertainty_best['balanced_accuracy_ci95_low']) if predictor_uncertainty_best is not None else 'N/A'}, {fmt(predictor_uncertainty_best['balanced_accuracy_ci95_high']) if predictor_uncertainty_best is not None else 'N/A'}]。
-- 结论：目前只支撑“描述性边界”，尚未达到可对新任务稳定预测的强可迁移规则。
-
-## 可直接放入正文的结论顺序（建议）
-
-1. Muon 改变更新谱几何（nrUpdate / stUpdate）；  
-2. one-step 主要通过 `<G,D>` 的局部对齐解释；  
-3. 光谱分配在范数几何下有边界；  
-4. 结果是条件化、跨任务可翻转的，不是普适最优性。
-
-## 开放风险与审稿防线
-
-- 不能把 update-spectrum 的提升直接写成最终优化优势。  
-- 不能把神经网络小样本检验扩展为现代架构结论。  
-- 长程、充分调优、非 toy 神经任务上的稳定性仍是下一阶段要补的“可泛化预测”证据。
+1. 主文只讲 head-to-tail function drift，不讲 broad optimizer leaderboard。
+2. 定理和图都围绕 matched-head-gain protocol 组织。
+3. Muon-style compatibility 已从 fixed checkpoint 推进到 short practical trajectory；可以说 selected-state 兼容性证据更多，但仍不能说完整 practical Muon training 或 final tail accuracy。
+4. 如果要更强 empirical paper，下一步不是再画旧 geometry 图，而是加 real long-tail benchmark 和 larger-architecture layerwise diagnostic。
 """
-
     write_markdown(OUTPUT_PATH, text)
     print(f"saved discussion outline to {OUTPUT_PATH}")
 

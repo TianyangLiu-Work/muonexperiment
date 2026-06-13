@@ -4,7 +4,7 @@ This generated audit separates optimizer-intrinsic evidence from effects that de
 
 ## Short Answer
 
-The current evidence supports a robust optimizer-intrinsic claim for **update-spectrum shaping**, but it does **not** support the broad claim that Muon is generally more stable in the state geometry.
+The current evidence indicates a robust optimizer-intrinsic pattern for **update-spectrum shaping**, but it does **not** support the broad claim that Muon is generally more stable in the state geometry.
 
 Raw trajectories make Muon look smoother: all-task normalized rank-plane speed has Muon/Adam ratio 0.9134 with CI [0.8276, 1.008], and normalized condition speed has ratio 0.7201 with CI [0.6382, 0.8126]. However, after matching global relative update size, those all-task ratios become 1.072 for rank-plane speed and 0.916 for condition speed. In Matrix Sensing under equal-update control, the same ratios are 1.177 and 1.177, both strongly above 1.
 

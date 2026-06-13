@@ -72,7 +72,7 @@ def main() -> None:
     ignore_frame = pd.DataFrame(ignore_policy)
     text = f"""# E11 Artifact Manifest
 
-This generated manifest documents the current reproducibility boundary for E11. It is intentionally practical: it records what should be committed as evidence, what is local cache, and which key CSV tables back the paper-facing claims.
+This generated manifest documents the current reproducibility boundary for E11. It separates the head-to-tail paper evidence from background condition-geometry guardrails, records what should be committed as evidence, and lists which key CSV tables back the paper-facing claims.
 
 ## Artifact Directories
 

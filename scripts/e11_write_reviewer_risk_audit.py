@@ -9,164 +9,110 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from e11_condition_geometry.reporting import fmt, markdown_table, ratio_ci, require_one, write_markdown
+from e11_condition_geometry.reporting import fmt, markdown_table, write_markdown
 
 
 OUTPUT_PATH = Path("discussion/e11_reviewer_risk_audit.md")
 
 
-def main() -> None:
-    update_spectrum = pd.read_csv("results/e11_equal_update/update_spectrum_summary.csv")
-    calibration = pd.read_csv("results/e11_equal_update/first_order_calibration_summary.csv")
-    spectral = pd.read_csv("results/e11_spectral_allocation_probe/spectral_allocation_summary.csv")
-    stateless = pd.read_csv("results/e11_stateless_direction_ablation/stateless_direction_summary.csv")
-    trajectory = pd.read_csv("results/e11_stateless_optimizer_trajectory/stateless_optimizer_summary.csv")
-    deep_pair = pd.read_csv("results/e11_deep_mnist_mlp_probe/pair_summary.csv")
-    deep_spectrum = pd.read_csv("results/e11_deep_mnist_mlp_probe/update_spectrum_summary.csv")
-    conv_pair = pd.read_csv("results/e11_mnist_conv_probe/pair_summary.csv")
-    conv_spectrum = pd.read_csv("results/e11_mnist_conv_probe/update_spectrum_summary.csv")
-    predictor = pd.read_csv("results/e11_boundary_predictor/boundary_predictor_summary.csv")
-    predictor_uncertainty = pd.read_csv("results/e11_boundary_predictor/boundary_predictor_uncertainty.csv")
-    switch_lr = pd.read_csv("results/e11_optimizer_switch_lr_sweep/optimizer_switch_lr_summary.csv")
+def interval(row: pd.Series, low: str, high: str) -> str:
+    return f"[{fmt(row[low])}, {fmt(row[high])}]"
 
-    nr_update = require_one(update_spectrum, problem_family="All", metric="nrUpdate")
-    st_update = require_one(update_spectrum, problem_family="All", metric="stUpdate")
-    calibration_all = require_one(calibration, group="All")
-    fro = require_one(
-        spectral,
-        group_type="budget_all",
-        comparison="flat_polar_over_gd_spectrum",
-        metric="update_grad_inner",
-        budget="fro",
-    )
-    op = require_one(
-        spectral,
-        group_type="budget_all",
-        comparison="flat_polar_over_gd_spectrum",
-        metric="update_grad_inner",
-        budget="op",
-    )
-    stateless_nr = require_one(
-        stateless,
-        group_type="all",
-        problem_family="All",
-        checkpoint_source="All",
-        comparison="PolarMuon/GD",
-        metric="nrUpdate",
-    )
-    stateless_inner = require_one(
-        stateless,
-        group_type="all",
-        problem_family="All",
-        checkpoint_source="All",
-        comparison="PolarMuon/GD",
-        metric="update_grad_inner",
-    )
-    traj_decrease = require_one(
-        trajectory,
-        group_type="all",
-        problem_family="All",
-        comparison="PolarMuon/GD",
-        metric="total_decrease",
-    )
-    deep_nr = require_one(deep_spectrum, problem_family="DeepMNISTMLP", metric="nrUpdate")
-    deep_first = require_one(deep_pair, group_type="all", hidden_dim="All", num_factors="All", metric="update_grad_inner")
-    conv_nr = require_one(conv_spectrum, problem_family="MNISTConvNet", metric="nrUpdate")
-    conv_first = require_one(conv_pair, group_type="all", filters="All", kernel_size="All", metric="update_grad_inner")
-    predictor_focus = predictor[
-        (predictor["target"] == "update_grad_inner_muon_higher") & (predictor["evaluation"] == "leave_setting_out")
-    ]
-    predictor_best = (
-        predictor_focus.groupby("feature_set", as_index=False)
-        .agg(mean_balanced_accuracy=("balanced_accuracy", "mean"))
-        .sort_values("mean_balanced_accuracy", ascending=False)
-        .iloc[0]
-    )
-    predictor_uncertainty_best = (
-        predictor_uncertainty[predictor_uncertainty["target"].eq("update_grad_inner_muon_higher")]
-        .sort_values("mean_balanced_accuracy_chance_filled", ascending=False)
-        .iloc[0]
-    )
-    switch_all = require_one(switch_lr, group_type="all", metric="loss_after", source_algo="All")
+
+def main() -> None:
+    synthetic = pd.read_csv("results/e11_head_tail_interference/pair_summary.csv")
+    one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
+    muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
+    practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
+    practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
+    forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
+    layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
+
+    positive = synthetic[synthetic["setting"].eq("high_head_rank_low_tail_srank")].iloc[0]
+    negative = synthetic[synthetic["setting"].eq("low_head_rank_high_tail_srank")].iloc[0]
+    layer_1 = layerwise[layerwise["layer"].eq(1)].iloc[0]
+    layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
 
     risks = pd.DataFrame(
         [
             {
-                "reviewer_objection": "The update-rank result is trivial because ExactMuon is polar by construction.",
+                "reviewer_objection": "The matched-head-gain result only shows lower tail logit drift, not better tail performance.",
+                "risk_level": "high if overclaimed",
+                "current_evidence": (
+                    f"One-step drift-sq ratio={fmt(one_step['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(one_step, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}, "
+                    f"but tail loss-increase diff={fmt(one_step['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
+                    f"CI={interval(one_step, 'tail_loss_increase_diff_ci95_low', 'tail_loss_increase_diff_ci95_high')}. "
+                    f"The small practical training run has lower tail eval loss ratio="
+                    f"{fmt(practical_training['geomean_final_tail_eval_loss_ratio_muon_over_adam'])} "
+                    f"CI={interval(practical_training, 'final_tail_eval_loss_ratio_ci95_low', 'final_tail_eval_loss_ratio_ci95_high')}, "
+                    f"higher tail margin diff={fmt(practical_training['mean_final_tail_eval_margin_diff_muon_minus_adam'])} "
+                    f"CI={interval(practical_training, 'final_tail_eval_margin_diff_ci95_low', 'final_tail_eval_margin_diff_ci95_high')}, "
+                    f"but tail accuracy diff={fmt(practical_training['mean_final_tail_eval_accuracy_diff_muon_minus_adam'])} "
+                    f"CI={interval(practical_training, 'final_tail_eval_accuracy_diff_ci95_low', 'final_tail_eval_accuracy_diff_ci95_high')}."
+                ),
+                "safe_response": "Make function drift the main measured quantity; present practical tail-loss/margin evidence as a small sanity check and separate it from tail accuracy.",
+                "remaining_work": "Run retuned long-horizon benchmarks before making performance claims.",
+            },
+            {
+                "reviewer_objection": "The theory is local and uses a matched-head-gain protocol rather than a real optimizer schedule.",
                 "risk_level": "medium",
                 "current_evidence": (
-                    f"Equal-update nrUpdate={fmt(nr_update['geomean_ratio_muon_over_adam'])} CI={ratio_ci(nr_update)}, "
-                    f"stUpdate={fmt(st_update['geomean_ratio_muon_over_adam'])} CI={ratio_ci(st_update)}; "
-                    f"stateless PolarMuon/GD nrUpdate={fmt(stateless_nr['geomean_ratio'])} CI={ratio_ci(stateless_nr)}."
+                    f"8-step forgetting still has lower final drift ratio={fmt(forgetting['geomean_final_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(forgetting, 'final_tail_output_drift_sq_ratio_ci95_low', 'final_tail_output_drift_sq_ratio_ci95_high')}, "
+                    f"but final tail loss diff CI={interval(forgetting, 'final_tail_loss_increase_diff_ci95_low', 'final_tail_loss_increase_diff_ci95_high')} crosses zero."
                 ),
-                "safe_response": "Frame this as the optimizer's controlled spectral bias, not as a surprising performance result.",
-                "remaining_work": "Add non-exact Muon variants or approximate polar iterations if the paper targets broader optimizer implementations.",
+                "safe_response": "State the result as a local mechanism diagnostic for head-only updates, not a convergence or final-performance theorem.",
+                "remaining_work": "Add retuned longer-horizon runs if the manuscript claims training improvement.",
             },
             {
-                "reviewer_objection": "Higher-rank updates do not explain optimization progress.",
-                "risk_level": "low for current claim, high for stronger claims",
-                "current_evidence": (
-                    f"Stateless PolarMuon/GD update_grad_inner={fmt(stateless_inner['geomean_ratio'])} CI={ratio_ci(stateless_inner)}; "
-                    f"trajectory total_decrease={fmt(traj_decrease['geomean_ratio'])} CI={ratio_ci(traj_decrease)}; "
-                    f"Deep MNIST first-order ratio={fmt(deep_first['geomean_ratio_muon_over_adam'])} CI={ratio_ci(deep_first)} despite "
-                    f"nrUpdate={fmt(deep_nr['geomean_ratio_muon_over_adam'])} CI={ratio_ci(deep_nr)}."
-                ),
-                "safe_response": "Agree; the paper's claim is boundary-dependent update-spectrum shaping, not rank-implies-progress.",
-                "remaining_work": "Keep high-rank progress claims out of the abstract and theorem statements.",
-            },
-            {
-                "reviewer_objection": "The theory is only local and does not prove optimizer superiority.",
-                "risk_level": "low if framed correctly",
-                "current_evidence": (
-                    f"First-order calibration Spearman={fmt(calibration_all['spearman_delta_vs_first_order'])} "
-                    f"CI=[{fmt(calibration_all['spearman_ci95_low'])}, {fmt(calibration_all['spearman_ci95_high'])}], "
-                    f"Frobenius flat/GD={fmt(fro['geomean_ratio'])} CI={ratio_ci(fro)}, operator flat/GD={fmt(op['geomean_ratio'])} CI={ratio_ci(op)}."
-                ),
-                "safe_response": "State the theorem as a local constrained linearized result and use it only to explain mechanism probes.",
-                "remaining_work": "A convergence theorem would be a different paper and is not currently supported.",
-            },
-            {
-                "reviewer_objection": "The boundary map is descriptive but not predictive.",
-                "risk_level": "high for predictive-theory claims",
-                "current_evidence": (
-                    f"Best leave-setting-out predictor balanced accuracy={fmt(predictor_best['mean_balanced_accuracy'])} "
-                    f"from {predictor_best['feature_set']} when degenerate settings are skipped; "
-                    f"chance-filled best={fmt(predictor_uncertainty_best['mean_balanced_accuracy_chance_filled'])} "
-                    f"CI=[{fmt(predictor_uncertainty_best['balanced_accuracy_ci95_low'])}, "
-                    f"{fmt(predictor_uncertainty_best['balanced_accuracy_ci95_high'])}]."
-                ),
-                "safe_response": "Explicitly present the predictor as a failed/weak baseline and call the boundary map descriptive.",
-                "remaining_work": "Pre-register a predictor and test it on a genuinely new balanced held-out task or architecture.",
-            },
-            {
-                "reviewer_objection": "The neural evidence is too small or not representative.",
+                "reviewer_objection": "The nrank-vs-ssrank condition may be constructed rather than predictive.",
                 "risk_level": "medium",
                 "current_evidence": (
-                    f"Deep MNIST MLP preserves update-spectrum shaping with nrUpdate={fmt(deep_nr['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(deep_nr)}, but first-order progress is Adam-favorable: {fmt(deep_first['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(deep_first)}. MNIST ConvNet also preserves nrUpdate={fmt(conv_nr['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(conv_nr)} while first-order is Adam-favorable: {fmt(conv_first['geomean_ratio_muon_over_adam'])} "
-                    f"CI={ratio_ci(conv_first)}."
+                    f"Positive boundary: nrank={fmt(positive['mean_head_gradient_nuclear_rank'])} > "
+                    f"ssrank={fmt(positive['mean_tail_downstream_aware_stable_rank'])}, drift ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
+                    f"Negative boundary: nrank={fmt(negative['mean_head_gradient_nuclear_rank'])} < "
+                    f"ssrank={fmt(negative['mean_tail_downstream_aware_stable_rank'])}, drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}."
                 ),
-                "safe_response": "Use neural experiments as sanity/negative controls, not as broad performance benchmarks.",
-                "remaining_work": "Add modern or longer-horizon neural benchmarks only if the paper claims broad neural relevance.",
+                "safe_response": "Call the synthetic result a mechanism sanity check, not a validated predictor for natural tasks.",
+                "remaining_work": "Test a pre-specified boundary rule on held-out real tasks or architecture splits.",
             },
             {
-                "reviewer_objection": "Local geometry may not predict longer-horizon behavior.",
-                "risk_level": "medium",
+                "reviewer_objection": "The layerwise mechanism is not simply lower tail sensitivity.",
+                "risk_level": "low if stated clearly",
                 "current_evidence": (
-                    f"Continuation-LR sweep switched/own final-loss ratio={fmt(switch_all['mean_switched_over_own'])} "
-                    f"CI=[{fmt(switch_all['ratio_ci95_low'])}, {fmt(switch_all['ratio_ci95_high'])}]."
+                    f"Layer 1 unit-JVP ratio={fmt(layer_1['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])} while observed ratio={fmt(layer_1['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}; "
+                    f"layer 2 unit-JVP ratio={fmt(layer_2['geomean_jvp_tail_drift_sq_ratio_spectral_over_fro'])} while observed ratio={fmt(layer_2['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}."
                 ),
-                "safe_response": "Use continuation/switch probes as negative controls against overclaiming.",
-                "remaining_work": "Run longer retuned training only if final-performance claims become central.",
+                "safe_response": "Say spectral/polar reduces drift through smaller matched-head-gain step size, not because unit polar directions are always safer for tail.",
+                "remaining_work": "Repeat layerwise diagnostics in deeper ConvNet or Transformer-style models.",
             },
             {
-                "reviewer_objection": "There are too many artifacts and the claim may be hard to follow.",
+                "reviewer_objection": "The current paper discusses Muon but proves a statement about ideal polar/SpecGrad.",
+                "risk_level": "high for Muon-specific claims",
+                "current_evidence": (
+                    f"The selected-state compatibility check gives polar(M_t) drift ratio={fmt(muon_bridge.loc['polar_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"CI={interval(muon_bridge.loc['polar_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}, "
+                    f"and the short-trajectory NS(M_t) ratio={fmt(practical_bridge.loc['ns_momentum', 'geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"CI={interval(practical_bridge.loc['ns_momentum'], 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')} across "
+                    f"{int(practical_bridge.loc['ns_momentum', 'comparisons'])} state-step comparisons."
+                ),
+                "safe_response": "Treat Muon as motivation plus selected-state compatibility checks; state the main theorem for spectral/polar directions.",
+                "remaining_work": "Add real long-tail practical Muon benchmarks before claiming full Muon training behavior.",
+            },
+            {
+                "reviewer_objection": "The empirical evidence is too small for a long-tail learning paper.",
                 "risk_level": "medium",
-                "current_evidence": "Paper skeleton, evidence index, theorem bridge, and reviewer audit now provide a claim hierarchy.",
-                "safe_response": "Keep the main paper to three claims: update-spectrum signature, local calibration, norm/boundary mechanism.",
-                "remaining_work": "Before drafting, select 3 main figures and move most ablations to appendix.",
+                "current_evidence": "Current real-data evidence is a sklearn-digits long-tail diagnostic with 20 paired seeds and short head-only horizon.",
+                "safe_response": "Present the manuscript as a theory-and-diagnostic mechanism paper, not a full long-tail benchmark paper.",
+                "remaining_work": "Run CIFAR-100-LT, ImageNet-LT, or iNaturalist matched-head-gain diagnostics.",
+            },
+            {
+                "reviewer_objection": "There are too many legacy E11 artifacts and the main claim may be hard to follow.",
+                "risk_level": "medium",
+                "current_evidence": "README and artifact manifest now separate head-to-tail paper evidence from legacy condition-geometry guardrails.",
+                "safe_response": "Keep the paper narrative to core mechanism blocks plus one practical sanity check: synthetic boundary, one-step digits, fixed Muon-style compatibility, trajectory Muon-style compatibility, small practical training, 8-step forgetting, and layerwise JVP. Keep LR sensitivity as supporting robustness evidence.",
+                "remaining_work": "Move legacy update-spectrum artifacts to appendix/background or omit them from the main manuscript.",
             },
         ]
     )
@@ -174,36 +120,36 @@ def main() -> None:
     claim_decisions = pd.DataFrame(
         [
             {
-                "claim": "Muon is an update-spectrum shaping optimizer.",
+                "claim": "Spectral/polar directions can reduce held-out tail logit drift at matched head gain.",
                 "decision": "main-paper claim",
-                "reason": "Direct, robust, matched-update evidence supports it.",
+                "reason": "One-step and 8-step diagnostics support it with paired confidence intervals.",
             },
             {
-                "claim": "Muon's polar direction is locally operator-norm optimal.",
-                "decision": "main-paper mechanism claim",
-                "reason": "Narrow theorem plus spectral allocation probe support this exactly.",
+                "claim": "nrank(G_H) > ssrank(B_T,A_T) is the central mechanism condition.",
+                "decision": "theorem-backed mechanism claim",
+                "reason": "It follows from the worst-case sensitivity bound and is verified in the controlled positive/negative boundary probe.",
             },
             {
-                "claim": "Muon is generally better than Adam.",
+                "claim": "Lower drift implies better tail loss, margin, or accuracy.",
                 "decision": "do not claim",
-                "reason": "Boundary, deep MNIST, stateless trajectory, and continuation evidence contradict a broad claim.",
+                "reason": "One-step and forgetting diagnostics do not automatically transfer to tail loss/margin, and the practical run still has no tail accuracy gain.",
             },
             {
-                "claim": "Local features predict when Muon wins.",
-                "decision": "future-work claim only",
-                "reason": "Current leave-setting-out predictor is weak and imbalanced.",
-            },
-            {
-                "claim": "The paper gives a convergence theory.",
+                "claim": "The paper explains full Muon optimizer behavior.",
                 "decision": "do not claim",
-                "reason": "Current theorem is local and first-order.",
+                "reason": "Fixed-checkpoint, short-trajectory, and small practical diagnostics are still not a real long-tail benchmark.",
+            },
+            {
+                "claim": "The paper is a full long-tail classification benchmark.",
+                "decision": "do not claim",
+                "reason": "Current real-data evidence is intentionally lightweight and diagnostic.",
             },
         ]
     )
 
     text = f"""# E11 Reviewer Risk Audit
 
-This generated audit lists the likely reviewer objections and the current evidence-backed response. It is meant to keep the manuscript focused on defensible claims.
+This generated audit lists likely reviewer objections for the current head-to-tail interference paper and the evidence-backed response. It is meant to keep the manuscript focused on defensible function-drift claims.
 
 ## Risk Table
 
@@ -215,19 +161,22 @@ This generated audit lists the likely reviewer objections and the current eviden
 
 ## Recommended Manuscript Discipline
 
-1. Put update-spectrum shaping, first-order calibration, and norm-geometry boundary in the main paper.
-2. Put neural probes, stateless trajectories, switch controls, and predictor failure modes in supporting/appendix sections.
-3. Do not state or imply that higher update rank generally improves progress.
-4. Do not present the current boundary predictor as a predictive theory.
+1. Put head-to-tail interference, matched-head-gain drift, and the nrank-vs-ssrank condition in the main paper.
+2. Treat Muon as motivation plus selected-state compatibility checks unless real long-tail practical Muon benchmarks are added.
+3. Do not state or imply that lower logit drift automatically improves tail loss, margin, or accuracy.
+4. Keep legacy update-spectrum artifacts out of the main claim unless they are explicitly labeled as background guardrails.
 
 ## Sources
 
-- [paper skeleton](e11_paper_skeleton.md)
-- [mechanism theorem bridge](e11_mechanism_theorem_bridge.md)
-- [boundary predictor audit](e11_boundary_predictor_audit.md)
-- [Deep MNIST MLP probe](e11_deep_mnist_mlp_probe.md)
-- [MNIST ConvNet probe](e11_mnist_conv_probe.md)
-- [stateless optimizer trajectory ablation](e11_stateless_optimizer_trajectory.md)
+- [head-to-tail interference note](e11_head_tail_interference.md)
+- [long-tailed one-step diagnostic](e11_long_tail_one_step.md)
+- [long-tailed Muon-style compatibility diagnostic](e11_long_tail_muon_bridge.md)
+- [long-tailed practical-Muon trajectory compatibility](e11_long_tail_practical_muon_bridge.md)
+- [long-tailed practical training diagnostic](e11_long_tail_practical_training.md)
+- [long-tailed practical training LR sensitivity](e11_long_tail_practical_training_lr_sweep.md)
+- [head-only forgetting probe](e11_long_tail_forgetting.md)
+- [long-tailed layerwise diagnostic](e11_long_tail_layerwise.md)
+- [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)
     print(f"saved reviewer risk audit to {OUTPUT_PATH}")

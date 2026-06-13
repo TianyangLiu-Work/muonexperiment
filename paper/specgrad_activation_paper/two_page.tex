@@ -1,0 +1,115 @@
+\documentclass[10pt]{article}
+
+\usepackage[a4paper,margin=0.68in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts,booktabs,array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{multicol}
+
+\setlength{\columnsep}{0.24in}
+\setlength{\parskip}{2pt}
+\setlength{\parindent}{0pt}
+\setlength{\textfloatsep}{6pt plus 1pt minus 1pt}
+\setlength{\floatsep}{6pt plus 1pt minus 1pt}
+\setlength{\intextsep}{6pt plus 1pt minus 1pt}
+\emergencystretch=2em
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Loss}{\mathcal L}
+\newcommand{\I}{\mathcal I}
+\newcommand{\op}{\mathrm{op}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\inner}[2]{\left\langle #1,#2 \right\rangle}
+\newcommand{\srank}{\operatorname{srank}}
+\newcommand{\nrank}{\operatorname{nrank}}
+\newcommand{\ssrank}{\operatorname{ssrank}}
+\newcommand{\vecop}{\operatorname{vec}}
+\newcommand{\polar}{\operatorname{polar}}
+\input{tables/e11_paper_numbers.tex}
+
+\title{\vspace{-1.2em}Head-to-Tail Interference in Long-Tailed Small-Batch Training}
+\author{\small Tianyang Liu\\[-0.15em]\small UCDavis\\[-0.15em]\small \texttt{tlyliu@ucdavis.edu}}
+\date{\vspace{-1.4em}}
+
+\begin{document}
+\maketitle
+\vspace{-1.1em}
+\begin{multicols}{2}
+
+\section*{Abstract}
+Long-tailed small-batch training can update a model on frequent head classes while rare tail classes are absent. This report studies a local stability question: after two update directions make the same first-order progress on the head batch, which one perturbs held-out tail logits less? We introduce a matched-head-gain drift diagnostic and a head-to-tail interference coefficient. For a matrix block with tail perturbation \(J_T(D)=B_TDA_T\), the analysis predicts that spectral/polar geometry has a smaller worst-case tail-drift bound when \(\nrank(G_H)>\ssrank(B_T,A_T)\). Controlled and long-tailed digits experiments support this local drift mechanism, while also showing that lower logit drift does not automatically imply better tail loss or accuracy.
+
+\section*{1. Problem}
+Long-tailed small-batch training has a local function-drift failure mode: frequent head-class updates can change rare tail-class logits before tail samples reappear. Ordinary loss-decrease comparisons do not isolate this effect, because an update may look stable simply by moving less. We therefore use the comparison
+\[
+\boxed{\text{match head progress, then compare tail drift}.}
+\]
+This is a mechanism claim rather than an optimizer-level benchmark claim: after different update geometries obtain the same first-order head-batch gain, compare how much they perturb a held-out tail function.
+
+\section*{2. Matched-Gain Geometry}
+Let \(g_H=\nabla_\theta\Loss_H(\theta)\) be the head-batch gradient and let \(F_T(\theta)\) be the model output on a held-out tail batch. Under a local linearization,
+\[
+F_T(\theta+\Delta)-F_T(\theta)\approx J_T\Delta .
+\]
+We compare updates only after fixing the same head gain,
+\[
+-\inner{g_H}{\Delta}=\rho,
+\]
+and then measure tail drift \(\norm{J_T\Delta}\). This removes the confound that an update may look tail-safe only because it moved less and made less head progress.
+
+For a parameter norm \(N\), define the tail sensitivity and head-to-tail interference coefficient
+\[
+K_{T,N}=\sup_{\norm{\Delta}_N\le 1}\norm{J_T\Delta},
+\qquad
+\I_N(T\mid H)=\frac{K_{T,N}^2}{\norm{g_H}_{N,*}^2}.
+\]
+If \(\Delta_N\) is the norm-\(N\) steepest direction scaled to head gain \(\rho\), then
+\[
+\norm{J_T\Delta_N}^2\le \rho^2\I_N(T\mid H).
+\]
+Thus the relevant quantity is not raw loss decrease, but tail drift after head progress has been matched.
+The worst-case coefficient \(\I_N\) can be separated from the realized actual-direction quantity \(\widetilde{\I}_N=\norm{J_Tu_N}^2/\norm{g_H}_{N,*}^2\), which is what direct drift measurements estimate after scaling.
+
+\section*{3. Matrix-Block Condition}
+For a matrix block \(W\), write the tail perturbation as
+\[
+J_T(D)=B_TDA_T,
+\]
+where \(A_T\) is the tail activation entering the layer and \(B_T\) is the downstream tail Jacobian. Frobenius geometry gives
+\[
+\I_F=
+\frac{\norm{B_T}_{\op}^2\norm{A_T}_{\op}^2}{\norm{G_H}_F^2},
+\]
+while spectral geometry gives
+\[
+\I_S=
+\frac{\sum_i\sigma_i(B_T)^2\sigma_i(A_T)^2}{\norm{G_H}_*^2}.
+\]
+Therefore spectral geometry has a smaller worst-case matched-gain drift bound when
+\[
+\boxed{\nrank(G_H)>\ssrank(B_T,A_T).}
+\]
+The left side measures spectral spread in the head gradient; the right side measures downstream-aware tail sensitivity.
+This is a sandwich block condition. In a general nonlinear layer one should replace it with the vectorized operator form \(\vecop(\mathcal{J}_{T,\ell}(D))=L_{T,\ell}\vecop(D)\); the displayed singular-value formula is the special case \(L_{T,\ell}=A_T^\top\otimes B_T\).
+
+\section*{4. Evidence}
+The controlled boundary is directionally correct: the synthetic positive case has ratio \(\EelevenHeadTailPositiveDriftRatio\), while the reversed case has ratio \(\EelevenHeadTailNegativeDriftRatio\). The data diagnostic is consistent with lower drift but not with a direct performance claim: the one-step tail-logit drift ratio is \(\EelevenLongTailOneStepDriftRatio\,\EelevenLongTailOneStepDriftRatioCi\), while the CE tail-loss difference is \(\EelevenLongTailOneStepTailLossDiff\,\EelevenLongTailOneStepTailLossDiffCi\). The Muon-style checks are selected-state compatibility tests: \(\polar(M_t)\) has ratio \(\EelevenLongTailMuonBridgePolarMomentumDriftRatio\,\EelevenLongTailMuonBridgePolarMomentumDriftRatioCi\), and short-trajectory NS\((M_t)\) has ratio \(\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatio\,\EelevenLongTailPracticalMuonBridgeNsMomentumDriftRatioCi\). Finally, unit-JVP ratios exceed \(1\), but scaled layerwise ratios are \(\EelevenLayerOneScaledJvpDriftRatio\) and \(\EelevenLayerTwoScaledJvpDriftRatio\), so matched-head-gain scaling is part of the mechanism.
+
+{\raggedright
+\section*{5. Interpretation}
+The synthetic result shows that \(\ssrank(B_T,A_T)\) is an operative tail-side quantity: changing the downstream-aware tail sensitivity changes the predicted drift ordering. The digits one-step result gives non-synthetic evidence consistent with lower logit drift, but CE tail loss is slightly worse in that diagnostic. The Muon-style compatibility check reports drift ratios compatible with the local polar mechanism for selected momentum and finite Newton--Schulz directions, but it does not explain full Muon training dynamics.
+
+The layerwise diagnostic rules out an overly broad interpretation. Spectral/polar unit directions are not always less tail-sensitive; in the two MLP layers, the unit-direction JVP ratios exceed \(1\). The lower observed drift appears after matched-head-gain scaling, meaning that spectral/polar geometry can obtain the same head gain with a smaller effective parameter step in this diagnostic. The mechanism is therefore not ``spectral directions are always safer'', but ``spectral geometry can reduce measured tail drift after head progress is matched.''
+
+\section*{6. Claim Boundary}
+The supported claims are deliberately local. First, the sandwich theorem predicts a reversible boundary: the synthetic ratio changes from \(\EelevenHeadTailPositiveDriftRatio\) to \(\EelevenHeadTailNegativeDriftRatio\) when the rank condition is reversed. Second, the long-tailed digits one-step result supports a tail-logit-drift claim, with ratio \(\EelevenLongTailOneStepDriftRatio\,\EelevenLongTailOneStepDriftRatioCi\), but not a tail-loss claim, because the CE tail-loss difference is positive. Third, Muon-style momentum directions are compatible with the local polar mechanism in selected states, while finite Newton--Schulz approximation and momentum-gradient alignment remain separate sources of variation. Fourth, layerwise evidence indicates that the lower observed drift comes from matched-head-gain scaling, not from uniformly lower unit-direction tail sensitivity.
+
+The mechanism should be evaluated before making optimizer-level claims. If spectral/polar directions lower matched-gain tail drift but do not lower tail cross-entropy or improve tail accuracy, then the result is a stability mechanism rather than a performance theorem. A practical Muon claim would require showing that the same local geometry persists under momentum, approximation, schedules, weight decay, and checkpoint variation, and that the resulting trajectory improves standard tail metrics under tuned baselines.
+
+\section*{7. Conclusion}
+The current evidence is consistent with a cautious mechanism paper: spectral/polar update geometry can reduce matched-head-gain tail-logit drift when the head-gradient nuclear rank is large relative to downstream-aware tail stable rank. It does not yet support a broad optimizer-performance claim, a general long-tailed accuracy claim, or a complete theory of practical Muon. Stronger claims require standard long-tailed benchmarks, longer practical Muon ablations, and larger-architecture layerwise diagnostics that measure downstream-aware sensitivity rather than only activation proxies.
+\par}
+\end{multicols}
+
+\end{document}

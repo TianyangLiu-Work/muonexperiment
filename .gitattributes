@@ -3,8 +3,12 @@ results/e11*/** linguist-generated=true
 figures/e11*/** linguist-generated=true
 discussion/e11_*.md linguist-generated=true
 Notebooks/E11_*.ipynb linguist-generated=true
+paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex linguist-generated=true
+paper/specgrad_activation_paper/tables/e11_paper_numbers.tex linguist-generated=true
+paper/specgrad_activation_paper/figures/*.png linguist-generated=true
 
 # Treat binary artifacts as binary in diffs.
+*.pdf binary
 *.png binary
 *.jpg binary
 *.jpeg binary

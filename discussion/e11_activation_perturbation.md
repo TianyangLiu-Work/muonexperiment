@@ -1,6 +1,6 @@
 # E11 Activation Perturbation Diagnostics
 
-This note reports the first direct activation-perturbation diagnostic for the SpecGrad activation-geometry paper draft.
+This note reports the E11 direct activation-perturbation diagnostic. It is kept as supporting evidence for the broader optimizer-geometry project, but it is no longer part of the current head-to-tail interference paper draft.
 
 ## Definition
 
@@ -42,4 +42,3 @@ The result does **not** justify saying that Muon is generally more stable. A saf
 - [Equal-update activation perturbation summary](../results/e11_equal_update/activation_perturbation_summary.csv)
 - [Raw layer metrics](../results/e11/layer_metrics.csv)
 - [Equal-update layer metrics](../results/e11_equal_update/layer_metrics.csv)
-- [LaTeX table](../paper/specgrad_activation_paper/tables/e11_activation_perturbation.tex)

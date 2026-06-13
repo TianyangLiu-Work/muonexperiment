@@ -1,48 +1,47 @@
 # E11 Main Paper Package
 
-This generated note selects the smallest evidence package for a focused manuscript. The point is to keep the main paper readable: three figures plus one table should carry the main claim, with the remaining probes used as safeguards and appendix evidence.
+This generated note selects the smallest evidence package for the current head-to-tail interference manuscript. The main paper should be carried by seven figures plus one generated table, with legacy condition-geometry artifacts used only as appendix guardrails. The LR-sensitivity figure is supporting robustness evidence rather than a main figure.
 
 ## Main Figure/Table Package
 
-| slot     | artifact                                                             | claim                                                                 | quantitative_anchor                                                                                    | reader_takeaway                                                                                                  |
-|:---------|:---------------------------------------------------------------------|:----------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------|
-| Figure 1 | figures/e11_equal_update/update_spectrum_robustness.png              | Muon has a robust update-spectrum signature.                          | nrUpdate Muon/Adam=2.017 [1.905, 2.136]; stUpdate=4.765 [4.582, 4.955].                                | The reliable optimizer-intrinsic effect is spectrum shaping, not final-loss superiority.                         |
-| Figure 2 | figures/e11_equal_update/first_order_calibration.png                 | One-step progress is locally calibrated by gradient-update alignment. | Spearman(delta_loss, <G,D>)=0.9803 [0.9787, 0.9817].                                                   | It is meaningful to analyze the positive descent proxy `<G,D>` as a local bridge from geometry to loss decrease. |
-| Figure 3 | figures/e11_spectral_allocation_probe/spectral_allocation_ratios.png | Flat/polar spectral allocation has a norm-geometry boundary.          | Frobenius flat/GD=0.6071 [0.5846, 0.6304]; operator-norm flat/GD=1.689 [1.614, 1.768].                 | Muon-like spectral spreading is locally useful only under the right norm geometry.                               |
-| Table 1  | results/e11_mechanism_boundary/mechanism_boundary_map.csv            | The advantage flips across problem, layer, and control condition.     | Boundary rows: 4 Muon/flat favorable, 1 own-update positive-control, 8 unfavorable, 1 mixed/uncertain. | The paper is a boundary/mechanism paper, not a universal optimizer win paper.                                    |
+| slot     | artifact                                                                        | claim                                                                                                         | quantitative_anchor                                                                                                                                                         | reader_takeaway                                                                                                                  |
+|:---------|:--------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------|
+| Figure 1 | figures/e11_head_tail_interference/head_tail_drift_ratio.png                    | The nrank-vs-ssrank condition has the correct sign in controlled positive and negative settings.              | Positive drift ratio=0.3403; negative drift ratio=7.208.                                                                                                                    | The theorem boundary is not decorative; flipping the constructed geometry flips the drift direction.                             |
+| Figure 2 | figures/e11_long_tail_one_step/long_tail_one_step_tail_response.png             | Spectral/polar reduces held-out tail logit drift at matched head gain on long-tailed digits.                  | Tail drift-sq ratio=0.5501 [0.5101, 0.5931]; 20/20 paired seeds lower drift.                                                                                                | The main empirical quantity is tail function drift, not final classification performance.                                        |
+| Figure 3 | figures/e11_long_tail_muon_bridge/long_tail_muon_bridge.png                     | Momentum polar gives a selected-state compatibility check for Muon-style state.                               | polar(M_t) drift ratio=0.8199 [0.6951, 0.9672]; NS(M_t) ratio=0.9116 [0.7696, 1.08].                                                                                        | Muon-style state is locally compatible in sampled states, but finite Newton-Schulz and trajectory-level behavior remain caveats. |
+| Figure 4 | figures/e11_long_tail_practical_muon_bridge/long_tail_practical_muon_bridge.png | Muon-style directions show selected-state compatibility across a short practical NS-Muon trajectory.          | trajectory polar(M_t) drift ratio=0.7292 [0.696, 0.7641]; trajectory NS(M_t) ratio=0.8019 [0.7644, 0.8413].                                                                 | Practical Muon-style states show drift ratios compatible with the local polar mechanism along sampled short-trajectory states.   |
+| Figure 5 | figures/e11_long_tail_practical_training/long_tail_practical_training.png       | A small practical imbalanced-training run is consistent with lower measured drift/loss in a fixed diagnostic. | Train loss ratio=0.6468 [0.604, 0.6926]; tail eval loss ratio=0.8549 [0.8319, 0.8786]; tail margin diff=1.955 [1.628, 2.281]; tail drift RMS ratio=0.7501 [0.7244, 0.7767]. | The practical result is a fixed lightweight sanity check; tail accuracy is unchanged and benchmark claims remain open.           |
+| Figure 6 | figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png             | The lower measured tail drift remains visible over a short head-only horizon.                                 | Final drift ratio=0.6167 [0.5744, 0.6622]; area ratio=0.7787 [0.7549, 0.8033].                                                                                              | The effect is visible beyond a single step, but tail loss and margin remain separate outcomes.                                   |
+| Figure 7 | figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png                   | Layerwise drift reduction comes from matched-head-gain scaling, not safer unit directions.                    | Layer 1 unit/scaled/observed=1.45/0.4766/0.4767; layer 2=1.476/0.596/0.596.                                                                                                 | Spectral/polar directions are not uniformly lower-sensitivity; the head-gain normalization matters.                              |
+| Table 1  | paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex          | Paper-facing quantitative table summarizing the mechanism, drift evidence, and caveats.                       | Generated from the current head-to-tail result CSVs.                                                                                                                        | The table keeps claim scope explicit for readers and reviewers.                                                                  |
 
 ## Appendix Allocation
 
-| artifact                                         | role                                                                                                                                      |
-|:-------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------|
-| discussion/e11_mechanism_theorem_bridge.md       | States theorem assumptions, evidence mapping, and safe causal language.                                                                   |
-| discussion/e11_main_figure_captions.md           | Paper-safe main figure/table captions with quantitative anchors and interpretation boundaries.                                            |
-| discussion/e11_notation_glossary.md              | Shared notation source for gradients, updates, ranks, activation products, and recorded diagnostics.                                      |
-| discussion/e11_deep_mnist_mlp_probe.md           | Neural negative control: Deep MNIST nrUpdate=2.262 [2.175, 2.353] but first-order=0.5978 [0.5633, 0.6345].                                |
-| discussion/e11_mnist_patch_probe.md              | Patch/shared-weight neural sanity check: nrUpdate=4.235 [3.834, 4.677] but first-order=0.5222 [0.4943, 0.5516].                           |
-| discussion/e11_mnist_conv_probe.md               | True Conv2d neural sanity check: nrUpdate=3.718 [3.451, 4.006] but first-order=0.677 [0.6321, 0.7251].                                    |
-| discussion/e11_stateless_optimizer_trajectory.md | Trajectory mechanism control: PolarMuon/GD total decrease=0.4656 [0.3686, 0.5882].                                                        |
-| discussion/e11_boundary_predictor_audit.md       | Predictive-boundary gap: best leave-setting-out balanced accuracy=0.6039 from state_plus_update_spectrum; chance-filled CI=[0.5, 0.7446]. |
-| discussion/e11_reviewer_risk_audit.md            | Reviewer-risk map and claim discipline.                                                                                                   |
-| discussion/e11_quantitative_claim_ledger.md      | Paper-writing claim ledger with allowed wording, forbidden wording, quantitative anchors, and evidence links.                             |
-| discussion/e11_paper_numbers.tex                 | LaTeX macros for paper-facing quantitative anchors, generated directly from result CSVs.                                                  |
-| discussion/e11_reproduction_checklist.md         | Minimal main-paper and appendix reproduction map with validation commands.                                                                |
+| artifact                                                | role                                                                                                |
+|:--------------------------------------------------------|:----------------------------------------------------------------------------------------------------|
+| discussion/e11_paper_readiness_audit.md                 | Claim readiness, missing experiments, and paper title direction for the current head-to-tail draft. |
+| discussion/e11_reviewer_risk_audit.md                   | Reviewer objections and safe responses for function-drift claims.                                   |
+| discussion/e11_long_tail_practical_training_lr_sweep.md | Supporting robustness check for the selected practical-training Muon learning rate.                 |
+| discussion/e11_activation_perturbation.md               | Background activation-geometry evidence; not a current main result.                                 |
+| discussion/e11_reproduction_checklist.md                | Minimal reproduction and appendix/guardrail reproduction commands.                                  |
+| discussion/e11_artifact_manifest.md                     | Commit boundary for paper evidence, generated results, figures, and ignored local caches.           |
 
 ## Claims To Exclude From Main Text
 
-| artifact                                      | reason                                                                       |
-|:----------------------------------------------|:-----------------------------------------------------------------------------|
-| optimizer switch and LR-sweep figures         | Use as negative controls in appendix; too detailed for the main argument.    |
-| all individual trajectory/3D figures          | Useful exploratory evidence, but they dilute the main mechanism story.       |
-| boundary predictor detailed per-setting table | Keep the main text to the failure summary; detailed rows belong in appendix. |
+| artifact                                           | reason                                                                                                                                                               |
+|:---------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| equal-update update-spectrum figures               | Legacy condition-geometry guardrails; they are not the current head-to-tail paper's main evidence.                                                                   |
+| legacy optimizer-switch and broad LR-sweep figures | Useful overclaim controls, but too far from the current head-to-tail drift mechanism. This does not exclude the practical-training LR sensitivity note listed above. |
+| boundary predictor detailed tables                 | The current paper does not claim a predictive boundary model for unseen tasks.                                                                                       |
 
 ## Main-Text Claim Order
 
-1. Muon changes update spectra robustly under matched update size.
-2. One-step loss decrease is well calibrated by `<G,D>`.
-3. The local value of flat/polar spectra depends on the norm geometry.
-4. Therefore Muon is a geometry-shaping optimizer with boundary-dependent progress, not a universally better optimizer.
+1. Long-tailed small-batch training creates head-only updates that can perturb held-out tail functions.
+2. The local matched-head-gain theory predicts a spectral-vs-Frobenius drift boundary through `nrank(G_H) > ssrank(B_T,A_T)`.
+3. Synthetic and long-tailed digits diagnostics provide evidence consistent with lower tail logit drift for idealized spectral/polar directions.
+4. The Muon-style compatibility diagnostics provide selected fixed-state and trajectory-state checks.
+5. The result is about function drift under local matched-head-gain comparisons, not broad Muon performance or final tail accuracy.
 
 ## Drafting Rule
 
-If a sentence cannot be supported by Figure 1, Figure 2, Figure 3, or Table 1, it should probably be in the appendix or discussion rather than in the main result section.
+If a sentence cannot be supported by Figure 1, Figure 2, Figure 3, Figure 4, Figure 5, Figure 6, Figure 7, or Table 1, it should probably be in the appendix or discussion rather than in the main result section.

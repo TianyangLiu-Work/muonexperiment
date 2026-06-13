@@ -432,13 +432,13 @@ def write_discussion(
     rel = lambda key: "../" + str(figure_paths[key])
     text = f"""# result for discussion
 
-## Research Question
+## Legacy Scope
 
-Does Muon act as a geometry-shaping optimizer that induces a quantitatively different spectral/rank geometry from Adam? When does that geometry explain one-step loss decrease or actual optimization progress?
+This generated note is a legacy condition-geometry discussion artifact. It documents the older Adam/Muon geometry experiments that motivated the current project, but it is **not** the main evidence summary for the active head-to-tail interference paper.
 
-For a stricter paper-facing summary of the current claims, evidence, and caveats, see [E11 research synthesis](e11_research_synthesis.md). That generated note is the recommended entry point before using the longer exploratory tables below.
+For the current paper-facing summary of claims, evidence, and caveats, start with [E11 research synthesis](e11_research_synthesis.md), [E11 evidence index](e11_evidence_index.md), and [E11 quantitative claim ledger](e11_quantitative_claim_ledger.md). Use the longer exploratory tables below only as background guardrails against overclaiming optimizer-wide behavior.
 
-## Experiment Scope
+## Legacy Experiment Scope
 
 The evidence uses three problem families, treated as parallel experiments rather than primary/auxiliary cases:
 

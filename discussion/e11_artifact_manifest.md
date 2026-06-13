@@ -1,22 +1,22 @@
 # E11 Artifact Manifest
 
-This generated manifest documents the current reproducibility boundary for E11. It is intentionally practical: it records what should be committed as evidence, what is local cache, and which key CSV tables back the paper-facing claims.
+This generated manifest documents the current reproducibility boundary for E11. It separates the head-to-tail paper evidence from background condition-geometry guardrails, records what should be committed as evidence, and lists which key CSV tables back the paper-facing claims.
 
 ## Artifact Directories
 
-| path                   | role                                                                                 | commit_policy                            | size     |
-|:-----------------------|:-------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.   | commit                                   | 442.3 KB |
-| scripts                | Experiment runners, artifact writers, and validation scripts.                        | commit E11 scripts                       | 1.5 MB   |
-| tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.      | commit                                   | 159.1 KB |
-| discussion             | Generated paper-facing Markdown evidence and synthesis.                              | commit                                   | 621.1 KB |
-| results                | Generated CSV evidence used by discussion artifacts and validator.                   | commit current E11 evidence set          | 253.0 MB |
-| figures                | Static figures used by paper-facing Markdown artifacts.                              | commit static E11 figures                | 26.0 MB  |
-| configs                | Experiment configuration snapshots.                                                  | commit                                   | 316 B    |
-| paper                  | LaTeX paper draft, paper-facing tables, and experiment triage notes.                 | commit source and selected rendered PDFs | 406.4 KB |
-| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands. | commit                                   | 1.8 KB   |
-| .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.           | commit                                   | 470 B    |
-| .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.       | commit                                   | 404 B    |
+| path                   | role                                                                                  | commit_policy                            | size     |
+|:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 675.2 KB |
+| scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 1.7 MB   |
+| tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 236.1 KB |
+| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 481.8 KB |
+| results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 254.5 MB |
+| figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 27.0 MB  |
+| configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
+| paper                  | Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.   | commit source and selected rendered PDFs | 2.1 MB   |
+| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 2.4 KB   |
+| .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.            | commit                                   | 470 B    |
+| .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.        | commit                                   | 667 B    |
 
 ## Key Quantitative Tables
 
@@ -24,6 +24,23 @@ This generated manifest documents the current reproducibility boundary for E11. 
 |:--------------------------------------------------------------------------------|-------:|:----------|
 | results/e11/step_metrics.csv                                                    |   2880 | 20.9 MB   |
 | results/e11/activation_perturbation_summary.csv                                 |     60 | 12.6 KB   |
+| results/e11_head_tail_interference/step_metrics.csv                             |    320 | 142.9 KB  |
+| results/e11_head_tail_interference/pair_summary.csv                             |      2 | 2.0 KB    |
+| results/e11_long_tail_one_step/step_metrics.csv                                 |     40 | 18.1 KB   |
+| results/e11_long_tail_one_step/pair_summary.csv                                 |      1 | 1.0 KB    |
+| results/e11_long_tail_one_step/layer_metrics.csv                                |     80 | 7.0 KB    |
+| results/e11_long_tail_muon_bridge/step_metrics.csv                              |     80 | 37.2 KB   |
+| results/e11_long_tail_muon_bridge/pair_summary.csv                              |      3 | 2.1 KB    |
+| results/e11_long_tail_practical_muon_bridge/step_metrics.csv                    |    480 | 223.5 KB  |
+| results/e11_long_tail_practical_muon_bridge/step_summary.csv                    |     18 | 3.3 KB    |
+| results/e11_long_tail_practical_muon_bridge/summary.csv                         |      3 | 2.2 KB    |
+| results/e11_long_tail_practical_training/step_metrics.csv                       |   3240 | 1.0 MB    |
+| results/e11_long_tail_practical_training/summary.csv                            |      1 | 1.1 KB    |
+| results/e11_long_tail_practical_training_lr_sweep/sweep_summary.csv             |      4 | 2.0 KB    |
+| results/e11_long_tail_forgetting/step_metrics.csv                               |    360 | 93.7 KB   |
+| results/e11_long_tail_forgetting/summary.csv                                    |      1 | 1.6 KB    |
+| results/e11_long_tail_layerwise/metrics.csv                                     |     80 | 32.1 KB   |
+| results/e11_long_tail_layerwise/summary.csv                                     |      2 | 1.9 KB    |
 | results/e11_equal_update/step_metrics.csv                                       |   2880 | 21.0 MB   |
 | results/e11_equal_update/activation_perturbation_summary.csv                    |     60 | 12.6 KB   |
 | results/e11_overlap_followup/step_metrics.csv                                   |   1530 | 8.2 MB    |
