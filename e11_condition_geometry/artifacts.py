@@ -86,6 +86,9 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_fc_condition_scatter/step_metrics.csv",
     "results/e11_cifar100_resnet_fc_condition_scatter/summary.csv",
     "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv",
+    "results/e11_cifar100_resnet_tail_quality_control/step_metrics.csv",
+    "results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv",
+    "results/e11_cifar100_resnet_tail_quality_control/layer_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/summary.csv",
     "results/e11_long_tail_checkpoint_sweep/step_metrics.csv",
@@ -165,6 +168,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_resnet_checkpoint_sweep.md",
     "discussion/e11_cifar100_resnet_condition_proxy_scatter.md",
     "discussion/e11_cifar100_resnet_fc_condition_scatter.md",
+    "discussion/e11_cifar100_resnet_tail_quality_control.md",
 )
 
 
@@ -291,6 +295,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch",
         "produces": "results/e11_cifar100_resnet_fc_condition_scatter/* and figures/e11_cifar100_resnet_fc_condition_scatter/*",
         "paper_role": "Final-layer downstream-aware condition diagnostic measuring nrank(G_H) against tail feature stable rank at matched head gain.",
+    },
+    {
+        "stage": "CIFAR-100 ResNet18 tail-quality control",
+        "command": "sbatch scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch",
+        "produces": "results/e11_cifar100_resnet_tail_quality_control/* and figures/e11_cifar100_resnet_tail_quality_control/*",
+        "paper_role": "Tail-rich ResNet18 checkpoint control testing whether lower matched-gain drift persists when pre-update tail accuracy is meaningfully above the weak-tail checkpoint sweep.",
     },
     {
         "stage": "Long-tailed imbalance ablation",

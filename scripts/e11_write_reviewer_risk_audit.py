@@ -32,6 +32,7 @@ def main() -> None:
     cifar_resnet_fc_condition_points = pd.read_csv(
         "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
     )
+    cifar_resnet_tail_quality = pd.read_csv("results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -64,6 +65,12 @@ def main() -> None:
     cifar_resnet_fc_condition_favors_count = int(
         (cifar_resnet_fc_condition_points["condition_score_nrank_over_tail_srank"] > 1.0).sum()
     )
+    cifar_resnet_tail_quality_worst = cifar_resnet_tail_quality.loc[
+        cifar_resnet_tail_quality["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_tail_quality_best_tail_accuracy = cifar_resnet_tail_quality.loc[
+        cifar_resnet_tail_quality["mean_tail_accuracy_before"].idxmax()
+    ]
     layer_1 = layerwise[layerwise["layer"].eq(1)].iloc[0]
     layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
 
@@ -89,7 +96,13 @@ def main() -> None:
                     f"the ResNet checkpoint sweep worst drift CI upper endpoint is "
                     f"{fmt(cifar_resnet_checkpoint_worst['tail_output_drift_sq_ratio_ci95_high'])}, "
                     f"but best pre-update tail accuracy is only "
-                    f"{fmt(cifar_resnet_checkpoint_best_tail_accuracy['mean_tail_accuracy_before'])}; "
+                    f"{fmt(cifar_resnet_checkpoint_best_tail_accuracy['mean_tail_accuracy_before'])}. "
+                    f"The tail-rich ResNet control raises pre-update tail accuracy to "
+                    f"{fmt(cifar_resnet_tail_quality_best_tail_accuracy['mean_tail_accuracy_before'])} "
+                    f"CI={interval(cifar_resnet_tail_quality_best_tail_accuracy, 'tail_accuracy_before_ci95_low', 'tail_accuracy_before_ci95_high')} "
+                    f"and keeps worst squared drift ratio at "
+                    f"{fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_tail_quality_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
                     f"but tail-accuracy-drop diff CI={interval(cifar_resnet, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')} crosses zero. "
                     f"The small practical training run has lower tail eval loss ratio="
                     f"{fmt(practical_training['geomean_final_tail_eval_loss_ratio_muon_over_adam'])} "
@@ -99,7 +112,7 @@ def main() -> None:
                     f"but tail accuracy diff={fmt(practical_training['mean_final_tail_eval_accuracy_diff_muon_minus_adam'])} "
                     f"CI={interval(practical_training, 'final_tail_eval_accuracy_diff_ci95_low', 'final_tail_eval_accuracy_diff_ci95_high')}."
                 ),
-                "safe_response": "Make function drift the main measured quantity; present practical tail-loss/margin evidence as a small sanity check and separate it from tail accuracy.",
+                "safe_response": "Make function drift the main measured quantity; use the tail-rich ResNet control to address the weak-tail-function objection, while keeping practical tail-loss/margin evidence separate from tail accuracy.",
                 "remaining_work": "Run retuned long-horizon benchmarks before making performance claims.",
             },
             {
@@ -173,10 +186,13 @@ def main() -> None:
                     f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
                     f"a checkpoint sweep over 250, 500, 1000, and 2000 warmup steps has worst ratio="
                     f"{fmt(cifar_resnet_checkpoint_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
-                    f"CI={interval(cifar_resnet_checkpoint_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
+                    f"CI={interval(cifar_resnet_checkpoint_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
+                    f"A tail-rich control reaches tail accuracy="
+                    f"{fmt(cifar_resnet_tail_quality_best_tail_accuracy['mean_tail_accuracy_before'])} "
+                    f"and worst drift ratio={fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}."
                 ),
-                "safe_response": "Present the manuscript as a theory-and-diagnostic mechanism paper with an architecture robustness check, not a full long-tail benchmark paper.",
-                "remaining_work": "Add higher-quality tail checkpoints, ImageNet-LT or iNaturalist-style matched-head-gain diagnostics, and long-horizon practical baselines before claiming benchmark-level generality.",
+                "safe_response": "Present the manuscript as a theory-and-diagnostic mechanism paper with architecture and tail-quality controls, not a full long-tail benchmark paper.",
+                "remaining_work": "Add ImageNet-LT or iNaturalist-style matched-head-gain diagnostics and long-horizon practical baselines before claiming benchmark-level generality.",
             },
             {
                 "reviewer_objection": "There are too many legacy E11 artifacts and the main claim may be hard to follow.",
@@ -252,6 +268,7 @@ This generated audit lists likely reviewer objections for the current head-to-ta
 - [CIFAR-100-LT ResNet18 checkpoint-quality sweep](e11_cifar100_resnet_checkpoint_sweep.md)
 - [CIFAR-100-LT ResNet18 condition-proxy scatter](e11_cifar100_resnet_condition_proxy_scatter.md)
 - [CIFAR-100-LT ResNet18 final-layer condition scatter](e11_cifar100_resnet_fc_condition_scatter.md)
+- [CIFAR-100 ResNet18 tail-quality control](e11_cifar100_resnet_tail_quality_control.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

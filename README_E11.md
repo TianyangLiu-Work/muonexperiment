@@ -34,6 +34,7 @@ python3 scripts/e11_run_cifar100_lt_one_step.py --device cpu --no-download
 sbatch scripts/slurm/e11_cifar100_resnet_one_step.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch
+sbatch scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch
 python3 scripts/e11_run_long_tail_imbalance_ablation.py
 python3 scripts/e11_run_long_tail_checkpoint_sweep.py
 python3 scripts/e11_run_long_tail_class_partition_sweep.py
@@ -107,6 +108,7 @@ make e11-cifar-resnet-rho002-results # submit the CIFAR-100-LT ResNet18 rho=0.00
 make e11-cifar-resnet-checkpoint-sweep-results # submit the top-conference ResNet checkpoint-quality sweep via Slurm
 make e11-cifar-resnet-condition-proxy-results # regenerate the ResNet rank-proxy scatter from checkpoint-sweep CSVs
 make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downstream-aware condition diagnostic via Slurm
+make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
@@ -122,6 +124,7 @@ Top-conference upgrade runner:
 ```bash
 make e11-cifar-resnet-checkpoint-sweep-results
 make e11-cifar-resnet-fc-condition-results
+make e11-cifar-resnet-tail-quality-results
 ```
 
 This submits `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`, which
@@ -135,6 +138,12 @@ The final-layer condition target submits
 `scripts/e11_run_cifar100_resnet_fc_condition_scatter.py` on GPU. It measures
 the downstream-aware final-layer proxy `nrank(G_H) / srank(H_T)` and compares
 matched-head-gain final-layer-only drift.
+
+The tail-quality target submits
+`scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch`, which reuses
+the ResNet checkpoint-sweep runner with 300 tail-train examples per class. It is
+a tail-rich control for the weak-tail-predictor objection, not a standard
+long-tailed benchmark.
 
 ## Core Artifacts
 
@@ -167,6 +176,7 @@ Paper-facing synthesis:
 - `discussion/e11_cifar100_resnet_checkpoint_sweep.md`
 - `discussion/e11_cifar100_resnet_condition_proxy_scatter.md`
 - `discussion/e11_cifar100_resnet_fc_condition_scatter.md`
+- `discussion/e11_cifar100_resnet_tail_quality_control.md`
 - `discussion/e11_long_tail_imbalance_ablation.md`
 - `discussion/e11_long_tail_checkpoint_sweep.md`
 - `discussion/e11_long_tail_class_partition_sweep.md`
@@ -209,6 +219,7 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv`
 - `results/e11_cifar100_resnet_fc_condition_scatter/summary.csv`
 - `results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv`
+- `results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv`
 - `results/e11_long_tail_imbalance_ablation/summary.csv`
 - `results/e11_long_tail_checkpoint_sweep/summary.csv`
 - `results/e11_long_tail_class_partition_sweep/summary.csv`
@@ -233,6 +244,7 @@ Primary paper figures:
 - `figures/e11_cifar100_resnet_checkpoint_sweep/cifar100_resnet_checkpoint_sweep.png`
 - `figures/e11_cifar100_resnet_condition_proxy_scatter/cifar100_resnet_condition_proxy_scatter.png`
 - `figures/e11_cifar100_resnet_fc_condition_scatter/cifar100_resnet_fc_condition_scatter.png`
+- `figures/e11_cifar100_resnet_tail_quality_control/cifar100_resnet_checkpoint_sweep.png`
 - `figures/e11_long_tail_imbalance_ablation/long_tail_imbalance_ablation.png`
 - `figures/e11_long_tail_checkpoint_sweep/long_tail_checkpoint_sweep.png`
 - `figures/e11_long_tail_class_partition_sweep/long_tail_class_partition_sweep.png`
@@ -263,6 +275,7 @@ Primary paper figures:
    - The same sweep's best pre-update tail accuracy is only about `0.068`, so it reduces checkpoint-selection risk but does not prove preservation of a high-quality tail predictor.
    - A ResNet rank-side proxy scatter over 40 seed/checkpoint points gives positive correlation between mean gradient nuclear rank and log drift ratio, Pearson about `0.7594 [0.6657, 0.8807]`; this supports the caveat that `nrank(G_H)` alone is not the downstream-aware condition.
    - A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`, all points favoring spectral, and worst final-layer-only squared drift ratio about `0.2391 [0.2201, 0.2597]`.
+   - A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]` and still keeps the worst squared drift ratio below 1, about `0.7292 [0.6923, 0.768]`.
    - In the default ResNet diagnostic, tail-loss increase diff spectral-minus-Fro is about `-0.000421 [-0.000592, -0.000249]`; tail-accuracy-drop diff still crosses zero, so this remains a local drift/loss diagnostic rather than an accuracy claim.
 4. The 8-step head-only forgetting diagnostic shows lower measured tail drift across the short horizon.
    - Final squared drift ratio is about `0.6167 [0.5744, 0.6622]`.
@@ -319,6 +332,7 @@ Do not claim:
 - `scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch`: GPU/Slurm submission wrapper for the smaller-head-gain ResNet18 check.
 - `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`: GPU/Slurm submission wrapper for the checkpoint-quality sweep.
 - `scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch`: GPU/Slurm submission wrapper for the final-layer condition diagnostic.
+- `scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch`: GPU/Slurm submission wrapper for the tail-rich checkpoint-quality control.
 - `scripts/e11_write_*.py`: generated discussion and paper-facing artifacts.
 - `tests/`: smoke and diagnostic tests.
 
@@ -328,7 +342,7 @@ The current evidence is consistent with a focused local-geometry paper. It is no
 
 Most important next steps:
 
-1. Add higher-quality tail checkpoints or a stronger real long-tail dataset; the completed CIFAR-100-LT ResNet checkpoint sweep reduces single-checkpoint risk but still has low pre-update tail accuracy.
+1. Add a stronger real long-tail dataset or standard benchmark protocol; the tail-rich ResNet control addresses the weak-tail-function objection, but it is not a tuned long-tail benchmark.
 2. Extend the final-layer ResNet condition diagnostic to all Conv/Linear blocks with downstream-aware tail sensitivity, unit JVP, scaled JVP, observed drift, and layer contribution.
 3. Extend the current fixed-checkpoint, short-trajectory, and small practical-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.

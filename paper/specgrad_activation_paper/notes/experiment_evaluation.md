@@ -33,6 +33,7 @@ condition is
 | CIFAR-100-LT ResNet18 one-step diagnostic | completed | On 10 GPU-rerun seeds, a CIFAR-stem ResNet18 gives lower matched-head-gain squared tail-example logit drift: ratio `0.5611 [0.5224, 0.6026]`, with spectral lower in all seeds. A smaller-head-gain check at `rho=0.002 L_H` gives ratio `0.7761 [0.7585, 0.7941]`. A 250/500/1000/2000-step checkpoint sweep keeps the worst drift-ratio CI endpoint at `0.6026`. | This is still a local one-step diagnostic with fixed BatchNorm state and Conv/Linear matrix-weight interventions; best pre-update tail accuracy in the sweep is only `0.068`, so it is not a full long-tail optimizer benchmark or high-quality tail-predictor preservation result. |
 | CIFAR-100-LT ResNet18 rank-proxy scatter | completed | Across 40 seed/checkpoint points, mean matrix-gradient nuclear rank has positive correlation with log squared drift ratio, Pearson `0.7594 [0.6657, 0.8807]`. | This is a useful caveat, not a positive predictor: it shows `nrank(G_H)` alone is not a replacement for downstream-aware tail sensitivity. |
 | CIFAR-100-LT ResNet18 final-layer condition scatter | completed | Across 40 seed/checkpoint points for `fc.weight`, weakest mean `nrank(G_H) / srank(H_T)` is `6.566`, all points favor spectral, and the worst final-layer-only squared drift ratio is `0.2391 [0.2201, 0.2597]`. | This is closer to the theorem than the rank-only proxy, but it is only the classifier layer; Conv/Linear blocks still need downstream-aware sensitivity or JVP diagnostics. |
+| CIFAR-100 ResNet18 tail-quality control | completed | With 300 tail-train examples per class, best pre-update tail accuracy rises to `0.3739 [0.3454, 0.4024]`, while the worst squared drift ratio remains below 1 at `0.7292 [0.6923, 0.768]`. | This weakens the weak-tail-predictor objection, but it is a tail-rich local control rather than a standard long-tail benchmark or practical optimizer result. |
 | Long-tailed digits Muon bridge diagnostic | completed | `polar(M_t)` still has lower matched-head-gain tail drift than Fro/GD: squared drift ratio `0.8199 [0.6951, 0.9672]`. | Newton-Schulz `NS(M_t)` is weaker: `0.9116 [0.7696, 1.080]`, so this is a local bridge, not a full practical-Muon training claim. |
 | Short practical-Muon trajectory bridge | completed | Across 120 sampled state-step comparisons, `polar(M_t)` and `NS(M_t)` both have lower matched-head-gain squared tail-example logit drift than Fro/GD: ratios `0.7292 [0.6891, 0.7717]` and `0.8019 [0.7583, 0.848]`. | This is still a short local diagnostic on sampled states; it does not establish final tail accuracy, long-horizon training behavior, or hyperparameter robustness. |
 | Practical imbalanced-training diagnostic | completed | On the same small long-tailed digits task, NS-Muon-style training has lower final train loss, lower final tail eval loss, and lower tail output drift than Adam at the chosen lightweight hyperparameters. | Tail accuracy does not improve; this is not a tuned optimizer leaderboard and still needs larger long-tail benchmarks. |
@@ -50,6 +51,7 @@ condition is
 - CIFAR-100-LT ResNet18 checkpoint sweep results: `results/e11_cifar100_resnet_checkpoint_sweep/`.
 - CIFAR-100-LT ResNet18 rank-proxy scatter results: `results/e11_cifar100_resnet_condition_proxy_scatter/`.
 - CIFAR-100-LT ResNet18 final-layer condition results: `results/e11_cifar100_resnet_fc_condition_scatter/`.
+- CIFAR-100 ResNet18 tail-quality control results: `results/e11_cifar100_resnet_tail_quality_control/`.
 - Muon bridge results: `results/e11_long_tail_muon_bridge/`.
 - Practical-Muon trajectory bridge results: `results/e11_long_tail_practical_muon_bridge/`.
 - Practical training results: `results/e11_long_tail_practical_training/`.
@@ -98,11 +100,12 @@ condition is
 
 ## Remaining Experiments for a Publishable Empirical Paper
 
-1. **Stronger real long-tail benchmark.** Extend the CIFAR-100-LT ResNet18
-   diagnostic with higher-quality tail checkpoints, ImageNet-LT or
-   iNaturalist-style data. Required outputs: matched head loss decrease,
-   tail-example logit drift, tail loss increase, tail margin drop, accuracy, and
-   paired confidence intervals.
+1. **Standard real long-tail benchmark.** The tail-rich ResNet control now
+   reduces the weak-tail-function objection, but the paper still needs
+   CIFAR-100-LT/ImageNet-LT/iNaturalist-style protocols with many/medium/few
+   metrics if it wants benchmark-level empirical claims. Required outputs:
+   matched head loss decrease, tail-example logit drift, tail loss increase,
+   tail margin drop, accuracy, and paired confidence intervals.
 2. **All-layer architecture-level condition diagnostic.** Extend the ResNet
    final-layer condition check to Conv/Linear blocks with downstream-aware tail
    sensitivity, unit JVP, scaled JVP, observed drift, and layer contribution.

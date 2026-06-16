@@ -90,6 +90,9 @@ def main() -> None:
     cifar_resnet_fc_condition_points = pd.read_csv(
         "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
     )
+    cifar_resnet_tail_quality = pd.read_csv(
+        "results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv"
+    )
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -183,6 +186,18 @@ def main() -> None:
     cifar_resnet_fc_condition_favors_fraction = (
         cifar_resnet_fc_condition_points["condition_score_nrank_over_tail_srank"] > 1.0
     ).mean()
+    cifar_resnet_tail_quality_worst = cifar_resnet_tail_quality.loc[
+        cifar_resnet_tail_quality["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_tail_quality_best_tail_accuracy = cifar_resnet_tail_quality.loc[
+        cifar_resnet_tail_quality["mean_tail_accuracy_before"].idxmax()
+    ]
+    cifar_resnet_tail_quality_tail_accuracy_min = cifar_resnet_tail_quality[
+        "mean_tail_accuracy_before"
+    ].min()
+    cifar_resnet_tail_quality_tail_accuracy_max = cifar_resnet_tail_quality[
+        "mean_tail_accuracy_before"
+    ].max()
     one_step_alignment_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "alignment")
     one_step_update_fro_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_fro_norm")
     one_step_update_op_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_op_norm")
@@ -780,6 +795,39 @@ def main() -> None:
         macro(
             "EelevenCifarResNetFcConditionFavorsSpectralFraction",
             fmt(cifar_resnet_fc_condition_favors_fraction),
+        ),
+        macro("EelevenCifarResNetTailQualitySettings", int(len(cifar_resnet_tail_quality))),
+        macro(
+            "EelevenCifarResNetTailQualityWorstWarmupSteps",
+            int(cifar_resnet_tail_quality_worst["warmup_steps"]),
+        ),
+        macro(
+            "EelevenCifarResNetTailQualityWorstDriftRatio",
+            fmt(cifar_resnet_tail_quality_worst["geomean_tail_output_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetTailQualityWorstDriftRatio",
+            cifar_resnet_tail_quality_worst,
+            "tail_output_drift_sq_ratio_ci95_low",
+            "tail_output_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetTailQualityBestTailAccuracyWarmupSteps",
+            int(cifar_resnet_tail_quality_best_tail_accuracy["warmup_steps"]),
+        ),
+        macro(
+            "EelevenCifarResNetTailQualityBestTailAccuracy",
+            fmt(cifar_resnet_tail_quality_best_tail_accuracy["mean_tail_accuracy_before"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetTailQualityBestTailAccuracy",
+            cifar_resnet_tail_quality_best_tail_accuracy,
+            "tail_accuracy_before_ci95_low",
+            "tail_accuracy_before_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetTailQualityTailAccuracyRange",
+            f"{fmt(cifar_resnet_tail_quality_tail_accuracy_min)}\\text{{ to }}{fmt(cifar_resnet_tail_quality_tail_accuracy_max)}",
         ),
         "",
         "% Local linearization quality",

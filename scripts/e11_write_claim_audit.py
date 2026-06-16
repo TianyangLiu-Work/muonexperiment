@@ -39,6 +39,7 @@ def main() -> None:
     cifar_resnet_fc_condition_points = pd.read_csv(
         "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
     )
+    cifar_resnet_tail_quality = pd.read_csv("results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
@@ -65,6 +66,12 @@ def main() -> None:
     ]
     cifar_resnet_fc_condition_weakest = cifar_resnet_fc_condition.loc[
         cifar_resnet_fc_condition["mean_condition_score_nrank_over_tail_srank"].idxmin()
+    ]
+    cifar_resnet_tail_quality_worst = cifar_resnet_tail_quality.loc[
+        cifar_resnet_tail_quality["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_tail_quality_best_tail_accuracy = cifar_resnet_tail_quality.loc[
+        cifar_resnet_tail_quality["mean_tail_accuracy_before"].idxmax()
     ]
 
     claim_status = pd.DataFrame(
@@ -108,9 +115,14 @@ def main() -> None:
                     f"CI={ci(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
                     f"Across the ResNet checkpoint sweep, the worst drift-ratio CI upper endpoint is "
                     f"{fmt(cifar_resnet_checkpoint_worst['tail_output_drift_sq_ratio_ci95_high'])} at "
-                    f"{int(cifar_resnet_checkpoint_worst['warmup_steps'])} warmup steps."
+                    f"{int(cifar_resnet_checkpoint_worst['warmup_steps'])} warmup steps. "
+                    f"A tail-rich ResNet control with 300 tail-train examples per class reaches pre-update tail accuracy "
+                    f"{fmt(cifar_resnet_tail_quality_best_tail_accuracy['mean_tail_accuracy_before'])} "
+                    f"CI={ci(cifar_resnet_tail_quality_best_tail_accuracy, 'tail_accuracy_before_ci95_low', 'tail_accuracy_before_ci95_high')} "
+                    f"while preserving worst drift ratio {fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={ci(cifar_resnet_tail_quality_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
-                "main_loophole": "The result is about logits/function drift; the matched step is norm-specific, not uniformly smaller, and it is not a tail-accuracy claim.",
+                "main_loophole": "The result is about logits/function drift; the matched step is norm-specific, not uniformly smaller, and even the tail-rich control is not a tuned long-tail optimizer benchmark.",
             },
             {
                 "claim": "Lower tail-example logit drift implies lower tail loss or better tail accuracy.",
@@ -219,6 +231,11 @@ def main() -> None:
                 "role": "Final-layer downstream-aware condition check comparing head-gradient nuclear rank with tail feature stable rank.",
             },
             {
+                "table": "CIFAR-100 ResNet18 tail-quality control",
+                "path": "results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv",
+                "role": "Tail-rich checkpoint control showing lower matched-gain drift with substantially higher pre-update tail accuracy.",
+            },
+            {
                 "table": "Long-tail Muon-style compatibility",
                 "path": "results/e11_long_tail_muon_bridge/pair_summary.csv",
                 "role": "Fixed-checkpoint compatibility check for polar(G_t), polar(M_t), and Newton-Schulz directions under matched head gain.",
@@ -261,7 +278,7 @@ The current data do **not** justify saying that this already proves better tail 
 
 ## Strongest Remaining Loopholes
 
-1. The CIFAR-100-LT ResNet evidence is still a local one-step diagnostic with 10 seeds, two target head-gain levels, and a checkpoint sweep; it is not a modern long-tail benchmark or full benchmark.
+1. The CIFAR-100-LT ResNet evidence is still local diagnostics plus a tail-rich control; it is not a modern long-tail optimizer benchmark.
 2. The Muon-style compatibility evidence is local and small-scale; real long-tail practical Muon training remains unchecked.
 3. The final-layer ResNet condition scatter is useful, but all-layer convolutional downstream-aware condition diagnostics remain missing.
 4. The current performance evidence is weaker than the function-drift evidence.

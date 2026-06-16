@@ -14,6 +14,7 @@ Long-tailed digits one-step & 0.5501 [0.5101, 0.5931] & tail loss diff = 0.00139
 CIFAR-100-LT ResNet18 one-step & 0.5611 [0.5224, 0.6026] & tail loss diff = -4.21e-04 [-5.92e-04, -2.49e-04]; rho=0.002 ratio 0.7761 [0.7585, 0.7941]; accuracy diff CI crosses 0 \\
 CIFAR-100-LT ResNet18 checkpoint sweep & worst drift 0.5611 [0.5224, 0.6026] at 1.00e+03 steps & best pre-update tail accuracy 0.068 at 1.00e+03 steps; still weak-tail-predictor evidence \\
 CIFAR-100-LT ResNet18 final-layer condition & worst drift 0.2391 [0.2201, 0.2597] at 5.00e+02 steps & weakest mean nrank/srank score 6.566; final-layer-only downstream-aware check \\
+CIFAR-100 ResNet18 tail-quality control & worst drift 0.7292 [0.6923, 0.768] & best pre-update tail accuracy 0.3739 [0.3454, 0.4024]; tail-rich checkpoint control \\
 8-step head-only forgetting & 0.6167 [0.5744, 0.6622]; area 0.7787 [0.7549, 0.8033] & tail loss/margin diff CI crosses 0 \\
 Muon-style compatibility: $\polar(M_t)$ / NS$(M_t)$ & 0.8199 [0.6951, 0.9672] / 0.9116 [0.7696, 1.08] & NS$(M_t)$ CI crosses 1; selected-state check only \\
 Practical-Muon trajectory compatibility & 0.7292 [0.6891, 0.7717] / 0.8019 [0.7583, 0.848] & 120 state-step comparisons; still local matched-head-gain \\

@@ -571,6 +571,12 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_fc_condition_scatter") / "config.json",
         Path("figures/e11_cifar100_resnet_fc_condition_scatter") / "cifar100_resnet_fc_condition_scatter.png",
         Path("discussion/e11_cifar100_resnet_fc_condition_scatter.md"),
+        Path("results/e11_cifar100_resnet_tail_quality_control") / "step_metrics.csv",
+        Path("results/e11_cifar100_resnet_tail_quality_control") / "pair_summary.csv",
+        Path("results/e11_cifar100_resnet_tail_quality_control") / "layer_metrics.csv",
+        Path("results/e11_cifar100_resnet_tail_quality_control") / "config.json",
+        Path("figures/e11_cifar100_resnet_tail_quality_control") / "cifar100_resnet_checkpoint_sweep.png",
+        Path("discussion/e11_cifar100_resnet_tail_quality_control.md"),
         Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv",
         Path("results/e11_long_tail_imbalance_ablation") / "summary.csv",
         Path("figures/e11_long_tail_imbalance_ablation") / "long_tail_imbalance_ablation.png",
@@ -718,7 +724,9 @@ def main() -> None:
         "Final squared drift ratio is about `0.6167 [0.5744, 0.6622]`",
         "Unit-direction spectral JVP is larger than Frobenius in both layers",
         "make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downstream-aware condition diagnostic via Slurm",
+        "make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
+        "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
         "make e11-all-results",
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
@@ -819,6 +827,7 @@ def main() -> None:
         "tail loss, margin, and accuracy are reported separately",
         "local function-drift reduction",
         "final-layer-only ResNet condition diagnostic",
+        "tail-rich checkpoint-quality control",
         "tail-example logit drift means the drift of the full class-logit vector",
         "not restricted to logits of tail classes only",
         "Sandwiched sensitivity",
@@ -1162,7 +1171,7 @@ def main() -> None:
         "state selection remain separate sources of variation",
         "The mechanism should be evaluated before making optimizer-level claims",
         "The current evidence supports a local mechanism claim",
-        "protection of a high-quality tail predictor",
+        "tail-rich ResNet control raises pre-update tail accuracy",
         "\\textbf{References.}",
         "Pedregosa et al.",
         "\\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
@@ -1818,6 +1827,50 @@ def main() -> None:
         raise AssertionError(
             "CIFAR-100-LT ResNet18 final-layer condition scatter must preserve the downstream-aware condition readout"
         )
+    cifar_resnet_tail_quality_steps = pd.read_csv(
+        Path("results/e11_cifar100_resnet_tail_quality_control") / "step_metrics.csv"
+    )
+    cifar_resnet_tail_quality_summary = pd.read_csv(
+        Path("results/e11_cifar100_resnet_tail_quality_control") / "pair_summary.csv"
+    )
+    cifar_resnet_tail_quality_layers = pd.read_csv(
+        Path("results/e11_cifar100_resnet_tail_quality_control") / "layer_metrics.csv"
+    )
+    cifar_resnet_tail_quality_config = json.loads(
+        (Path("results/e11_cifar100_resnet_tail_quality_control") / "config.json").read_text()
+    )
+    expected_tail_quality_steps = {2000, 5000, 10000}
+    if len(cifar_resnet_tail_quality_steps) != 60 or len(cifar_resnet_tail_quality_layers) != 1260:
+        raise AssertionError(
+            "CIFAR-100 ResNet18 tail-quality control must contain 3 checkpoints x 10 seeds x 2 geometries"
+        )
+    if set(cifar_resnet_tail_quality_summary["warmup_steps"]) != expected_tail_quality_steps:
+        raise AssertionError("CIFAR-100 ResNet18 tail-quality control must cover warmup steps 2000, 5000, 10000")
+    if set(cifar_resnet_tail_quality_config["warmup_steps"]) != expected_tail_quality_steps:
+        raise AssertionError("CIFAR-100 ResNet18 tail-quality config must record the warmup schedule")
+    base_tail_quality_config = cifar_resnet_tail_quality_config["base_config"]
+    if (
+        base_tail_quality_config["device"] != "cuda"
+        or base_tail_quality_config["download"]
+        or abs(float(base_tail_quality_config["target_head_gain_fraction"]) - 0.005) > 1e-12
+        or len(base_tail_quality_config["seeds"]) != 10
+        or int(base_tail_quality_config["head_train_per_class"]) != 300
+        or int(base_tail_quality_config["tail_train_per_class"]) != 300
+    ):
+        raise AssertionError("CIFAR-100 ResNet18 tail-quality control should be the Slurm/GPU tail-rich no-download run")
+    if not (
+        (cifar_resnet_tail_quality_summary["seeds"] == 10).all()
+        and (cifar_resnet_tail_quality_summary["tail_output_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (cifar_resnet_tail_quality_summary["spectral_less_tail_output_drift_fraction"] == 1.0).all()
+        and cifar_resnet_tail_quality_summary["mean_tail_accuracy_before"].max() > 0.3
+        and cifar_resnet_tail_quality_summary["mean_tail_accuracy_before"].max()
+        > 4.0 * cifar_resnet_checkpoint_summary["mean_tail_accuracy_before"].max()
+        and (cifar_resnet_tail_quality_summary["tail_loss_increase_diff_ci95_low"] < 0.0).all()
+        and (cifar_resnet_tail_quality_summary["tail_loss_increase_diff_ci95_high"] > 0.0).all()
+    ):
+        raise AssertionError(
+            "CIFAR-100 ResNet18 tail-quality control must preserve lower drift and the non-performance caveat"
+        )
     imbalance_steps = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv")
     imbalance_summary = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "summary.csv")
     if len(imbalance_steps) != 160:
@@ -2406,6 +2459,11 @@ def main() -> None:
         "\\EelevenCifarResNetFcConditionWeakestPointConditionScore",
         "\\EelevenCifarResNetFcConditionWorstTheoryRatio",
         "\\EelevenCifarResNetFcConditionFavorsSpectralFraction",
+        "\\EelevenCifarResNetTailQualitySettings",
+        "\\EelevenCifarResNetTailQualityWorstWarmupSteps",
+        "\\EelevenCifarResNetTailQualityWorstDriftRatio",
+        "\\EelevenCifarResNetTailQualityBestTailAccuracy",
+        "\\EelevenCifarResNetTailQualityTailAccuracyRange",
         "\\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         "\\EelevenLocalLinearizationMaxRelativeErrorDirection",
         "\\EelevenLongTailImbalanceAblationSettings",
@@ -2474,6 +2532,7 @@ def main() -> None:
     for range_macro in [
         "EelevenLongTailCheckpointSweepTailAccuracyRange",
         "EelevenLongTailCheckpointSweepPositiveMarginRange",
+        "EelevenCifarResNetTailQualityTailAccuracyRange",
     ]:
         range_match = re.search(rf"\\newcommand\{{\\{range_macro}\}}\{{(?P<value>[^}}]*(?:\}}[^}}]*)?)\}}", paper_numbers)
         if range_match is None:
@@ -2503,6 +2562,8 @@ def main() -> None:
         r"\EelevenCifarResNetFcConditionWorstDriftRatio",
         r"\EelevenCifarResNetFcConditionWeakestMeanConditionScore",
         r"\EelevenCifarResNetFcConditionFavorsSpectralFraction",
+        r"\EelevenCifarResNetTailQualityWorstDriftRatio",
+        r"\EelevenCifarResNetTailQualityBestTailAccuracy",
         r"\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         r"\EelevenLocalLinearizationMaxRelativeErrorDirection",
         r"\EelevenLongTailImbalanceWorstRatioCiHigh",
@@ -2544,6 +2605,7 @@ def main() -> None:
         "make e11-cifar-resnet-checkpoint-sweep-results",
         "make e11-cifar-resnet-condition-proxy-results",
         "make e11-cifar-resnet-fc-condition-results",
+        "make e11-cifar-resnet-tail-quality-results",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -2562,6 +2624,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 checkpoint-quality sweep",
         "CIFAR-100-LT ResNet18 condition-proxy scatter",
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
+        "CIFAR-100 ResNet18 tail-quality control",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -2585,6 +2648,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 checkpoint-quality sweep",
         "CIFAR-100-LT ResNet18 condition-proxy scatter",
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
+        "CIFAR-100 ResNet18 tail-quality control",
         "Long-tailed practical training diagnostic",
         "Long-tailed practical training LR sensitivity",
     ]
@@ -2604,6 +2668,7 @@ def main() -> None:
         "lower tail-example logit drift",
         "nrank-vs-ssrank condition",
         "final-layer condition scatter",
+        "tail-rich ResNet control",
         "Treat Muon as motivation",
         "legacy update-spectrum artifacts",
     ]
@@ -2789,11 +2854,12 @@ def main() -> None:
         "idealized spectral/polar directions can reduce head-to-tail drift on tail-example logits",
         "small-digits selected-state compatibility check",
         "short-trajectory",
-        "not a modern long-tail benchmark",
+        "not a modern long-tail optimizer benchmark",
         "do **not** justify saying",
         "head-alignment ratio=2.083",
         "operator-norm ratio=0.5543",
         "final-layer ResNet condition scatter",
+        "tail-rich control",
     ]
     missing_claim_validity = [phrase for phrase in required_claim_validity_phrases if phrase not in claim_validity]
     if missing_claim_validity:
@@ -2807,6 +2873,7 @@ def main() -> None:
         "Real long-tail practical Muon benchmark",
         "Larger-architecture layerwise diagnostic",
         "final-layer condition scatter",
+        "tail-rich ResNet control",
         "lower tail-example logit drift automatically improves",
         "Head-to-Tail Interference in Long-Tailed Small-Batch Training",
         "explicit norm-specific scaling readouts",
@@ -2824,6 +2891,8 @@ def main() -> None:
         "Rank-side proxy scatter",
         "Final-layer downstream-aware condition",
         "All-layer downstream-aware ResNet condition scatter",
+        "Tail-quality control",
+        "tail-quality control",
         "Long-tail imbalance sweep",
         "Practical optimizer bridge on CIFAR-100-LT",
         "Acceptance Gates",

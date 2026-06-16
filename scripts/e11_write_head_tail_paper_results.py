@@ -26,6 +26,7 @@ def main() -> None:
     cifar_resnet_rho002 = pd.read_csv("results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv").iloc[0]
     cifar_resnet_checkpoint_sweep = pd.read_csv("results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv")
     cifar_resnet_fc_condition = pd.read_csv("results/e11_cifar100_resnet_fc_condition_scatter/summary.csv")
+    cifar_resnet_tail_quality = pd.read_csv("results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
@@ -45,6 +46,12 @@ def main() -> None:
     ]
     cifar_resnet_fc_condition_weakest = cifar_resnet_fc_condition.loc[
         cifar_resnet_fc_condition["mean_condition_score_nrank_over_tail_srank"].idxmin()
+    ]
+    cifar_resnet_tail_quality_worst = cifar_resnet_tail_quality.loc[
+        cifar_resnet_tail_quality["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_tail_quality_best_tail_accuracy = cifar_resnet_tail_quality.loc[
+        cifar_resnet_tail_quality["mean_tail_accuracy_before"].idxmax()
     ]
     layer1 = layerwise.set_index("layer").loc[1]
     layer2 = layerwise.set_index("layer").loc[2]
@@ -141,6 +148,21 @@ def main() -> None:
             + " steps & weakest mean nrank/srank score "
             + fmt(cifar_resnet_fc_condition_weakest["mean_condition_score_nrank_over_tail_srank"])
             + "; final-layer-only downstream-aware check \\\\"
+        ),
+        (
+            "CIFAR-100 ResNet18 tail-quality control & worst drift "
+            + ci(
+                cifar_resnet_tail_quality_worst["geomean_tail_output_drift_sq_ratio_spectral_over_fro"],
+                cifar_resnet_tail_quality_worst["tail_output_drift_sq_ratio_ci95_low"],
+                cifar_resnet_tail_quality_worst["tail_output_drift_sq_ratio_ci95_high"],
+            )
+            + " & best pre-update tail accuracy "
+            + ci(
+                cifar_resnet_tail_quality_best_tail_accuracy["mean_tail_accuracy_before"],
+                cifar_resnet_tail_quality_best_tail_accuracy["tail_accuracy_before_ci95_low"],
+                cifar_resnet_tail_quality_best_tail_accuracy["tail_accuracy_before_ci95_high"],
+            )
+            + "; tail-rich checkpoint control \\\\"
         ),
         (
             "8-step head-only forgetting & "

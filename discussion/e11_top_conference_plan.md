@@ -18,13 +18,14 @@ reduce tail-example function drift at matched head gain.
 | Checkpoint sweep | CIFAR-100-LT ResNet18 warmup checkpoints 250/500/1000/2000 all have drift-ratio CI upper endpoint below 1; worst endpoint is `0.6026`. | partial |
 | Rank-side proxy scatter | Across 40 ResNet seed/checkpoint points, mean gradient nuclear rank is positively correlated with log drift ratio, Pearson `0.7594 [0.6657, 0.8807]`. | caveat |
 | Final-layer downstream-aware condition | Across 40 ResNet final-layer seed/checkpoint points, the weakest mean `nrank(G_H) / srank(H_T)` score is `6.566`, all points favor spectral, and the worst final-layer-only squared drift ratio is `0.2391 [0.2201, 0.2597]`. | partial |
+| Tail-quality control | A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy `0.3739 [0.3454, 0.4024]`; worst squared drift ratio remains `0.7292 [0.6923, 0.768]`. | partial |
 | Claim boundary | Tail accuracy remains inconclusive; paper explicitly avoids performance claims. | keep |
 
 ## Paper-Critical Missing Evidence
 
 | priority | missing piece | minimum acceptable gate | why it matters |
 |---|---|---|---|
-| P0 | Higher-quality ResNet tail checkpoint | The completed checkpoint sweep now reduces single-checkpoint risk, but best pre-update tail accuracy is only `0.068`; add checkpoints or data where the tail predictor is meaningfully useful. | Reviewers will object that lower drift may preserve a weak tail function. |
+| P0 | Standard long-tail benchmark protocol | The tail-rich control now addresses the weakest-tail-function objection, but it is not a tuned CIFAR-100-LT/ImageNet-LT/iNaturalist benchmark with many/medium/few reporting. | Reviewers will still object if the paper implies benchmark-level optimizer performance. |
 | P0 | All-layer downstream-aware ResNet condition scatter | The final-layer condition scatter is complete for `fc.weight`, but Conv/Linear blocks still need downstream-aware tail sensitivity, unit JVP, scaled JVP, observed drift, and layer contribution. | The theorem must look predictive beyond the synthetic construction and beyond the classifier layer. |
 | P1 | Long-tail imbalance sweep | CIFAR-100-LT imbalance factors or explicit tail-count settings with at least 3 seeds each; keep paired matched-gain diagnostics. | Converts one dataset split into a systematic long-tail experiment. |
 | P1 | Practical optimizer bridge on CIFAR-100-LT | Sample Muon-style momentum/NS directions along CIFAR-100-LT ResNet training states, not only digits. | Bridges ideal polar directions to practical Muon without claiming final SOTA. |
@@ -48,7 +49,8 @@ reduce tail-example function drift at matched head gain.
 
 - All headline numbers are generated from CSVs and LaTeX macros, not hand typed.
 - `scripts/e11_validate_outputs.py` checks the ResNet 10-seed, rho=0.002,
-  checkpoint-sweep, rank-proxy, and final-layer condition artifacts.
+  checkpoint-sweep, rank-proxy, final-layer condition, and tail-quality
+  artifacts.
 - The paper states one main claim in the abstract and conclusion: local
   matched-head-gain drift, not final accuracy.
 - Every ResNet result includes seed count, target gain, checkpoint quality, and
@@ -58,20 +60,22 @@ reduce tail-example function drift at matched head gain.
 
 ## Next Implementation Step
 
-The ResNet checkpoint-quality sweep and final-layer condition scatter have been
-run.
+The ResNet checkpoint-quality sweep, final-layer condition scatter, and
+tail-quality control have been run.
 
 The checkpoint sweep now reduces single-checkpoint risk, the rank-side proxy
 scatter makes clear that head-gradient rank alone is not enough, and the
 final-layer condition scatter directly measures a downstream-aware classifier
-proxy. The next highest-leverage experiments are therefore:
+proxy. The tail-rich control weakens the objection that the original ResNet
+checkpoints only protected a weak tail function. The next highest-leverage
+experiments are therefore:
 
-1. train/load checkpoints with substantially higher tail accuracy and rerun the
-   matched-head-gain diagnostic;
-2. extend the final-layer condition diagnostic to all Conv/Linear blocks with a
+1. extend the final-layer condition diagnostic to all Conv/Linear blocks with a
    downstream-aware tail sensitivity or finite-difference JVP proxy; or
-3. run CIFAR-100-LT practical Muon/AdamW trajectory diagnostics with sampled
+2. run CIFAR-100-LT practical Muon/AdamW trajectory diagnostics with sampled
    matched-head-gain probes and final class-wise metrics.
+3. move the diagnostic to a standard long-tail benchmark protocol with
+   many/medium/few metrics.
 
 The completed checkpoint-sweep artifacts are:
 `results/e11_cifar100_resnet_checkpoint_sweep/*`,
@@ -85,3 +89,7 @@ The completed final-layer condition scatter artifacts are:
 `results/e11_cifar100_resnet_fc_condition_scatter/*`,
 `figures/e11_cifar100_resnet_fc_condition_scatter/*`, and
 `discussion/e11_cifar100_resnet_fc_condition_scatter.md`.
+The completed tail-quality control artifacts are:
+`results/e11_cifar100_resnet_tail_quality_control/*`,
+`figures/e11_cifar100_resnet_tail_quality_control/*`, and
+`discussion/e11_cifar100_resnet_tail_quality_control.md`.

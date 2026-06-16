@@ -6,15 +6,15 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 657.5 KB |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 658.9 KB |
 | scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 1.3 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 239.8 KB |
-| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 617.4 KB |
-| results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 256.2 MB |
-| figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 28.3 MB  |
+| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 628.2 KB |
+| results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 256.4 MB |
+| figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 28.5 MB  |
 | configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
 | paper                  | Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.   | commit source and selected rendered PDFs | 3.2 MB   |
-| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 4.1 KB   |
+| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 4.3 KB   |
 | .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.            | commit                                   | 479 B    |
 | .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.        | commit                                   | 667 B    |
 
@@ -47,6 +47,9 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_cifar100_resnet_fc_condition_scatter/step_metrics.csv               |     80 | 53.6 KB   |
 | results/e11_cifar100_resnet_fc_condition_scatter/summary.csv                    |      4 | 12.3 KB   |
 | results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv          |     40 | 5.2 KB    |
+| results/e11_cifar100_resnet_tail_quality_control/step_metrics.csv               |     60 | 57.3 KB   |
+| results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv               |      3 | 10.1 KB   |
+| results/e11_cifar100_resnet_tail_quality_control/layer_metrics.csv              |   1260 | 107.0 KB  |
 | results/e11_long_tail_imbalance_ablation/step_metrics.csv                       |    160 | 81.8 KB   |
 | results/e11_long_tail_imbalance_ablation/summary.csv                            |      4 | 6.8 KB    |
 | results/e11_long_tail_checkpoint_sweep/step_metrics.csv                         |    200 | 121.5 KB  |
@@ -103,30 +106,31 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                      | size    |
 |:----------------------------------------------------------|:--------|
-| README_E11.md                                             | 21.9 KB |
+| README_E11.md                                             | 22.9 KB |
 | discussion/e11_paper_skeleton.md                          | 10.9 KB |
 | discussion/e11_main_paper_package.md                      | 10.5 KB |
 | discussion/e11_main_figure_captions.md                    | 6.5 KB  |
 | discussion/e11_notation_glossary.md                       | 8.7 KB  |
 | discussion/e11_quantitative_claim_ledger.md               | 11.0 KB |
-| discussion/e11_reproduction_checklist.md                  | 18.0 KB |
-| discussion/e11_reviewer_risk_audit.md                     | 15.9 KB |
+| discussion/e11_reproduction_checklist.md                  | 18.7 KB |
+| discussion/e11_reviewer_risk_audit.md                     | 17.1 KB |
 | discussion/e11_pasted_review_audit.md                     | 8.3 KB  |
 | discussion/e11_completion_audit.md                        | 4.8 KB  |
 | discussion/e11_end_of_draft_self_review.md                | 6.4 KB  |
 | discussion/e11_reference_audit.md                         | 6.1 KB  |
-| discussion/e11_paper_readiness_audit.md                   | 17.7 KB |
-| discussion/e11_top_conference_plan.md                     | 6.2 KB  |
+| discussion/e11_paper_readiness_audit.md                   | 19.1 KB |
+| discussion/e11_top_conference_plan.md                     | 6.8 KB  |
 | discussion/e11_evidence_index.md                          | 13.7 KB |
 | discussion/e11_research_synthesis.md                      | 7.8 KB  |
 | discussion/e11_research_direction_map.md                  | 9.8 KB  |
-| discussion/e11_claim_validity_audit.md                    | 12.4 KB |
+| discussion/e11_claim_validity_audit.md                    | 13.7 KB |
 | discussion/e11_cifar100_lt_one_step.md                    | 2.2 KB  |
 | discussion/e11_cifar100_resnet_one_step.md                | 2.5 KB  |
 | discussion/e11_cifar100_resnet_one_step_rho002.md         | 2.5 KB  |
 | discussion/e11_cifar100_resnet_checkpoint_sweep.md        | 5.1 KB  |
 | discussion/e11_cifar100_resnet_condition_proxy_scatter.md | 3.4 KB  |
 | discussion/e11_cifar100_resnet_fc_condition_scatter.md    | 3.4 KB  |
+| discussion/e11_cifar100_resnet_tail_quality_control.md    | 4.7 KB  |
 
 ## Ignored Local Artifacts
 
