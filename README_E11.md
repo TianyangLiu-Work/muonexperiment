@@ -35,6 +35,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_one_step.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch
+sbatch scripts/slurm/e11_cifar100_resnet_imbalance_sweep.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch
@@ -115,6 +116,7 @@ make e11-cifar-resnet-checkpoint-sweep-results # submit the top-conference ResNe
 make e11-cifar-resnet-condition-proxy-results # regenerate the ResNet rank-proxy scatter from checkpoint-sweep CSVs
 make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downstream-aware condition diagnostic via Slurm
 make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm
+make e11-cifar-resnet-imbalance-sweep-results # submit the CIFAR-100-LT ResNet18 tail-count imbalance sweep via Slurm
 make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm
 make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results # submit the all-layer ResNet JVP checkpoint-transfer benchmark via Slurm
 make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm
@@ -137,6 +139,7 @@ Top-conference upgrade runner:
 make e11-cifar-resnet-checkpoint-sweep-results
 make e11-cifar-resnet-fc-condition-results
 make e11-cifar-resnet-tail-quality-results
+make e11-cifar-resnet-imbalance-sweep-results
 make e11-cifar-resnet-layer-jvp-tail-quality-results
 make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results
 make e11-cifar-resnet-lt-standard-eval-results
@@ -162,6 +165,13 @@ The tail-quality target submits
 the ResNet checkpoint-sweep runner with 300 tail-train examples per class. It is
 a tail-rich control for the weak-tail-predictor objection, not a standard
 long-tailed benchmark.
+
+The imbalance-sweep target submits
+`scripts/slurm/e11_cifar100_resnet_imbalance_sweep.sbatch`, which runs
+`scripts/e11_run_cifar100_resnet_imbalance_sweep.py` on GPU. It keeps the head
+split at 300 train examples per class and sweeps tail_train_per_class
+10/30/100/300 over 3 seeds with the same matched-head-gain protocol. This is a
+local tail-frequency robustness check, not a final optimizer benchmark.
 
 The all-layer JVP target submits
 `scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch`, which runs
@@ -241,6 +251,7 @@ Paper-facing synthesis:
 - `discussion/e11_cifar100_resnet_condition_proxy_scatter.md`
 - `discussion/e11_cifar100_resnet_fc_condition_scatter.md`
 - `discussion/e11_cifar100_resnet_tail_quality_control.md`
+- `discussion/e11_cifar100_resnet_imbalance_sweep.md`
 - `discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md`
 - `discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
@@ -290,6 +301,9 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_resnet_fc_condition_scatter/summary.csv`
 - `results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv`
 - `results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv`
+- `results/e11_cifar100_resnet_imbalance_sweep/pair_summary.csv`
+- `results/e11_cifar100_resnet_imbalance_sweep/step_metrics.csv`
+- `results/e11_cifar100_resnet_imbalance_sweep/layer_metrics.csv`
 - `results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv`
 - `results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv`
 - `results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/checkpoint_summary.csv`
@@ -326,6 +340,7 @@ Primary paper figures:
 - `figures/e11_cifar100_resnet_condition_proxy_scatter/cifar100_resnet_condition_proxy_scatter.png`
 - `figures/e11_cifar100_resnet_fc_condition_scatter/cifar100_resnet_fc_condition_scatter.png`
 - `figures/e11_cifar100_resnet_tail_quality_control/cifar100_resnet_checkpoint_sweep.png`
+- `figures/e11_cifar100_resnet_imbalance_sweep/cifar100_resnet_imbalance_sweep.png`
 - `figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png`
 - `figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png`
 - `figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png`
@@ -363,6 +378,7 @@ Primary paper figures:
    - A ResNet rank-side proxy scatter over 40 seed/checkpoint points gives positive correlation between mean gradient nuclear rank and log drift ratio, Pearson about `0.7594 [0.6657, 0.8807]`; this supports the caveat that `nrank(G_H)` alone is not the downstream-aware condition.
    - A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`, all points favoring spectral, and worst final-layer-only squared drift ratio about `0.2391 [0.2201, 0.2597]`.
    - A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]` and still keeps the worst squared drift ratio below 1, about `0.7292 [0.6923, 0.768]`.
+   - A CIFAR-100-LT ResNet18 imbalance sweep over tail_train_per_class 10/30/100/300 keeps spectral/Frobenius squared drift ratio below 1 in every setting; worst CI upper endpoint is 0.936 at tail_train_per_class=100, and best pre-update tail accuracy is 0.3297 [0.2954, 0.3639] at tail_train_per_class=300. Tail-loss evidence is mixed, so this remains a local drift result.
    - An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points; observed squared drift ratio is about `0.2011 [0.1845, 0.2192]`, scaled-JVP ratio is about `0.065 [0.06008, 0.07031]`, and every per-layer observed CI upper endpoint is below 1.
    - An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs; the scaled-JVP predictor has below-one threshold accuracy `1` but held-out layer-risk Spearman about `-0.3203 [-0.3562, -0.2845]`, so the current score is not yet a positive layer-ranking predictor.
    - A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`. This supplies a standard classification reporting surface, not a tuned benchmark or Muon comparison.
@@ -421,6 +437,7 @@ Do not claim:
 - `scripts/e11_run_cifar100_resnet_checkpoint_sweep.py`: ResNet18 checkpoint-quality sweep for the top-conference upgrade path.
 - `scripts/e11_run_cifar100_resnet_condition_proxy_scatter.py`: rank-side proxy scatter generated from the ResNet checkpoint-sweep CSVs.
 - `scripts/e11_run_cifar100_resnet_fc_condition_scatter.py`: final-layer downstream-aware condition diagnostic for `fc.weight` on ResNet18 checkpoints.
+- `scripts/e11_run_cifar100_resnet_imbalance_sweep.py`: CIFAR-100-LT ResNet18 tail-count imbalance sweep for local matched-head-gain drift robustness.
 - `scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py`: all-layer ResNet finite-difference JVP diagnostic at the tail-rich checkpoint.
 - `scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py`: all-layer ResNet JVP checkpoint-transfer benchmark across tail-rich checkpoints.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
@@ -431,6 +448,7 @@ Do not claim:
 - `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`: GPU/Slurm submission wrapper for the checkpoint-quality sweep.
 - `scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch`: GPU/Slurm submission wrapper for the final-layer condition diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch`: GPU/Slurm submission wrapper for the tail-rich checkpoint-quality control.
+- `scripts/slurm/e11_cifar100_resnet_imbalance_sweep.sbatch`: GPU/Slurm submission wrapper for the ResNet18 tail-count imbalance sweep.
 - `scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch`: GPU/Slurm submission wrapper for the all-layer ResNet JVP tail-quality diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.sbatch`: GPU/Slurm submission wrapper for the all-layer ResNet JVP checkpoint-transfer benchmark.
 - `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`: GPU/Slurm submission wrapper for the standard CIFAR-100-LT ResNet18 reporting baseline.
@@ -445,7 +463,7 @@ The current evidence is consistent with a focused local-geometry paper. It is no
 
 Most important next steps:
 
-1. Extend the new standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline, augmented recipe pilot, and negative NS-Muon final-training pilot into a tuned benchmark protocol with a wider grid, class-balanced samplers, better Muon schedules, and larger long-tail datasets; the current pilots are useful benchmark context, not a competitive optimizer result.
+1. Extend the new standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline, augmented recipe pilot, negative NS-Muon final-training pilot, and local tail-count imbalance sweep into a tuned benchmark protocol with a wider grid, class-balanced samplers, better Muon schedules, and larger long-tail datasets; the current pilots are useful benchmark context, not a competitive optimizer result.
 2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run is complete, but the current score has negative layer-risk ranking transfer, so the next version needs a stronger downstream-aware condition and held-out architecture or dataset splits.
 3. Extend the current fixed-checkpoint, short-trajectory, small practical-training, and negative ResNet final-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.

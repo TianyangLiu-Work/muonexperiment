@@ -27,6 +27,7 @@ def main() -> None:
     cifar_resnet_checkpoint_sweep = pd.read_csv("results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv")
     cifar_resnet_fc_condition = pd.read_csv("results/e11_cifar100_resnet_fc_condition_scatter/summary.csv")
     cifar_resnet_tail_quality = pd.read_csv("results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv")
+    cifar_resnet_imbalance_sweep = pd.read_csv("results/e11_cifar100_resnet_imbalance_sweep/pair_summary.csv")
     cifar_resnet_layer_jvp = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv"
     ).iloc[0]
@@ -79,6 +80,12 @@ def main() -> None:
     ]
     cifar_resnet_tail_quality_best_tail_accuracy = cifar_resnet_tail_quality.loc[
         cifar_resnet_tail_quality["mean_tail_accuracy_before"].idxmax()
+    ]
+    cifar_resnet_imbalance_worst = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_imbalance_best_tail_accuracy = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["mean_tail_accuracy_before"].idxmax()
     ]
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
@@ -219,6 +226,25 @@ def main() -> None:
                 cifar_resnet_tail_quality_best_tail_accuracy["tail_accuracy_before_ci95_high"],
             )
             + "; tail-rich checkpoint control \\\\"
+        ),
+        (
+            "CIFAR-100-LT ResNet18 imbalance sweep & worst drift "
+            + ci(
+                cifar_resnet_imbalance_worst["geomean_tail_output_drift_sq_ratio_spectral_over_fro"],
+                cifar_resnet_imbalance_worst["tail_output_drift_sq_ratio_ci95_low"],
+                cifar_resnet_imbalance_worst["tail_output_drift_sq_ratio_ci95_high"],
+            )
+            + " at tail train/class "
+            + fmt(cifar_resnet_imbalance_worst["tail_train_per_class"])
+            + " & best pre-update tail accuracy "
+            + ci(
+                cifar_resnet_imbalance_best_tail_accuracy["mean_tail_accuracy_before"],
+                cifar_resnet_imbalance_best_tail_accuracy["tail_accuracy_before_ci95_low"],
+                cifar_resnet_imbalance_best_tail_accuracy["tail_accuracy_before_ci95_high"],
+            )
+            + " at tail train/class "
+            + fmt(cifar_resnet_imbalance_best_tail_accuracy["tail_train_per_class"])
+            + "; tail-loss evidence is mixed \\\\"
         ),
         (
             "CIFAR-100-LT ResNet18 all-layer JVP & observed "

@@ -48,6 +48,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
     )
+    cifar_resnet_imbalance_sweep = pd.read_csv(
+        "results/e11_cifar100_resnet_imbalance_sweep/pair_summary.csv"
+    )
     cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
@@ -81,6 +84,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
     )
+    resnet_imbalance_worst = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    resnet_imbalance_best_tail_accuracy = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["mean_tail_accuracy_before"].idxmax()
+    ]
     resnet_adam_ns = cifar_resnet_practical_bridge.loc[("adamw_matrix_trajectory", "ns_momentum")]
     resnet_muon_ns = cifar_resnet_practical_bridge.loc[("ns_muon_matrix_trajectory", "ns_momentum")]
     resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_scaled_jvp_ratio"]
@@ -287,6 +296,25 @@ def main() -> None:
                 ),
                 "how_to_read": "Every Conv/Linear matrix weight is probed by finite-difference JVP and layer-only matched-head-gain intervention at the tail-rich ResNet checkpoint.",
                 "caveat": "This is local mechanism evidence at one tail-rich checkpoint family, not a practical optimizer benchmark.",
+            },
+            {
+                "claim": "The CIFAR-100-LT ResNet18 local drift readout persists across explicit tail-count settings.",
+                "recommended_figure": link(
+                    "figures/e11_cifar100_resnet_imbalance_sweep/cifar100_resnet_imbalance_sweep.png"
+                ),
+                "source_data": link("results/e11_cifar100_resnet_imbalance_sweep/pair_summary.csv"),
+                "quantitative_anchor": (
+                    f"CIFAR-100-LT ResNet18 imbalance sweep: worst drift ratio="
+                    f"{fmt(resnet_imbalance_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{ci(resnet_imbalance_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')} "
+                    f"at tail_train_per_class={int(resnet_imbalance_worst['tail_train_per_class'])}; "
+                    f"best tail accuracy={fmt(resnet_imbalance_best_tail_accuracy['mean_tail_accuracy_before'])} "
+                    f"{ci(resnet_imbalance_best_tail_accuracy, 'tail_accuracy_before_ci95_low', 'tail_accuracy_before_ci95_high')} "
+                    f"at tail_train_per_class={int(resnet_imbalance_best_tail_accuracy['tail_train_per_class'])}; "
+                    f"settings={cifar_resnet_imbalance_sweep['tail_train_per_class'].nunique()}."
+                ),
+                "how_to_read": "The diagnostic holds head count fixed and sweeps tail examples per class, checking whether the matched-head-gain drift ratio remains below one as tail frequency changes.",
+                "caveat": "Tail-loss signs are mixed across settings, so this remains a local drift robustness check rather than a performance result.",
             },
             {
                 "claim": "The held-out checkpoint-transfer benchmark exposes a predictive boundary for the local JVP signal.",

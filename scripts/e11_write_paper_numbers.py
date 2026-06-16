@@ -93,6 +93,9 @@ def main() -> None:
     cifar_resnet_tail_quality = pd.read_csv(
         "results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv"
     )
+    cifar_resnet_imbalance_sweep = pd.read_csv(
+        "results/e11_cifar100_resnet_imbalance_sweep/pair_summary.csv"
+    )
     cifar_resnet_layer_jvp = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv"
     ).iloc[0]
@@ -234,6 +237,13 @@ def main() -> None:
     cifar_resnet_tail_quality_tail_accuracy_max = cifar_resnet_tail_quality[
         "mean_tail_accuracy_before"
     ].max()
+    cifar_resnet_imbalance_worst = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_imbalance_best_tail_accuracy = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["mean_tail_accuracy_before"].idxmax()
+    ]
+    cifar_resnet_imbalance_settings = int(cifar_resnet_imbalance_sweep["tail_train_per_class"].nunique())
     cifar_resnet_layer_jvp_worst_observed = cifar_resnet_layer_jvp_summary.loc[
         cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"].idxmax()
     ]
@@ -925,6 +935,51 @@ def main() -> None:
         macro(
             "EelevenCifarResNetTailQualityTailAccuracyRange",
             f"{fmt(cifar_resnet_tail_quality_tail_accuracy_min)}\\text{{ to }}{fmt(cifar_resnet_tail_quality_tail_accuracy_max)}",
+        ),
+        "",
+        "% CIFAR-100-LT ResNet18 imbalance sweep",
+        macro("EelevenCifarResNetImbalanceSweepSettings", cifar_resnet_imbalance_settings),
+        macro(
+            "EelevenCifarResNetImbalanceSweepWorstTailTrainPerClass",
+            int(cifar_resnet_imbalance_worst["tail_train_per_class"]),
+        ),
+        macro(
+            "EelevenCifarResNetImbalanceSweepWorstDriftRatio",
+            fmt(cifar_resnet_imbalance_worst["geomean_tail_output_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetImbalanceSweepWorstDriftRatio",
+            cifar_resnet_imbalance_worst,
+            "tail_output_drift_sq_ratio_ci95_low",
+            "tail_output_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetImbalanceSweepBestTailTrainPerClass",
+            int(cifar_resnet_imbalance_best_tail_accuracy["tail_train_per_class"]),
+        ),
+        macro(
+            "EelevenCifarResNetImbalanceSweepBestTailAccuracy",
+            fmt(cifar_resnet_imbalance_best_tail_accuracy["mean_tail_accuracy_before"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetImbalanceSweepBestTailAccuracy",
+            cifar_resnet_imbalance_best_tail_accuracy,
+            "tail_accuracy_before_ci95_low",
+            "tail_accuracy_before_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetImbalanceSweepBestTailDriftRatio",
+            fmt(
+                cifar_resnet_imbalance_best_tail_accuracy[
+                    "geomean_tail_output_drift_sq_ratio_spectral_over_fro"
+                ]
+            ),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetImbalanceSweepBestTailDriftRatio",
+            cifar_resnet_imbalance_best_tail_accuracy,
+            "tail_output_drift_sq_ratio_ci95_low",
+            "tail_output_drift_sq_ratio_ci95_high",
         ),
         macro("EelevenCifarResNetLayerJvpSeeds", int(cifar_resnet_layer_jvp["seeds"])),
         macro("EelevenCifarResNetLayerJvpParameters", int(cifar_resnet_layer_jvp["parameters"])),

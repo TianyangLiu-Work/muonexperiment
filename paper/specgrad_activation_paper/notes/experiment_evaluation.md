@@ -34,6 +34,7 @@ condition is
 | CIFAR-100-LT ResNet18 rank-proxy scatter | completed | Across 40 seed/checkpoint points, mean matrix-gradient nuclear rank has positive correlation with log squared drift ratio, Pearson `0.7594 [0.6657, 0.8807]`. | This is a useful caveat, not a positive predictor: it shows `nrank(G_H)` alone is not a replacement for downstream-aware tail sensitivity. |
 | CIFAR-100-LT ResNet18 final-layer condition scatter | completed | Across 40 seed/checkpoint points for `fc.weight`, weakest mean `nrank(G_H) / srank(H_T)` is `6.566`, all points favor spectral, and the worst final-layer-only squared drift ratio is `0.2391 [0.2201, 0.2597]`. | This is closer to the theorem than the rank-only proxy, but it is only the classifier layer. |
 | CIFAR-100 ResNet18 tail-quality control | completed | With 300 tail-train examples per class, best pre-update tail accuracy rises to `0.3739 [0.3454, 0.4024]`, while the worst squared drift ratio remains below 1 at `0.7292 [0.6923, 0.768]`. | This weakens the weak-tail-predictor objection, but it is a tail-rich local control rather than a standard long-tail benchmark or practical optimizer result. |
+| CIFAR-100-LT ResNet18 imbalance sweep | completed | Sweeping tail_train_per_class 10/30/100/300 keeps spectral/Frobenius squared drift-ratio CI upper endpoints below 1; the worst endpoint is `0.936` at tail_train_per_class=100, and best tail accuracy is `0.3297 [0.2954, 0.3639]` at tail_train_per_class=300. | This converts the local ResNet split into a systematic tail-count check, but tail-loss signs are mixed and it remains a local diagnostic rather than a benchmark result. |
 | CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic | completed | At the tail-rich 5000-step checkpoint, 21 Conv/Linear weights and 210 paired layer/seed points give observed squared drift ratio `0.2011 [0.1845, 0.2192]` and scaled-JVP ratio `0.065 [0.06008, 0.07031]`; every per-layer observed CI upper endpoint is below 1. | This closes the classifier-only mechanism gap locally, but it is still a finite-difference one-step diagnostic rather than a standard long-tail optimizer benchmark or held-out predictor. |
 | CIFAR-100-LT ResNet18 all-layer JVP checkpoint transfer | completed | Across tail-rich 2000/5000/10000-step checkpoints, scaled-JVP below-one threshold accuracy is `1`, while held-out layer-risk Spearman is `-0.3203 [-0.3562, -0.2845]`. | This is useful negative evidence: the current local score transfers the below-one direction but is not a positive cross-checkpoint layer-risk predictor. |
 | CIFAR-100-LT ResNet18 standard many/medium/few reporting | completed | IF=100 AdamW ResNet18 gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]` over 10 seeds. | This is a standard reporting baseline, not a tuned optimizer benchmark, augmentation study, or Muon comparison. |
@@ -57,6 +58,7 @@ condition is
 - CIFAR-100-LT ResNet18 rank-proxy scatter results: `results/e11_cifar100_resnet_condition_proxy_scatter/`.
 - CIFAR-100-LT ResNet18 final-layer condition results: `results/e11_cifar100_resnet_fc_condition_scatter/`.
 - CIFAR-100 ResNet18 tail-quality control results: `results/e11_cifar100_resnet_tail_quality_control/`.
+- CIFAR-100-LT ResNet18 imbalance sweep results: `results/e11_cifar100_resnet_imbalance_sweep/`.
 - CIFAR-100-LT ResNet18 all-layer JVP tail-quality results: `results/e11_cifar100_resnet_layer_jvp_tail_quality/`.
 - CIFAR-100-LT ResNet18 all-layer JVP checkpoint-transfer results: `results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/`.
 - CIFAR-100-LT ResNet18 standard reporting results: `results/e11_cifar100_resnet_lt_standard_eval/`.
@@ -72,6 +74,7 @@ condition is
 - Discussion notes:
   - `discussion/e11_head_tail_interference.md`
   - `discussion/e11_long_tail_one_step.md`
+  - `discussion/e11_cifar100_resnet_imbalance_sweep.md`
   - `discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md`
   - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
   - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
@@ -107,7 +110,7 @@ condition is
 - Do not claim lower tail-example logit drift automatically implies lower tail loss,
   better tail margin, or higher tail accuracy.
 - Do not claim the new CIFAR-100-LT ResNet18 one-step diagnostic or standard
-  reporting baseline, augmented recipe pilot, or negative NS-Muon final pilot
+  reporting baseline, tail-count imbalance sweep, augmented recipe pilot, or negative NS-Muon final pilot
   is sufficient for ImageNet-LT, iNaturalist, or a tuned long-tail optimizer
   benchmark claim.
 - Do not claim the small fixed-hyperparameter practical run is a full Muon
@@ -117,8 +120,8 @@ condition is
 
 1. **Standard real long-tail benchmark.** A CIFAR-100-LT IF=100 ResNet18
    many/medium/few reporting baseline, a 5-seed augmented
-   AdamW/class-balanced/SGD pilot, and a 3-seed negative NS-Muon final-training
-   pilot now exist, but the paper still needs a wider tuning grid,
+   AdamW/class-balanced/SGD pilot, a 3-seed negative NS-Muon final-training
+   pilot, and a 4-setting local tail-count imbalance sweep now exist, but the paper still needs a wider tuning grid,
    class-balanced samplers, better Muon schedules, and
    ImageNet-LT/iNaturalist-style protocols if it wants
    benchmark-level empirical claims. Required outputs: matched head loss
@@ -147,6 +150,7 @@ condition is
 The current draft is viable as a focused theory-and-diagnostic paper about
 head-to-tail function drift, now with a CIFAR-100-LT ResNet18 architecture
 robustness check, a standard CIFAR-100-LT reporting baseline, and an augmented
-recipe benchmark pilot, plus a negative NS-Muon final-training pilot. It is
+recipe benchmark pilot, plus a local tail-count imbalance sweep and a negative
+NS-Muon final-training pilot. It is
 not yet viable as a broad empirical claim about long-tailed classification
 performance or Muon's full training behavior.

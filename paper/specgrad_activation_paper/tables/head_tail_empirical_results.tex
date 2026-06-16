@@ -15,6 +15,7 @@ CIFAR-100-LT ResNet18 one-step & 0.5611 [0.5224, 0.6026] & tail loss diff = -4.2
 CIFAR-100-LT ResNet18 checkpoint sweep & worst drift 0.5611 [0.5224, 0.6026] at 1.00e+03 steps & best pre-update tail accuracy 0.068 at 1.00e+03 steps; still weak-tail-predictor evidence \\
 CIFAR-100-LT ResNet18 final-layer condition & worst drift 0.2391 [0.2201, 0.2597] at 5.00e+02 steps & weakest mean nrank/srank score 6.566; final-layer-only downstream-aware check \\
 CIFAR-100 ResNet18 tail-quality control & worst drift 0.7292 [0.6923, 0.768] & best pre-update tail accuracy 0.3739 [0.3454, 0.4024]; tail-rich checkpoint control \\
+CIFAR-100-LT ResNet18 imbalance sweep & worst drift 0.6075 [0.3943, 0.936] at tail train/class 1.00e+02 & best pre-update tail accuracy 0.3297 [0.2954, 0.3639] at tail train/class 3.00e+02; tail-loss evidence is mixed \\
 CIFAR-100-LT ResNet18 all-layer JVP & observed 0.2011 [0.1845, 0.2192]; scaled JVP 0.065 [0.06008, 0.07031] & 21/21 layer CI upper endpoints below 1; tail-rich local JVP diagnostic \\
 CIFAR-100-LT ResNet18 checkpoint-transfer JVP & scaled-JVP threshold accuracy 1; held-out Spearman -0.3203 [-0.3562, -0.2845] & 6 directed checkpoint-transfer pairs; layer ranking does not transfer \\
 CIFAR-100-LT ResNet18 standard reporting & many/medium/few balanced acc. 0.3665 [0.3489, 0.3841] / 0.1036 [0.09138, 0.1158] / 0.0129 [0.009351, 0.01645] & IF=100 AdamW ResNet18 reporting baseline; no augmentation, tuning, or Muon comparison \\

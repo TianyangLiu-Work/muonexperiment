@@ -33,6 +33,9 @@ def main() -> None:
         "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
     )
     cifar_resnet_tail_quality = pd.read_csv("results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv")
+    cifar_resnet_imbalance_sweep = pd.read_csv(
+        "results/e11_cifar100_resnet_imbalance_sweep/pair_summary.csv"
+    )
     cifar_resnet_layer_jvp = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv"
     ).iloc[0]
@@ -92,6 +95,12 @@ def main() -> None:
     cifar_resnet_tail_quality_best_tail_accuracy = cifar_resnet_tail_quality.loc[
         cifar_resnet_tail_quality["mean_tail_accuracy_before"].idxmax()
     ]
+    cifar_resnet_imbalance_worst = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_imbalance_best_tail_accuracy = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["mean_tail_accuracy_before"].idxmax()
+    ]
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
     )
@@ -141,6 +150,14 @@ def main() -> None:
                     f"and keeps worst squared drift ratio at "
                     f"{fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(cifar_resnet_tail_quality_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"the CIFAR-100-LT ResNet18 imbalance sweep covers "
+                    f"{int(cifar_resnet_imbalance_sweep['tail_train_per_class'].nunique())} tail-count settings, "
+                    f"with worst squared drift ratio "
+                    f"{fmt(cifar_resnet_imbalance_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_imbalance_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')} "
+                    f"and best pre-update tail accuracy "
+                    f"{fmt(cifar_resnet_imbalance_best_tail_accuracy['mean_tail_accuracy_before'])} "
+                    f"CI={interval(cifar_resnet_imbalance_best_tail_accuracy, 'tail_accuracy_before_ci95_low', 'tail_accuracy_before_ci95_high')}; "
                     f"the all-layer JVP tail-quality diagnostic gives observed squared drift ratio "
                     f"{fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(cifar_resnet_layer_jvp, 'observed_tail_drift_sq_ratio_ci95_low', 'observed_tail_drift_sq_ratio_ci95_high')}; "
@@ -249,6 +266,9 @@ def main() -> None:
                     f"A tail-rich control reaches tail accuracy="
                     f"{fmt(cifar_resnet_tail_quality_best_tail_accuracy['mean_tail_accuracy_before'])} "
                     f"and worst drift ratio={fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
+                    f"The CIFAR-100-LT ResNet18 imbalance sweep adds four explicit tail-count settings with worst drift CI upper endpoint "
+                    f"{fmt(cifar_resnet_imbalance_worst['tail_output_drift_sq_ratio_ci95_high'])} and best tail accuracy "
+                    f"{fmt(cifar_resnet_imbalance_best_tail_accuracy['mean_tail_accuracy_before'])}. "
                     f"The all-layer JVP diagnostic adds observed ratio="
                     f"{fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])} "
                     f"over {int(cifar_resnet_layer_jvp['paired_points'])} layer/seed pairs. "
@@ -341,6 +361,7 @@ This generated audit lists likely reviewer objections for the current head-to-ta
 - [CIFAR-100-LT ResNet18 condition-proxy scatter](e11_cifar100_resnet_condition_proxy_scatter.md)
 - [CIFAR-100-LT ResNet18 final-layer condition scatter](e11_cifar100_resnet_fc_condition_scatter.md)
 - [CIFAR-100 ResNet18 tail-quality control](e11_cifar100_resnet_tail_quality_control.md)
+- [CIFAR-100-LT ResNet18 imbalance sweep](e11_cifar100_resnet_imbalance_sweep.md)
 - [CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic](e11_cifar100_resnet_layer_jvp_tail_quality.md)
 - [CIFAR-100-LT ResNet18 standard many/medium/few evaluation](e11_cifar100_resnet_lt_standard_eval.md)
 - [CIFAR-100-LT ResNet18 recipe benchmark pilot](e11_cifar100_resnet_lt_recipe_benchmark.md)

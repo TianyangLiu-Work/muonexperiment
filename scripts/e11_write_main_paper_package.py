@@ -30,6 +30,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_imbalance_sweep = pd.read_csv(
+        "results/e11_cifar100_resnet_imbalance_sweep/pair_summary.csv"
+    )
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -55,6 +58,12 @@ def main() -> None:
     resnet_adam_ns = cifar_resnet_practical_bridge.loc[("adamw_matrix_trajectory", "ns_momentum")]
     resnet_muon_ns = cifar_resnet_practical_bridge.loc[("ns_muon_matrix_trajectory", "ns_momentum")]
     resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_scaled_jvp_ratio"]
+    resnet_imbalance_worst = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    resnet_imbalance_best_tail_accuracy = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["mean_tail_accuracy_before"].idxmax()
+    ]
     resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
@@ -191,6 +200,21 @@ def main() -> None:
                 ),
             },
             {"artifact": "discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md", "role": "Markdown summary and CSV links for the held-out checkpoint-transfer JVP benchmark."},
+            {
+                "artifact": "figures/e11_cifar100_resnet_imbalance_sweep/cifar100_resnet_imbalance_sweep.png",
+                "role": (
+                    "Appendix CIFAR-100-LT ResNet18 tail-count imbalance sweep over "
+                    f"{int(cifar_resnet_imbalance_sweep['tail_train_per_class'].nunique())} settings; "
+                    f"worst drift ratio is "
+                    f"{fmt(resnet_imbalance_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{interval(resnet_imbalance_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')} "
+                    f"at tail_train_per_class={int(resnet_imbalance_worst['tail_train_per_class'])}, "
+                    f"and best tail accuracy is {fmt(resnet_imbalance_best_tail_accuracy['mean_tail_accuracy_before'])} "
+                    f"{interval(resnet_imbalance_best_tail_accuracy, 'tail_accuracy_before_ci95_low', 'tail_accuracy_before_ci95_high')}; "
+                    "tail-loss signs are mixed, so this remains local drift robustness evidence."
+                ),
+            },
+            {"artifact": "discussion/e11_cifar100_resnet_imbalance_sweep.md", "role": "Markdown summary and CSV links for the CIFAR-100-LT ResNet18 tail-count imbalance sweep."},
             {
                 "artifact": "figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png",
                 "role": (

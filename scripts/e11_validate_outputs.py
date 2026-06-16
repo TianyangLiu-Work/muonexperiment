@@ -577,6 +577,12 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_tail_quality_control") / "config.json",
         Path("figures/e11_cifar100_resnet_tail_quality_control") / "cifar100_resnet_checkpoint_sweep.png",
         Path("discussion/e11_cifar100_resnet_tail_quality_control.md"),
+        Path("results/e11_cifar100_resnet_imbalance_sweep") / "step_metrics.csv",
+        Path("results/e11_cifar100_resnet_imbalance_sweep") / "pair_summary.csv",
+        Path("results/e11_cifar100_resnet_imbalance_sweep") / "layer_metrics.csv",
+        Path("results/e11_cifar100_resnet_imbalance_sweep") / "config.json",
+        Path("figures/e11_cifar100_resnet_imbalance_sweep") / "cifar100_resnet_imbalance_sweep.png",
+        Path("discussion/e11_cifar100_resnet_imbalance_sweep.md"),
         Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "metrics.csv",
         Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "paired_metrics.csv",
         Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "summary.csv",
@@ -684,6 +690,7 @@ def main() -> None:
         Path("paper/specgrad_activation_paper/figures") / "long_tail_layerwise_drift.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_tail_quality.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_imbalance_sweep.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_standard_eval.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_recipe_benchmark.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_muon_final_benchmark.png",
@@ -729,6 +736,7 @@ def main() -> None:
         "e11-paper-assets:",
         "scripts/e11_write_all_discussion_artifacts.py",
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
+        "e11-cifar-resnet-imbalance-sweep-results:",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -779,6 +787,7 @@ def main() -> None:
         "Unit-direction spectral JVP is larger than Frobenius in both layers",
         "make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downstream-aware condition diagnostic via Slurm",
         "make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm",
+        "make e11-cifar-resnet-imbalance-sweep-results # submit the CIFAR-100-LT ResNet18 tail-count imbalance sweep via Slurm",
         "make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm",
         "make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results # submit the all-layer ResNet JVP checkpoint-transfer benchmark via Slurm",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
@@ -786,6 +795,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
         "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
+        "A CIFAR-100-LT ResNet18 imbalance sweep over tail_train_per_class 10/30/100/300 keeps spectral/Frobenius squared drift ratio below 1 in every setting",
         "An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points",
         "An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs",
         "A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`",
@@ -892,6 +902,7 @@ def main() -> None:
         "local function-drift reduction",
         "final-layer-only ResNet condition diagnostic",
         "tail-rich checkpoint-quality control",
+        "tail-count sweep",
         "tail-example logit drift means the drift of the full class-logit vector",
         "not restricted to logits of tail classes only",
         "Sandwiched sensitivity",
@@ -1006,6 +1017,7 @@ def main() -> None:
         "\\label{fig:long-tail-layerwise}",
         "\\label{fig:cifar-resnet-practical-muon-bridge}",
         "\\label{fig:cifar-resnet-lt-muon-final-benchmark}",
+        "\\label{fig:cifar-resnet-imbalance-sweep}",
         "figures/head_tail_drift_ratio.png",
         "figures/head_tail_alignment_ablation.png",
         "figures/long_tail_one_step_tail_response.png",
@@ -1018,6 +1030,7 @@ def main() -> None:
         "figures/long_tail_head_only_forgetting.png",
         "figures/long_tail_layerwise_drift.png",
         "figures/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        "figures/cifar100_resnet_imbalance_sweep.png",
         "figures/cifar100_resnet_lt_standard_eval.png",
         "figures/cifar100_resnet_lt_recipe_benchmark.png",
         "figures/cifar100_resnet_lt_muon_final_benchmark.png",
@@ -1314,6 +1327,7 @@ def main() -> None:
         "long_tail_layerwise_drift.png",
         "cifar100_resnet_layer_jvp_tail_quality.png",
         "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        "cifar100_resnet_imbalance_sweep.png",
         "cifar100_resnet_lt_standard_eval.png",
         "cifar100_resnet_lt_recipe_benchmark.png",
         "cifar100_resnet_lt_muon_final_benchmark.png",
@@ -1948,6 +1962,70 @@ def main() -> None:
     ):
         raise AssertionError(
             "CIFAR-100 ResNet18 tail-quality control must preserve lower drift and the non-performance caveat"
+        )
+    imbalance_sweep_dir = Path("results/e11_cifar100_resnet_imbalance_sweep")
+    cifar_resnet_imbalance_steps = pd.read_csv(imbalance_sweep_dir / "step_metrics.csv")
+    cifar_resnet_imbalance_summary = pd.read_csv(imbalance_sweep_dir / "pair_summary.csv")
+    cifar_resnet_imbalance_layers = pd.read_csv(imbalance_sweep_dir / "layer_metrics.csv")
+    cifar_resnet_imbalance_config = json.loads((imbalance_sweep_dir / "config.json").read_text())
+    expected_resnet_imbalance_tail_counts = {10, 30, 100, 300}
+    if (
+        len(cifar_resnet_imbalance_steps) != 24
+        or len(cifar_resnet_imbalance_summary) != 4
+        or len(cifar_resnet_imbalance_layers) != 504
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 imbalance sweep must contain 4 tail counts x 3 seeds x 2 geometries"
+        )
+    if not (
+        set(cifar_resnet_imbalance_steps["tail_train_per_class"]) == expected_resnet_imbalance_tail_counts
+        and set(cifar_resnet_imbalance_summary["tail_train_per_class"]) == expected_resnet_imbalance_tail_counts
+        and set(cifar_resnet_imbalance_layers["tail_train_per_class"]) == expected_resnet_imbalance_tail_counts
+        and set(cifar_resnet_imbalance_steps["geometry"]) == {"frobenius", "spectral"}
+        and cifar_resnet_imbalance_steps["seed"].nunique() == 3
+        and (cifar_resnet_imbalance_summary["seeds"] == 3).all()
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 imbalance sweep must cover four tail counts, 3 seeds, and both geometries"
+        )
+    base_imbalance_config = cifar_resnet_imbalance_config["base_config"]
+    if (
+        base_imbalance_config["device"] != "cuda"
+        or base_imbalance_config["download"]
+        or abs(float(base_imbalance_config["target_head_gain_fraction"]) - 0.005) > 1e-12
+        or len(base_imbalance_config["seeds"]) != 3
+        or int(base_imbalance_config["head_train_per_class"]) != 300
+        or int(base_imbalance_config["tail_eval_per_class"]) != 40
+        or int(base_imbalance_config["warmup_steps"]) != 1000
+        or set(cifar_resnet_imbalance_config["tail_train_per_class"])
+        != expected_resnet_imbalance_tail_counts
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 imbalance sweep should be the formal 3-seed Slurm/GPU no-download run"
+        )
+    imbalance_worst = cifar_resnet_imbalance_summary.loc[
+        cifar_resnet_imbalance_summary["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    imbalance_tail300 = cifar_resnet_imbalance_summary[
+        cifar_resnet_imbalance_summary["tail_train_per_class"].eq(300)
+    ].iloc[0]
+    imbalance_tail10 = cifar_resnet_imbalance_summary[
+        cifar_resnet_imbalance_summary["tail_train_per_class"].eq(10)
+    ].iloc[0]
+    imbalance_tail30 = cifar_resnet_imbalance_summary[
+        cifar_resnet_imbalance_summary["tail_train_per_class"].eq(30)
+    ].iloc[0]
+    if not (
+        (cifar_resnet_imbalance_summary["spectral_less_tail_output_drift_fraction"] == 1.0).all()
+        and (cifar_resnet_imbalance_summary["tail_output_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and 0.90 <= float(imbalance_worst["tail_output_drift_sq_ratio_ci95_high"]) <= 0.95
+        and 0.32 <= float(imbalance_tail300["mean_tail_accuracy_before"]) <= 0.34
+        and 0.35 <= float(imbalance_tail300["geomean_tail_output_drift_sq_ratio_spectral_over_fro"]) <= 0.45
+        and 0.50 <= float(imbalance_tail10["geomean_tail_output_drift_sq_ratio_spectral_over_fro"]) <= 0.56
+        and 0.50 <= float(imbalance_tail30["geomean_tail_output_drift_sq_ratio_spectral_over_fro"]) <= 0.56
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 imbalance sweep must preserve lower drift across tail-count settings"
         )
     cifar_resnet_layer_jvp_metrics = pd.read_csv(
         Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "metrics.csv"
@@ -2803,6 +2881,7 @@ def main() -> None:
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
         "figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png",
         "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        "figures/e11_cifar100_resnet_imbalance_sweep/cifar100_resnet_imbalance_sweep.png",
         "figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png",
         "figures/e11_cifar100_resnet_lt_recipe_benchmark/cifar100_resnet_lt_recipe_benchmark.png",
         "figures/e11_cifar100_resnet_lt_muon_final_benchmark/cifar100_resnet_lt_recipe_benchmark.png",
@@ -2961,6 +3040,11 @@ def main() -> None:
         "\\EelevenCifarResNetTailQualityWorstDriftRatio",
         "\\EelevenCifarResNetTailQualityBestTailAccuracy",
         "\\EelevenCifarResNetTailQualityTailAccuracyRange",
+        "\\EelevenCifarResNetImbalanceSweepSettings",
+        "\\EelevenCifarResNetImbalanceSweepWorstTailTrainPerClass",
+        "\\EelevenCifarResNetImbalanceSweepWorstDriftRatio",
+        "\\EelevenCifarResNetImbalanceSweepBestTailAccuracy",
+        "\\EelevenCifarResNetImbalanceSweepBestTailDriftRatio",
         "\\EelevenCifarResNetLayerJvpSeeds",
         "\\EelevenCifarResNetLayerJvpParameters",
         "\\EelevenCifarResNetLayerJvpPairedPoints",
@@ -3087,6 +3171,8 @@ def main() -> None:
         r"\EelevenCifarResNetFcConditionFavorsSpectralFraction",
         r"\EelevenCifarResNetTailQualityWorstDriftRatio",
         r"\EelevenCifarResNetTailQualityBestTailAccuracy",
+        r"\EelevenCifarResNetImbalanceSweepWorstDriftRatio",
+        r"\EelevenCifarResNetImbalanceSweepBestTailAccuracy",
         r"\EelevenCifarResNetLayerJvpObservedRatio",
         r"\EelevenCifarResNetLayerJvpScaledRatio",
         r"\EelevenCifarResNetLtMuonFinalAdamwAllBalancedAccuracy",
@@ -3135,6 +3221,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-proxy-results",
         "make e11-cifar-resnet-fc-condition-results",
         "make e11-cifar-resnet-tail-quality-results",
+        "make e11-cifar-resnet-imbalance-sweep-results",
         "make e11-cifar-resnet-layer-jvp-tail-quality-results",
         "make e11-cifar-resnet-practical-muon-bridge-results",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results",
@@ -3157,6 +3244,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 condition-proxy scatter",
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
         "CIFAR-100 ResNet18 tail-quality control",
+        "CIFAR-100-LT ResNet18 imbalance sweep",
         "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
         "CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot",
         "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
@@ -3184,6 +3272,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 condition-proxy scatter",
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
         "CIFAR-100 ResNet18 tail-quality control",
+        "CIFAR-100-LT ResNet18 imbalance sweep",
         "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
         "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
         "Long-tailed practical training diagnostic",
@@ -3337,6 +3426,7 @@ def main() -> None:
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
         "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
         "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        "figures/e11_cifar100_resnet_imbalance_sweep/cifar100_resnet_imbalance_sweep.png",
         "squared drift ratio=0.5501",
         "head-alignment ratio=2.083",
         "Frobenius-norm ratio=3.112",
@@ -3345,6 +3435,10 @@ def main() -> None:
         "trajectory NS(M_t) squared drift ratio=0.8019",
         "scaled-JVP threshold accuracy=1",
         "scaled-JVP held-out Spearman=-0.3203",
+        "CIFAR-100-LT ResNet18 imbalance sweep",
+        "worst drift ratio=0.6075",
+        "tail_train_per_class=100",
+        "best tail accuracy=0.3297",
         "many balanced accuracy=0.3665",
         "medium=0.1036",
         "few=0.0129",
@@ -3412,6 +3506,7 @@ def main() -> None:
         "operator-norm ratio=0.5543",
         "final-layer ResNet condition scatter",
         "tail-rich control",
+        "CIFAR-100-LT ResNet18 imbalance sweep",
         "all-layer ResNet JVP",
     ]
     missing_claim_validity = [phrase for phrase in required_claim_validity_phrases if phrase not in claim_validity]
@@ -3427,6 +3522,7 @@ def main() -> None:
         "Larger-architecture layerwise diagnostic",
         "final-layer condition scatter",
         "tail-rich ResNet control",
+        "tail-count imbalance sweep",
         "all-layer ResNet JVP",
         "lower tail-example logit drift automatically improves",
         "Head-to-Tail Interference in Long-Tailed Small-Batch Training",
@@ -3449,6 +3545,7 @@ def main() -> None:
         "Tail-quality control",
         "tail-quality control",
         "Long-tail imbalance sweep",
+        "CIFAR-100-LT ResNet18 imbalance sweep",
         "Practical optimizer bridge on CIFAR-100-LT",
         "NS-Muon final-training pilot",
         "Acceptance Gates",
@@ -3470,6 +3567,7 @@ def main() -> None:
         or "make e11-cifar-resnet-rho002-results" not in readme
         or "make e11-cifar-resnet-checkpoint-sweep-results" not in readme
         or "make e11-cifar-resnet-condition-proxy-results" not in readme
+        or "make e11-cifar-resnet-imbalance-sweep-results" not in readme
         or "make e11-cifar-resnet-layer-jvp-tail-quality-results" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme

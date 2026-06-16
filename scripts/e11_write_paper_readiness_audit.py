@@ -40,6 +40,9 @@ def main() -> None:
         "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
     )
     cifar_resnet_tail_quality = pd.read_csv("results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv")
+    cifar_resnet_imbalance_sweep = pd.read_csv(
+        "results/e11_cifar100_resnet_imbalance_sweep/pair_summary.csv"
+    )
     cifar_resnet_layer_jvp = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv"
     ).iloc[0]
@@ -109,6 +112,12 @@ def main() -> None:
     cifar_resnet_tail_quality_best_tail_accuracy = cifar_resnet_tail_quality.loc[
         cifar_resnet_tail_quality["mean_tail_accuracy_before"].idxmax()
     ]
+    cifar_resnet_imbalance_worst = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_imbalance_best_tail_accuracy = cifar_resnet_imbalance_sweep.loc[
+        cifar_resnet_imbalance_sweep["mean_tail_accuracy_before"].idxmax()
+    ]
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
     )
@@ -163,6 +172,14 @@ def main() -> None:
                     f"while preserving worst squared drift ratio "
                     f"{fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(cifar_resnet_tail_quality_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
+                    f"A CIFAR-100-LT ResNet18 imbalance sweep over "
+                    f"{int(cifar_resnet_imbalance_sweep['tail_train_per_class'].nunique())} tail-count settings has worst squared drift ratio "
+                    f"{fmt(cifar_resnet_imbalance_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_imbalance_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')} "
+                    f"at tail_train_per_class={int(cifar_resnet_imbalance_worst['tail_train_per_class'])}, "
+                    f"and best pre-update tail accuracy "
+                    f"{fmt(cifar_resnet_imbalance_best_tail_accuracy['mean_tail_accuracy_before'])} "
+                    f"CI={interval(cifar_resnet_imbalance_best_tail_accuracy, 'tail_accuracy_before_ci95_low', 'tail_accuracy_before_ci95_high')}. "
                     f"The all-layer ResNet JVP diagnostic at the tail-rich checkpoint gives observed squared drift ratio "
                     f"{fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(cifar_resnet_layer_jvp, 'observed_tail_drift_sq_ratio_ci95_low', 'observed_tail_drift_sq_ratio_ci95_high')} "
@@ -211,10 +228,12 @@ def main() -> None:
                     f"CI={interval(cifar_resnet_checkpoint_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
                     f"best pre-update tail accuracy={fmt(cifar_resnet_checkpoint_best_tail_accuracy['mean_tail_accuracy_before'])}; "
                     f"tail-rich control best pre-update tail accuracy={fmt(cifar_resnet_tail_quality_best_tail_accuracy['mean_tail_accuracy_before'])}; "
+                    f"tail-count imbalance sweep worst drift CI upper endpoint={fmt(cifar_resnet_imbalance_worst['tail_output_drift_sq_ratio_ci95_high'])}; "
+                    f"best sweep tail accuracy={fmt(cifar_resnet_imbalance_best_tail_accuracy['mean_tail_accuracy_before'])}; "
                     f"all-layer JVP observed ratio={fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}."
                 ),
-                "why_it_is_ready": "It was rerun on GPU with a convolutional architecture, a CIFAR-100-LT split, two target gains, a warmup-checkpoint sweep, and a tail-rich checkpoint-quality control.",
-                "remaining_risk": "Still a one-step local intervention; BatchNorm/bias are frozen during the diagnostic. The new standard many/medium/few run is a reporting baseline, not a tuned long-tailed optimizer benchmark.",
+                "why_it_is_ready": "It was rerun on GPU with a convolutional architecture, a CIFAR-100-LT split, two target gains, a warmup-checkpoint sweep, a tail-rich checkpoint-quality control, and an explicit tail-count imbalance sweep.",
+                "remaining_risk": "Still a one-step local intervention; BatchNorm/bias are frozen during the diagnostic. The new standard many/medium/few run is a reporting baseline, not a tuned long-tailed optimizer benchmark, and the imbalance sweep has mixed tail-loss signs.",
             },
             {
                 "claim": "The condition nrank(G_H) > ssrank(B_T,A_T) is a useful mechanism boundary.",
@@ -332,7 +351,7 @@ def main() -> None:
             },
             {
                 "section": "Evidence",
-                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain, checkpoint-sweep, tail-quality, rank-proxy, final-layer condition, all-layer JVP checks, standard many/medium/few reporting, augmented recipe benchmark pilot, negative NS-Muon final-training pilot, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
+                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain, checkpoint-sweep, tail-quality, tail-count imbalance sweep, rank-proxy, final-layer condition, all-layer JVP checks, standard many/medium/few reporting, augmented recipe benchmark pilot, negative NS-Muon final-training pilot, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
             },
             {
                 "section": "Boundary",
@@ -347,7 +366,7 @@ def main() -> None:
                 "priority": "partly complete; extend for stronger empirical paper",
                 "experiment": "Real long-tail benchmark",
                 "purpose": "Test whether matched-head-gain tail drift reduction appears beyond scikit-learn digits.",
-                "minimum_standard": "The CIFAR-100-LT IF=100 ResNet18 many/medium/few reporting baseline, a 5-seed augmented AdamW/class-balanced/SGD pilot, and a 3-seed negative NS-Muon final-training pilot are now present; strengthen further with a wider hyperparameter grid, class-balanced samplers, better Muon schedules, and ImageNet-LT/iNaturalist-style protocols.",
+                "minimum_standard": "The CIFAR-100-LT IF=100 ResNet18 many/medium/few reporting baseline, a 5-seed augmented AdamW/class-balanced/SGD pilot, a 3-seed negative NS-Muon final-training pilot, and a local 4-setting tail-count imbalance sweep are now present; strengthen further with a wider hyperparameter grid, class-balanced samplers, better Muon schedules, and ImageNet-LT/iNaturalist-style protocols.",
             },
             {
                 "priority": "must-have for full empirical optimizer claim",
@@ -419,6 +438,7 @@ In long-tailed small-batch training, head-only updates can perturb held-out tail
 - [long-tailed layerwise diagnostic](e11_long_tail_layerwise.md)
 - [CIFAR-100-LT ResNet18 final-layer condition scatter](e11_cifar100_resnet_fc_condition_scatter.md)
 - [CIFAR-100 ResNet18 tail-quality control](e11_cifar100_resnet_tail_quality_control.md)
+- [CIFAR-100-LT ResNet18 imbalance sweep](e11_cifar100_resnet_imbalance_sweep.md)
 - [CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic](e11_cifar100_resnet_layer_jvp_tail_quality.md)
 - [CIFAR-100-LT ResNet18 all-layer JVP checkpoint-transfer benchmark](e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md)
 - [CIFAR-100-LT ResNet18 standard many/medium/few evaluation](e11_cifar100_resnet_lt_standard_eval.md)

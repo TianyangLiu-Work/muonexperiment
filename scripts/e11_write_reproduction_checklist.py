@@ -28,6 +28,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 condition-proxy scatter",
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
         "CIFAR-100 ResNet18 tail-quality control",
+        "CIFAR-100-LT ResNet18 imbalance sweep",
         "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
         "CIFAR-100-LT ResNet18 NS-Muon final-training pilot",
         "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
@@ -92,6 +93,7 @@ make e11-cifar-resnet-checkpoint-sweep-results # submit the top-conference ResNe
 make e11-cifar-resnet-condition-proxy-results # regenerate the ResNet rank-proxy scatter from checkpoint-sweep CSVs
 make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downstream-aware condition diagnostic via Slurm
 make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm
+make e11-cifar-resnet-imbalance-sweep-results # submit the CIFAR-100-LT ResNet18 tail-count imbalance sweep via Slurm
 make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm
 make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm
 make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practical Muon/AdamW trajectory bridge via Slurm
