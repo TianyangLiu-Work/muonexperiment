@@ -21,10 +21,13 @@ if str(ROOT) not in sys.path:
 from e11_condition_geometry.cifar100_resnet_tail import (
     Cifar100ResNetOneStepConfig,
     batch,
-    build_cifar_resnet18,
+    build_cifar_resnet_model,
+    dataset_display_name,
     dtype_from_name,
     full_metrics,
     matrix_named_parameters,
+    model_display_name,
+    normalized_dataset_name,
     resolve_device,
     split_long_tail_cifar100,
     train_checkpoint,
@@ -150,7 +153,7 @@ def run_layer_jvp_probe(
         torch.manual_seed(seed + 33000)
         if device.type == "cuda":
             torch.cuda.manual_seed_all(seed + 33000)
-        model = build_cifar_resnet18(device=device, dtype=dtype)
+        model = build_cifar_resnet_model(config, device=device, dtype=dtype)
         if progress:
             print(f"[resnet-layer-jvp] seed={seed}: training {config.warmup_steps} warmup steps", flush=True)
         train_checkpoint(model, train_x, train_y, train_indices, config, seed=seed)
@@ -201,8 +204,8 @@ def run_layer_jvp_probe(
                     {
                         "seed": int(seed),
                         "geometry": geometry,
-                        "dataset": "CIFAR100",
-                        "model": "resnet18_cifar_stem",
+                        "dataset": normalized_dataset_name(config.dataset_name),
+                        "model": f"{config.model_arch.lower()}_cifar_stem",
                         "updated_parameter_subset": "single_matrix_weight",
                         "layer_index": int(profile["layer_index"]),
                         "parameter": str(profile["parameter"]),
@@ -478,7 +481,7 @@ def write_figure(summary: pd.DataFrame, paired: pd.DataFrame, figure_dir: Path) 
     axes[1].set_ylabel("observed drift ratio")
     axes[1].set_title("JVP agreement check")
 
-    fig.suptitle("CIFAR-100-LT ResNet18 all-layer tail-sensitivity diagnostic")
+    fig.suptitle("CIFAR ResNet all-layer tail-sensitivity diagnostic")
     fig.tight_layout()
     path = figure_dir / "cifar100_resnet_layer_jvp_tail_quality.png"
     fig.savefig(path, dpi=200)
@@ -515,16 +518,17 @@ def write_discussion(
         "spectral_less_observed_tail_drift_fraction",
     ]
     lines = [
-        "# E11 CIFAR-100-LT ResNet18 All-Layer JVP Tail-Quality Diagnostic",
+        f"# E11 {dataset_display_name(config.dataset_name)} {model_display_name(config.model_arch)} All-Layer JVP Tail-Quality Diagnostic",
         "",
         "This generated diagnostic probes every convolution and linear matrix weight",
-        "in a CIFAR-100-LT ResNet18 checkpoint. Each intervention updates exactly one",
+        f"in a {dataset_display_name(config.dataset_name)} {model_display_name(config.model_arch)} checkpoint. Each intervention updates exactly one",
         "matrix parameter, matches the same first-order head-batch gain for",
         "Frobenius/GD and spectral/polar directions, and measures held-out tail-logit",
         "drift. It adds the missing downstream-aware check for layers before the",
         "final classifier, where the tail map is nonlinear and rank-only proxies are",
         "not enough.",
         "",
+        f"- Dataset/model: {dataset_display_name(config.dataset_name)} / {model_display_name(config.model_arch)}",
         f"- Seeds: {len(config.seeds)}",
         f"- Warmup steps: {config.warmup_steps}",
         f"- Head train examples per class: {config.head_train_per_class}",
@@ -534,7 +538,7 @@ def write_discussion(
         f"- Finite-difference JVP epsilon: {jvp_epsilon}",
         f"- Device/dtype request: {config.device}/{config.dtype}",
         "",
-        f"![CIFAR-100-LT ResNet18 all-layer JVP](../{figure_path.as_posix()})",
+        f"![CIFAR ResNet all-layer JVP](../{figure_path.as_posix()})",
         "",
         "## Overall Summary",
         "",
@@ -601,6 +605,10 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--device", default=None)
+    parser.add_argument("--dataset-name", choices=["CIFAR100", "CIFAR10"], default=None)
+    parser.add_argument("--model-arch", choices=["resnet18", "resnet34"], default=None)
+    parser.add_argument("--head-classes", default=None)
+    parser.add_argument("--tail-classes", default=None)
     parser.add_argument("--seeds", type=int, default=10)
     parser.add_argument("--warmup-steps", type=int, default=5000)
     parser.add_argument("--target-head-gain-fraction", type=float, default=0.005)
@@ -618,6 +626,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--download", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--progress", action="store_true")
     return parser.parse_args()
+
+
+def parse_class_list(value: str) -> tuple[int, ...]:
+    classes = tuple(int(part.strip()) for part in value.split(",") if part.strip())
+    if not classes:
+        raise ValueError("class list must not be empty")
+    return classes
 
 
 def config_from_args(args: argparse.Namespace) -> Cifar100ResNetOneStepConfig:
@@ -640,6 +655,14 @@ def config_from_args(args: argparse.Namespace) -> Cifar100ResNetOneStepConfig:
         config = replace(config, seeds=tuple(range(args.seeds)), warmup_steps=args.warmup_steps)
     if args.device is not None:
         config = replace(config, device=args.device)
+    if args.dataset_name is not None:
+        config = replace(config, dataset_name=args.dataset_name)
+    if args.model_arch is not None:
+        config = replace(config, model_arch=args.model_arch)
+    if args.head_classes is not None:
+        config = replace(config, head_classes=parse_class_list(args.head_classes))
+    if args.tail_classes is not None:
+        config = replace(config, tail_classes=parse_class_list(args.tail_classes))
     if args.target_head_gain_fraction is not None:
         config = replace(config, target_head_gain_fraction=args.target_head_gain_fraction)
     if args.head_train_per_class is not None:
@@ -695,7 +718,10 @@ def main() -> None:
         args.discussion_path,
         jvp_epsilon=args.jvp_epsilon,
     )
-    print(f"saved CIFAR-100-LT ResNet18 all-layer JVP results to {args.output_dir}")
+    print(
+        f"saved {dataset_display_name(config.dataset_name)} {model_display_name(config.model_arch)} "
+        f"all-layer JVP results to {args.output_dir}"
+    )
     print(f"metric rows={len(metrics)}, paired rows={len(paired)}, layer summaries={len(summary)}")
     print(f"figure: {figure_path}")
     print(f"discussion: {args.discussion_path}")

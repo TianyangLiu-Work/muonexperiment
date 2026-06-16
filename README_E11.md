@@ -40,6 +40,8 @@ sbatch scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_imbalance_sweep.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.sbatch
+sbatch scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch
+sbatch scripts/slurm/e11_cifar100_resnet_condition_score_heldout_data.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_muon_final_benchmark.sbatch
@@ -129,6 +131,8 @@ make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpo
 make e11-cifar-resnet-imbalance-sweep-results # submit the CIFAR-100-LT ResNet18 tail-count imbalance sweep via Slurm
 make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm
 make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results # submit the all-layer ResNet JVP checkpoint-transfer benchmark via Slurm
+make e11-cifar-resnet-condition-score-heldout-architecture-results # submit the registered ResNet34 held-out architecture condition-score split via Slurm
+make e11-cifar-resnet-condition-score-heldout-data-results # submit the registered CIFAR-10-LT held-out data condition-score split via Slurm
 make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm
 make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm
 make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm
@@ -153,6 +157,8 @@ make e11-cifar-resnet-tail-quality-results
 make e11-cifar-resnet-imbalance-sweep-results
 make e11-cifar-resnet-layer-jvp-tail-quality-results
 make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results
+make e11-cifar-resnet-condition-score-heldout-architecture-results
+make e11-cifar-resnet-condition-score-heldout-data-results
 make e11-cifar-resnet-lt-standard-eval-results
 make e11-cifar-resnet-lt-recipe-benchmark-results
 make e11-cifar-resnet-lt-muon-final-benchmark-results
@@ -203,6 +209,16 @@ preserves the below-one threshold direction but not the ranking. The residual
 version fits source-checkpoint observed drift against early-layer structure and
 tests held-out residual risk: source observed residuals still transfer, while
 scaled-JVP residuals remain inverted.
+
+The registered condition-score held-out split targets submit
+`scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch`
+and `scripts/slurm/e11_cifar100_resnet_condition_score_heldout_data.sbatch`.
+They run the same all-layer checkpoint-transfer probe on ResNet34/CIFAR-100-LT
+and ResNet18/CIFAR-10-LT, writing raw held-out layer tables under
+`results/e11_cifar100_resnet_condition_score_next/heldout_architecture` and
+`results/e11_cifar100_resnet_condition_score_next/heldout_data`. These jobs
+prepare the registered no-tuning held-out evidence; until the score gates are
+evaluated on those tables, the P0 predictive-condition claim remains open.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -460,7 +476,7 @@ Do not claim:
 - `e11_condition_geometry/statistics.py`: summary tables and confidence intervals.
 - `e11_condition_geometry/long_tail_digits.py`: shared sklearn-digits long-tail data, MLP, update-direction, and layerwise diagnostic helpers.
 - `e11_condition_geometry/cifar100_long_tail.py`: CIFAR-100-LT two-layer MLP matched-head-gain diagnostic.
-- `e11_condition_geometry/cifar100_resnet_tail.py`: CIFAR-100-LT ResNet18 matched-head-gain diagnostic with Conv/Linear matrix-weight interventions.
+- `e11_condition_geometry/cifar100_resnet_tail.py`: CIFAR-100/CIFAR-10 ResNet18/ResNet34 matched-head-gain diagnostic with Conv/Linear matrix-weight interventions.
 - `e11_condition_geometry/plots/`: static figure generation.
 - `e11_condition_geometry/reporting.py`: shared Markdown/report helpers.
 - `scripts/e11_run_*.py`: experiment runners.
@@ -484,6 +500,8 @@ Do not claim:
 - `scripts/slurm/e11_cifar100_resnet_imbalance_sweep.sbatch`: GPU/Slurm submission wrapper for the ResNet18 tail-count imbalance sweep.
 - `scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch`: GPU/Slurm submission wrapper for the all-layer ResNet JVP tail-quality diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.sbatch`: GPU/Slurm submission wrapper for the all-layer ResNet JVP checkpoint-transfer benchmark.
+- `scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch`: GPU/Slurm submission wrapper for the registered ResNet34 held-out architecture condition-score split.
+- `scripts/slurm/e11_cifar100_resnet_condition_score_heldout_data.sbatch`: GPU/Slurm submission wrapper for the registered CIFAR-10-LT held-out data condition-score split.
 - `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`: GPU/Slurm submission wrapper for the standard CIFAR-100-LT ResNet18 reporting baseline.
 - `scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch`: GPU/Slurm submission wrapper for the augmented ResNet18 recipe benchmark pilot.
 - `scripts/slurm/e11_cifar100_resnet_lt_muon_final_benchmark.sbatch`: GPU/Slurm submission wrapper for the negative NS-Muon final-training benchmark pilot.
@@ -499,7 +517,7 @@ The generated next-evidence matrix is `discussion/e11_top_conference_gap_registe
 Most important next steps:
 
 1. Extend the new standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline, augmented recipe pilot, negative NS-Muon final-training pilot, and local tail-count imbalance sweep into a tuned benchmark protocol with a wider grid, class-balanced samplers, better Muon schedules, and larger long-tail datasets; the current pilots are useful benchmark context, not a competitive optimizer result.
-2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run now shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the current scaled-JVP score has negative raw and residual layer-risk ranking transfer. The next version needs a stronger downstream-aware condition and held-out architecture or dataset splits.
+2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run now shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the current scaled-JVP score has negative raw and residual layer-risk ranking transfer. ResNet34 and CIFAR-10-LT held-out Slurm entry points are now registered, but the jobs and score gates still need to run before any P0 predictive-condition claim is defensible.
 3. Extend the current fixed-checkpoint, short-trajectory, small practical-training, and negative ResNet final-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
 5. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.

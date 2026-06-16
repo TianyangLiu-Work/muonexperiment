@@ -17,7 +17,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from e11_condition_geometry.cifar100_resnet_tail import Cifar100ResNetOneStepConfig
+from e11_condition_geometry.cifar100_resnet_tail import (
+    Cifar100ResNetOneStepConfig,
+    dataset_display_name,
+    model_display_name,
+)
 from e11_condition_geometry.reporting import fmt, markdown_table
 from e11_condition_geometry.statistics import ci95, corr_ci95, log_ratio_ci95
 
@@ -423,6 +427,8 @@ def write_figure(
     prediction_summary: pd.DataFrame,
     residual_prediction_summary: pd.DataFrame,
     figure_dir: Path,
+    *,
+    title: str = "CIFAR ResNet all-layer JVP checkpoint-prediction benchmark",
 ) -> Path:
     figure_dir.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, 3, figsize=(15.2, 5.0))
@@ -505,7 +511,7 @@ def write_figure(
     axes[2].set_xlabel("depth-adjusted Spearman")
     axes[2].set_title("Residual layer-risk transfer")
 
-    fig.suptitle("CIFAR-100-LT ResNet18 all-layer JVP checkpoint-prediction benchmark")
+    fig.suptitle(title)
     fig.tight_layout()
     path = figure_dir / "cifar100_resnet_layer_jvp_checkpoint_prediction.png"
     fig.savefig(path, dpi=200)
@@ -543,10 +549,10 @@ def write_discussion(
         residual_prediction_summary["predictor"].eq("source_gradient_nuclear_rank_residual")
     ].iloc[0]
     lines = [
-        "# E11 CIFAR-100-LT ResNet18 All-Layer JVP Checkpoint-Prediction Benchmark",
+        f"# E11 {dataset_display_name(base_config.dataset_name)} {model_display_name(base_config.model_arch)} All-Layer JVP Checkpoint-Prediction Benchmark",
         "",
         "This diagnostic turns the single-checkpoint all-layer JVP bridge into a",
-        "checkpoint-transfer prediction test. For each tail-rich ResNet checkpoint,",
+        f"checkpoint-transfer prediction test. For each tail-rich {model_display_name(base_config.model_arch)} checkpoint,",
         "the script probes every Conv/Linear matrix weight, computes unit-JVP,",
         "matched-gain scaled-JVP, and observed layer-only drift ratios, then asks",
         "whether layer scores measured at one checkpoint predict observed layer risk",
@@ -564,6 +570,7 @@ def write_discussion(
         "checkpoint itself.",
         "",
         f"- Warmup checkpoints: {', '.join(str(step) for step in warmup_steps)}",
+        f"- Dataset/model: {dataset_display_name(base_config.dataset_name)} / {model_display_name(base_config.model_arch)}",
         f"- Seeds per checkpoint: {len(base_config.seeds)}",
         f"- Head train examples per class: {base_config.head_train_per_class}",
         f"- Tail train examples per class: {base_config.tail_train_per_class}",
@@ -572,7 +579,7 @@ def write_discussion(
         f"- Finite-difference JVP epsilon: {jvp_epsilon}",
         f"- Device/dtype request: {base_config.device}/{base_config.dtype}",
         "",
-        f"![CIFAR-100-LT ResNet18 all-layer JVP checkpoint prediction](../{figure_path.as_posix()})",
+        f"![CIFAR ResNet all-layer JVP checkpoint prediction](../{figure_path.as_posix()})",
         "",
         "## Checkpoint Summary",
         "",
@@ -667,6 +674,10 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--device", default=None)
+    parser.add_argument("--dataset-name", choices=["CIFAR100", "CIFAR10"], default=None)
+    parser.add_argument("--model-arch", choices=["resnet18", "resnet34"], default=None)
+    parser.add_argument("--head-classes", default=None)
+    parser.add_argument("--tail-classes", default=None)
     parser.add_argument("--seeds", type=int, default=10)
     parser.add_argument("--warmup-steps", type=parse_warmup_steps, default=DEFAULT_WARMUP_STEPS)
     parser.add_argument("--target-head-gain-fraction", type=float, default=0.005)
@@ -689,6 +700,13 @@ def parse_args() -> argparse.Namespace:
         help="Reuse existing layer/checkpoint summaries and refresh prediction CSVs, figure, and discussion.",
     )
     return parser.parse_args()
+
+
+def parse_class_list(value: str) -> tuple[int, ...]:
+    classes = tuple(int(part.strip()) for part in value.split(",") if part.strip())
+    if not classes:
+        raise argparse.ArgumentTypeError("class list must not be empty")
+    return classes
 
 
 def config_from_args(args: argparse.Namespace) -> tuple[Cifar100ResNetOneStepConfig, tuple[int, ...], int | None]:
@@ -714,6 +732,14 @@ def config_from_args(args: argparse.Namespace) -> tuple[Cifar100ResNetOneStepCon
         max_matrix_parameters = args.max_matrix_parameters
     if args.device is not None:
         config = replace(config, device=args.device)
+    if args.dataset_name is not None:
+        config = replace(config, dataset_name=args.dataset_name)
+    if args.model_arch is not None:
+        config = replace(config, model_arch=args.model_arch)
+    if args.head_classes is not None:
+        config = replace(config, head_classes=parse_class_list(args.head_classes))
+    if args.tail_classes is not None:
+        config = replace(config, tail_classes=parse_class_list(args.tail_classes))
     if args.target_head_gain_fraction is not None:
         config = replace(config, target_head_gain_fraction=args.target_head_gain_fraction)
     if args.head_train_per_class is not None:
@@ -793,7 +819,16 @@ def main() -> None:
         + "\n",
         encoding="utf-8",
     )
-    figure_path = write_figure(checkpoint_summary, prediction_summary, residual_prediction_summary, args.figure_dir)
+    figure_path = write_figure(
+        checkpoint_summary,
+        prediction_summary,
+        residual_prediction_summary,
+        args.figure_dir,
+        title=(
+            f"{dataset_display_name(config.dataset_name)} {model_display_name(config.model_arch)} "
+            "all-layer JVP checkpoint-prediction benchmark"
+        ),
+    )
     write_discussion(
         config,
         warmup_steps,
@@ -805,7 +840,10 @@ def main() -> None:
         args.discussion_path,
         jvp_epsilon=args.jvp_epsilon,
     )
-    print(f"saved CIFAR-100-LT ResNet18 layer-JVP checkpoint prediction to {args.output_dir}")
+    print(
+        f"saved {dataset_display_name(config.dataset_name)} {model_display_name(config.model_arch)} "
+        f"layer-JVP checkpoint prediction to {args.output_dir}"
+    )
     print(
         f"metric rows={len(metrics)}, paired rows={len(paired)}, "
         f"layer summaries={len(layer_summary)}, checkpoint summaries={len(checkpoint_summary)}"

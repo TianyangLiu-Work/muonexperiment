@@ -1,7 +1,13 @@
 import torch
 
 from e11_condition_geometry.config import ProblemSpec
+from e11_condition_geometry.cifar100_resnet_tail import (
+    Cifar100ResNetOneStepConfig,
+    build_cifar_resnet_model,
+    dataset_num_classes,
+)
 from e11_condition_geometry.runner import build_problem
+from scripts.e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction import parse_class_list
 
 
 def test_problem_layer_counts_and_activation_definitions():
@@ -158,6 +164,22 @@ def test_mnist_patch_training_batch_is_separate_from_full_activation_diagnostics
     assert activations[0].shape[0] > 32
     assert activations[0].shape[1] == 25
     assert activations[1].shape == (32, 8)
+
+
+def test_cifar_resnet_heldout_architecture_and_data_config_shapes():
+    config = Cifar100ResNetOneStepConfig(
+        dataset_name="CIFAR10",
+        model_arch="resnet34",
+        head_classes=tuple(range(5)),
+        tail_classes=tuple(range(5, 10)),
+    )
+
+    model = build_cifar_resnet_model(config, device=torch.device("cpu"), dtype=torch.float32)
+
+    assert dataset_num_classes(config.dataset_name) == 10
+    assert model.fc.out_features == 10
+    assert model.conv1.kernel_size == (3, 3)
+    assert parse_class_list("0,1,2,3,4") == tuple(range(5))
 
 
 def test_mnist_conv_training_batch_is_separate_from_full_activation_diagnostics():

@@ -5,22 +5,22 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 376661,
-      "size": "367.8 KB"
+      "size_bytes": 379506,
+      "size": "370.6 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1573039,
+      "size_bytes": 1579371,
       "size": "1.5 MB"
     },
     {
       "path": "tests",
       "role": "Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.",
       "commit_policy": "commit",
-      "size_bytes": 56824,
-      "size": "55.5 KB"
+      "size_bytes": 57625,
+      "size": "56.3 KB"
     },
     {
       "path": "discussion",
@@ -61,8 +61,8 @@
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 6622,
-      "size": "6.5 KB"
+      "size_bytes": 7304,
+      "size": "7.1 KB"
     },
     {
       "path": ".gitignore",
@@ -709,7 +709,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "37.3 KB"
+      "size": "39.0 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",

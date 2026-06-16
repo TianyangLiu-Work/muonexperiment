@@ -9,8 +9,9 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision.datasets import CIFAR10
 from torchvision.datasets import CIFAR100
-from torchvision.models import resnet18
+from torchvision.models import resnet18, resnet34
 
 from .diagnostics import matrix_effective_rank, matrix_view, singular_values
 from .long_tail_digits import make_generator, margins, sample_indices
@@ -20,6 +21,8 @@ from .long_tail_one_step import summarize_long_tail_one_step
 @dataclass(frozen=True)
 class Cifar100ResNetOneStepConfig:
     seeds: tuple[int, ...] = (0, 1, 2)
+    dataset_name: str = "CIFAR100"
+    model_arch: str = "resnet18"
     head_classes: tuple[int, ...] = tuple(range(50))
     tail_classes: tuple[int, ...] = tuple(range(50, 100))
     head_train_per_class: int = 300
@@ -51,10 +54,63 @@ def resolve_device(name: str) -> torch.device:
     return torch.device(name)
 
 
-def _normalization_tensors(device: torch.device, dtype: torch.dtype) -> tuple[torch.Tensor, torch.Tensor]:
-    mean = torch.tensor((0.5071, 0.4867, 0.4408), device=device, dtype=dtype).view(1, 3, 1, 1)
-    std = torch.tensor((0.2675, 0.2565, 0.2761), device=device, dtype=dtype).view(1, 3, 1, 1)
+def normalized_dataset_name(name: str) -> str:
+    normalized = name.upper().replace("-", "")
+    if normalized not in {"CIFAR100", "CIFAR10"}:
+        raise ValueError(f"unknown CIFAR dataset: {name}")
+    return normalized
+
+
+def dataset_num_classes(name: str) -> int:
+    return 100 if normalized_dataset_name(name) == "CIFAR100" else 10
+
+
+def dataset_display_name(name: str) -> str:
+    return "CIFAR-100-LT" if normalized_dataset_name(name) == "CIFAR100" else "CIFAR-10-LT"
+
+
+def model_display_name(name: str) -> str:
+    normalized = name.lower()
+    if normalized == "resnet18":
+        return "ResNet18"
+    if normalized == "resnet34":
+        return "ResNet34"
+    raise ValueError(f"unknown CIFAR ResNet architecture: {name}")
+
+
+def _normalization_tensors(
+    device: torch.device,
+    dtype: torch.dtype,
+    *,
+    dataset_name: str = "CIFAR100",
+) -> tuple[torch.Tensor, torch.Tensor]:
+    if normalized_dataset_name(dataset_name) == "CIFAR100":
+        mean_values = (0.5071, 0.4867, 0.4408)
+        std_values = (0.2675, 0.2565, 0.2761)
+    else:
+        mean_values = (0.4914, 0.4822, 0.4465)
+        std_values = (0.2470, 0.2435, 0.2616)
+    mean = torch.tensor(mean_values, device=device, dtype=dtype).view(1, 3, 1, 1)
+    std = torch.tensor(std_values, device=device, dtype=dtype).view(1, 3, 1, 1)
     return mean, std
+
+
+def load_cifar_images(
+    *,
+    root: str | Path,
+    train: bool,
+    device: torch.device,
+    dtype: torch.dtype,
+    download: bool,
+    dataset_name: str = "CIFAR100",
+) -> tuple[torch.Tensor, torch.Tensor]:
+    dataset_class = CIFAR100 if normalized_dataset_name(dataset_name) == "CIFAR100" else CIFAR10
+    dataset = dataset_class(root=str(root), train=train, download=download)
+    x = torch.tensor(dataset.data, device=device, dtype=dtype).permute(0, 3, 1, 2) / 255.0
+    mean, std = _normalization_tensors(device, dtype, dataset_name=dataset_name)
+    x = (x - mean) / std
+    y = torch.tensor(dataset.targets, device=device, dtype=torch.long)
+    return x, y
 
 
 def load_cifar100_images(
@@ -65,12 +121,14 @@ def load_cifar100_images(
     dtype: torch.dtype,
     download: bool,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    dataset = CIFAR100(root=str(root), train=train, download=download)
-    x = torch.tensor(dataset.data, device=device, dtype=dtype).permute(0, 3, 1, 2) / 255.0
-    mean, std = _normalization_tensors(device, dtype)
-    x = (x - mean) / std
-    y = torch.tensor(dataset.targets, device=device, dtype=torch.long)
-    return x, y
+    return load_cifar_images(
+        root=root,
+        train=train,
+        device=device,
+        dtype=dtype,
+        download=download,
+        dataset_name="CIFAR100",
+    )
 
 
 def split_long_tail_cifar100(
@@ -80,19 +138,26 @@ def split_long_tail_cifar100(
     device: torch.device,
     dtype: torch.dtype,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-    train_x, train_y = load_cifar100_images(
+    num_classes = dataset_num_classes(config.dataset_name)
+    requested_classes = set(config.head_classes) | set(config.tail_classes)
+    invalid_classes = sorted(label for label in requested_classes if label < 0 or label >= num_classes)
+    if invalid_classes:
+        raise ValueError(f"{config.dataset_name} class split contains invalid labels: {invalid_classes}")
+    train_x, train_y = load_cifar_images(
         root=config.data_root,
         train=True,
         device=device,
         dtype=dtype,
         download=config.download,
+        dataset_name=config.dataset_name,
     )
-    test_x, test_y = load_cifar100_images(
+    test_x, test_y = load_cifar_images(
         root=config.data_root,
         train=False,
         device=device,
         dtype=dtype,
         download=config.download,
+        dataset_name=config.dataset_name,
     )
     generator = make_generator(seed + 31000, device)
     head_train = sample_indices(
@@ -119,6 +184,19 @@ def split_long_tail_cifar100(
 
 def build_cifar_resnet18(*, device: torch.device, dtype: torch.dtype) -> nn.Module:
     model = resnet18(weights=None, num_classes=100)
+    model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    model.maxpool = nn.Identity()
+    return model.to(device=device, dtype=dtype)
+
+
+def build_cifar_resnet_model(config: Cifar100ResNetOneStepConfig, *, device: torch.device, dtype: torch.dtype) -> nn.Module:
+    arch = config.model_arch.lower()
+    if arch == "resnet18":
+        model = resnet18(weights=None, num_classes=dataset_num_classes(config.dataset_name))
+    elif arch == "resnet34":
+        model = resnet34(weights=None, num_classes=dataset_num_classes(config.dataset_name))
+    else:
+        raise ValueError(f"unknown CIFAR ResNet architecture: {config.model_arch}")
     model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
     model.maxpool = nn.Identity()
     return model.to(device=device, dtype=dtype)
@@ -265,7 +343,7 @@ def run_cifar100_resnet_one_step(
         torch.manual_seed(seed + 33000)
         if device.type == "cuda":
             torch.cuda.manual_seed_all(seed + 33000)
-        model = build_cifar_resnet18(device=device, dtype=dtype)
+        model = build_cifar_resnet_model(config, device=device, dtype=dtype)
         if progress:
             print(f"[resnet] seed {seed}: training {config.warmup_steps} warmup steps", flush=True)
         train_checkpoint(model, train_x, train_y, train_indices, config, seed=seed)
@@ -331,8 +409,8 @@ def run_cifar100_resnet_one_step(
                 {
                     "seed": int(seed),
                     "geometry": geometry,
-                    "dataset": "CIFAR100",
-                    "model": "resnet18_cifar_stem",
+                    "dataset": normalized_dataset_name(config.dataset_name),
+                    "model": f"{config.model_arch.lower()}_cifar_stem",
                     "updated_parameter_subset": "conv_and_linear_weights_only",
                     "head_classes": ",".join(str(x) for x in config.head_classes),
                     "tail_classes": ",".join(str(x) for x in config.tail_classes),
