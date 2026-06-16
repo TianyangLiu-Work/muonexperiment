@@ -6,10 +6,10 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 366.9 KB |
-| scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 1.4 MB   |
-| tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 43.9 KB  |
-| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 782.1 KB |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 367.0 KB |
+| scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 1.5 MB   |
+| tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 48.9 KB  |
+| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 793.9 KB |
 | results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 259.0 MB |
 | figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 29.8 MB  |
 | configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
@@ -69,6 +69,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_cifar100_resnet_condition_score_audit/raw_score_summary.csv                     |     10 | 2.0 KB    |
 | results/e11_cifar100_resnet_condition_score_audit/residual_score_pairs.csv                  |     30 | 6.8 KB    |
 | results/e11_cifar100_resnet_condition_score_audit/residual_score_summary.csv                |      5 | 1.3 KB    |
+| results/e11_top_conference_gap_register/gap_register.csv                                    |      7 | 6.5 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv                                |    110 | 5.7 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/class_metrics.csv                              |   1000 | 58.6 KB   |
 | results/e11_cifar100_resnet_lt_standard_eval/group_metrics.csv                              |     40 | 4.2 KB    |
@@ -144,7 +145,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                              | size    |
 |:------------------------------------------------------------------|:--------|
-| README_E11.md                                                     | 36.2 KB |
+| README_E11.md                                                     | 36.5 KB |
 | discussion/e11_paper_skeleton.md                                  | 10.9 KB |
 | discussion/e11_main_paper_package.md                              | 22.8 KB |
 | discussion/e11_main_figure_captions.md                            | 6.5 KB  |
@@ -158,6 +159,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_reference_audit.md                                 | 6.1 KB  |
 | discussion/e11_paper_readiness_audit.md                           | 34.9 KB |
 | discussion/e11_top_conference_plan.md                             | 14.1 KB |
+| discussion/e11_top_conference_gap_register.md                     | 11.8 KB |
 | discussion/e11_evidence_index.md                                  | 29.3 KB |
 | discussion/e11_research_synthesis.md                              | 7.8 KB  |
 | discussion/e11_research_direction_map.md                          | 9.8 KB  |

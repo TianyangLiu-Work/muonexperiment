@@ -280,6 +280,55 @@ def assert_valid_artifact_manifest(manifest_json: dict) -> None:
         raise AssertionError(f"artifact manifest missing ignore policy entries: {required_ignored - manifest_ignored}")
 
 
+def assert_top_conference_gap_register(frame: pd.DataFrame) -> None:
+    required_columns = {
+        "gap_id",
+        "priority",
+        "claim_unblocked",
+        "current_state",
+        "required_next_evidence",
+        "acceptance_gate",
+        "compute_mode",
+        "planned_artifacts",
+        "risk_if_missing",
+    }
+    missing_columns = required_columns - set(frame.columns)
+    if missing_columns:
+        raise AssertionError(f"top-conference gap register missing columns: {missing_columns}")
+    required_gap_ids = {
+        "P0-PredictiveCondition",
+        "P0-StandardBenchmark",
+        "P1-HeldOutGenerality",
+        "P1-TheoryToScore",
+        "P1-PracticalMuonBridge",
+        "P2-NaturalBoundaryCases",
+        "P2-PackagingRepro",
+    }
+    gap_ids = set(frame["gap_id"])
+    if not required_gap_ids.issubset(gap_ids):
+        raise AssertionError(f"top-conference gap register missing gap ids: {required_gap_ids - gap_ids}")
+    priorities = set(frame["priority"])
+    if not {"P0", "P1", "P2"}.issubset(priorities):
+        raise AssertionError(f"top-conference gap register missing priorities: {priorities}")
+    if int(frame["priority"].eq("P0").sum()) < 2:
+        raise AssertionError("top-conference gap register must keep at least two P0 gates")
+    compute_modes = set(frame["compute_mode"])
+    if "GPU via Slurm" not in compute_modes or "CPU" not in compute_modes:
+        raise AssertionError(f"top-conference gap register missing compute modes: {compute_modes}")
+    weak_gate_rows = frame[
+        frame["acceptance_gate"].astype(str).str.len().lt(80)
+        | frame["acceptance_gate"].astype(str).str.contains("TBD|todo", case=False, regex=True)
+    ]
+    if not weak_gate_rows.empty:
+        raise AssertionError(f"top-conference gap register has weak acceptance gates: {weak_gate_rows['gap_id'].tolist()}")
+    missing_result_artifacts = frame[~frame["planned_artifacts"].astype(str).str.contains("results/|discussion/", regex=True)]
+    if not missing_result_artifacts.empty:
+        raise AssertionError(
+            f"top-conference gap register rows must name planned artifacts: "
+            f"{missing_result_artifacts['gap_id'].tolist()}"
+        )
+
+
 def assert_batch_activation_contract(path: Path, frame: pd.DataFrame) -> None:
     """Validate the training-vs-diagnostic batch contract for step metrics."""
 
@@ -717,6 +766,8 @@ def main() -> None:
         Path("discussion/e11_research_synthesis.md"),
         Path("discussion/e11_claim_validity_audit.md"),
         Path("discussion/e11_paper_readiness_audit.md"),
+        Path("results/e11_top_conference_gap_register") / "gap_register.csv",
+        Path("discussion/e11_top_conference_gap_register.md"),
         Path("discussion/e11_paper_skeleton.md"),
         Path("discussion/e11_main_paper_package.md"),
         Path("discussion/e11_main_figure_captions.md"),
@@ -3706,6 +3757,27 @@ def main() -> None:
     ]
     if missing_top_conference:
         raise AssertionError(f"top-conference plan missing required gates: {missing_top_conference}")
+    gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
+    assert_top_conference_gap_register(gap_register_frame)
+    top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
+        encoding="utf-8"
+    )
+    required_gap_register_phrases = [
+        "Top-Conference Gap Register",
+        "Minimum Viable Top-Tier Mechanism Paper",
+        "P0-PredictiveCondition",
+        "P0-StandardBenchmark",
+        "source-only condition score",
+        "held-out architecture",
+        "benchmark-level performance claim",
+        "GPU via Slurm",
+        "No row in this register authorizes a stronger paper claim by itself",
+    ]
+    missing_gap_register = [
+        phrase for phrase in required_gap_register_phrases if phrase not in top_conference_gap_register
+    ]
+    if missing_gap_register:
+        raise AssertionError(f"top-conference gap register missing required content: {missing_gap_register}")
     readme = Path("README_E11.md").read_text(encoding="utf-8")
     if "## Main Entry Points" not in readme or "## Current Publication Gaps" not in readme:
         raise AssertionError("README_E11.md must document entry points and publication gaps")
@@ -3742,9 +3814,10 @@ def main() -> None:
         [
             Path("README_E11.md"),
             Path("discussion/e11_evidence_index.md"),
-        Path("discussion/e11_research_synthesis.md"),
-        Path("discussion/e11_research_direction_map.md"),
+            Path("discussion/e11_research_synthesis.md"),
+            Path("discussion/e11_research_direction_map.md"),
             Path("discussion/e11_paper_readiness_audit.md"),
+            Path("discussion/e11_top_conference_gap_register.md"),
             Path("discussion/e11_paper_skeleton.md"),
             Path("discussion/e11_main_paper_package.md"),
             Path("discussion/e11_main_figure_captions.md"),

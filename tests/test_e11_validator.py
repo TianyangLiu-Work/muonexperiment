@@ -2,6 +2,7 @@ import importlib.util
 import re
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from e11_condition_geometry.artifacts import (
@@ -272,6 +273,105 @@ def valid_manifest() -> dict:
         "key_documents": [{"path": path} for path in KEY_DOCUMENTS],
         "ignore_policy": [{"path_or_pattern": item["path_or_pattern"]} for item in IGNORE_POLICY],
     }
+
+
+def valid_top_conference_gap_register() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {
+                "gap_id": "P0-PredictiveCondition",
+                "priority": "P0",
+                "claim_unblocked": "Predictive condition claim.",
+                "current_state": "Current score is a boundary result.",
+                "required_next_evidence": "Run held-out prediction.",
+                "acceptance_gate": "Report positive held-out residual prediction with confidence intervals and no target leakage.",
+                "compute_mode": "GPU via Slurm",
+                "planned_artifacts": "results/example/*; discussion/example.md",
+                "risk_if_missing": "Condition claim remains unsupported.",
+            },
+            {
+                "gap_id": "P0-StandardBenchmark",
+                "priority": "P0",
+                "claim_unblocked": "Performance claim.",
+                "current_state": "Only pilots exist.",
+                "required_next_evidence": "Run tuned baselines.",
+                "acceptance_gate": "Report confidence intervals, paired seeds, and tuned baselines before any performance claim.",
+                "compute_mode": "GPU via Slurm",
+                "planned_artifacts": "results/example/*; discussion/example.md",
+                "risk_if_missing": "No performance claim.",
+            },
+            {
+                "gap_id": "P1-HeldOutGenerality",
+                "priority": "P1",
+                "claim_unblocked": "Generality claim.",
+                "current_state": "One architecture family is strongest.",
+                "required_next_evidence": "Run held-out architecture.",
+                "acceptance_gate": "Report seed count, checkpoint quality, and drift-ratio CI before broadening the claim.",
+                "compute_mode": "GPU via Slurm",
+                "planned_artifacts": "results/example/*; discussion/example.md",
+                "risk_if_missing": "Generality remains limited.",
+            },
+            {
+                "gap_id": "P1-TheoryToScore",
+                "priority": "P1",
+                "claim_unblocked": "Theory-score bridge.",
+                "current_state": "The theorem and real score are adjacent.",
+                "required_next_evidence": "Add theory bridge.",
+                "acceptance_gate": "Add a falsifiable score statement, a score-term ablation, and a documented failure mode before treating the score as predictive.",
+                "compute_mode": "CPU plus optional GPU via Slurm",
+                "planned_artifacts": "results/example/*; discussion/example.md",
+                "risk_if_missing": "Mechanism looks loose.",
+            },
+            {
+                "gap_id": "P1-PracticalMuonBridge",
+                "priority": "P1",
+                "claim_unblocked": "Practical Muon discussion.",
+                "current_state": "Final-training pilot is negative.",
+                "required_next_evidence": "Tune schedules.",
+                "acceptance_gate": "Report final metrics and trajectory-local diagnostics with confidence intervals.",
+                "compute_mode": "GPU via Slurm",
+                "planned_artifacts": "results/example/*; discussion/example.md",
+                "risk_if_missing": "Muon remains motivation only.",
+            },
+            {
+                "gap_id": "P2-NaturalBoundaryCases",
+                "priority": "P2",
+                "claim_unblocked": "Natural boundary claim.",
+                "current_state": "Synthetic negative exists.",
+                "required_next_evidence": "Search natural settings.",
+                "acceptance_gate": "Report drift, loss, margin, rank, JVP, checkpoint-quality metrics, and the pre-registered stopping rule.",
+                "compute_mode": "CPU plus optional GPU via Slurm",
+                "planned_artifacts": "results/example/*; discussion/example.md",
+                "risk_if_missing": "Falsifiability concern remains.",
+            },
+            {
+                "gap_id": "P2-PackagingRepro",
+                "priority": "P2",
+                "claim_unblocked": "Artifact-review readiness.",
+                "current_state": "Tectonic build works.",
+                "required_next_evidence": "Run clean checkout.",
+                "acceptance_gate": "A fresh checkout completes make e11-check, builds both PDFs, and records the exact command environment.",
+                "compute_mode": "CPU",
+                "planned_artifacts": "results/example/*; discussion/example.md",
+                "risk_if_missing": "Packaging risk remains.",
+            },
+        ]
+    )
+
+
+def test_top_conference_gap_register_schema_accepts_required_entries() -> None:
+    validator = load_validator_module()
+
+    validator.assert_top_conference_gap_register(valid_top_conference_gap_register())
+
+
+def test_top_conference_gap_register_schema_rejects_missing_p0_gate() -> None:
+    validator = load_validator_module()
+    register = valid_top_conference_gap_register()
+    register = register[~register["gap_id"].eq("P0-StandardBenchmark")]
+
+    with pytest.raises(AssertionError, match="missing gap ids"):
+        validator.assert_top_conference_gap_register(register)
 
 
 def test_artifact_manifest_schema_accepts_required_entries() -> None:

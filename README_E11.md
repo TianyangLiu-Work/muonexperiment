@@ -247,6 +247,7 @@ Paper-facing synthesis:
 - `discussion/e11_reproduction_checklist.md`
 - `discussion/e11_paper_readiness_audit.md`
 - `discussion/e11_top_conference_plan.md`
+- `discussion/e11_top_conference_gap_register.md`
 - `discussion/e11_reviewer_risk_audit.md`
 - `discussion/e11_pasted_review_audit.md`
 - `discussion/e11_end_of_draft_self_review.md`
@@ -327,6 +328,7 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_resnet_condition_score_audit/raw_score_summary.csv`
 - `results/e11_cifar100_resnet_condition_score_audit/residual_score_pairs.csv`
 - `results/e11_cifar100_resnet_condition_score_audit/residual_score_summary.csv`
+- `results/e11_top_conference_gap_register/gap_register.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
 - `results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv`
@@ -482,6 +484,8 @@ Do not claim:
 ## Current Publication Gaps
 
 The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
+
+The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`.
 
 Most important next steps:
 
