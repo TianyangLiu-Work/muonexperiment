@@ -42,6 +42,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_heldout_data.sbatch
+python3 scripts/e11_evaluate_cifar100_resnet_condition_score_heldouts.py
 sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_muon_final_benchmark.sbatch
@@ -133,6 +134,7 @@ make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResN
 make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results # submit the all-layer ResNet JVP checkpoint-transfer benchmark via Slurm
 make e11-cifar-resnet-condition-score-heldout-architecture-results # submit the registered ResNet34 held-out architecture condition-score split via Slurm
 make e11-cifar-resnet-condition-score-heldout-data-results # submit the registered CIFAR-10-LT held-out data condition-score split via Slurm
+make e11-cifar-resnet-condition-score-heldout-eval # evaluate frozen condition-score gates after both held-out Slurm jobs finish
 make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm
 make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm
 make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm
@@ -159,6 +161,7 @@ make e11-cifar-resnet-layer-jvp-tail-quality-results
 make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results
 make e11-cifar-resnet-condition-score-heldout-architecture-results
 make e11-cifar-resnet-condition-score-heldout-data-results
+make e11-cifar-resnet-condition-score-heldout-eval
 make e11-cifar-resnet-lt-standard-eval-results
 make e11-cifar-resnet-lt-recipe-benchmark-results
 make e11-cifar-resnet-lt-muon-final-benchmark-results
@@ -219,6 +222,10 @@ and ResNet18/CIFAR-10-LT, writing raw held-out layer tables under
 `results/e11_cifar100_resnet_condition_score_next/heldout_data`. These jobs
 prepare the registered no-tuning held-out evidence; until the score gates are
 evaluated on those tables, the P0 predictive-condition claim remains open.
+After both Slurm jobs finish, `make e11-cifar-resnet-condition-score-heldout-eval`
+applies the frozen `condition_score_v2_calibrated_residual` coefficients from
+`results/e11_cifar100_resnet_condition_score_next/calibration_coefficients.csv`
+to those held-out layer tables and writes the held-out gate report.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -489,6 +496,7 @@ Do not claim:
 - `scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py`: all-layer ResNet finite-difference JVP diagnostic at the tail-rich checkpoint.
 - `scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py`: all-layer ResNet JVP checkpoint-transfer benchmark across tail-rich checkpoints.
 - `scripts/e11_write_cifar100_resnet_condition_score_audit.py`: offline candidate condition-score audit generated from checkpoint-transfer tables.
+- `scripts/e11_evaluate_cifar100_resnet_condition_score_heldouts.py`: frozen-coefficient condition-score evaluator for registered held-out architecture/data splits.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.
 - `scripts/e11_run_cifar100_resnet_practical_muon_bridge.py`: ResNet practical Muon/AdamW trajectory-state bridge from the tail-rich checkpoint.

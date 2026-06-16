@@ -897,6 +897,8 @@ def main() -> None:
         "scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch",
         "e11-cifar-resnet-condition-score-heldout-data-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_heldout_data.sbatch",
+        "e11-cifar-resnet-condition-score-heldout-eval:",
+        "scripts/e11_evaluate_cifar100_resnet_condition_score_heldouts.py",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -965,6 +967,7 @@ def main() -> None:
         "make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results # submit the all-layer ResNet JVP checkpoint-transfer benchmark via Slurm",
         "make e11-cifar-resnet-condition-score-heldout-architecture-results # submit the registered ResNet34 held-out architecture condition-score split via Slurm",
         "make e11-cifar-resnet-condition-score-heldout-data-results # submit the registered CIFAR-10-LT held-out data condition-score split via Slurm",
+        "make e11-cifar-resnet-condition-score-heldout-eval # evaluate frozen condition-score gates after both held-out Slurm jobs finish",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
@@ -974,6 +977,7 @@ def main() -> None:
         "An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points",
         "An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs",
         "ResNet34 and CIFAR-10-LT held-out Slurm entry points are now registered",
+        "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
         "candidate condition-score audit",
         "scaled-JVP residual Spearman",
@@ -3985,6 +3989,7 @@ def main() -> None:
         or "make e11-cifar-resnet-layer-jvp-tail-quality-results" not in readme
         or "make e11-cifar-resnet-condition-score-heldout-architecture-results" not in readme
         or "make e11-cifar-resnet-condition-score-heldout-data-results" not in readme
+        or "make e11-cifar-resnet-condition-score-heldout-eval" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-guardrail-assets" not in readme

@@ -5,29 +5,29 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 379506,
-      "size": "370.6 KB"
+      "size_bytes": 380096,
+      "size": "371.2 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1579371,
+      "size_bytes": 1606088,
       "size": "1.5 MB"
     },
     {
       "path": "tests",
       "role": "Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.",
       "commit_policy": "commit",
-      "size_bytes": 57625,
-      "size": "56.3 KB"
+      "size_bytes": 61086,
+      "size": "59.7 KB"
     },
     {
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 832208,
-      "size": "812.7 KB"
+      "size_bytes": 833103,
+      "size": "813.6 KB"
     },
     {
       "path": "results",
@@ -61,8 +61,8 @@
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 7304,
-      "size": "7.1 KB"
+      "size_bytes": 7539,
+      "size": "7.4 KB"
     },
     {
       "path": ".gitignore",
@@ -709,7 +709,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "39.0 KB"
+      "size": "39.7 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -733,7 +733,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "23.6 KB"
+      "size": "24.5 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",

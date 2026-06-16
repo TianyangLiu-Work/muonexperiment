@@ -268,6 +268,7 @@ MAIN_RESULT_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_run_cifar100_resnet_imbalance_sweep.py",
     "scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py",
     "scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py",
+    "scripts/e11_evaluate_cifar100_resnet_condition_score_heldouts.py",
     "scripts/e11_run_cifar100_resnet_lt_standard_eval.py",
     "scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py",
     "scripts/e11_run_cifar100_resnet_practical_muon_bridge.py",
@@ -382,6 +383,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.sbatch",
         "produces": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/* and figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/*",
         "paper_role": "Held-out checkpoint-transfer boundary check for whether all-layer downstream-aware JVP quantities predict observed layer risk across tail-rich ResNet checkpoints.",
+    },
+    {
+        "stage": "Registered condition-score held-out evaluation",
+        "command": "python3 scripts/e11_evaluate_cifar100_resnet_condition_score_heldouts.py",
+        "produces": "results/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation/* and figures/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation/*",
+        "paper_role": "Applies frozen condition-score coefficients to the registered held-out architecture and data splits after their Slurm layer tables finish.",
     },
     {
         "stage": "CIFAR-100-LT ResNet18 standard many/medium/few reporting baseline",
