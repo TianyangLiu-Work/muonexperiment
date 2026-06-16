@@ -271,6 +271,7 @@ Paper-facing synthesis:
 - `discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md`
 - `discussion/e11_cifar100_resnet_condition_score_audit.md`
 - `discussion/e11_cifar100_resnet_condition_score_protocol.md`
+- `discussion/e11_cifar100_resnet_condition_score_next.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
 - `discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md`
@@ -332,6 +333,10 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_resnet_condition_score_protocol/score_registry.csv`
 - `results/e11_cifar100_resnet_condition_score_protocol/split_registry.csv`
 - `results/e11_cifar100_resnet_condition_score_protocol/acceptance_gates.csv`
+- `results/e11_cifar100_resnet_condition_score_next/score_pairs.csv`
+- `results/e11_cifar100_resnet_condition_score_next/score_summary.csv`
+- `results/e11_cifar100_resnet_condition_score_next/calibration_coefficients.csv`
+- `results/e11_cifar100_resnet_condition_score_next/gate_report.csv`
 - `results/e11_top_conference_gap_register/gap_register.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
@@ -489,7 +494,7 @@ Do not claim:
 
 The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
 
-The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`.
+The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`.
 
 Most important next steps:
 

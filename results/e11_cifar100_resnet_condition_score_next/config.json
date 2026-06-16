@@ -1,0 +1,17 @@
+{
+  "input_layer_summary": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/layer_summary.csv",
+  "protocol_dir": "results/e11_cifar100_resnet_condition_score_protocol",
+  "ridge_alpha": 1.0,
+  "feature_columns": {
+    "log_gradient_nuclear_rank": "mean_gradient_nuclear_rank",
+    "log_alignment_ratio": "mean_alignment_ratio_spectral_over_fro",
+    "log_step_size_ratio": "mean_step_size_ratio_spectral_over_fro",
+    "log_unit_jvp_ratio": "geomean_jvp_tail_drift_sq_ratio_spectral_over_fro",
+    "log_scaled_jvp_ratio": "geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro",
+    "log_tail_accuracy_before": "mean_tail_accuracy_before"
+  },
+  "score_registry_rows": 5,
+  "split_registry_rows": 6,
+  "acceptance_gate_rows": 6,
+  "analysis_scope": "locked retrospective ResNet18 checkpoint split; held-out architecture/data not generated"
+}

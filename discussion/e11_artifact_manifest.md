@@ -6,12 +6,12 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 367.4 KB |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 367.8 KB |
 | scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 1.5 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 55.5 KB  |
-| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 805.9 KB |
-| results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 259.0 MB |
-| figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 29.8 MB  |
+| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 812.7 KB |
+| results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 259.1 MB |
+| figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 29.9 MB  |
 | configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
 | paper                  | Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.   | commit source and selected rendered PDFs | 5.6 MB   |
 | Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 6.5 KB   |
@@ -72,7 +72,11 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_cifar100_resnet_condition_score_protocol/score_registry.csv                     |      5 | 1.9 KB    |
 | results/e11_cifar100_resnet_condition_score_protocol/split_registry.csv                     |      6 | 1.5 KB    |
 | results/e11_cifar100_resnet_condition_score_protocol/acceptance_gates.csv                   |      6 | 1.7 KB    |
-| results/e11_top_conference_gap_register/gap_register.csv                                    |      7 | 6.6 KB    |
+| results/e11_cifar100_resnet_condition_score_next/score_pairs.csv                            |     30 | 5.8 KB    |
+| results/e11_cifar100_resnet_condition_score_next/score_summary.csv                          |      5 | 1.5 KB    |
+| results/e11_cifar100_resnet_condition_score_next/calibration_coefficients.csv               |     27 | 2.1 KB    |
+| results/e11_cifar100_resnet_condition_score_next/gate_report.csv                            |      6 | 820 B     |
+| results/e11_top_conference_gap_register/gap_register.csv                                    |      7 | 6.7 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv                                |    110 | 5.7 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/class_metrics.csv                              |   1000 | 58.6 KB   |
 | results/e11_cifar100_resnet_lt_standard_eval/group_metrics.csv                              |     40 | 4.2 KB    |
@@ -148,7 +152,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                              | size    |
 |:------------------------------------------------------------------|:--------|
-| README_E11.md                                                     | 36.9 KB |
+| README_E11.md                                                     | 37.3 KB |
 | discussion/e11_paper_skeleton.md                                  | 10.9 KB |
 | discussion/e11_main_paper_package.md                              | 22.8 KB |
 | discussion/e11_main_figure_captions.md                            | 6.5 KB  |
@@ -162,7 +166,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_reference_audit.md                                 | 6.1 KB  |
 | discussion/e11_paper_readiness_audit.md                           | 34.9 KB |
 | discussion/e11_top_conference_plan.md                             | 14.1 KB |
-| discussion/e11_top_conference_gap_register.md                     | 12.5 KB |
+| discussion/e11_top_conference_gap_register.md                     | 13.2 KB |
 | discussion/e11_evidence_index.md                                  | 29.3 KB |
 | discussion/e11_research_synthesis.md                              | 7.8 KB  |
 | discussion/e11_research_direction_map.md                          | 9.8 KB  |
@@ -179,6 +183,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md | 8.1 KB  |
 | discussion/e11_cifar100_resnet_condition_score_audit.md           | 5.5 KB  |
 | discussion/e11_cifar100_resnet_condition_score_protocol.md        | 11.0 KB |
+| discussion/e11_cifar100_resnet_condition_score_next.md            | 5.3 KB  |
 | discussion/e11_cifar100_resnet_lt_standard_eval.md                | 3.3 KB  |
 | discussion/e11_cifar100_resnet_lt_recipe_benchmark.md             | 6.6 KB  |
 | discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md         | 6.9 KB  |

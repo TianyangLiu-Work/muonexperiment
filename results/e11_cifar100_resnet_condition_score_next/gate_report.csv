@@ -1,0 +1,7 @@
+gate_id,scope,status,evidence
+legacy_checkpoint_residual_spearman,retrospective ResNet18 checkpoint split,pass,"primary residual Spearman=0.5942 CI=[0.5428, 0.6455]"
+legacy_checkpoint_threshold_accuracy,retrospective ResNet18 checkpoint split,pass,primary below-one threshold accuracy=0.9841
+baseline_comparison,retrospective ResNet18 checkpoint split,pass,primary Spearman=0.5942; early-layer prior Spearman=0.2671
+primary_heldout_architecture,P0 protocol,not_run,ResNet34 held-out architecture split is registered but not generated.
+primary_heldout_data,P0 protocol,not_run,CIFAR-10-LT held-out data split is registered but not generated.
+p0_predictive_condition_claim,paper claim,not_ready,"The retrospective checkpoint split is promising, but the registered architecture and data held-out splits are still missing."

@@ -745,6 +745,13 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_condition_score_protocol") / "split_registry.csv",
         Path("results/e11_cifar100_resnet_condition_score_protocol") / "acceptance_gates.csv",
         Path("discussion/e11_cifar100_resnet_condition_score_protocol.md"),
+        Path("results/e11_cifar100_resnet_condition_score_next") / "score_pairs.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next") / "score_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next") / "calibration_coefficients.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next") / "gate_report.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next") / "config.json",
+        Path("figures/e11_cifar100_resnet_condition_score_next") / "cifar100_resnet_condition_score_next.png",
+        Path("discussion/e11_cifar100_resnet_condition_score_next.md"),
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "train_trace.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_metrics.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "group_metrics.csv",
@@ -2472,6 +2479,48 @@ def main() -> None:
     score_protocol_splits = pd.read_csv(score_protocol_dir / "split_registry.csv")
     score_protocol_gates = pd.read_csv(score_protocol_dir / "acceptance_gates.csv")
     assert_condition_score_protocol(score_protocol_scores, score_protocol_splits, score_protocol_gates)
+    score_next_dir = Path("results/e11_cifar100_resnet_condition_score_next")
+    score_next_pairs = pd.read_csv(score_next_dir / "score_pairs.csv")
+    score_next_summary = pd.read_csv(score_next_dir / "score_summary.csv")
+    score_next_coefficients = pd.read_csv(score_next_dir / "calibration_coefficients.csv")
+    score_next_gates = pd.read_csv(score_next_dir / "gate_report.csv")
+    score_next_config = json.loads((score_next_dir / "config.json").read_text())
+    expected_next_scores = {
+        "condition_score_v2_calibrated_residual",
+        "early_layer_prior",
+        "legacy_scaled_jvp_ratio",
+        "theory_sign_composite",
+        "source_observed_drift_positive_control",
+    }
+    if (
+        len(score_next_pairs) != 30
+        or len(score_next_summary) != 5
+        or len(score_next_coefficients) != 27
+        or len(score_next_gates) != 6
+        or set(score_next_summary["score"]) != expected_next_scores
+        or score_next_config.get("analysis_scope")
+        != "locked retrospective ResNet18 checkpoint split; held-out architecture/data not generated"
+    ):
+        raise AssertionError("condition-score v2 retrospective analysis must preserve registered output shape")
+    score_next_by_score = score_next_summary.set_index("score")
+    score_next_primary = score_next_by_score.loc["condition_score_v2_calibrated_residual"]
+    score_next_early = score_next_by_score.loc["early_layer_prior"]
+    score_next_legacy = score_next_by_score.loc["legacy_scaled_jvp_ratio"]
+    score_next_gate_status = score_next_gates.set_index("gate_id")["status"].to_dict()
+    if not (
+        float(score_next_primary["mean_spearman_score_vs_target_residual"]) > 0.5
+        and float(score_next_primary["spearman_ci95_low"]) > 0.0
+        and float(score_next_primary["mean_spearman_score_vs_target_residual"])
+        > float(score_next_early["mean_spearman_score_vs_target_residual"])
+        and float(score_next_legacy["mean_spearman_score_vs_target_residual"]) < 0.0
+        and score_next_gate_status.get("legacy_checkpoint_residual_spearman") == "pass"
+        and score_next_gate_status.get("primary_heldout_architecture") == "not_run"
+        and score_next_gate_status.get("primary_heldout_data") == "not_run"
+        and score_next_gate_status.get("p0_predictive_condition_claim") == "not_ready"
+    ):
+        raise AssertionError(
+            "condition-score v2 analysis must show a promising retrospective checkpoint result without claiming P0 completion"
+        )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -3872,6 +3921,25 @@ def main() -> None:
         raise AssertionError(
             f"condition-score protocol missing required content: {missing_condition_score_protocol}"
         )
+    condition_score_next = Path("discussion/e11_cifar100_resnet_condition_score_next.md").read_text(
+        encoding="utf-8"
+    )
+    required_condition_score_next_phrases = [
+        "Condition-Score v2 Retrospective Analysis",
+        "condition_score_v2_calibrated_residual",
+        "legacy scaled-JVP residual score remains negative",
+        "not yet the P0 predictive-condition result",
+        "held-out architecture and held-out data splits",
+        "p0_predictive_condition_claim",
+        "not_ready",
+    ]
+    missing_condition_score_next = [
+        phrase for phrase in required_condition_score_next_phrases if phrase not in condition_score_next
+    ]
+    if missing_condition_score_next:
+        raise AssertionError(
+            f"condition-score v2 retrospective analysis missing required content: {missing_condition_score_next}"
+        )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -3883,6 +3951,7 @@ def main() -> None:
         "P0-PredictiveCondition",
         "P0-StandardBenchmark",
         "discussion/e11_cifar100_resnet_condition_score_protocol.md",
+        "discussion/e11_cifar100_resnet_condition_score_next.md",
         "source-only calibrated residual condition score",
         "held-out architecture",
         "benchmark-level performance claim",
@@ -3934,6 +4003,7 @@ def main() -> None:
             Path("discussion/e11_research_direction_map.md"),
             Path("discussion/e11_paper_readiness_audit.md"),
             Path("discussion/e11_cifar100_resnet_condition_score_protocol.md"),
+            Path("discussion/e11_cifar100_resnet_condition_score_next.md"),
             Path("discussion/e11_top_conference_gap_register.md"),
             Path("discussion/e11_paper_skeleton.md"),
             Path("discussion/e11_main_paper_package.md"),
