@@ -33,6 +33,8 @@ python3 scripts/e11_run_long_tail_one_step.py
 python3 scripts/e11_run_cifar100_lt_one_step.py --device cpu --no-download
 sbatch scripts/slurm/e11_cifar100_resnet_one_step.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch
+sbatch scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch
+python3 scripts/e11_run_cifar100_resnet_condition_proxy_scatter.py
 sbatch scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_imbalance_sweep.sbatch
@@ -105,6 +107,12 @@ python3 -m pytest tests -q
 git diff --check
 ```
 
+On the shared GPU server, the verified test interpreter is
+`/data/conda_envs/SpatialQuantization/bin/python`, which has torch/torchvision.
+If that environment is missing pytest, install it into the user site with
+`/data/conda_envs/SpatialQuantization/bin/python -m pip install --user pytest`
+and then run `/data/conda_envs/SpatialQuantization/bin/python -m pytest tests -q`.
+
 Equivalent make targets:
 
 ```bash
@@ -137,6 +145,7 @@ Top-conference upgrade runner:
 
 ```bash
 make e11-cifar-resnet-checkpoint-sweep-results
+make e11-cifar-resnet-condition-proxy-results
 make e11-cifar-resnet-fc-condition-results
 make e11-cifar-resnet-tail-quality-results
 make e11-cifar-resnet-imbalance-sweep-results

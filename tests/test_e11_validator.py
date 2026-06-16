@@ -18,8 +18,36 @@ from e11_condition_geometry.artifacts import (
 )
 
 
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def script_identity_from_command(command: str) -> str | None:
+    parts = command.split()
+    if not parts:
+        return None
+    if parts[0] in {"python3", "$(PYTHON)"}:
+        return next((part for part in parts[1:] if part.startswith("scripts/e11_") and part.endswith(".py")), None)
+    if parts[0] == "sbatch":
+        wrapper = ROOT / parts[1]
+        wrapper_text = wrapper.read_text(encoding="utf-8")
+        match = re.search(r"(?:^|\s)\S*python(?:3)?\s+(scripts/e11_[^\s\\]+\.py)", wrapper_text)
+        assert match is not None, f"could not resolve Python runner from {wrapper}"
+        return match.group(1)
+    return None
+
+
+def dedupe_preserving_order(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    unique = []
+    for item in items:
+        if item not in seen:
+            seen.add(item)
+            unique.append(item)
+    return unique
+
+
 def load_validator_module():
-    path = Path(__file__).resolve().parents[1] / "scripts" / "e11_validate_outputs.py"
+    path = ROOT / "scripts" / "e11_validate_outputs.py"
     spec = importlib.util.spec_from_file_location("e11_validate_outputs", path)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
@@ -298,29 +326,42 @@ def test_appendix_runner_registry_has_descriptions() -> None:
 
 
 def test_main_evidence_registry_covers_main_result_scripts() -> None:
-    main_commands = [item["command"].removeprefix("python3 ") for item in MAIN_EVIDENCE_STAGES]
+    main_commands = [item["command"] for item in MAIN_EVIDENCE_STAGES]
+    stage_scripts = [
+        script
+        for item in MAIN_EVIDENCE_STAGES
+        for script in [script_identity_from_command(item["command"])]
+        if script is not None and script in MAIN_RESULT_SCRIPTS
+    ]
 
-    assert list(MAIN_RESULT_SCRIPTS) == main_commands[: len(MAIN_RESULT_SCRIPTS)]
-    assert "scripts/e11_write_mechanism_boundary.py" in main_commands
+    assert list(MAIN_RESULT_SCRIPTS) == dedupe_preserving_order(stage_scripts)
+    assert any("scripts/e11_write_mechanism_boundary.py" in command for command in main_commands)
     assert all(item["stage"].strip() and item["produces"].strip() for item in MAIN_EVIDENCE_STAGES)
 
 
-def test_makefile_main_target_matches_registry_order() -> None:
-    makefile = (Path(__file__).resolve().parents[1] / "Makefile").read_text(encoding="utf-8")
+def test_makefile_result_targets_cover_registry_scripts() -> None:
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
     start = makefile.index("e11-main-results:")
     end = makefile.index("\ne11-appendix-results:", start)
-    target_block = makefile[start:end]
+    result_target_block = makefile[start:end]
     commands = [
-        line.strip().removeprefix("$(PYTHON) ")
-        for line in target_block.splitlines()
-        if line.strip().startswith("$(PYTHON) ")
+        line.strip()
+        for line in result_target_block.splitlines()
+        if line.strip().startswith(("$(PYTHON) ", "sbatch "))
+    ]
+    scripts = [
+        script
+        for command in commands
+        for script in [script_identity_from_command(command)]
+        if script is not None
     ]
 
-    assert commands == list(MAIN_RESULT_SCRIPTS)
+    assert set(scripts) == set(MAIN_RESULT_SCRIPTS)
+    assert any(command.startswith("sbatch ") for command in commands)
 
 
 def test_makefile_appendix_target_matches_registry_order() -> None:
-    makefile = (Path(__file__).resolve().parents[1] / "Makefile").read_text(encoding="utf-8")
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
     start = makefile.index("e11-appendix-results:")
     end = makefile.index("\ne11-all-results:", start)
     target_block = makefile[start:end]
@@ -334,7 +375,7 @@ def test_makefile_appendix_target_matches_registry_order() -> None:
 
 
 def test_makefile_paper_pdf_target_is_part_of_full_gate() -> None:
-    makefile = (Path(__file__).resolve().parents[1] / "Makefile").read_text(encoding="utf-8")
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
 
     assert "e11-paper-pdf:" in makefile
     assert "$(MAKE) -C paper/specgrad_activation_paper" in makefile
@@ -344,7 +385,7 @@ def test_makefile_paper_pdf_target_is_part_of_full_gate() -> None:
 
 
 def test_readme_command_blocks_match_registry_order() -> None:
-    readme = (Path(__file__).resolve().parents[1] / "README_E11.md").read_text(encoding="utf-8")
+    readme = (ROOT / "README_E11.md").read_text(encoding="utf-8")
 
     core_match = re.search(r"Run the core experiment:\n\n```bash\n(?P<commands>.*?)\n```", readme, re.S)
     appendix_match = re.search(
@@ -355,11 +396,20 @@ def test_readme_command_blocks_match_registry_order() -> None:
     assert core_match is not None
     assert appendix_match is not None
 
-    def parse_commands(block: str) -> list[str]:
+    def parse_main_scripts(block: str) -> list[str]:
+        scripts = [
+            script
+            for line in block.splitlines()
+            for script in [script_identity_from_command(line)]
+            if script is not None
+        ]
+        return dedupe_preserving_order(scripts)
+
+    def parse_appendix_commands(block: str) -> list[str]:
         return [line.removeprefix("python3 ") for line in block.splitlines() if line.startswith("python3 scripts/e11_")]
 
-    assert parse_commands(core_match.group("commands")) == list(MAIN_RESULT_SCRIPTS)
-    assert parse_commands(appendix_match.group("commands")) == list(APPENDIX_RUNNER_SCRIPTS)
+    assert parse_main_scripts(core_match.group("commands")) == list(MAIN_RESULT_SCRIPTS)
+    assert parse_appendix_commands(appendix_match.group("commands")) == list(APPENDIX_RUNNER_SCRIPTS)
 
 
 def test_paper_asset_registry_order_preserves_dependencies() -> None:
