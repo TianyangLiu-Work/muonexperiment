@@ -758,6 +758,19 @@ def main() -> None:
     missing_makefile_phrases = [phrase for phrase in required_makefile_phrases if phrase not in makefile_text]
     if missing_makefile_phrases:
         raise AssertionError(f"Makefile missing required E11 reproduction entries: {missing_makefile_phrases}")
+    paper_makefile_text = Path("paper/specgrad_activation_paper/Makefile").read_text(encoding="utf-8")
+    required_paper_makefile_phrases = [
+        "tectonic: main-tectonic two-page-tectonic",
+        "$(TECTONIC) main.tex",
+        "$(TECTONIC) two_page.tex",
+    ]
+    missing_paper_makefile_phrases = [
+        phrase for phrase in required_paper_makefile_phrases if phrase not in paper_makefile_text
+    ]
+    if missing_paper_makefile_phrases:
+        raise AssertionError(
+            f"paper Makefile missing Tectonic fallback entries: {missing_paper_makefile_phrases}"
+        )
     gitattributes_text = Path(".gitattributes").read_text(encoding="utf-8")
     required_gitattributes_phrases = [
         "paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex linguist-generated=true",
@@ -846,6 +859,8 @@ def main() -> None:
         "paper-local `figures/*.png`",
         "## Local Build",
         "both the main paper and the two-page report",
+        "falls back to Tectonic",
+        "make tectonic",
     ]
     assert_required_phrases(
         "paper README root reproduction/build instructions",
@@ -3145,8 +3160,8 @@ def main() -> None:
         "\\EelevenCifarResNetOneStepTailAccuracyDropDiff",
         "\\EelevenCifarResNetOneStepTailAccuracyBefore",
         "\\EelevenCifarResNetOneStepMeanNrG",
-        "\\EelevenCifarResNetRho002DriftRatio",
-        "\\EelevenCifarResNetRho002TailLossDiff",
+        "\\EelevenCifarResNetRhoZeroZeroTwoDriftRatio",
+        "\\EelevenCifarResNetRhoZeroZeroTwoTailLossDiff",
         "\\EelevenCifarResNetCheckpointSweepSettings",
         "\\EelevenCifarResNetCheckpointSweepWorstWarmupSteps",
         "\\EelevenCifarResNetCheckpointSweepWorstDriftRatio",
@@ -3291,8 +3306,8 @@ def main() -> None:
         r"\EelevenCifarResNetOneStepDriftRatio",
         r"\EelevenCifarResNetOneStepTailLossDiff",
         r"\EelevenCifarResNetOneStepTailAccuracyDropDiff",
-        r"\EelevenCifarResNetRho002DriftRatio",
-        r"\EelevenCifarResNetRho002TailLossDiff",
+        r"\EelevenCifarResNetRhoZeroZeroTwoDriftRatio",
+        r"\EelevenCifarResNetRhoZeroZeroTwoTailLossDiff",
         r"\EelevenCifarResNetCheckpointSweepWorstDriftRatio",
         r"\EelevenCifarResNetCheckpointSweepTailAccuracyRange",
         r"\EelevenCifarResNetConditionProxyRankPearson",

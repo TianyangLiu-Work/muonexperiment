@@ -825,21 +825,21 @@ def main() -> None:
             fmt(cifar_resnet["mean_nrG"]),
         ),
         macro(
-            "EelevenCifarResNetRho002DriftRatio",
+            "EelevenCifarResNetRhoZeroZeroTwoDriftRatio",
             fmt(cifar_resnet_rho002["geomean_tail_output_drift_sq_ratio_spectral_over_fro"]),
         ),
         *ci_macros(
-            "EelevenCifarResNetRho002DriftRatio",
+            "EelevenCifarResNetRhoZeroZeroTwoDriftRatio",
             cifar_resnet_rho002,
             "tail_output_drift_sq_ratio_ci95_low",
             "tail_output_drift_sq_ratio_ci95_high",
         ),
         macro(
-            "EelevenCifarResNetRho002TailLossDiff",
+            "EelevenCifarResNetRhoZeroZeroTwoTailLossDiff",
             fmt(cifar_resnet_rho002["mean_tail_loss_increase_diff_spectral_minus_fro"]),
         ),
         *ci_macros(
-            "EelevenCifarResNetRho002TailLossDiff",
+            "EelevenCifarResNetRhoZeroZeroTwoTailLossDiff",
             cifar_resnet_rho002,
             "tail_loss_increase_diff_ci95_low",
             "tail_loss_increase_diff_ci95_high",

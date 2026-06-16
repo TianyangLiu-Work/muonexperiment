@@ -142,6 +142,14 @@ Use the local Makefile to build both the main paper and the two-page report:
 make
 ```
 
+The default target uses `pdflatex`/`bibtex` for `main.tex` and `xelatex` for
+`two_page.tex` when those engines are available. On machines without that
+toolchain, it falls back to Tectonic if `tectonic` is on `PATH`:
+
+```bash
+make tectonic
+```
+
 To build only the main paper, run:
 
 ```bash

@@ -65,8 +65,13 @@ reduce tail-example function drift at matched head gain.
   matched-head-gain drift, not final accuracy.
 - Every ResNet result includes seed count, target gain, checkpoint quality, and
   whether tail accuracy evidence is conclusive.
-- The repo has a working test environment with both `torch` and `pytest`.
+- The repo has a working test environment with both `torch` and `pytest`;
+  on the shared server the root `Makefile` now defaults to
+  `/data/conda_envs/SpatialQuantization/bin/python` when it exists.
 - The paper PDF builds from a clean checkout with `pdflatex`/`xelatex`.
+  Current server-side fallback builds with Tectonic are working for both the
+  main paper and two-page report; venue-final packaging should still be checked
+  once a full `pdflatex`/`xelatex` toolchain is available.
 
 ## Next Implementation Step
 

@@ -55,6 +55,26 @@ def load_validator_module():
     return module
 
 
+def load_artifact_manifest_module():
+    path = ROOT / "scripts" / "e11_write_artifact_manifest.py"
+    spec = importlib.util.spec_from_file_location("e11_write_artifact_manifest", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_artifact_manifest_size_ignores_python_caches(tmp_path: Path) -> None:
+    manifest = load_artifact_manifest_module()
+    package = tmp_path / "package"
+    cache = package / "__pycache__"
+    cache.mkdir(parents=True)
+    (package / "source.py").write_text("print('ok')\n", encoding="utf-8")
+    (cache / "source.cpython.pyc").write_bytes(b"x" * 1024)
+
+    assert manifest.path_size_bytes(package) == (package / "source.py").stat().st_size
+
+
 def test_overclaim_guard_rejects_unguarded_claim(tmp_path: Path) -> None:
     validator = load_validator_module()
     document = tmp_path / "bad.md"
@@ -382,6 +402,10 @@ def test_makefile_paper_pdf_target_is_part_of_full_gate() -> None:
     assert "e11-full: e11-paper-assets e11-paper-pdf e11-check" in makefile
     assert "e11-guardrail-assets:" in makefile
     assert "$(PYTHON) scripts/e11_write_legacy_guardrail_artifacts.py" in makefile
+    paper_makefile = (ROOT / "paper" / "specgrad_activation_paper" / "Makefile").read_text(encoding="utf-8")
+    assert "tectonic: main-tectonic two-page-tectonic" in paper_makefile
+    assert "$(TECTONIC) main.tex" in paper_makefile
+    assert "$(TECTONIC) two_page.tex" in paper_makefile
 
 
 def test_readme_command_blocks_match_registry_order() -> None:

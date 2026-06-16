@@ -109,6 +109,8 @@ git diff --check
 
 On the shared GPU server, the verified test interpreter is
 `/data/conda_envs/SpatialQuantization/bin/python`, which has torch/torchvision.
+The root `Makefile` defaults to that interpreter when it exists; pass
+`PYTHON=/path/to/python` to override it on another machine.
 If that environment is missing pytest, install it into the user site with
 `/data/conda_envs/SpatialQuantization/bin/python -m pip install --user pytest`
 and then run `/data/conda_envs/SpatialQuantization/bin/python -m pytest tests -q`.

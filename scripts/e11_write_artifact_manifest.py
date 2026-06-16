@@ -16,14 +16,24 @@ from e11_condition_geometry.reporting import markdown_table, write_markdown
 
 JSON_PATH = Path("results/e11_artifact_manifest.json")
 MARKDOWN_PATH = Path("discussion/e11_artifact_manifest.md")
+LOCAL_CACHE_DIR_NAMES = {"__pycache__", ".pytest_cache"}
+LOCAL_CACHE_SUFFIXES = {".pyc", ".pyo"}
+
+
+def is_local_cache_artifact(path: Path) -> bool:
+    return any(part in LOCAL_CACHE_DIR_NAMES for part in path.parts) or path.suffix in LOCAL_CACHE_SUFFIXES
 
 
 def path_size_bytes(path: Path) -> int:
     if not path.exists():
         return 0
     if path.is_file():
-        return path.stat().st_size
-    return sum(file.stat().st_size for file in path.rglob("*") if file.is_file())
+        return 0 if is_local_cache_artifact(path) else path.stat().st_size
+    return sum(
+        file.stat().st_size
+        for file in path.rglob("*")
+        if file.is_file() and not is_local_cache_artifact(file)
+    )
 
 
 def human_size(size: int) -> str:
