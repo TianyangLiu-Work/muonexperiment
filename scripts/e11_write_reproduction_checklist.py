@@ -23,6 +23,7 @@ def main() -> None:
         "Long-tailed one-step diagnostic",
         "CIFAR-100-LT MLP one-step diagnostic",
         "CIFAR-100-LT ResNet18 one-step diagnostic",
+        "CIFAR-100-LT ResNet18 smaller-head-gain check",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed Muon state-source control",
@@ -79,6 +80,8 @@ This generated checklist separates the minimal main-paper evidence from appendix
 make e11-main-results      # core trajectories, equal-update, head-to-tail probes, and spectral-allocation
 make e11-cifar-results     # CIFAR-100-LT MLP local matched-head-gain diagnostic
 make e11-cifar-resnet-results # submit the CIFAR-100-LT ResNet18 GPU diagnostic via Slurm
+make e11-cifar-resnet-rho002-results # submit the CIFAR-100-LT ResNet18 rho=0.002 robustness check via Slurm
+make e11-cifar-resnet-checkpoint-sweep-results # submit the top-conference ResNet checkpoint-quality sweep via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets

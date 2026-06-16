@@ -74,6 +74,7 @@ def main() -> None:
     one_step_metrics = pd.read_csv("results/e11_long_tail_one_step/step_metrics.csv")
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
+    cifar_resnet_rho002 = pd.read_csv("results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv").iloc[0]
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -594,6 +595,26 @@ def main() -> None:
         macro(
             "EelevenCifarResNetOneStepMeanNrG",
             fmt(cifar_resnet["mean_nrG"]),
+        ),
+        macro(
+            "EelevenCifarResNetRho002DriftRatio",
+            fmt(cifar_resnet_rho002["geomean_tail_output_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetRho002DriftRatio",
+            cifar_resnet_rho002,
+            "tail_output_drift_sq_ratio_ci95_low",
+            "tail_output_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetRho002TailLossDiff",
+            fmt(cifar_resnet_rho002["mean_tail_loss_increase_diff_spectral_minus_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetRho002TailLossDiff",
+            cifar_resnet_rho002,
+            "tail_loss_increase_diff_ci95_low",
+            "tail_loss_increase_diff_ci95_high",
         ),
         "",
         "% Local linearization quality",

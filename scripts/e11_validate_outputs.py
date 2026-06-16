@@ -1633,13 +1633,17 @@ def main() -> None:
     cifar_resnet_summary = pd.read_csv(Path("results/e11_cifar100_resnet_one_step") / "pair_summary.csv")
     cifar_resnet_layers = pd.read_csv(Path("results/e11_cifar100_resnet_one_step") / "layer_metrics.csv")
     cifar_resnet_config = json.loads((Path("results/e11_cifar100_resnet_one_step") / "config.json").read_text())
-    if len(cifar_resnet_steps) != 6 or len(cifar_resnet_layers) != 126:
-        raise AssertionError("CIFAR-100-LT ResNet18 one-step diagnostic must contain 3 seeds x 2 geometries")
-    if set(cifar_resnet_steps["geometry"]) != {"frobenius", "spectral"} or cifar_resnet_steps["seed"].nunique() != 3:
-        raise AssertionError("CIFAR-100-LT ResNet18 one-step diagnostic must compare Fro/GD and spectral on 3 seeds")
+    if len(cifar_resnet_steps) != 20 or len(cifar_resnet_layers) != 420:
+        raise AssertionError("CIFAR-100-LT ResNet18 one-step diagnostic must contain 10 seeds x 2 geometries")
+    if set(cifar_resnet_steps["geometry"]) != {"frobenius", "spectral"} or cifar_resnet_steps["seed"].nunique() != 10:
+        raise AssertionError("CIFAR-100-LT ResNet18 one-step diagnostic must compare Fro/GD and spectral on 10 seeds")
     if set(cifar_resnet_steps["updated_parameter_subset"]) != {"conv_and_linear_weights_only"}:
         raise AssertionError("CIFAR-100-LT ResNet18 diagnostic must update only Conv/Linear matrix weights")
-    if cifar_resnet_config["device"] != "cuda" or cifar_resnet_config["download"]:
+    if (
+        cifar_resnet_config["device"] != "cuda"
+        or cifar_resnet_config["download"]
+        or abs(float(cifar_resnet_config["target_head_gain_fraction"]) - 0.005) > 1e-12
+    ):
         raise AssertionError("CIFAR-100-LT ResNet18 diagnostic should be the Slurm/GPU no-download run")
     if len(cifar_resnet_summary) != 1:
         raise AssertionError("CIFAR-100-LT ResNet18 one-step summary must contain one paired-summary row")
@@ -1653,6 +1657,33 @@ def main() -> None:
         and cifar_resnet_row["tail_accuracy_drop_diff_ci95_high"] > 0.0
     ):
         raise AssertionError("CIFAR-100-LT ResNet18 diagnostic must preserve lower drift, lower tail-loss increase, and inconclusive accuracy")
+    cifar_resnet_rho_steps = pd.read_csv(Path("results/e11_cifar100_resnet_one_step_rho002") / "step_metrics.csv")
+    cifar_resnet_rho_summary = pd.read_csv(Path("results/e11_cifar100_resnet_one_step_rho002") / "pair_summary.csv")
+    cifar_resnet_rho_layers = pd.read_csv(Path("results/e11_cifar100_resnet_one_step_rho002") / "layer_metrics.csv")
+    cifar_resnet_rho_config = json.loads(
+        (Path("results/e11_cifar100_resnet_one_step_rho002") / "config.json").read_text()
+    )
+    if len(cifar_resnet_rho_steps) != 20 or len(cifar_resnet_rho_layers) != 420:
+        raise AssertionError("CIFAR-100-LT ResNet18 rho=0.002 diagnostic must contain 10 seeds x 2 geometries")
+    if set(cifar_resnet_rho_steps["geometry"]) != {"frobenius", "spectral"} or cifar_resnet_rho_steps["seed"].nunique() != 10:
+        raise AssertionError("CIFAR-100-LT ResNet18 rho=0.002 diagnostic must compare Fro/GD and spectral on 10 seeds")
+    if (
+        cifar_resnet_rho_config["device"] != "cuda"
+        or cifar_resnet_rho_config["download"]
+        or abs(float(cifar_resnet_rho_config["target_head_gain_fraction"]) - 0.002) > 1e-12
+    ):
+        raise AssertionError("CIFAR-100-LT ResNet18 rho=0.002 diagnostic should be the Slurm/GPU no-download run")
+    if len(cifar_resnet_rho_summary) != 1:
+        raise AssertionError("CIFAR-100-LT ResNet18 rho=0.002 summary must contain one paired-summary row")
+    cifar_resnet_rho_row = cifar_resnet_rho_summary.iloc[0]
+    if not (
+        cifar_resnet_rho_row["tail_output_drift_sq_ratio_ci95_high"] < 1.0
+        and cifar_resnet_rho_row["spectral_less_tail_output_drift_fraction"] == 1.0
+        and cifar_resnet_rho_row["tail_loss_increase_diff_ci95_high"] < 0.0
+        and cifar_resnet_rho_row["tail_accuracy_drop_diff_ci95_low"] < 0.0
+        and cifar_resnet_rho_row["tail_accuracy_drop_diff_ci95_high"] > 0.0
+    ):
+        raise AssertionError("CIFAR-100-LT ResNet18 rho=0.002 diagnostic must preserve lower drift and inconclusive accuracy")
     imbalance_steps = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv")
     imbalance_summary = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "summary.csv")
     if len(imbalance_steps) != 160:
@@ -2221,6 +2252,8 @@ def main() -> None:
         "\\EelevenCifarResNetOneStepTailAccuracyDropDiff",
         "\\EelevenCifarResNetOneStepTailAccuracyBefore",
         "\\EelevenCifarResNetOneStepMeanNrG",
+        "\\EelevenCifarResNetRho002DriftRatio",
+        "\\EelevenCifarResNetRho002TailLossDiff",
         "\\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         "\\EelevenLocalLinearizationMaxRelativeErrorDirection",
         "\\EelevenLongTailImbalanceAblationSettings",
@@ -2310,6 +2343,8 @@ def main() -> None:
         r"\EelevenCifarResNetOneStepDriftRatio",
         r"\EelevenCifarResNetOneStepTailLossDiff",
         r"\EelevenCifarResNetOneStepTailAccuracyDropDiff",
+        r"\EelevenCifarResNetRho002DriftRatio",
+        r"\EelevenCifarResNetRho002TailLossDiff",
         r"\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         r"\EelevenLocalLinearizationMaxRelativeErrorDirection",
         r"\EelevenLongTailImbalanceWorstRatioCiHigh",
@@ -2347,6 +2382,7 @@ def main() -> None:
     required_reproduction_phrases = [
         "make e11-main-results",
         "make e11-cifar-resnet-results",
+        "make e11-cifar-resnet-rho002-results",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -2361,6 +2397,7 @@ def main() -> None:
         "Head-to-tail interference probe",
         "Long-tailed one-step diagnostic",
         "CIFAR-100-LT ResNet18 one-step diagnostic",
+        "CIFAR-100-LT ResNet18 smaller-head-gain check",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -2380,6 +2417,7 @@ def main() -> None:
     current_reproduction_section = reproduction_checklist.split("## Background / Legacy E11 Evidence", 1)[0]
     required_current_reproduction_phrases = [
         "CIFAR-100-LT ResNet18 one-step diagnostic",
+        "CIFAR-100-LT ResNet18 smaller-head-gain check",
         "Long-tailed practical training diagnostic",
         "Long-tailed practical training LR sensitivity",
     ]
@@ -2607,6 +2645,22 @@ def main() -> None:
     missing_readiness = [phrase for phrase in required_readiness_phrases if phrase not in paper_readiness]
     if missing_readiness:
         raise AssertionError(f"paper-readiness audit missing required next-step content: {missing_readiness}")
+    top_conference_plan = Path("discussion/e11_top_conference_plan.md").read_text(encoding="utf-8")
+    required_top_conference_phrases = [
+        "Top-Conference Upgrade Plan",
+        "CIFAR-100-LT ResNet18 gives squared drift ratio",
+        "ResNet checkpoint-quality sweep",
+        "Natural-task condition scatter",
+        "Long-tail imbalance sweep",
+        "Practical optimizer bridge on CIFAR-100-LT",
+        "Acceptance Gates",
+        "working test environment with both `torch` and `pytest`",
+    ]
+    missing_top_conference = [
+        phrase for phrase in required_top_conference_phrases if phrase not in top_conference_plan
+    ]
+    if missing_top_conference:
+        raise AssertionError(f"top-conference plan missing required gates: {missing_top_conference}")
     readme = Path("README_E11.md").read_text(encoding="utf-8")
     if "## Main Entry Points" not in readme or "## Current Publication Gaps" not in readme:
         raise AssertionError("README_E11.md must document entry points and publication gaps")
@@ -2615,6 +2669,7 @@ def main() -> None:
         or "make e11-full" not in readme
         or "make e11-main-results" not in readme
         or "make e11-cifar-resnet-results" not in readme
+        or "make e11-cifar-resnet-rho002-results" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
     ):

@@ -18,17 +18,17 @@ from e11_condition_geometry.cifar100_resnet_tail import (
 )
 
 
-OUTPUT_DIR = Path("results/e11_cifar100_resnet_one_step")
-FIGURE_DIR = Path("figures/e11_cifar100_resnet_one_step")
-DISCUSSION_PATH = Path("discussion/e11_cifar100_resnet_one_step.md")
+DEFAULT_OUTPUT_DIR = Path("results/e11_cifar100_resnet_one_step")
+DEFAULT_FIGURE_DIR = Path("figures/e11_cifar100_resnet_one_step")
+DEFAULT_DISCUSSION_PATH = Path("discussion/e11_cifar100_resnet_one_step.md")
 
 
 def _fmt(value: float) -> str:
     return f"{value:.4g}"
 
 
-def write_figure(step_metrics, pair_summary) -> Path:
-    FIGURE_DIR.mkdir(parents=True, exist_ok=True)
+def write_figure(step_metrics, pair_summary, figure_dir: Path) -> Path:
+    figure_dir.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, 2, figsize=(9, 4))
     order = ["frobenius", "spectral"]
     colors = {"frobenius": "#D55E00", "spectral": "#0072B2"}
@@ -64,13 +64,19 @@ def write_figure(step_metrics, pair_summary) -> Path:
         f"[{row['tail_output_drift_sq_ratio_ci95_low']:.3g}, {row['tail_output_drift_sq_ratio_ci95_high']:.3g}]"
     )
     fig.tight_layout()
-    path = FIGURE_DIR / "cifar100_resnet_one_step_tail_response.png"
+    path = figure_dir / "cifar100_resnet_one_step_tail_response.png"
     fig.savefig(path, dpi=200)
     plt.close(fig)
     return path
 
 
-def write_discussion(config: Cifar100ResNetOneStepConfig, pair_summary, figure_path: Path) -> None:
+def write_discussion(
+    config: Cifar100ResNetOneStepConfig,
+    pair_summary,
+    figure_path: Path,
+    output_dir: Path,
+    discussion_path: Path,
+) -> None:
     row = pair_summary.iloc[0].to_dict()
     lines = [
         "# E11 CIFAR-100-LT ResNet18 One-Step Diagnostic",
@@ -119,12 +125,13 @@ def write_discussion(config: Cifar100ResNetOneStepConfig, pair_summary, figure_p
         "measurement.",
         "",
         "Artifacts:",
-        "- [step_metrics.csv](../results/e11_cifar100_resnet_one_step/step_metrics.csv)",
-        "- [pair_summary.csv](../results/e11_cifar100_resnet_one_step/pair_summary.csv)",
-        "- [layer_metrics.csv](../results/e11_cifar100_resnet_one_step/layer_metrics.csv)",
-        "- [config.json](../results/e11_cifar100_resnet_one_step/config.json)",
+        f"- [step_metrics.csv](../{(output_dir / 'step_metrics.csv').as_posix()})",
+        f"- [pair_summary.csv](../{(output_dir / 'pair_summary.csv').as_posix()})",
+        f"- [layer_metrics.csv](../{(output_dir / 'layer_metrics.csv').as_posix()})",
+        f"- [config.json](../{(output_dir / 'config.json').as_posix()})",
     ]
-    DISCUSSION_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    discussion_path.parent.mkdir(parents=True, exist_ok=True)
+    discussion_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def parse_args() -> argparse.Namespace:
@@ -139,6 +146,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=None)
     parser.add_argument("--head-batch-size", type=int, default=None)
     parser.add_argument("--lr", type=float, default=None)
+    parser.add_argument("--target-head-gain-fraction", type=float, default=None)
+    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--figure-dir", type=Path, default=DEFAULT_FIGURE_DIR)
+    parser.add_argument("--discussion-path", type=Path, default=DEFAULT_DISCUSSION_PATH)
     parser.add_argument("--download", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--progress", action="store_true")
     return parser.parse_args()
@@ -178,6 +189,8 @@ def config_from_args(args: argparse.Namespace) -> Cifar100ResNetOneStepConfig:
         config = replace(config, head_batch_size=args.head_batch_size)
     if args.lr is not None:
         config = replace(config, lr=args.lr)
+    if args.target_head_gain_fraction is not None:
+        config = replace(config, target_head_gain_fraction=args.target_head_gain_fraction)
     if args.download is not None:
         config = replace(config, download=args.download)
     return config
@@ -186,18 +199,21 @@ def config_from_args(args: argparse.Namespace) -> Cifar100ResNetOneStepConfig:
 def main() -> None:
     args = parse_args()
     config = config_from_args(args)
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    output_dir = args.output_dir
+    figure_dir = args.figure_dir
+    discussion_path = args.discussion_path
+    output_dir.mkdir(parents=True, exist_ok=True)
     step_metrics, pair_summary, layer_metrics = run_cifar100_resnet_one_step(config, progress=args.progress)
-    step_metrics.to_csv(OUTPUT_DIR / "step_metrics.csv", index=False)
-    pair_summary.to_csv(OUTPUT_DIR / "pair_summary.csv", index=False)
-    layer_metrics.to_csv(OUTPUT_DIR / "layer_metrics.csv", index=False)
-    (OUTPUT_DIR / "config.json").write_text(json.dumps(asdict(config), indent=2), encoding="utf-8")
-    figure_path = write_figure(step_metrics, pair_summary)
-    write_discussion(config, pair_summary, figure_path)
-    print(f"saved CIFAR-100-LT ResNet18 one-step results to {OUTPUT_DIR}")
+    step_metrics.to_csv(output_dir / "step_metrics.csv", index=False)
+    pair_summary.to_csv(output_dir / "pair_summary.csv", index=False)
+    layer_metrics.to_csv(output_dir / "layer_metrics.csv", index=False)
+    (output_dir / "config.json").write_text(json.dumps(asdict(config), indent=2), encoding="utf-8")
+    figure_path = write_figure(step_metrics, pair_summary, figure_dir)
+    write_discussion(config, pair_summary, figure_path, output_dir, discussion_path)
+    print(f"saved CIFAR-100-LT ResNet18 one-step results to {output_dir}")
     print(f"step rows={len(step_metrics)}, seeds={len(config.seeds)}")
     print(f"figure: {figure_path}")
-    print(f"discussion: {DISCUSSION_PATH}")
+    print(f"discussion: {discussion_path}")
     print(pair_summary.to_string(index=False))
 
 

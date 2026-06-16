@@ -23,6 +23,7 @@ def main() -> None:
     synthetic = pd.read_csv("results/e11_head_tail_interference/pair_summary.csv")
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
+    cifar_resnet_rho002 = pd.read_csv("results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv").iloc[0]
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -53,6 +54,9 @@ def main() -> None:
                     f"and tail-loss increase diff spectral-minus-Fro="
                     f"{fmt(cifar_resnet['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
                     f"CI={interval(cifar_resnet, 'tail_loss_increase_diff_ci95_low', 'tail_loss_increase_diff_ci95_high')}, "
+                    f"with target-head-gain 0.002 squared drift ratio="
+                    f"{fmt(cifar_resnet_rho002['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
                     f"but tail-accuracy-drop diff CI={interval(cifar_resnet, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')} crosses zero. "
                     f"The small practical training run has lower tail eval loss ratio="
                     f"{fmt(practical_training['geomean_final_tail_eval_loss_ratio_muon_over_adam'])} "
@@ -121,10 +125,13 @@ def main() -> None:
                     f"Current real-data evidence now includes sklearn digits with {int(one_step['seeds'])} paired seeds and a CIFAR-100-LT ResNet18 one-step diagnostic with "
                     f"{int(cifar_resnet['seeds'])} seeds; the ResNet squared drift ratio is "
                     f"{fmt(cifar_resnet['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
-                    f"CI={interval(cifar_resnet, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
+                    f"CI={interval(cifar_resnet, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
+                    f"A smaller-head-gain check at 0.002 gives ratio="
+                    f"{fmt(cifar_resnet_rho002['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
                 "safe_response": "Present the manuscript as a theory-and-diagnostic mechanism paper with an architecture robustness check, not a full long-tail benchmark paper.",
-                "remaining_work": "Increase CIFAR-100-LT seeds/checkpoint quality and add ImageNet-LT or iNaturalist-style matched-head-gain diagnostics before claiming benchmark-level generality.",
+                "remaining_work": "Add checkpoint-quality sweeps, ImageNet-LT or iNaturalist-style matched-head-gain diagnostics, and long-horizon practical baselines before claiming benchmark-level generality.",
             },
             {
                 "reviewer_objection": "There are too many legacy E11 artifacts and the main claim may be hard to follow.",
@@ -196,6 +203,7 @@ This generated audit lists likely reviewer objections for the current head-to-ta
 - [head-only forgetting probe](e11_long_tail_forgetting.md)
 - [long-tailed layerwise diagnostic](e11_long_tail_layerwise.md)
 - [CIFAR-100-LT ResNet18 one-step diagnostic](e11_cifar100_resnet_one_step.md)
+- [CIFAR-100-LT ResNet18 smaller-head-gain check](e11_cifar100_resnet_one_step_rho002.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

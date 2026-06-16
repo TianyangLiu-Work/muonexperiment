@@ -74,6 +74,9 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_one_step/step_metrics.csv",
     "results/e11_cifar100_resnet_one_step/pair_summary.csv",
     "results/e11_cifar100_resnet_one_step/layer_metrics.csv",
+    "results/e11_cifar100_resnet_one_step_rho002/step_metrics.csv",
+    "results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv",
+    "results/e11_cifar100_resnet_one_step_rho002/layer_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/summary.csv",
     "results/e11_long_tail_checkpoint_sweep/step_metrics.csv",
@@ -142,12 +145,14 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_end_of_draft_self_review.md",
     "discussion/e11_reference_audit.md",
     "discussion/e11_paper_readiness_audit.md",
+    "discussion/e11_top_conference_plan.md",
     "discussion/e11_evidence_index.md",
     "discussion/e11_research_synthesis.md",
     "discussion/e11_research_direction_map.md",
     "discussion/e11_claim_validity_audit.md",
     "discussion/e11_cifar100_lt_one_step.md",
     "discussion/e11_cifar100_resnet_one_step.md",
+    "discussion/e11_cifar100_resnet_one_step_rho002.md",
 )
 
 
@@ -246,7 +251,13 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "stage": "CIFAR-100-LT ResNet18 one-step diagnostic",
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_one_step.sbatch",
         "produces": "results/e11_cifar100_resnet_one_step/* and figures/e11_cifar100_resnet_one_step/*",
-        "paper_role": "GPU ResNet18 architecture robustness check for matched-head-gain tail drift.",
+        "paper_role": "GPU ResNet18 architecture robustness check for matched-head-gain tail drift at target head gain 0.005 times head loss.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 smaller-head-gain check",
+        "command": "sbatch scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch",
+        "produces": "results/e11_cifar100_resnet_one_step_rho002/* and figures/e11_cifar100_resnet_one_step_rho002/*",
+        "paper_role": "Target-head-gain scale robustness check for the CIFAR-100-LT ResNet18 diagnostic at 0.002 times head loss.",
     },
     {
         "stage": "Long-tailed imbalance ablation",

@@ -30,7 +30,7 @@ condition is
 |---|---|---|---|
 | Synthetic head-tail linear model | completed | The sign of `nrank(G_H) > ssrank(B_T,A_T)` matches whether spectral/polar has lower tail drift in controlled positive and negative boundary settings. | Synthetic construction controls singular values directly; it is a boundary sanity check, not a natural-data benchmark. |
 | Long-tailed digits one-step diagnostic | completed | On 20 paired seeds, spectral/polar produces lower held-out tail-example logit drift than Fro/GD after matching head first-order gain. | Tail loss and margin do not improve in the same direction; the supported quantity is tail-example logit drift. |
-| CIFAR-100-LT ResNet18 one-step diagnostic | completed | On 3 GPU-rerun seeds, a CIFAR-stem ResNet18 gives lower matched-head-gain squared tail-example logit drift: ratio `0.5369 [0.3943, 0.7312]`, with spectral lower in all seeds. | This is still a local one-step diagnostic with fixed BatchNorm state and Conv/Linear matrix-weight interventions, not a full long-tail optimizer benchmark. |
+| CIFAR-100-LT ResNet18 one-step diagnostic | completed | On 10 GPU-rerun seeds, a CIFAR-stem ResNet18 gives lower matched-head-gain squared tail-example logit drift: ratio `0.5611 [0.5224, 0.6026]`, with spectral lower in all seeds. A smaller-head-gain check at `rho=0.002 L_H` gives ratio `0.7761 [0.7585, 0.7941]`. | This is still a local one-step diagnostic with fixed BatchNorm state and Conv/Linear matrix-weight interventions, not a full long-tail optimizer benchmark. |
 | Long-tailed digits Muon bridge diagnostic | completed | `polar(M_t)` still has lower matched-head-gain tail drift than Fro/GD: squared drift ratio `0.8199 [0.6951, 0.9672]`. | Newton-Schulz `NS(M_t)` is weaker: `0.9116 [0.7696, 1.080]`, so this is a local bridge, not a full practical-Muon training claim. |
 | Short practical-Muon trajectory bridge | completed | Across 120 sampled state-step comparisons, `polar(M_t)` and `NS(M_t)` both have lower matched-head-gain squared tail-example logit drift than Fro/GD: ratios `0.7292 [0.6891, 0.7717]` and `0.8019 [0.7583, 0.848]`. | This is still a short local diagnostic on sampled states; it does not establish final tail accuracy, long-horizon training behavior, or hyperparameter robustness. |
 | Practical imbalanced-training diagnostic | completed | On the same small long-tailed digits task, NS-Muon-style training has lower final train loss, lower final tail eval loss, and lower tail output drift than Adam at the chosen lightweight hyperparameters. | Tail accuracy does not improve; this is not a tuned optimizer leaderboard and still needs larger long-tail benchmarks. |
@@ -44,6 +44,7 @@ condition is
 - One-step long-tail results: `results/e11_long_tail_one_step/`.
 - CIFAR-100-LT MLP results: `results/e11_cifar100_lt_one_step/`.
 - CIFAR-100-LT ResNet18 results: `results/e11_cifar100_resnet_one_step/`.
+- CIFAR-100-LT ResNet18 smaller-head-gain results: `results/e11_cifar100_resnet_one_step_rho002/`.
 - Muon bridge results: `results/e11_long_tail_muon_bridge/`.
 - Practical-Muon trajectory bridge results: `results/e11_long_tail_practical_muon_bridge/`.
 - Practical training results: `results/e11_long_tail_practical_training/`.

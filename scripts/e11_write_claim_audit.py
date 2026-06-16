@@ -30,6 +30,7 @@ def main() -> None:
     one_step_steps = pd.read_csv("results/e11_long_tail_one_step/step_metrics.csv")
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
+    cifar_resnet_rho002 = pd.read_csv("results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv").iloc[0]
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
@@ -70,7 +71,9 @@ def main() -> None:
                     f"{fmt(cifar_resnet['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={ci(cifar_resnet, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')} "
                     f"with spectral-lower fraction={fmt(cifar_resnet['spectral_less_tail_output_drift_fraction'])} "
-                    f"over {int(cifar_resnet['seeds'])} seeds."
+                    f"over {int(cifar_resnet['seeds'])} seeds. At target head gain 0.002, the ResNet squared drift ratio is "
+                    f"{fmt(cifar_resnet_rho002['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={ci(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
                 "main_loophole": "The result is about logits/function drift; the matched step is norm-specific, not uniformly smaller, and it is not a tail-accuracy claim.",
             },
@@ -86,6 +89,9 @@ def main() -> None:
                     f"CIFAR-100-LT ResNet18 has lower one-step tail-loss increase "
                     f"diff={fmt(cifar_resnet['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
                     f"CI={ci(cifar_resnet, 'tail_loss_increase_diff_ci95_low', 'tail_loss_increase_diff_ci95_high')}, "
+                    f"and at target head gain 0.002 the tail-loss increase diff is "
+                    f"{fmt(cifar_resnet_rho002['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
+                    f"CI={ci(cifar_resnet_rho002, 'tail_loss_increase_diff_ci95_low', 'tail_loss_increase_diff_ci95_high')}; "
                     f"but tail-accuracy-drop diff still crosses zero "
                     f"CI={ci(cifar_resnet, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')}."
                 ),
@@ -155,6 +161,11 @@ def main() -> None:
                 "role": "Larger visual-data architecture check for matched-head-gain tail drift under fixed BatchNorm state.",
             },
             {
+                "table": "CIFAR-100-LT ResNet18 smaller-head-gain check",
+                "path": "results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv",
+                "role": "Target-head-gain scale robustness check at 0.002 times head loss.",
+            },
+            {
                 "table": "Long-tail Muon-style compatibility",
                 "path": "results/e11_long_tail_muon_bridge/pair_summary.csv",
                 "role": "Fixed-checkpoint compatibility check for polar(G_t), polar(M_t), and Newton-Schulz directions under matched head gain.",
@@ -197,7 +208,7 @@ The current data do **not** justify saying that this already proves better tail 
 
 ## Strongest Remaining Loopholes
 
-1. The CIFAR-100-LT ResNet evidence is still a local one-step diagnostic with three seeds, not a modern long-tail benchmark or full benchmark.
+1. The CIFAR-100-LT ResNet evidence is still a local one-step diagnostic with 10 seeds and two target head-gain levels, not a modern long-tail benchmark or full benchmark.
 2. The Muon-style compatibility evidence is local and small-scale; real long-tail practical Muon training remains unchecked.
 3. The current performance evidence is weaker than the function-drift evidence.
 4. The detailed layerwise JVP mechanism has only been checked in the current small MLP.

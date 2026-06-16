@@ -30,6 +30,7 @@ def main() -> None:
     one_step_steps = pd.read_csv("results/e11_long_tail_one_step/step_metrics.csv")
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
+    cifar_resnet_rho002 = pd.read_csv("results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv").iloc[0]
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -67,7 +68,9 @@ def main() -> None:
                     f"CIFAR-100-LT ResNet18 squared drift ratio={fmt(cifar_resnet['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(cifar_resnet, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')} "
                     f"with spectral-lower fraction={fmt(cifar_resnet['spectral_less_tail_output_drift_fraction'])} over "
-                    f"{int(cifar_resnet['seeds'])} seeds."
+                    f"{int(cifar_resnet['seeds'])} seeds; the target-head-gain 0.002 check gives squared drift ratio="
+                    f"{fmt(cifar_resnet_rho002['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
                 "why_it_is_ready": "It is measured under the paper's matched-head-gain protocol with paired confidence intervals and explicit norm-specific scaling readouts.",
                 "remaining_risk": "The strongest new evidence is still a local diagnostic, not a retuned long-horizon long-tail benchmark.",
@@ -82,10 +85,13 @@ def main() -> None:
                     f"tail-loss increase diff spectral-minus-Fro={fmt(cifar_resnet['mean_tail_loss_increase_diff_spectral_minus_fro'])} "
                     f"CI={interval(cifar_resnet, 'tail_loss_increase_diff_ci95_low', 'tail_loss_increase_diff_ci95_high')}; "
                     f"tail-accuracy-drop diff={fmt(cifar_resnet['mean_tail_accuracy_drop_diff_spectral_minus_fro'])} "
-                    f"CI={interval(cifar_resnet, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')}."
+                    f"CI={interval(cifar_resnet, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')}; "
+                    f"the target-head-gain 0.002 check gives squared drift ratio="
+                    f"{fmt(cifar_resnet_rho002['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
                 "why_it_is_ready": "It was rerun on GPU with a convolutional architecture and CIFAR-100-LT split, addressing the pure two-layer-MLP concern.",
-                "remaining_risk": "Only three seeds and a one-step local intervention; BatchNorm/bias are frozen during the diagnostic and this is not a full practical Muon run.",
+                "remaining_risk": "Still a one-step local intervention; BatchNorm/bias are frozen during the diagnostic and this is not a full practical Muon run.",
             },
             {
                 "claim": "The condition nrank(G_H) > ssrank(B_T,A_T) is a useful mechanism boundary.",
@@ -184,7 +190,7 @@ def main() -> None:
             },
             {
                 "section": "Evidence",
-                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
+                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with a smaller-head-gain robustness check, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
             },
             {
                 "section": "Boundary",

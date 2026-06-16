@@ -5,43 +5,43 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 479744,
-      "size": "468.5 KB"
+      "size_bytes": 668786,
+      "size": "653.1 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1033457,
-      "size": "1009.2 KB"
+      "size_bytes": 1229012,
+      "size": "1.2 MB"
     },
     {
       "path": "tests",
       "role": "Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.",
       "commit_policy": "commit",
-      "size_bytes": 42350,
-      "size": "41.4 KB"
+      "size_bytes": 245532,
+      "size": "239.8 KB"
     },
     {
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 591323,
-      "size": "577.5 KB"
+      "size_bytes": 601269,
+      "size": "587.2 KB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 268218035,
-      "size": "255.8 MB"
+      "size_bytes": 268318102,
+      "size": "255.9 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 29221102,
-      "size": "27.9 MB"
+      "size_bytes": 29403134,
+      "size": "28.0 MB"
     },
     {
       "path": "configs",
@@ -54,15 +54,15 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 3315607,
+      "size_bytes": 3316471,
       "size": "3.2 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 3089,
-      "size": "3.0 KB"
+      "size_bytes": 3415,
+      "size": "3.3 KB"
     },
     {
       "path": ".gitignore",
@@ -132,8 +132,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_one_step/step_metrics.csv",
-      "rows": 6,
-      "size": "6.7 KB"
+      "rows": 20,
+      "size": "19.5 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_one_step/pair_summary.csv",
@@ -142,8 +142,23 @@
     },
     {
       "path": "results/e11_cifar100_resnet_one_step/layer_metrics.csv",
-      "rows": 126,
-      "size": "10.1 KB"
+      "rows": 420,
+      "size": "33.5 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_one_step_rho002/step_metrics.csv",
+      "rows": 20,
+      "size": "19.6 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv",
+      "rows": 1,
+      "size": "6.1 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_one_step_rho002/layer_metrics.csv",
+      "rows": 420,
+      "size": "33.5 KB"
     },
     {
       "path": "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
@@ -404,7 +419,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "17.2 KB"
+      "size": "18.2 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -428,11 +443,11 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "15.9 KB"
+      "size": "16.4 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
-      "size": "13.6 KB"
+      "size": "14.5 KB"
     },
     {
       "path": "discussion/e11_pasted_review_audit.md",
@@ -452,7 +467,11 @@
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
-      "size": "14.9 KB"
+      "size": "16.0 KB"
+    },
+    {
+      "path": "discussion/e11_top_conference_plan.md",
+      "size": "4.3 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",
@@ -468,7 +487,7 @@
     },
     {
       "path": "discussion/e11_claim_validity_audit.md",
-      "size": "8.6 KB"
+      "size": "9.9 KB"
     },
     {
       "path": "discussion/e11_cifar100_lt_one_step.md",
@@ -476,6 +495,10 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_one_step.md",
+      "size": "2.5 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_resnet_one_step_rho002.md",
       "size": "2.5 KB"
     }
   ],
