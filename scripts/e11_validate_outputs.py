@@ -584,6 +584,15 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "config.json",
         Path("figures/e11_cifar100_resnet_layer_jvp_tail_quality") / "cifar100_resnet_layer_jvp_tail_quality.png",
         Path("discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md"),
+        Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "metrics.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "paired_metrics.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "layer_summary.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "checkpoint_summary.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "prediction_pairs.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "prediction_summary.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "config.json",
+        Path("figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        Path("discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md"),
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "summary.csv",
@@ -650,6 +659,7 @@ def main() -> None:
         Path("paper/specgrad_activation_paper/figures") / "long_tail_head_only_forgetting.png",
         Path("paper/specgrad_activation_paper/figures") / "long_tail_layerwise_drift.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_tail_quality.png",
+        Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_practical_muon_bridge.png",
         Path("paper/specgrad_activation_paper/tables") / "head_tail_empirical_results.tex",
         Path("paper/specgrad_activation_paper/tables") / "local_linearization_errors.tex",
@@ -742,9 +752,11 @@ def main() -> None:
         "make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downstream-aware condition diagnostic via Slurm",
         "make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm",
         "make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm",
+        "make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results # submit the all-layer ResNet JVP checkpoint-transfer benchmark via Slurm",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
         "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
         "An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points",
+        "An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs",
         "make e11-all-results",
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
@@ -969,6 +981,7 @@ def main() -> None:
         "figures/long_tail_muon_state_source_control.png",
         "figures/long_tail_head_only_forgetting.png",
         "figures/long_tail_layerwise_drift.png",
+        "figures/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         "figures/cifar100_resnet_practical_muon_bridge.png",
         "momentum-gradient alignment",
         "Tianyang Liu",
@@ -1261,6 +1274,7 @@ def main() -> None:
         "long_tail_head_only_forgetting.png",
         "long_tail_layerwise_drift.png",
         "cifar100_resnet_layer_jvp_tail_quality.png",
+        "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         "cifar100_resnet_practical_muon_bridge.png",
         "tables/",
         "e11_paper_numbers.tex",
@@ -1953,6 +1967,102 @@ def main() -> None:
         raise AssertionError(
             "CIFAR-100-LT ResNet18 all-layer JVP diagnostic must preserve lower scaled-JVP and observed drift"
         )
+    checkpoint_prediction_dir = Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction")
+    cifar_resnet_layer_jvp_checkpoint_metrics = pd.read_csv(checkpoint_prediction_dir / "metrics.csv")
+    cifar_resnet_layer_jvp_checkpoint_paired = pd.read_csv(checkpoint_prediction_dir / "paired_metrics.csv")
+    cifar_resnet_layer_jvp_checkpoint_layer_summary = pd.read_csv(checkpoint_prediction_dir / "layer_summary.csv")
+    cifar_resnet_layer_jvp_checkpoint_summary = pd.read_csv(checkpoint_prediction_dir / "checkpoint_summary.csv")
+    cifar_resnet_layer_jvp_checkpoint_prediction_pairs = pd.read_csv(checkpoint_prediction_dir / "prediction_pairs.csv")
+    cifar_resnet_layer_jvp_checkpoint_prediction_summary = pd.read_csv(
+        checkpoint_prediction_dir / "prediction_summary.csv"
+    )
+    cifar_resnet_layer_jvp_checkpoint_config = json.loads(
+        (checkpoint_prediction_dir / "config.json").read_text()
+    )
+    expected_checkpoint_prediction_steps = {2000, 5000, 10000}
+    expected_checkpoint_prediction_predictors = {
+        "source_scaled_jvp_ratio",
+        "source_unit_jvp_ratio",
+        "source_alignment_ratio",
+        "source_gradient_nuclear_rank",
+    }
+    if (
+        len(cifar_resnet_layer_jvp_checkpoint_metrics) != 1260
+        or len(cifar_resnet_layer_jvp_checkpoint_paired) != 630
+        or len(cifar_resnet_layer_jvp_checkpoint_layer_summary) != 63
+        or len(cifar_resnet_layer_jvp_checkpoint_summary) != 3
+        or len(cifar_resnet_layer_jvp_checkpoint_prediction_pairs) != 24
+        or len(cifar_resnet_layer_jvp_checkpoint_prediction_summary) != 4
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must contain 3 checkpoints x 10 seeds x 21 layers"
+        )
+    if not (
+        set(cifar_resnet_layer_jvp_checkpoint_metrics["warmup_steps"])
+        == expected_checkpoint_prediction_steps
+        and set(cifar_resnet_layer_jvp_checkpoint_paired["warmup_steps"])
+        == expected_checkpoint_prediction_steps
+        and set(cifar_resnet_layer_jvp_checkpoint_summary["warmup_steps"])
+        == expected_checkpoint_prediction_steps
+        and cifar_resnet_layer_jvp_checkpoint_metrics["seed"].nunique() == 10
+        and cifar_resnet_layer_jvp_checkpoint_metrics["parameter"].nunique() == 21
+        and cifar_resnet_layer_jvp_checkpoint_layer_summary["parameter"].nunique() == 21
+        and set(cifar_resnet_layer_jvp_checkpoint_metrics["geometry"]) == {"frobenius", "spectral"}
+        and set(cifar_resnet_layer_jvp_checkpoint_prediction_summary["predictor"])
+        == expected_checkpoint_prediction_predictors
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must cover 10 seeds, 21 layers, and four pre-registered predictors"
+        )
+    base_checkpoint_prediction_config = cifar_resnet_layer_jvp_checkpoint_config["base_config"]
+    if (
+        base_checkpoint_prediction_config["device"] != "cuda"
+        or base_checkpoint_prediction_config["download"]
+        or abs(float(base_checkpoint_prediction_config["target_head_gain_fraction"]) - 0.005) > 1e-12
+        or len(base_checkpoint_prediction_config["seeds"]) != 10
+        or int(base_checkpoint_prediction_config["head_train_per_class"]) != 300
+        or int(base_checkpoint_prediction_config["tail_train_per_class"]) != 300
+        or set(cifar_resnet_layer_jvp_checkpoint_config["warmup_steps"])
+        != expected_checkpoint_prediction_steps
+        or abs(float(cifar_resnet_layer_jvp_checkpoint_config["jvp_epsilon"]) - 1e-4) > 1e-12
+        or cifar_resnet_layer_jvp_checkpoint_config["max_matrix_parameters"] is not None
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 JVP checkpoint prediction should be the full tail-rich Slurm/GPU no-download run"
+        )
+    if not (
+        (cifar_resnet_layer_jvp_checkpoint_summary["parameters"] == 21).all()
+        and (cifar_resnet_layer_jvp_checkpoint_summary["paired_points"] == 210).all()
+        and (cifar_resnet_layer_jvp_checkpoint_summary["seeds"] == 10).all()
+        and (cifar_resnet_layer_jvp_checkpoint_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (cifar_resnet_layer_jvp_checkpoint_summary["scaled_jvp_tail_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (cifar_resnet_layer_jvp_checkpoint_summary["spectral_less_observed_tail_drift_fraction"] == 1.0).all()
+        and (cifar_resnet_layer_jvp_checkpoint_summary["spectral_less_scaled_jvp_tail_drift_fraction"] == 1.0).all()
+        and (cifar_resnet_layer_jvp_checkpoint_layer_summary["seeds"] == 10).all()
+        and (cifar_resnet_layer_jvp_checkpoint_layer_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).all()
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must preserve lower directional drift across checkpoints"
+        )
+    checkpoint_prediction_by_predictor = cifar_resnet_layer_jvp_checkpoint_prediction_summary.set_index(
+        "predictor"
+    )
+    scaled_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["source_scaled_jvp_ratio"]
+    unit_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["source_unit_jvp_ratio"]
+    rank_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["source_gradient_nuclear_rank"]
+    if not (
+        int(scaled_checkpoint_prediction["checkpoint_transfer_pairs"]) == 6
+        and abs(float(scaled_checkpoint_prediction["mean_threshold_below_one_accuracy"]) - 1.0) < 1e-12
+        and abs(float(scaled_checkpoint_prediction["mean_top5_risk_overlap_fraction"]) - 0.2) < 1e-12
+        and float(scaled_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"]) < 0.0
+        and float(scaled_checkpoint_prediction["spearman_ci95_high"]) < 0.0
+        and float(unit_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"])
+        < float(scaled_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"])
+        and float(rank_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"]) < 0.0
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must preserve the current boundary result: threshold transfers, ranking does not"
+        )
     cifar_resnet_practical_metrics = pd.read_csv(
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv"
     )
@@ -2466,6 +2576,7 @@ def main() -> None:
         "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png",
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
         "figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png",
+        "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
         "seven figures plus one generated table",
         "paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex",
@@ -2982,12 +3093,15 @@ def main() -> None:
         "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png",
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
         "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
+        "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         "squared drift ratio=0.5501",
         "head-alignment ratio=2.083",
         "Frobenius-norm ratio=3.112",
         "operator-norm ratio=0.5543",
         "polar(M_t) squared drift ratio=0.8199",
         "trajectory NS(M_t) squared drift ratio=0.8019",
+        "scaled-JVP threshold accuracy=1",
+        "scaled-JVP held-out Spearman=-0.3203",
         "final squared drift ratio=0.6167",
         "broad tail-accuracy or benchmark improvement",
         "narrow tail-loss/margin diagnostic",

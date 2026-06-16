@@ -46,6 +46,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
     )
+    cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
+    ).set_index("predictor")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -94,6 +97,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
     )
+    cifar_resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "source_scaled_jvp_ratio"
+    ]
+    cifar_resnet_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "source_unit_jvp_ratio"
+    ]
 
     claim_status = pd.DataFrame(
         [
@@ -128,10 +137,15 @@ def main() -> None:
                     f"The all-layer ResNet JVP diagnostic at the tail-rich checkpoint gives observed squared drift ratio "
                     f"{fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(cifar_resnet_layer_jvp, 'observed_tail_drift_sq_ratio_ci95_low', 'observed_tail_drift_sq_ratio_ci95_high')} "
-                    f"over {int(cifar_resnet_layer_jvp['paired_points'])} paired layer/seed points."
+                    f"over {int(cifar_resnet_layer_jvp['paired_points'])} paired layer/seed points. "
+                    f"The held-out checkpoint-transfer version keeps scaled-JVP threshold accuracy at "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_scaled['mean_threshold_below_one_accuracy'])}, "
+                    f"but its held-out layer-risk Spearman is "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}."
                 ),
                 "why_it_is_ready": "It is measured under the paper's matched-head-gain protocol with paired confidence intervals and explicit norm-specific scaling readouts.",
-                "remaining_risk": "The tail-rich control weakens the weak-tail-predictor objection, but the strongest evidence is still local diagnostics rather than a standard long-tail benchmark.",
+                "remaining_risk": "The tail-rich control weakens the weak-tail-predictor objection, but the checkpoint-transfer result shows that the current local JVP score is not yet a held-out layer-ranking predictor.",
             },
             {
                 "claim": "The matched-head-gain drift readout survives a more appropriate CIFAR-100-LT ResNet architecture.",
@@ -181,10 +195,14 @@ def main() -> None:
                     f"The all-layer ResNet JVP tail-quality diagnostic covers "
                     f"{int(cifar_resnet_layer_jvp['parameters'])} Conv/Linear weights; "
                     f"{cifar_resnet_layer_jvp_supported_layers}/{int(cifar_resnet_layer_jvp['parameters'])} observed per-layer CI upper endpoints are below one, "
-                    f"with overall scaled-JVP ratio={fmt(cifar_resnet_layer_jvp['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}."
+                    f"with overall scaled-JVP ratio={fmt(cifar_resnet_layer_jvp['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])}. "
+                    f"Across held-out checkpoints, scaled-JVP is less inverted than unit-JVP "
+                    f"({fmt(cifar_resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} vs "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_unit['mean_spearman_log_predictor_vs_log_target_observed'])}), "
+                    f"but both are negative for layer-risk ranking."
                 ),
                 "why_it_is_ready": "The synthetic construction flips the theory inequality and the observed tail drift direction flips with it.",
-                "remaining_risk": "The all-layer ResNet bridge is finite-difference local evidence, not a long-horizon optimizer or held-out benchmark predictor.",
+                "remaining_risk": "The all-layer ResNet bridge is finite-difference local evidence. The checkpoint-transfer benchmark is a useful boundary result, not yet a positive held-out predictor.",
             },
             {
                 "claim": "The mechanism is norm-specific scaled head-gain efficiency, not lower unit-direction tail sensitivity.",
@@ -296,13 +314,13 @@ def main() -> None:
                 "priority": "partly complete; extend for predictive condition claim",
                 "experiment": "Larger-architecture layerwise diagnostic",
                 "purpose": "Check whether the scaled head-gain mechanism persists across layers in deeper models.",
-                "minimum_standard": "The ResNet all-layer JVP diagnostic now gives unit JVP, scaled JVP, observed drift, and layer contribution for Conv/Linear weights; a stronger version should pre-register downstream-aware condition scores and test held-out architecture/checkpoint prediction.",
+                "minimum_standard": "The ResNet all-layer JVP diagnostic now gives unit JVP, scaled JVP, observed drift, and layer contribution for Conv/Linear weights. The held-out checkpoint-transfer run exposes negative layer-risk transfer, so a stronger version needs a better downstream-aware condition score and held-out architecture/dataset splits.",
             },
             {
                 "priority": "should-have",
                 "experiment": "Held-out boundary prediction benchmark",
                 "purpose": "Determine whether nrank-vs-ssrank is predictive beyond constructed settings.",
-                "minimum_standard": "The ResNet rank-only proxy scatter is a caveat, while final-layer and all-layer JVP diagnostics are local bridges; the next benchmark should include downstream-aware tail sensitivity with pre-specified held-out family/architecture splits.",
+                "minimum_standard": "The checkpoint-transfer benchmark is now a negative boundary check for layer ranking; the next benchmark should improve the condition score and include pre-specified held-out family/architecture splits.",
             },
             {
                 "priority": "should-have",
@@ -357,6 +375,7 @@ In long-tailed small-batch training, head-only updates can perturb held-out tail
 - [CIFAR-100-LT ResNet18 final-layer condition scatter](e11_cifar100_resnet_fc_condition_scatter.md)
 - [CIFAR-100 ResNet18 tail-quality control](e11_cifar100_resnet_tail_quality_control.md)
 - [CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic](e11_cifar100_resnet_layer_jvp_tail_quality.md)
+- [CIFAR-100-LT ResNet18 all-layer JVP checkpoint-transfer benchmark](e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

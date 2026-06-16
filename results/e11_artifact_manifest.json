@@ -5,15 +5,15 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 741412,
-      "size": "724.0 KB"
+      "size_bytes": 743697,
+      "size": "726.3 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1708837,
-      "size": "1.6 MB"
+      "size_bytes": 1781242,
+      "size": "1.7 MB"
     },
     {
       "path": "tests",
@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 680203,
-      "size": "664.3 KB"
+      "size_bytes": 695949,
+      "size": "679.6 KB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 269695724,
-      "size": "257.2 MB"
+      "size_bytes": 271183655,
+      "size": "258.6 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 30395496,
-      "size": "29.0 MB"
+      "size_bytes": 30522725,
+      "size": "29.1 MB"
     },
     {
       "path": "configs",
@@ -54,15 +54,15 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 3884685,
-      "size": "3.7 MB"
+      "size_bytes": 4015454,
+      "size": "3.8 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 4997,
-      "size": "4.9 KB"
+      "size_bytes": 5334,
+      "size": "5.2 KB"
     },
     {
       "path": ".gitignore",
@@ -239,6 +239,36 @@
       "path": "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv",
       "rows": 1,
       "size": "1.4 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/metrics.csv",
+      "rows": 1260,
+      "size": "1.2 MB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/paired_metrics.csv",
+      "rows": 630,
+      "size": "209.1 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/layer_summary.csv",
+      "rows": 63,
+      "size": "18.2 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/checkpoint_summary.csv",
+      "rows": 3,
+      "size": "1.1 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_pairs.csv",
+      "rows": 24,
+      "size": "4.4 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv",
+      "rows": 4,
+      "size": "1.1 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
@@ -519,7 +549,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "25.6 KB"
+      "size": "27.5 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -527,7 +557,7 @@
     },
     {
       "path": "discussion/e11_main_paper_package.md",
-      "size": "12.5 KB"
+      "size": "13.4 KB"
     },
     {
       "path": "discussion/e11_main_figure_captions.md",
@@ -543,7 +573,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "20.0 KB"
+      "size": "21.7 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -567,15 +597,15 @@
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
-      "size": "20.9 KB"
+      "size": "22.9 KB"
     },
     {
       "path": "discussion/e11_top_conference_plan.md",
-      "size": "8.5 KB"
+      "size": "9.5 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",
-      "size": "15.8 KB"
+      "size": "18.0 KB"
     },
     {
       "path": "discussion/e11_research_synthesis.md",
@@ -620,6 +650,10 @@
     {
       "path": "discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md",
       "size": "13.8 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md",
+      "size": "5.7 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_practical_muon_bridge.md",

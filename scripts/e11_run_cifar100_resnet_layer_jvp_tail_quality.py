@@ -129,6 +129,7 @@ def run_layer_jvp_probe(
     config: Cifar100ResNetOneStepConfig,
     *,
     jvp_epsilon: float,
+    max_matrix_parameters: int | None = None,
     progress: bool,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     random.seed(0)
@@ -171,6 +172,8 @@ def run_layer_jvp_probe(
         base_tail = full_metrics(model, test_x, test_y, tail_eval)
         base_head_loss = float(head_loss.detach().cpu())
         profiles = layer_profiles(matrix_named_parameters(model))
+        if max_matrix_parameters is not None:
+            profiles = profiles[: int(max_matrix_parameters)]
         if progress:
             print(f"[resnet-layer-jvp] seed={seed}: probing {len(profiles)} matrix layers", flush=True)
 
@@ -608,6 +611,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--head-batch-size", type=int, default=None)
     parser.add_argument("--lr", type=float, default=None)
     parser.add_argument("--jvp-epsilon", type=float, default=1e-4)
+    parser.add_argument("--max-matrix-parameters", type=int, default=None)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--figure-dir", type=Path, default=DEFAULT_FIGURE_DIR)
     parser.add_argument("--discussion-path", type=Path, default=DEFAULT_DISCUSSION_PATH)
@@ -662,6 +666,7 @@ def main() -> None:
     metrics, paired, summary, overall = run_layer_jvp_probe(
         config,
         jvp_epsilon=args.jvp_epsilon,
+        max_matrix_parameters=args.max_matrix_parameters,
         progress=args.progress,
     )
     metrics.to_csv(args.output_dir / "metrics.csv", index=False)
@@ -673,6 +678,7 @@ def main() -> None:
             {
                 "base_config": asdict(config),
                 "jvp_epsilon": float(args.jvp_epsilon),
+                "max_matrix_parameters": args.max_matrix_parameters,
             },
             indent=2,
         )

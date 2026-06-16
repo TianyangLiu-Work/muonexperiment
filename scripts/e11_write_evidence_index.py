@@ -48,6 +48,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
     )
+    cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
+    ).set_index("predictor")
     cifar_resnet_practical_bridge = pd.read_csv(
         "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv"
     ).set_index(["state_source", "direction"])
@@ -65,6 +68,8 @@ def main() -> None:
     )
     resnet_adam_ns = cifar_resnet_practical_bridge.loc[("adamw_matrix_trajectory", "ns_momentum")]
     resnet_muon_ns = cifar_resnet_practical_bridge.loc[("ns_muon_matrix_trajectory", "ns_momentum")]
+    resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_scaled_jvp_ratio"]
+    resnet_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_unit_jvp_ratio"]
 
     evidence = pd.DataFrame(
         [
@@ -251,6 +256,25 @@ def main() -> None:
                 ),
                 "how_to_read": "Every Conv/Linear matrix weight is probed by finite-difference JVP and layer-only matched-head-gain intervention at the tail-rich ResNet checkpoint.",
                 "caveat": "This is local mechanism evidence at one tail-rich checkpoint family, not a practical optimizer benchmark.",
+            },
+            {
+                "claim": "The held-out checkpoint-transfer benchmark exposes a predictive boundary for the local JVP signal.",
+                "recommended_figure": link(
+                    "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png"
+                ),
+                "source_data": link("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"),
+                "quantitative_anchor": (
+                    f"scaled-JVP threshold accuracy="
+                    f"{fmt(resnet_jvp_checkpoint_scaled['mean_threshold_below_one_accuracy'])}; "
+                    f"scaled-JVP held-out Spearman="
+                    f"{fmt(resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"{ci(resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"unit-JVP held-out Spearman="
+                    f"{fmt(resnet_jvp_checkpoint_unit['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"{ci(resnet_jvp_checkpoint_unit, 'spearman_ci95_low', 'spearman_ci95_high')}."
+                ),
+                "how_to_read": "The all-checkpoint directional below-one result transfers, but layer-risk ranking across checkpoints does not.",
+                "caveat": "This is a useful negative transfer result: the current downstream-aware JVP readout is not yet a held-out layer-risk predictor.",
             },
             {
                 "claim": "The current evidence does not prove broad tail-accuracy or benchmark improvement.",

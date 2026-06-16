@@ -45,6 +45,7 @@ specgrad_activation_paper/
 │   ├── long_tail_muon_state_source_control.png
 │   ├── long_tail_rho_sweep.png
 │   ├── cifar100_resnet_layer_jvp_tail_quality.png
+│   ├── cifar100_resnet_layer_jvp_checkpoint_prediction.png
 │   ├── cifar100_resnet_practical_muon_bridge.png
 │   └── long_tail_practical_training.png
 ├── tables/
@@ -83,6 +84,7 @@ or the higher-level `make e11-paper-assets` target. The source figures remain:
 - `figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png`
 - `figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png`
 - `figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png`
+- `figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png`
 - `figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png`
 
 `scripts/e11_validate_outputs.py` checks that the `\includegraphics` paths in

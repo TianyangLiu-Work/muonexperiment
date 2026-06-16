@@ -33,6 +33,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
     )
+    cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
+    ).set_index("predictor")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     cifar_resnet_practical_bridge = pd.read_csv(
@@ -65,6 +68,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
     )
+    cifar_resnet_layer_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "source_scaled_jvp_ratio"
+    ]
     layer1 = layerwise.set_index("layer").loc[1]
     layer2 = layerwise.set_index("layer").loc[2]
     cifar_resnet_practical_adam_ns = cifar_resnet_practical_bridge.loc[
@@ -200,6 +206,21 @@ def main() -> None:
             + "/"
             + fmt(cifar_resnet_layer_jvp["parameters"])
             + " layer CI upper endpoints below 1; tail-rich local JVP diagnostic \\\\"
+        ),
+        (
+            "CIFAR-100-LT ResNet18 checkpoint-transfer JVP & scaled-JVP threshold accuracy "
+            + fmt(cifar_resnet_layer_jvp_checkpoint_scaled["mean_threshold_below_one_accuracy"])
+            + "; held-out Spearman "
+            + ci(
+                cifar_resnet_layer_jvp_checkpoint_scaled[
+                    "mean_spearman_log_predictor_vs_log_target_observed"
+                ],
+                cifar_resnet_layer_jvp_checkpoint_scaled["spearman_ci95_low"],
+                cifar_resnet_layer_jvp_checkpoint_scaled["spearman_ci95_high"],
+            )
+            + " & "
+            + fmt(cifar_resnet_layer_jvp_checkpoint_scaled["checkpoint_transfer_pairs"])
+            + " directed checkpoint-transfer pairs; layer ranking does not transfer \\\\"
         ),
         (
             "CIFAR-100-LT ResNet18 practical Muon bridge & AdamW-state NS$(M_t)$ "

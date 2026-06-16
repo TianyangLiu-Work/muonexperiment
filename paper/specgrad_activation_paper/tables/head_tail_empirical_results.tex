@@ -16,6 +16,7 @@ CIFAR-100-LT ResNet18 checkpoint sweep & worst drift 0.5611 [0.5224, 0.6026] at 
 CIFAR-100-LT ResNet18 final-layer condition & worst drift 0.2391 [0.2201, 0.2597] at 5.00e+02 steps & weakest mean nrank/srank score 6.566; final-layer-only downstream-aware check \\
 CIFAR-100 ResNet18 tail-quality control & worst drift 0.7292 [0.6923, 0.768] & best pre-update tail accuracy 0.3739 [0.3454, 0.4024]; tail-rich checkpoint control \\
 CIFAR-100-LT ResNet18 all-layer JVP & observed 0.2011 [0.1845, 0.2192]; scaled JVP 0.065 [0.06008, 0.07031] & 21/21 layer CI upper endpoints below 1; tail-rich local JVP diagnostic \\
+CIFAR-100-LT ResNet18 checkpoint-transfer JVP & scaled-JVP threshold accuracy 1; held-out Spearman -0.3203 [-0.3562, -0.2845] & 6 directed checkpoint-transfer pairs; layer ranking does not transfer \\
 CIFAR-100-LT ResNet18 practical Muon bridge & AdamW-state NS$(M_t)$ 0.8628 [0.8154, 0.913]; NS-Muon-state NS$(M_t)$ 0.7247 [0.676, 0.777] & 30 comparisons per state source/direction; local trajectory-state compatibility only \\
 8-step head-only forgetting & 0.6167 [0.5744, 0.6622]; area 0.7787 [0.7549, 0.8033] & tail loss/margin diff CI crosses 0 \\
 Muon-style compatibility: $\polar(M_t)$ / NS$(M_t)$ & 0.8199 [0.6951, 0.9672] / 0.9116 [0.7696, 1.08] & NS$(M_t)$ CI crosses 1; selected-state check only \\

@@ -99,6 +99,18 @@ def main() -> None:
     cifar_resnet_layer_jvp_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
     )
+    cifar_resnet_layer_jvp_checkpoint_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/checkpoint_summary.csv"
+    )
+    cifar_resnet_layer_jvp_checkpoint_layer_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/layer_summary.csv"
+    )
+    cifar_resnet_layer_jvp_checkpoint_prediction_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_pairs.csv"
+    )
+    cifar_resnet_layer_jvp_checkpoint_prediction_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
+    ).set_index("predictor")
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -216,6 +228,15 @@ def main() -> None:
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
     )
+    cifar_resnet_layer_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction_summary.loc[
+        "source_scaled_jvp_ratio"
+    ]
+    cifar_resnet_layer_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction_summary.loc[
+        "source_unit_jvp_ratio"
+    ]
+    cifar_resnet_layer_jvp_checkpoint_rank = cifar_resnet_layer_jvp_checkpoint_prediction_summary.loc[
+        "source_gradient_nuclear_rank"
+    ]
     cifar_resnet_practical_adam_polar_momentum = cifar_resnet_practical_bridge.loc[
         ("adamw_matrix_trajectory", "polar_momentum")
     ]
@@ -921,6 +942,60 @@ def main() -> None:
             cifar_resnet_layer_jvp_worst_scaled,
             "scaled_jvp_tail_drift_sq_ratio_ci95_low",
             "scaled_jvp_tail_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionCheckpoints",
+            int(cifar_resnet_layer_jvp_checkpoint_summary["warmup_steps"].nunique()),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionLayerSummaries",
+            int(len(cifar_resnet_layer_jvp_checkpoint_layer_summary)),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionTransferPairs",
+            int(cifar_resnet_layer_jvp_checkpoint_scaled["checkpoint_transfer_pairs"]),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionDirectedRows",
+            int(len(cifar_resnet_layer_jvp_checkpoint_prediction_pairs)),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionScaledSpearman",
+            fmt(cifar_resnet_layer_jvp_checkpoint_scaled["mean_spearman_log_predictor_vs_log_target_observed"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionScaledSpearman",
+            cifar_resnet_layer_jvp_checkpoint_scaled,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionScaledThresholdAccuracy",
+            fmt(cifar_resnet_layer_jvp_checkpoint_scaled["mean_threshold_below_one_accuracy"]),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionScaledTopFiveOverlap",
+            fmt(cifar_resnet_layer_jvp_checkpoint_scaled["mean_top5_risk_overlap_fraction"]),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionUnitSpearman",
+            fmt(cifar_resnet_layer_jvp_checkpoint_unit["mean_spearman_log_predictor_vs_log_target_observed"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionUnitSpearman",
+            cifar_resnet_layer_jvp_checkpoint_unit,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionRankSpearman",
+            fmt(cifar_resnet_layer_jvp_checkpoint_rank["mean_spearman_log_predictor_vs_log_target_observed"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionRankSpearman",
+            cifar_resnet_layer_jvp_checkpoint_rank,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
         ),
         "",
         "% CIFAR-100-LT ResNet18 practical Muon trajectory bridge",

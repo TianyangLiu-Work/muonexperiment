@@ -27,6 +27,9 @@ def main() -> None:
     cifar_resnet_practical_bridge = pd.read_csv(
         "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv"
     ).set_index(["state_source", "direction"])
+    cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
+    ).set_index("predictor")
     practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
     layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
@@ -36,6 +39,7 @@ def main() -> None:
     layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
     resnet_adam_ns = cifar_resnet_practical_bridge.loc[("adamw_matrix_trajectory", "ns_momentum")]
     resnet_muon_ns = cifar_resnet_practical_bridge.loc[("ns_muon_matrix_trajectory", "ns_momentum")]
+    resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_scaled_jvp_ratio"]
 
     main_items = pd.DataFrame(
         [
@@ -147,6 +151,17 @@ def main() -> None:
             {"artifact": "discussion/e11_long_tail_muon_state_source_control.md", "role": "Markdown summary and CSV links for the Muon state-source control."},
             {"artifact": "figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png", "role": "Appendix ResNet all-layer finite-difference JVP control at the tail-rich checkpoint; supports the architecture-level mechanism bridge without turning the paper into a benchmark claim."},
             {"artifact": "discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md", "role": "Markdown summary and CSV links for the ResNet all-layer JVP tail-quality diagnostic."},
+            {
+                "artifact": "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+                "role": (
+                    "Appendix checkpoint-transfer boundary check for the all-layer ResNet JVP readout; "
+                    f"scaled-JVP threshold accuracy is {fmt(resnet_jvp_checkpoint_scaled['mean_threshold_below_one_accuracy'])}, "
+                    f"but held-out layer-risk Spearman is "
+                    f"{fmt(resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"{interval(resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}."
+                ),
+            },
+            {"artifact": "discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md", "role": "Markdown summary and CSV links for the held-out checkpoint-transfer JVP benchmark."},
             {
                 "artifact": "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
                 "role": (

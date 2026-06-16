@@ -967,6 +967,15 @@ Figure \ref{fig:cifar-resnet-layer-jvp} reports the all-layer ResNet finite-diff
 \label{fig:cifar-resnet-layer-jvp}
 \end{figure}
 
+Figure \ref{fig:cifar-resnet-layer-jvp-checkpoint-prediction} turns the all-layer ResNet JVP diagnostic into a held-out checkpoint-transfer check. Across \(\EelevenCifarResNetLayerJvpCheckpointPredictionCheckpoints\) tail-rich checkpoints and \(\EelevenCifarResNetLayerJvpCheckpointPredictionLayerSummaries\) layer/checkpoint summaries, the scaled-JVP predictor keeps the directional below-one threshold accuracy at \(\EelevenCifarResNetLayerJvpCheckpointPredictionScaledThresholdAccuracy\), but its held-out checkpoint layer-risk Spearman is \(\EelevenCifarResNetLayerJvpCheckpointPredictionScaledSpearman ~\EelevenCifarResNetLayerJvpCheckpointPredictionScaledSpearmanCi\). We therefore treat this as a boundary result: the current local JVP readout explains matched-head-gain directionality, but it is not yet a positive cross-checkpoint layer-ranking predictor.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{figures/cifar100_resnet_layer_jvp_checkpoint_prediction.png}
+\caption{CIFAR-100-LT ResNet18 all-layer JVP checkpoint-transfer benchmark. The left panel checks whether the all-layer directional drift ratios remain below the Frobenius baseline across tail-rich checkpoints. The right panel reports held-out checkpoint Spearman correlations for source-checkpoint layer scores against target-checkpoint observed layer drift. The negative ranking correlations mark a current predictive-boundary limitation.}
+\label{fig:cifar-resnet-layer-jvp-checkpoint-prediction}
+\end{figure}
+
 Figure \ref{fig:cifar-resnet-practical-muon-bridge} reports the ResNet practical trajectory bridge discussed in the Muon-style compatibility subsection.
 
 \begin{figure}[H]
