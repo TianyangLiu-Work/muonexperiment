@@ -83,6 +83,9 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_condition_proxy_scatter/scatter_points.csv",
     "results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv",
     "results/e11_cifar100_resnet_condition_proxy_scatter/layer_summary.csv",
+    "results/e11_cifar100_resnet_fc_condition_scatter/step_metrics.csv",
+    "results/e11_cifar100_resnet_fc_condition_scatter/summary.csv",
+    "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/summary.csv",
     "results/e11_long_tail_checkpoint_sweep/step_metrics.csv",
@@ -161,6 +164,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_resnet_one_step_rho002.md",
     "discussion/e11_cifar100_resnet_checkpoint_sweep.md",
     "discussion/e11_cifar100_resnet_condition_proxy_scatter.md",
+    "discussion/e11_cifar100_resnet_fc_condition_scatter.md",
 )
 
 
@@ -199,6 +203,7 @@ MAIN_RESULT_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_run_cifar100_resnet_one_step.py",
     "scripts/e11_run_cifar100_resnet_checkpoint_sweep.py",
     "scripts/e11_run_cifar100_resnet_condition_proxy_scatter.py",
+    "scripts/e11_run_cifar100_resnet_fc_condition_scatter.py",
     "scripts/e11_run_long_tail_imbalance_ablation.py",
     "scripts/e11_run_long_tail_checkpoint_sweep.py",
     "scripts/e11_run_long_tail_class_partition_sweep.py",
@@ -280,6 +285,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "python3 scripts/e11_run_cifar100_resnet_condition_proxy_scatter.py",
         "produces": "results/e11_cifar100_resnet_condition_proxy_scatter/* and figures/e11_cifar100_resnet_condition_proxy_scatter/*",
         "paper_role": "Natural-task rank-side proxy scatter showing that head-gradient rank alone is not the full downstream-aware condition.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 final-layer condition scatter",
+        "command": "sbatch scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch",
+        "produces": "results/e11_cifar100_resnet_fc_condition_scatter/* and figures/e11_cifar100_resnet_fc_condition_scatter/*",
+        "paper_role": "Final-layer downstream-aware condition diagnostic measuring nrank(G_H) against tail feature stable rank at matched head gain.",
     },
     {
         "stage": "Long-tailed imbalance ablation",

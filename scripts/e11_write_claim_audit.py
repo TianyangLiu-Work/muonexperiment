@@ -35,6 +35,10 @@ def main() -> None:
     cifar_resnet_condition_proxy = pd.read_csv(
         "results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv"
     ).set_index(["comparison", "correlation"])
+    cifar_resnet_fc_condition = pd.read_csv("results/e11_cifar100_resnet_fc_condition_scatter/summary.csv")
+    cifar_resnet_fc_condition_points = pd.read_csv(
+        "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
+    )
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
@@ -56,6 +60,12 @@ def main() -> None:
     cifar_resnet_rank_proxy_pearson = cifar_resnet_condition_proxy.loc[
         ("mean_gradient_nuclear_rank_vs_log_tail_drift_sq_ratio", "pearson")
     ]
+    cifar_resnet_fc_condition_worst = cifar_resnet_fc_condition.loc[
+        cifar_resnet_fc_condition["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_fc_condition_weakest = cifar_resnet_fc_condition.loc[
+        cifar_resnet_fc_condition["mean_condition_score_nrank_over_tail_srank"].idxmin()
+    ]
 
     claim_status = pd.DataFrame(
         [
@@ -70,9 +80,14 @@ def main() -> None:
                     f"On the ResNet checkpoint sweep, mean gradient nuclear rank alone has Pearson correlation "
                     f"{fmt(cifar_resnet_rank_proxy_pearson['estimate'])} "
                     f"CI=[{fmt(cifar_resnet_rank_proxy_pearson['ci95_low'])},{fmt(cifar_resnet_rank_proxy_pearson['ci95_high'])}] "
-                    f"with log squared drift ratio, showing that the head-rank proxy alone is not the full downstream-aware condition."
+                    f"with log squared drift ratio, showing that the head-rank proxy alone is not the full downstream-aware condition. "
+                    f"The final-layer ResNet condition check measures nrank(G_H)/srank(H_T) directly for fc.weight; "
+                    f"the weakest mean score is {fmt(cifar_resnet_fc_condition_weakest['mean_condition_score_nrank_over_tail_srank'])}, "
+                    f"all {len(cifar_resnet_fc_condition_points)} seed/checkpoint points favor spectral, and the worst final-layer-only drift ratio is "
+                    f"{fmt(cifar_resnet_fc_condition_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={ci(cifar_resnet_fc_condition_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
-                "main_loophole": "The two settings validate sign logic; a natural-task condition test still needs downstream-aware tail sensitivity, not only head-gradient rank.",
+                "main_loophole": "The final layer now has a downstream-aware natural-task check, but convolutional blocks still need all-layer tail sensitivity or JVP diagnostics.",
             },
             {
                 "claim": "Spectral/polar one-step updates reduce held-out tail-example logit drift at matched head gain.",
@@ -199,6 +214,11 @@ def main() -> None:
                 "role": "Natural-task rank-side proxy check showing that head-gradient rank alone is not the downstream-aware condition.",
             },
             {
+                "table": "CIFAR-100-LT ResNet18 final-layer condition scatter",
+                "path": "results/e11_cifar100_resnet_fc_condition_scatter/summary.csv",
+                "role": "Final-layer downstream-aware condition check comparing head-gradient nuclear rank with tail feature stable rank.",
+            },
+            {
                 "table": "Long-tail Muon-style compatibility",
                 "path": "results/e11_long_tail_muon_bridge/pair_summary.csv",
                 "role": "Fixed-checkpoint compatibility check for polar(G_t), polar(M_t), and Newton-Schulz directions under matched head gain.",
@@ -243,7 +263,7 @@ The current data do **not** justify saying that this already proves better tail 
 
 1. The CIFAR-100-LT ResNet evidence is still a local one-step diagnostic with 10 seeds, two target head-gain levels, and a checkpoint sweep; it is not a modern long-tail benchmark or full benchmark.
 2. The Muon-style compatibility evidence is local and small-scale; real long-tail practical Muon training remains unchecked.
-3. The ResNet rank-proxy scatter is useful as a caveat, but a downstream-aware natural-task condition scatter remains missing.
+3. The final-layer ResNet condition scatter is useful, but all-layer convolutional downstream-aware condition diagnostics remain missing.
 4. The current performance evidence is weaker than the function-drift evidence.
 5. The detailed layerwise JVP mechanism has only been checked in the current small MLP.
 """

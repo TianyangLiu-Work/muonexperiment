@@ -35,6 +35,10 @@ def main() -> None:
     cifar_resnet_condition_proxy = pd.read_csv(
         "results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv"
     ).set_index(["comparison", "correlation"])
+    cifar_resnet_fc_condition = pd.read_csv("results/e11_cifar100_resnet_fc_condition_scatter/summary.csv")
+    cifar_resnet_fc_condition_points = pd.read_csv(
+        "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
+    )
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -62,6 +66,18 @@ def main() -> None:
     cifar_resnet_rank_proxy_pearson = cifar_resnet_condition_proxy.loc[
         ("mean_gradient_nuclear_rank_vs_log_tail_drift_sq_ratio", "pearson")
     ]
+    cifar_resnet_fc_condition_worst = cifar_resnet_fc_condition.loc[
+        cifar_resnet_fc_condition["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_fc_condition_weakest = cifar_resnet_fc_condition.loc[
+        cifar_resnet_fc_condition["mean_condition_score_nrank_over_tail_srank"].idxmin()
+    ]
+    cifar_resnet_fc_condition_favors_fraction = (
+        cifar_resnet_fc_condition_points["condition_score_nrank_over_tail_srank"] > 1.0
+    ).mean()
+    cifar_resnet_fc_condition_favors_count = int(
+        (cifar_resnet_fc_condition_points["condition_score_nrank_over_tail_srank"] > 1.0).sum()
+    )
 
     claim_status = pd.DataFrame(
         [
@@ -125,10 +141,18 @@ def main() -> None:
                     f"squared drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
                     f"On the ResNet checkpoint sweep, mean gradient nuclear rank alone has Pearson correlation "
                     f"{fmt(cifar_resnet_rank_proxy_pearson['estimate'])} "
-                    f"CI={interval(cifar_resnet_rank_proxy_pearson, 'ci95_low', 'ci95_high')} with log squared drift ratio."
+                    f"CI={interval(cifar_resnet_rank_proxy_pearson, 'ci95_low', 'ci95_high')} with log squared drift ratio. "
+                    f"For the ResNet final layer, nrank(G_H)/srank(H_T) favors spectral in "
+                    f"{cifar_resnet_fc_condition_favors_count}/{len(cifar_resnet_fc_condition_points)} seed/checkpoint points "
+                    f"(fraction {fmt(cifar_resnet_fc_condition_favors_fraction)}); "
+                    f"the weakest mean condition score is "
+                    f"{fmt(cifar_resnet_fc_condition_weakest['mean_condition_score_nrank_over_tail_srank'])}, "
+                    f"and the worst final-layer-only squared drift ratio is "
+                    f"{fmt(cifar_resnet_fc_condition_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_fc_condition_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
                 "why_it_is_ready": "The synthetic construction flips the theory inequality and the observed tail drift direction flips with it.",
-                "remaining_risk": "The natural-task rank-only proxy is explicitly insufficient; a downstream-aware tail-sensitivity scatter remains needed.",
+                "remaining_risk": "The final-layer natural-task condition bridge is now measured, but convolutional blocks still need downstream-aware all-layer tail-sensitivity diagnostics.",
             },
             {
                 "claim": "The mechanism is norm-specific scaled head-gain efficiency, not lower unit-direction tail sensitivity.",
@@ -213,7 +237,7 @@ def main() -> None:
             },
             {
                 "section": "Evidence",
-                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain and checkpoint-sweep robustness checks, a ResNet rank-proxy caveat scatter, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
+                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain and checkpoint-sweep robustness checks, ResNet rank-proxy and final-layer condition scatters, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
             },
             {
                 "section": "Boundary",
@@ -240,13 +264,13 @@ def main() -> None:
                 "priority": "must-have for architecture claim",
                 "experiment": "Larger-architecture layerwise diagnostic",
                 "purpose": "Check whether the scaled head-gain mechanism persists across layers in deeper models.",
-                "minimum_standard": "Per-layer nrank(G_H,l), downstream-aware tail sensitivity or ssrank(B_T,l,A_T,l), unit JVP, scaled JVP, observed drift, and layer contribution.",
+                "minimum_standard": "The ResNet final layer now has nrank(G_H)/srank(H_T); extend this to Conv/Linear blocks with per-layer nrank(G_H,l), downstream-aware tail sensitivity or ssrank(B_T,l,A_T,l), unit JVP, scaled JVP, observed drift, and layer contribution.",
             },
             {
                 "priority": "should-have",
                 "experiment": "Held-out boundary prediction benchmark",
                 "purpose": "Determine whether nrank-vs-ssrank is predictive beyond constructed settings.",
-                "minimum_standard": "The ResNet rank-only proxy scatter is a caveat; the next benchmark should include downstream-aware tail sensitivity with pre-specified held-out family/architecture splits.",
+                "minimum_standard": "The ResNet rank-only proxy scatter is a caveat and the final-layer condition scatter is a partial bridge; the next benchmark should include downstream-aware tail sensitivity with pre-specified held-out family/architecture splits.",
             },
             {
                 "priority": "should-have",
@@ -298,6 +322,7 @@ In long-tailed small-batch training, head-only updates can perturb held-out tail
 - [long-tailed practical training LR sensitivity](e11_long_tail_practical_training_lr_sweep.md)
 - [head-only forgetting probe](e11_long_tail_forgetting.md)
 - [long-tailed layerwise diagnostic](e11_long_tail_layerwise.md)
+- [CIFAR-100-LT ResNet18 final-layer condition scatter](e11_cifar100_resnet_fc_condition_scatter.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

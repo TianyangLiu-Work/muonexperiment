@@ -28,6 +28,10 @@ def main() -> None:
     cifar_resnet_condition_proxy = pd.read_csv(
         "results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv"
     ).set_index(["comparison", "correlation"])
+    cifar_resnet_fc_condition = pd.read_csv("results/e11_cifar100_resnet_fc_condition_scatter/summary.csv")
+    cifar_resnet_fc_condition_points = pd.read_csv(
+        "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
+    )
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -48,6 +52,18 @@ def main() -> None:
     cifar_resnet_rank_proxy_pearson = cifar_resnet_condition_proxy.loc[
         ("mean_gradient_nuclear_rank_vs_log_tail_drift_sq_ratio", "pearson")
     ]
+    cifar_resnet_fc_condition_worst = cifar_resnet_fc_condition.loc[
+        cifar_resnet_fc_condition["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_fc_condition_weakest = cifar_resnet_fc_condition.loc[
+        cifar_resnet_fc_condition["mean_condition_score_nrank_over_tail_srank"].idxmin()
+    ]
+    cifar_resnet_fc_condition_favors_fraction = (
+        cifar_resnet_fc_condition_points["condition_score_nrank_over_tail_srank"] > 1.0
+    ).mean()
+    cifar_resnet_fc_condition_favors_count = int(
+        (cifar_resnet_fc_condition_points["condition_score_nrank_over_tail_srank"] > 1.0).sum()
+    )
     layer_1 = layerwise[layerwise["layer"].eq(1)].iloc[0]
     layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
 
@@ -107,10 +123,16 @@ def main() -> None:
                     f"ssrank={fmt(negative['mean_tail_downstream_aware_stable_rank'])}, squared drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
                     f"On the ResNet checkpoint sweep, mean gradient nuclear rank alone has Pearson correlation "
                     f"{fmt(cifar_resnet_rank_proxy_pearson['estimate'])} "
-                    f"CI={interval(cifar_resnet_rank_proxy_pearson, 'ci95_low', 'ci95_high')} with log squared drift ratio."
+                    f"CI={interval(cifar_resnet_rank_proxy_pearson, 'ci95_low', 'ci95_high')} with log squared drift ratio. "
+                    f"For the final layer, nrank(G_H)/srank(H_T) favors spectral in "
+                    f"{cifar_resnet_fc_condition_favors_count}/{len(cifar_resnet_fc_condition_points)} points "
+                    f"(fraction {fmt(cifar_resnet_fc_condition_favors_fraction)}), "
+                    f"with weakest mean score={fmt(cifar_resnet_fc_condition_weakest['mean_condition_score_nrank_over_tail_srank'])} "
+                    f"and worst squared drift ratio={fmt(cifar_resnet_fc_condition_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_fc_condition_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
-                "safe_response": "Call the synthetic result a mechanism sanity check, and use the ResNet rank-only proxy as evidence that downstream-aware tail sensitivity must be measured.",
-                "remaining_work": "Test a pre-specified downstream-aware boundary rule on held-out real tasks or architecture splits.",
+                "safe_response": "Call the synthetic result a mechanism sanity check, use the ResNet rank-only proxy as a caveat, and present the final-layer condition scatter as a partial downstream-aware natural-task bridge.",
+                "remaining_work": "Extend the downstream-aware boundary rule beyond fc.weight to Conv/Linear blocks and held-out real tasks or architecture splits.",
             },
             {
                 "reviewer_objection": "The layerwise mechanism is not simply lower tail sensitivity.",
@@ -229,6 +251,7 @@ This generated audit lists likely reviewer objections for the current head-to-ta
 - [CIFAR-100-LT ResNet18 smaller-head-gain check](e11_cifar100_resnet_one_step_rho002.md)
 - [CIFAR-100-LT ResNet18 checkpoint-quality sweep](e11_cifar100_resnet_checkpoint_sweep.md)
 - [CIFAR-100-LT ResNet18 condition-proxy scatter](e11_cifar100_resnet_condition_proxy_scatter.md)
+- [CIFAR-100-LT ResNet18 final-layer condition scatter](e11_cifar100_resnet_fc_condition_scatter.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

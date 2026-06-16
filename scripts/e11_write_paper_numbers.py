@@ -84,6 +84,12 @@ def main() -> None:
     cifar_resnet_condition_proxy = pd.read_csv(
         "results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv"
     ).set_index(["comparison", "correlation"])
+    cifar_resnet_fc_condition_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_fc_condition_scatter/summary.csv"
+    )
+    cifar_resnet_fc_condition_points = pd.read_csv(
+        "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
+    )
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -162,6 +168,21 @@ def main() -> None:
     cifar_resnet_condition_tail_accuracy_spearman = cifar_resnet_condition_proxy.loc[
         ("tail_accuracy_before_vs_log_tail_drift_sq_ratio", "spearman")
     ]
+    cifar_resnet_fc_condition_worst = cifar_resnet_fc_condition_summary.loc[
+        cifar_resnet_fc_condition_summary["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_fc_condition_weakest_mean = cifar_resnet_fc_condition_summary.loc[
+        cifar_resnet_fc_condition_summary["mean_condition_score_nrank_over_tail_srank"].idxmin()
+    ]
+    cifar_resnet_fc_condition_weakest_point = cifar_resnet_fc_condition_points.loc[
+        cifar_resnet_fc_condition_points["condition_score_nrank_over_tail_srank"].idxmin()
+    ]
+    cifar_resnet_fc_condition_worst_theory = cifar_resnet_fc_condition_summary.loc[
+        cifar_resnet_fc_condition_summary["mean_theory_ratio_tail_srank_over_nrank"].idxmax()
+    ]
+    cifar_resnet_fc_condition_favors_fraction = (
+        cifar_resnet_fc_condition_points["condition_score_nrank_over_tail_srank"] > 1.0
+    ).mean()
     one_step_alignment_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "alignment")
     one_step_update_fro_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_fro_norm")
     one_step_update_op_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_op_norm")
@@ -719,6 +740,46 @@ def main() -> None:
             cifar_resnet_condition_tail_accuracy_spearman,
             "ci95_low",
             "ci95_high",
+        ),
+        macro("EelevenCifarResNetFcConditionSettings", int(len(cifar_resnet_fc_condition_summary))),
+        macro("EelevenCifarResNetFcConditionPoints", int(len(cifar_resnet_fc_condition_points))),
+        macro(
+            "EelevenCifarResNetFcConditionWorstWarmupSteps",
+            int(cifar_resnet_fc_condition_worst["warmup_steps"]),
+        ),
+        macro(
+            "EelevenCifarResNetFcConditionWorstDriftRatio",
+            fmt(cifar_resnet_fc_condition_worst["geomean_tail_output_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetFcConditionWorstDriftRatio",
+            cifar_resnet_fc_condition_worst,
+            "tail_output_drift_sq_ratio_ci95_low",
+            "tail_output_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetFcConditionWeakestMeanConditionScore",
+            fmt(cifar_resnet_fc_condition_weakest_mean["mean_condition_score_nrank_over_tail_srank"]),
+        ),
+        macro(
+            "EelevenCifarResNetFcConditionWeakestMeanConditionWarmupSteps",
+            int(cifar_resnet_fc_condition_weakest_mean["warmup_steps"]),
+        ),
+        macro(
+            "EelevenCifarResNetFcConditionWeakestPointConditionScore",
+            fmt(cifar_resnet_fc_condition_weakest_point["condition_score_nrank_over_tail_srank"]),
+        ),
+        macro(
+            "EelevenCifarResNetFcConditionWeakestPointWarmupSteps",
+            int(cifar_resnet_fc_condition_weakest_point["warmup_steps"]),
+        ),
+        macro(
+            "EelevenCifarResNetFcConditionWorstTheoryRatio",
+            fmt(cifar_resnet_fc_condition_worst_theory["mean_theory_ratio_tail_srank_over_nrank"]),
+        ),
+        macro(
+            "EelevenCifarResNetFcConditionFavorsSpectralFraction",
+            fmt(cifar_resnet_fc_condition_favors_fraction),
         ),
         "",
         "% Local linearization quality",
