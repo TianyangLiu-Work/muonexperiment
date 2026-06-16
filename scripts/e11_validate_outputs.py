@@ -280,6 +280,90 @@ def assert_valid_artifact_manifest(manifest_json: dict) -> None:
         raise AssertionError(f"artifact manifest missing ignore policy entries: {required_ignored - manifest_ignored}")
 
 
+def assert_condition_score_protocol(scores: pd.DataFrame, splits: pd.DataFrame, gates: pd.DataFrame) -> None:
+    required_score_columns = {
+        "score_id",
+        "role",
+        "uses_observed_source_drift",
+        "fit_rule",
+        "input_features",
+        "heldout_claim_allowed",
+        "reason",
+    }
+    missing_score_columns = required_score_columns - set(scores.columns)
+    if missing_score_columns:
+        raise AssertionError(f"condition-score protocol score registry missing columns: {missing_score_columns}")
+    required_score_ids = {
+        "source_observed_drift_positive_control",
+        "early_layer_prior",
+        "legacy_scaled_jvp_ratio",
+        "condition_score_v2_calibrated_residual",
+        "theory_sign_composite",
+    }
+    score_ids = set(scores["score_id"])
+    if not required_score_ids.issubset(score_ids):
+        raise AssertionError(f"condition-score protocol missing score ids: {required_score_ids - score_ids}")
+    primary = scores[scores["score_id"].eq("condition_score_v2_calibrated_residual")]
+    if len(primary) != 1:
+        raise AssertionError("condition-score protocol must have exactly one primary v2 score row")
+    primary_row = primary.iloc[0]
+    if primary_row["role"] != "primary_candidate" or primary_row["heldout_claim_allowed"] != "yes, if all primary gates pass":
+        raise AssertionError("condition-score protocol primary row must be the only held-out claim candidate")
+    if "target" in str(primary_row["fit_rule"]).lower() and "without" not in str(primary_row["fit_rule"]).lower():
+        raise AssertionError("condition-score protocol primary fit rule must avoid target leakage")
+
+    required_split_columns = {
+        "split_id",
+        "role",
+        "dataset",
+        "architecture",
+        "checkpoints",
+        "seeds",
+        "score_tuning_allowed",
+        "target_used_for_tuning",
+        "compute_mode",
+        "planned_artifact_prefix",
+    }
+    missing_split_columns = required_split_columns - set(splits.columns)
+    if missing_split_columns:
+        raise AssertionError(f"condition-score protocol split registry missing columns: {missing_split_columns}")
+    required_split_roles = {
+        "calibration_only",
+        "primary_heldout_checkpoint",
+        "primary_heldout_architecture",
+        "primary_heldout_data",
+    }
+    split_roles = set(splits["role"])
+    if not required_split_roles.issubset(split_roles):
+        raise AssertionError(f"condition-score protocol missing split roles: {required_split_roles - split_roles}")
+    heldout = splits[splits["role"].astype(str).str.startswith("primary_heldout")]
+    if heldout.empty:
+        raise AssertionError("condition-score protocol must include primary held-out splits")
+    if not heldout["score_tuning_allowed"].eq("no").all() or not heldout["target_used_for_tuning"].eq("no").all():
+        raise AssertionError("condition-score protocol held-out splits must forbid score and target tuning")
+    if "GPU via Slurm" not in set(splits["compute_mode"]):
+        raise AssertionError("condition-score protocol must specify GPU via Slurm for held-out experiments")
+
+    required_gate_columns = {"gate_id", "scope", "requirement", "pass_condition"}
+    missing_gate_columns = required_gate_columns - set(gates.columns)
+    if missing_gate_columns:
+        raise AssertionError(f"condition-score protocol gates missing columns: {missing_gate_columns}")
+    required_gate_ids = {
+        "G1-no-target-leakage",
+        "G2-primary-residual-prediction",
+        "G3-threshold-direction",
+        "G4-baseline-comparison",
+        "G5-no-performance-overclaim",
+        "G6-reporting-completeness",
+    }
+    gate_ids = set(gates["gate_id"])
+    if not required_gate_ids.issubset(gate_ids):
+        raise AssertionError(f"condition-score protocol missing gates: {required_gate_ids - gate_ids}")
+    combined_gates = " ".join(gates["pass_condition"].astype(str))
+    if "CI lower endpoint is above 0" not in combined_gates or "at least 0.8" not in combined_gates:
+        raise AssertionError("condition-score protocol gates must encode residual prediction and threshold success")
+
+
 def assert_top_conference_gap_register(frame: pd.DataFrame) -> None:
     required_columns = {
         "gap_id",
@@ -657,6 +741,10 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_condition_score_audit") / "config.json",
         Path("figures/e11_cifar100_resnet_condition_score_audit") / "cifar100_resnet_condition_score_audit.png",
         Path("discussion/e11_cifar100_resnet_condition_score_audit.md"),
+        Path("results/e11_cifar100_resnet_condition_score_protocol") / "score_registry.csv",
+        Path("results/e11_cifar100_resnet_condition_score_protocol") / "split_registry.csv",
+        Path("results/e11_cifar100_resnet_condition_score_protocol") / "acceptance_gates.csv",
+        Path("discussion/e11_cifar100_resnet_condition_score_protocol.md"),
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "train_trace.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_metrics.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "group_metrics.csv",
@@ -2379,6 +2467,11 @@ def main() -> None:
         raise AssertionError(
             "CIFAR-100-LT ResNet18 condition-score audit must preserve the negative score-selection guardrail"
         )
+    score_protocol_dir = Path("results/e11_cifar100_resnet_condition_score_protocol")
+    score_protocol_scores = pd.read_csv(score_protocol_dir / "score_registry.csv")
+    score_protocol_splits = pd.read_csv(score_protocol_dir / "split_registry.csv")
+    score_protocol_gates = pd.read_csv(score_protocol_dir / "acceptance_gates.csv")
+    assert_condition_score_protocol(score_protocol_scores, score_protocol_splits, score_protocol_gates)
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -3757,6 +3850,28 @@ def main() -> None:
     ]
     if missing_top_conference:
         raise AssertionError(f"top-conference plan missing required gates: {missing_top_conference}")
+    condition_score_protocol = Path(
+        "discussion/e11_cifar100_resnet_condition_score_protocol.md"
+    ).read_text(encoding="utf-8")
+    required_condition_score_protocol_phrases = [
+        "CIFAR-100 ResNet Condition-Score Protocol",
+        "condition_score_v2_calibrated_residual",
+        "primary_heldout_checkpoint",
+        "primary_heldout_architecture",
+        "primary_heldout_data",
+        "G1-no-target-leakage",
+        "G2-primary-residual-prediction",
+        "below-one threshold accuracy is at least 0.8",
+        "cannot support a final long-tail accuracy claim",
+        "legacy checkpoint-transfer tables may describe the failure",
+    ]
+    missing_condition_score_protocol = [
+        phrase for phrase in required_condition_score_protocol_phrases if phrase not in condition_score_protocol
+    ]
+    if missing_condition_score_protocol:
+        raise AssertionError(
+            f"condition-score protocol missing required content: {missing_condition_score_protocol}"
+        )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -3767,7 +3882,8 @@ def main() -> None:
         "Minimum Viable Top-Tier Mechanism Paper",
         "P0-PredictiveCondition",
         "P0-StandardBenchmark",
-        "source-only condition score",
+        "discussion/e11_cifar100_resnet_condition_score_protocol.md",
+        "source-only calibrated residual condition score",
         "held-out architecture",
         "benchmark-level performance claim",
         "GPU via Slurm",
@@ -3817,6 +3933,7 @@ def main() -> None:
             Path("discussion/e11_research_synthesis.md"),
             Path("discussion/e11_research_direction_map.md"),
             Path("discussion/e11_paper_readiness_audit.md"),
+            Path("discussion/e11_cifar100_resnet_condition_score_protocol.md"),
             Path("discussion/e11_top_conference_gap_register.md"),
             Path("discussion/e11_paper_skeleton.md"),
             Path("discussion/e11_main_paper_package.md"),

@@ -1,0 +1,7 @@
+split_id,role,dataset,architecture,checkpoints,seeds,score_tuning_allowed,target_used_for_tuning,compute_mode,planned_artifact_prefix
+legacy_resnet18_checkpoint_transfer_boundary,locked_retrospective_audit,CIFAR-100-LT,ResNet18 CIFAR stem,2000/5000/10000 warmup steps,10,no,no,already generated,results/e11_cifar100_resnet_condition_score_audit
+calibration_cifar100lt_resnet18_source_folds,calibration_only,CIFAR-100-LT,ResNet18 CIFAR stem,source folds drawn from training checkpoints only,at least 10,yes,no,GPU via Slurm,results/e11_cifar100_resnet_condition_score_next/calibration
+primary_heldout_checkpoint_resnet18,primary_heldout_checkpoint,CIFAR-100-LT,ResNet18 CIFAR stem,held-out warmup steps not used for calibration,at least 10,no,no,GPU via Slurm,results/e11_cifar100_resnet_condition_score_next/heldout_checkpoint
+primary_heldout_architecture_resnet34,primary_heldout_architecture,CIFAR-100-LT,ResNet34 CIFAR stem,matched-quality warmup steps fixed before scoring,at least 5,no,no,GPU via Slurm,results/e11_cifar100_resnet_condition_score_next/heldout_architecture
+primary_heldout_data_cifar10lt_resnet18,primary_heldout_data,CIFAR-10-LT,ResNet18 CIFAR stem,matched-quality warmup steps fixed before scoring,at least 10,no,no,GPU via Slurm,results/e11_cifar100_resnet_condition_score_next/heldout_data
+escalation_imagenetlt_resnet50,optional_scale_escalation,ImageNet-LT-style split,ResNet50 or pretrained feature backbone,fixed before scoring,at least 3,no,no,GPU via Slurm,results/e11_cifar100_resnet_condition_score_next/imagenetlt_escalation

@@ -275,6 +275,167 @@ def valid_manifest() -> dict:
     }
 
 
+def valid_condition_score_protocol() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    scores = pd.DataFrame(
+        [
+            {
+                "score_id": "source_observed_drift_positive_control",
+                "role": "positive_control",
+                "uses_observed_source_drift": "yes",
+                "fit_rule": "No fitting.",
+                "input_features": "source observed drift",
+                "heldout_claim_allowed": "no",
+                "reason": "Positive control only.",
+            },
+            {
+                "score_id": "early_layer_prior",
+                "role": "architecture_prior_baseline",
+                "uses_observed_source_drift": "no",
+                "fit_rule": "No fitting.",
+                "input_features": "layer_index",
+                "heldout_claim_allowed": "baseline only",
+                "reason": "Architecture baseline.",
+            },
+            {
+                "score_id": "legacy_scaled_jvp_ratio",
+                "role": "locked_boundary_baseline",
+                "uses_observed_source_drift": "no",
+                "fit_rule": "No fitting.",
+                "input_features": "scaled JVP",
+                "heldout_claim_allowed": "boundary only",
+                "reason": "Boundary baseline.",
+            },
+            {
+                "score_id": "condition_score_v2_calibrated_residual",
+                "role": "primary_candidate",
+                "uses_observed_source_drift": "calibration only",
+                "fit_rule": "Fit on calibration splits only and freeze coefficients before held-out evaluation.",
+                "input_features": "source-only JVP and rank features",
+                "heldout_claim_allowed": "yes, if all primary gates pass",
+                "reason": "Primary candidate.",
+            },
+            {
+                "score_id": "theory_sign_composite",
+                "role": "secondary_zero_fit_candidate",
+                "uses_observed_source_drift": "no",
+                "fit_rule": "No fitting.",
+                "input_features": "rank and scaled JVP",
+                "heldout_claim_allowed": "secondary only",
+                "reason": "Theory-adjacent candidate.",
+            },
+        ]
+    )
+    splits = pd.DataFrame(
+        [
+            {
+                "split_id": "calibration",
+                "role": "calibration_only",
+                "dataset": "CIFAR-100-LT",
+                "architecture": "ResNet18",
+                "checkpoints": "source folds",
+                "seeds": "10",
+                "score_tuning_allowed": "yes",
+                "target_used_for_tuning": "no",
+                "compute_mode": "GPU via Slurm",
+                "planned_artifact_prefix": "results/example/calibration",
+            },
+            {
+                "split_id": "heldout_checkpoint",
+                "role": "primary_heldout_checkpoint",
+                "dataset": "CIFAR-100-LT",
+                "architecture": "ResNet18",
+                "checkpoints": "held-out",
+                "seeds": "10",
+                "score_tuning_allowed": "no",
+                "target_used_for_tuning": "no",
+                "compute_mode": "GPU via Slurm",
+                "planned_artifact_prefix": "results/example/checkpoint",
+            },
+            {
+                "split_id": "heldout_architecture",
+                "role": "primary_heldout_architecture",
+                "dataset": "CIFAR-100-LT",
+                "architecture": "ResNet34",
+                "checkpoints": "held-out",
+                "seeds": "5",
+                "score_tuning_allowed": "no",
+                "target_used_for_tuning": "no",
+                "compute_mode": "GPU via Slurm",
+                "planned_artifact_prefix": "results/example/architecture",
+            },
+            {
+                "split_id": "heldout_data",
+                "role": "primary_heldout_data",
+                "dataset": "CIFAR-10-LT",
+                "architecture": "ResNet18",
+                "checkpoints": "held-out",
+                "seeds": "10",
+                "score_tuning_allowed": "no",
+                "target_used_for_tuning": "no",
+                "compute_mode": "GPU via Slurm",
+                "planned_artifact_prefix": "results/example/data",
+            },
+        ]
+    )
+    gates = pd.DataFrame(
+        [
+            {
+                "gate_id": "G1-no-target-leakage",
+                "scope": "all",
+                "requirement": "No target leakage.",
+                "pass_condition": "Protocol and coefficients are committed first.",
+            },
+            {
+                "gate_id": "G2-primary-residual-prediction",
+                "scope": "P0",
+                "requirement": "Predict residual risk.",
+                "pass_condition": "Held-out residual Spearman CI lower endpoint is above 0.",
+            },
+            {
+                "gate_id": "G3-threshold-direction",
+                "scope": "direction",
+                "requirement": "Preserve threshold.",
+                "pass_condition": "Below-one threshold accuracy is at least 0.8.",
+            },
+            {
+                "gate_id": "G4-baseline-comparison",
+                "scope": "baseline",
+                "requirement": "Compare baselines.",
+                "pass_condition": "Report early-layer and positive-control baselines.",
+            },
+            {
+                "gate_id": "G5-no-performance-overclaim",
+                "scope": "wording",
+                "requirement": "No performance claim.",
+                "pass_condition": "Keep claim local unless a separate benchmark passes.",
+            },
+            {
+                "gate_id": "G6-reporting-completeness",
+                "scope": "artifact review",
+                "requirement": "Report all fields.",
+                "pass_condition": "Generated artifacts exist and make e11-check validates them.",
+            },
+        ]
+    )
+    return scores, splits, gates
+
+
+def test_condition_score_protocol_schema_accepts_required_entries() -> None:
+    validator = load_validator_module()
+    scores, splits, gates = valid_condition_score_protocol()
+
+    validator.assert_condition_score_protocol(scores, splits, gates)
+
+
+def test_condition_score_protocol_schema_rejects_heldout_tuning() -> None:
+    validator = load_validator_module()
+    scores, splits, gates = valid_condition_score_protocol()
+    splits.loc[splits["role"].eq("primary_heldout_data"), "score_tuning_allowed"] = "yes"
+
+    with pytest.raises(AssertionError, match="held-out splits must forbid"):
+        validator.assert_condition_score_protocol(scores, splits, gates)
+
+
 def valid_top_conference_gap_register() -> pd.DataFrame:
     return pd.DataFrame(
         [
