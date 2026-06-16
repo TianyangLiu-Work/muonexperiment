@@ -24,6 +24,7 @@ def main() -> None:
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
     cifar_resnet_rho002 = pd.read_csv("results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv").iloc[0]
+    cifar_resnet_checkpoint_sweep = pd.read_csv("results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
@@ -32,6 +33,12 @@ def main() -> None:
 
     synthetic_positive = head_tail.set_index("setting").loc["high_head_rank_low_tail_srank"]
     synthetic_negative = head_tail.set_index("setting").loc["low_head_rank_high_tail_srank"]
+    cifar_resnet_checkpoint_worst = cifar_resnet_checkpoint_sweep.loc[
+        cifar_resnet_checkpoint_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_checkpoint_best_tail_accuracy = cifar_resnet_checkpoint_sweep.loc[
+        cifar_resnet_checkpoint_sweep["mean_tail_accuracy_before"].idxmax()
+    ]
     layer1 = layerwise.set_index("layer").loc[1]
     layer2 = layerwise.set_index("layer").loc[2]
 
@@ -99,6 +106,21 @@ def main() -> None:
                 cifar_resnet_rho002["tail_output_drift_sq_ratio_ci95_high"],
             )
             + "; accuracy diff CI crosses 0 \\\\"
+        ),
+        (
+            "CIFAR-100-LT ResNet18 checkpoint sweep & worst drift "
+            + ci(
+                cifar_resnet_checkpoint_worst["geomean_tail_output_drift_sq_ratio_spectral_over_fro"],
+                cifar_resnet_checkpoint_worst["tail_output_drift_sq_ratio_ci95_low"],
+                cifar_resnet_checkpoint_worst["tail_output_drift_sq_ratio_ci95_high"],
+            )
+            + " at "
+            + fmt(cifar_resnet_checkpoint_worst["warmup_steps"])
+            + " steps & best pre-update tail accuracy "
+            + fmt(cifar_resnet_checkpoint_best_tail_accuracy["mean_tail_accuracy_before"])
+            + " at "
+            + fmt(cifar_resnet_checkpoint_best_tail_accuracy["warmup_steps"])
+            + " steps; still weak-tail-predictor evidence \\\\"
         ),
         (
             "8-step head-only forgetting & "

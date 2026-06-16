@@ -77,6 +77,9 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_one_step_rho002/step_metrics.csv",
     "results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv",
     "results/e11_cifar100_resnet_one_step_rho002/layer_metrics.csv",
+    "results/e11_cifar100_resnet_checkpoint_sweep/step_metrics.csv",
+    "results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv",
+    "results/e11_cifar100_resnet_checkpoint_sweep/layer_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/summary.csv",
     "results/e11_long_tail_checkpoint_sweep/step_metrics.csv",
@@ -153,6 +156,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_lt_one_step.md",
     "discussion/e11_cifar100_resnet_one_step.md",
     "discussion/e11_cifar100_resnet_one_step_rho002.md",
+    "discussion/e11_cifar100_resnet_checkpoint_sweep.md",
 )
 
 
@@ -189,6 +193,7 @@ MAIN_RESULT_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_run_long_tail_one_step.py",
     "scripts/e11_run_cifar100_lt_one_step.py",
     "scripts/e11_run_cifar100_resnet_one_step.py",
+    "scripts/e11_run_cifar100_resnet_checkpoint_sweep.py",
     "scripts/e11_run_long_tail_imbalance_ablation.py",
     "scripts/e11_run_long_tail_checkpoint_sweep.py",
     "scripts/e11_run_long_tail_class_partition_sweep.py",
@@ -258,6 +263,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch",
         "produces": "results/e11_cifar100_resnet_one_step_rho002/* and figures/e11_cifar100_resnet_one_step_rho002/*",
         "paper_role": "Target-head-gain scale robustness check for the CIFAR-100-LT ResNet18 diagnostic at 0.002 times head loss.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 checkpoint-quality sweep",
+        "command": "sbatch scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch",
+        "produces": "results/e11_cifar100_resnet_checkpoint_sweep/* and figures/e11_cifar100_resnet_checkpoint_sweep/*",
+        "paper_role": "GPU checkpoint sweep across 250, 500, 1000, and 2000 warmup steps; strengthens single-checkpoint robustness while preserving the weak-tail-predictor caveat.",
     },
     {
         "stage": "Long-tailed imbalance ablation",

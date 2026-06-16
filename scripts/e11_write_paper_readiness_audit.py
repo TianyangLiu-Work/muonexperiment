@@ -31,6 +31,7 @@ def main() -> None:
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
     cifar_resnet_rho002 = pd.read_csv("results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv").iloc[0]
+    cifar_resnet_checkpoint_sweep = pd.read_csv("results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -49,6 +50,12 @@ def main() -> None:
     alignment_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "alignment")
     update_fro_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "update_fro_norm")
     update_op_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "update_op_norm")
+    cifar_resnet_checkpoint_worst = cifar_resnet_checkpoint_sweep.loc[
+        cifar_resnet_checkpoint_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_checkpoint_best_tail_accuracy = cifar_resnet_checkpoint_sweep.loc[
+        cifar_resnet_checkpoint_sweep["mean_tail_accuracy_before"].idxmax()
+    ]
 
     claim_status = pd.DataFrame(
         [
@@ -70,10 +77,13 @@ def main() -> None:
                     f"with spectral-lower fraction={fmt(cifar_resnet['spectral_less_tail_output_drift_fraction'])} over "
                     f"{int(cifar_resnet['seeds'])} seeds; the target-head-gain 0.002 check gives squared drift ratio="
                     f"{fmt(cifar_resnet_rho002['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
-                    f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
+                    f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"the checkpoint sweep's worst drift CI upper endpoint is "
+                    f"{fmt(cifar_resnet_checkpoint_worst['tail_output_drift_sq_ratio_ci95_high'])} at "
+                    f"{int(cifar_resnet_checkpoint_worst['warmup_steps'])} steps."
                 ),
                 "why_it_is_ready": "It is measured under the paper's matched-head-gain protocol with paired confidence intervals and explicit norm-specific scaling readouts.",
-                "remaining_risk": "The strongest new evidence is still a local diagnostic, not a retuned long-horizon long-tail benchmark.",
+                "remaining_risk": "The strongest new evidence is still a local diagnostic, and the checkpoint sweep's best pre-update tail accuracy remains low.",
             },
             {
                 "claim": "The matched-head-gain drift readout survives a more appropriate CIFAR-100-LT ResNet architecture.",
@@ -88,10 +98,14 @@ def main() -> None:
                     f"CI={interval(cifar_resnet, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')}; "
                     f"the target-head-gain 0.002 check gives squared drift ratio="
                     f"{fmt(cifar_resnet_rho002['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
-                    f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
+                    f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"checkpoint sweep worst drift ratio="
+                    f"{fmt(cifar_resnet_checkpoint_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_checkpoint_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"best pre-update tail accuracy={fmt(cifar_resnet_checkpoint_best_tail_accuracy['mean_tail_accuracy_before'])}."
                 ),
-                "why_it_is_ready": "It was rerun on GPU with a convolutional architecture and CIFAR-100-LT split, addressing the pure two-layer-MLP concern.",
-                "remaining_risk": "Still a one-step local intervention; BatchNorm/bias are frozen during the diagnostic and this is not a full practical Muon run.",
+                "why_it_is_ready": "It was rerun on GPU with a convolutional architecture, a CIFAR-100-LT split, two target gains, and a warmup-checkpoint sweep.",
+                "remaining_risk": "Still a one-step local intervention; BatchNorm/bias are frozen during the diagnostic, and the checkpoint sweep does not yet show a high-quality tail predictor.",
             },
             {
                 "claim": "The condition nrank(G_H) > ssrank(B_T,A_T) is a useful mechanism boundary.",
@@ -190,7 +204,7 @@ def main() -> None:
             },
             {
                 "section": "Evidence",
-                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with a smaller-head-gain robustness check, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
+                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain and checkpoint-sweep robustness checks, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
             },
             {
                 "section": "Boundary",
@@ -205,7 +219,7 @@ def main() -> None:
                 "priority": "partly complete; extend for stronger empirical paper",
                 "experiment": "Real long-tail benchmark",
                 "purpose": "Test whether matched-head-gain tail drift reduction appears beyond scikit-learn digits.",
-                "minimum_standard": "The new CIFAR-100-LT ResNet diagnostic is a first pass; strengthen it with more seeds, stronger checkpoints, ImageNet-LT/iNaturalist-style data, and class-wise metrics.",
+                "minimum_standard": "The CIFAR-100-LT ResNet checkpoint sweep reduces single-checkpoint risk, but the best tail accuracy is still low; strengthen with higher-quality checkpoints, ImageNet-LT/iNaturalist-style data, and class-wise metrics.",
             },
             {
                 "priority": "must-have for full empirical optimizer claim",

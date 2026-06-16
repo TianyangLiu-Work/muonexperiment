@@ -24,6 +24,7 @@ def main() -> None:
         "CIFAR-100-LT MLP one-step diagnostic",
         "CIFAR-100-LT ResNet18 one-step diagnostic",
         "CIFAR-100-LT ResNet18 smaller-head-gain check",
+        "CIFAR-100-LT ResNet18 checkpoint-quality sweep",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed Muon state-source control",

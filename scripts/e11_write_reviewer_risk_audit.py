@@ -24,6 +24,7 @@ def main() -> None:
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
     cifar_resnet_rho002 = pd.read_csv("results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv").iloc[0]
+    cifar_resnet_checkpoint_sweep = pd.read_csv("results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -35,6 +36,12 @@ def main() -> None:
 
     positive = synthetic[synthetic["setting"].eq("high_head_rank_low_tail_srank")].iloc[0]
     negative = synthetic[synthetic["setting"].eq("low_head_rank_high_tail_srank")].iloc[0]
+    cifar_resnet_checkpoint_worst = cifar_resnet_checkpoint_sweep.loc[
+        cifar_resnet_checkpoint_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_checkpoint_best_tail_accuracy = cifar_resnet_checkpoint_sweep.loc[
+        cifar_resnet_checkpoint_sweep["mean_tail_accuracy_before"].idxmax()
+    ]
     layer_1 = layerwise[layerwise["layer"].eq(1)].iloc[0]
     layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
 
@@ -57,6 +64,10 @@ def main() -> None:
                     f"with target-head-gain 0.002 squared drift ratio="
                     f"{fmt(cifar_resnet_rho002['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"the ResNet checkpoint sweep worst drift CI upper endpoint is "
+                    f"{fmt(cifar_resnet_checkpoint_worst['tail_output_drift_sq_ratio_ci95_high'])}, "
+                    f"but best pre-update tail accuracy is only "
+                    f"{fmt(cifar_resnet_checkpoint_best_tail_accuracy['mean_tail_accuracy_before'])}; "
                     f"but tail-accuracy-drop diff CI={interval(cifar_resnet, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')} crosses zero. "
                     f"The small practical training run has lower tail eval loss ratio="
                     f"{fmt(practical_training['geomean_final_tail_eval_loss_ratio_muon_over_adam'])} "
@@ -128,10 +139,13 @@ def main() -> None:
                     f"CI={interval(cifar_resnet, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
                     f"A smaller-head-gain check at 0.002 gives ratio="
                     f"{fmt(cifar_resnet_rho002['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
-                    f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
+                    f"CI={interval(cifar_resnet_rho002, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"a checkpoint sweep over 250, 500, 1000, and 2000 warmup steps has worst ratio="
+                    f"{fmt(cifar_resnet_checkpoint_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_checkpoint_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
                 ),
                 "safe_response": "Present the manuscript as a theory-and-diagnostic mechanism paper with an architecture robustness check, not a full long-tail benchmark paper.",
-                "remaining_work": "Add checkpoint-quality sweeps, ImageNet-LT or iNaturalist-style matched-head-gain diagnostics, and long-horizon practical baselines before claiming benchmark-level generality.",
+                "remaining_work": "Add higher-quality tail checkpoints, ImageNet-LT or iNaturalist-style matched-head-gain diagnostics, and long-horizon practical baselines before claiming benchmark-level generality.",
             },
             {
                 "reviewer_objection": "There are too many legacy E11 artifacts and the main claim may be hard to follow.",
@@ -204,6 +218,7 @@ This generated audit lists likely reviewer objections for the current head-to-ta
 - [long-tailed layerwise diagnostic](e11_long_tail_layerwise.md)
 - [CIFAR-100-LT ResNet18 one-step diagnostic](e11_cifar100_resnet_one_step.md)
 - [CIFAR-100-LT ResNet18 smaller-head-gain check](e11_cifar100_resnet_one_step_rho002.md)
+- [CIFAR-100-LT ResNet18 checkpoint-quality sweep](e11_cifar100_resnet_checkpoint_sweep.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

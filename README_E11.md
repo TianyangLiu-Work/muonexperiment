@@ -122,9 +122,9 @@ make e11-cifar-resnet-checkpoint-sweep-results
 
 This submits `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`, which
 runs `scripts/e11_run_cifar100_resnet_checkpoint_sweep.py` on GPU across
-ResNet18 warmup checkpoints. Its intended role is to test whether the
-matched-gain lower-drift signal persists when the pre-update tail predictor is
-stronger; it should be treated as a planned P0 upgrade until its CSVs exist.
+ResNet18 warmup checkpoints. The current committed result reduces
+single-checkpoint risk, but it should not be read as high-quality tail-predictor
+evidence because the best pre-update tail accuracy is still low.
 
 ## Core Artifacts
 
@@ -154,6 +154,7 @@ Paper-facing synthesis:
 - `discussion/e11_cifar100_lt_one_step.md`
 - `discussion/e11_cifar100_resnet_one_step.md`
 - `discussion/e11_cifar100_resnet_one_step_rho002.md`
+- `discussion/e11_cifar100_resnet_checkpoint_sweep.md`
 - `discussion/e11_long_tail_imbalance_ablation.md`
 - `discussion/e11_long_tail_checkpoint_sweep.md`
 - `discussion/e11_long_tail_class_partition_sweep.md`
@@ -192,6 +193,7 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_lt_one_step/pair_summary.csv`
 - `results/e11_cifar100_resnet_one_step/pair_summary.csv`
 - `results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv`
+- `results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv`
 - `results/e11_long_tail_imbalance_ablation/summary.csv`
 - `results/e11_long_tail_checkpoint_sweep/summary.csv`
 - `results/e11_long_tail_class_partition_sweep/summary.csv`
@@ -213,6 +215,7 @@ Primary paper figures:
 - `figures/e11_cifar100_lt_one_step/cifar100_lt_one_step_tail_response.png`
 - `figures/e11_cifar100_resnet_one_step/cifar100_resnet_one_step_tail_response.png`
 - `figures/e11_cifar100_resnet_one_step_rho002/cifar100_resnet_one_step_tail_response.png`
+- `figures/e11_cifar100_resnet_checkpoint_sweep/cifar100_resnet_checkpoint_sweep.png`
 - `figures/e11_long_tail_imbalance_ablation/long_tail_imbalance_ablation.png`
 - `figures/e11_long_tail_checkpoint_sweep/long_tail_checkpoint_sweep.png`
 - `figures/e11_long_tail_class_partition_sweep/long_tail_class_partition_sweep.png`
@@ -239,6 +242,8 @@ Primary paper figures:
    - The two-layer CIFAR-100-LT MLP gives squared drift ratio about `0.1944 [0.1848, 0.2044]`, with lower spectral drift in all 5 seeds, but tail loss increase is slightly worse.
    - The GPU ResNet18 CIFAR-100-LT diagnostic gives squared drift ratio about `0.5611 [0.5224, 0.6026]`, with lower spectral drift in all 10 seeds.
    - A smaller-head-gain GPU check at `rho=0.002 L_H` gives squared drift ratio about `0.7761 [0.7585, 0.7941]`.
+   - A warmup-checkpoint sweep over 250/500/1000/2000 steps keeps the drift-ratio CI upper endpoint below 1 at every checkpoint; the worst endpoint is about `0.6026`.
+   - The same sweep's best pre-update tail accuracy is only about `0.068`, so it reduces checkpoint-selection risk but does not prove preservation of a high-quality tail predictor.
    - In the default ResNet diagnostic, tail-loss increase diff spectral-minus-Fro is about `-0.000421 [-0.000592, -0.000249]`; tail-accuracy-drop diff still crosses zero, so this remains a local drift/loss diagnostic rather than an accuracy claim.
 4. The 8-step head-only forgetting diagnostic shows lower measured tail drift across the short horizon.
    - Final squared drift ratio is about `0.6167 [0.5744, 0.6622]`.
@@ -288,7 +293,7 @@ Do not claim:
 - `scripts/e11_run_*.py`: experiment runners.
 - `scripts/e11_run_cifar100_lt_one_step.py`: CIFAR-100-LT two-layer MLP runner.
 - `scripts/e11_run_cifar100_resnet_one_step.py`: CIFAR-100-LT ResNet18 runner called by the Slurm wrapper.
-- `scripts/e11_run_cifar100_resnet_checkpoint_sweep.py`: planned ResNet18 checkpoint-quality sweep for the top-conference upgrade path.
+- `scripts/e11_run_cifar100_resnet_checkpoint_sweep.py`: ResNet18 checkpoint-quality sweep for the top-conference upgrade path.
 - `scripts/slurm/e11_cifar100_resnet_one_step.sbatch`: GPU/Slurm submission wrapper for the ResNet18 diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch`: GPU/Slurm submission wrapper for the smaller-head-gain ResNet18 check.
 - `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`: GPU/Slurm submission wrapper for the checkpoint-quality sweep.
@@ -301,7 +306,7 @@ The current evidence is consistent with a focused local-geometry paper. It is no
 
 Most important next steps:
 
-1. Run the CIFAR-100-LT ResNet checkpoint-quality sweep and verify the lower-drift signal at stronger checkpoints before making a top-conference-level mechanism claim.
+1. Add higher-quality tail checkpoints or a stronger real long-tail dataset; the completed CIFAR-100-LT ResNet checkpoint sweep reduces single-checkpoint risk but still has low pre-update tail accuracy.
 2. Extend the current fixed-checkpoint, short-trajectory, and small practical-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 3. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
 4. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.

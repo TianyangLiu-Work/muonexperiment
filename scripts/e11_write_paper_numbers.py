@@ -75,6 +75,9 @@ def main() -> None:
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
     cifar_resnet_rho002 = pd.read_csv("results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv").iloc[0]
+    cifar_resnet_checkpoint_sweep = pd.read_csv(
+        "results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv"
+    )
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -126,6 +129,24 @@ def main() -> None:
     local_linearization_worst = local_linearization.loc[
         local_linearization["relative_error_ci95_high"].idxmax()
     ]
+    cifar_resnet_checkpoint_worst = cifar_resnet_checkpoint_sweep.loc[
+        cifar_resnet_checkpoint_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_checkpoint_best_tail_accuracy = cifar_resnet_checkpoint_sweep.loc[
+        cifar_resnet_checkpoint_sweep["mean_tail_accuracy_before"].idxmax()
+    ]
+    cifar_resnet_checkpoint_tail_accuracy_min = cifar_resnet_checkpoint_sweep[
+        "mean_tail_accuracy_before"
+    ].min()
+    cifar_resnet_checkpoint_tail_accuracy_max = cifar_resnet_checkpoint_sweep[
+        "mean_tail_accuracy_before"
+    ].max()
+    cifar_resnet_checkpoint_positive_margin_min = cifar_resnet_checkpoint_sweep[
+        "mean_tail_positive_margin_fraction_before"
+    ].min()
+    cifar_resnet_checkpoint_positive_margin_max = cifar_resnet_checkpoint_sweep[
+        "mean_tail_positive_margin_fraction_before"
+    ].max()
     one_step_alignment_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "alignment")
     one_step_update_fro_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_fro_norm")
     one_step_update_op_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_op_norm")
@@ -615,6 +636,43 @@ def main() -> None:
             cifar_resnet_rho002,
             "tail_loss_increase_diff_ci95_low",
             "tail_loss_increase_diff_ci95_high",
+        ),
+        macro("EelevenCifarResNetCheckpointSweepSettings", int(len(cifar_resnet_checkpoint_sweep))),
+        macro(
+            "EelevenCifarResNetCheckpointSweepWorstWarmupSteps",
+            int(cifar_resnet_checkpoint_worst["warmup_steps"]),
+        ),
+        macro(
+            "EelevenCifarResNetCheckpointSweepWorstDriftRatio",
+            fmt(cifar_resnet_checkpoint_worst["geomean_tail_output_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetCheckpointSweepWorstDriftRatio",
+            cifar_resnet_checkpoint_worst,
+            "tail_output_drift_sq_ratio_ci95_low",
+            "tail_output_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetCheckpointSweepBestTailAccuracyWarmupSteps",
+            int(cifar_resnet_checkpoint_best_tail_accuracy["warmup_steps"]),
+        ),
+        macro(
+            "EelevenCifarResNetCheckpointSweepBestTailAccuracy",
+            fmt(cifar_resnet_checkpoint_best_tail_accuracy["mean_tail_accuracy_before"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetCheckpointSweepBestTailAccuracy",
+            cifar_resnet_checkpoint_best_tail_accuracy,
+            "tail_accuracy_before_ci95_low",
+            "tail_accuracy_before_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetCheckpointSweepTailAccuracyRange",
+            f"{fmt(cifar_resnet_checkpoint_tail_accuracy_min)}\\text{{ to }}{fmt(cifar_resnet_checkpoint_tail_accuracy_max)}",
+        ),
+        macro(
+            "EelevenCifarResNetCheckpointSweepPositiveMarginRange",
+            f"{fmt(cifar_resnet_checkpoint_positive_margin_min)}\\text{{ to }}{fmt(cifar_resnet_checkpoint_positive_margin_max)}",
         ),
         "",
         "% Local linearization quality",

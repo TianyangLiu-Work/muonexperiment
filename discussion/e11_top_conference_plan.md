@@ -15,13 +15,14 @@ reduce tail-example function drift at matched head gain.
 | Small neural diagnostic | Long-tailed digits MLP gives squared drift ratio `0.5501 [0.5101, 0.5931]`. | keep |
 | ConvNet architecture check | CIFAR-100-LT ResNet18 gives squared drift ratio `0.5611 [0.5224, 0.6026]` over 10 GPU seeds. | strengthen |
 | Step-scale check | CIFAR-100-LT ResNet18 at `rho=0.002 L_H` gives squared drift ratio `0.7761 [0.7585, 0.7941]`. | strengthen |
+| Checkpoint sweep | CIFAR-100-LT ResNet18 warmup checkpoints 250/500/1000/2000 all have drift-ratio CI upper endpoint below 1; worst endpoint is `0.6026`. | partial |
 | Claim boundary | Tail accuracy remains inconclusive; paper explicitly avoids performance claims. | keep |
 
 ## Paper-Critical Missing Evidence
 
 | priority | missing piece | minimum acceptable gate | why it matters |
 |---|---|---|---|
-| P0 | ResNet checkpoint-quality sweep | CIFAR-100-LT ResNet18 checkpoints with higher pre-update tail accuracy and positive-margin fraction; report drift, tail CE, margin, and accuracy deltas. | Reviewers will object that lower drift may preserve a weak tail function. |
+| P0 | Higher-quality ResNet tail checkpoint | The completed checkpoint sweep now reduces single-checkpoint risk, but best pre-update tail accuracy is only `0.068`; add checkpoints or data where the tail predictor is meaningfully useful. | Reviewers will object that lower drift may preserve a weak tail function. |
 | P0 | Natural-task condition scatter | Across ResNet layers/checkpoints/seeds, plot condition score or rank-side proxy against observed drift ratio with uncertainty. | The theorem must look predictive beyond the synthetic construction. |
 | P1 | Long-tail imbalance sweep | CIFAR-100-LT imbalance factors or explicit tail-count settings with at least 3 seeds each; keep paired matched-gain diagnostics. | Converts one dataset split into a systematic long-tail experiment. |
 | P1 | Practical optimizer bridge on CIFAR-100-LT | Sample Muon-style momentum/NS directions along CIFAR-100-LT ResNet training states, not only digits. | Bridges ideal polar directions to practical Muon without claiming final SOTA. |
@@ -44,8 +45,8 @@ reduce tail-example function drift at matched head gain.
 ## Acceptance Gates Before Calling This Top-Tier Ready
 
 - All headline numbers are generated from CSVs and LaTeX macros, not hand typed.
-- `scripts/e11_validate_outputs.py` checks the ResNet 10-seed and rho=0.002
-  artifacts.
+- `scripts/e11_validate_outputs.py` checks the ResNet 10-seed, rho=0.002, and
+  checkpoint-sweep artifacts.
 - The paper states one main claim in the abstract and conclusion: local
   matched-head-gain drift, not final accuracy.
 - Every ResNet result includes seed count, target gain, checkpoint quality, and
@@ -55,20 +56,18 @@ reduce tail-example function drift at matched head gain.
 
 ## Next Implementation Step
 
-The next highest-leverage experiment is a CIFAR-100-LT ResNet checkpoint-quality
-sweep. Reuse the current 10-seed Slurm runner, sample several warmup lengths,
-and write a single summary CSV that reports whether the lower-drift signal
-persists when the pre-update tail predictor is stronger.
+The ResNet checkpoint-quality sweep has been run.
 
-The repo now has a concrete GPU entry point for that P0 experiment:
+The checkpoint sweep now reduces single-checkpoint risk, but it did not produce
+a strong tail predictor. The next highest-leverage experiment is therefore a
+natural-task condition scatter or a higher-quality tail-checkpoint run:
 
-```bash
-make e11-cifar-resnet-checkpoint-sweep-results
-```
+1. record a ResNet layer/checkpoint/seed scatter of rank-side proxy versus
+   observed drift ratio; or
+2. train/load checkpoints with substantially higher tail accuracy and rerun the
+   matched-head-gain diagnostic.
 
-This submits `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`, which
-runs `scripts/e11_run_cifar100_resnet_checkpoint_sweep.py` over warmup
-checkpoints `250,500,1000,2000`. Once it finishes, the expected artifacts are
+The completed checkpoint-sweep artifacts are:
 `results/e11_cifar100_resnet_checkpoint_sweep/*`,
 `figures/e11_cifar100_resnet_checkpoint_sweep/*`, and
 `discussion/e11_cifar100_resnet_checkpoint_sweep.md`.

@@ -1684,6 +1684,56 @@ def main() -> None:
         and cifar_resnet_rho_row["tail_accuracy_drop_diff_ci95_high"] > 0.0
     ):
         raise AssertionError("CIFAR-100-LT ResNet18 rho=0.002 diagnostic must preserve lower drift and inconclusive accuracy")
+    cifar_resnet_checkpoint_steps = pd.read_csv(
+        Path("results/e11_cifar100_resnet_checkpoint_sweep") / "step_metrics.csv"
+    )
+    cifar_resnet_checkpoint_summary = pd.read_csv(
+        Path("results/e11_cifar100_resnet_checkpoint_sweep") / "pair_summary.csv"
+    )
+    cifar_resnet_checkpoint_layers = pd.read_csv(
+        Path("results/e11_cifar100_resnet_checkpoint_sweep") / "layer_metrics.csv"
+    )
+    cifar_resnet_checkpoint_config = json.loads(
+        (Path("results/e11_cifar100_resnet_checkpoint_sweep") / "config.json").read_text()
+    )
+    expected_resnet_checkpoint_steps = {250, 500, 1000, 2000}
+    if len(cifar_resnet_checkpoint_steps) != 80 or len(cifar_resnet_checkpoint_layers) != 1680:
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 checkpoint sweep must contain 4 checkpoints x 10 seeds x 2 geometries"
+        )
+    if set(cifar_resnet_checkpoint_summary["warmup_steps"]) != expected_resnet_checkpoint_steps:
+        raise AssertionError("CIFAR-100-LT ResNet18 checkpoint sweep must cover warmup steps 250, 500, 1000, 2000")
+    if set(cifar_resnet_checkpoint_config["warmup_steps"]) != expected_resnet_checkpoint_steps:
+        raise AssertionError("CIFAR-100-LT ResNet18 checkpoint sweep config must record the warmup schedule")
+    base_resnet_checkpoint_config = cifar_resnet_checkpoint_config["base_config"]
+    if (
+        base_resnet_checkpoint_config["device"] != "cuda"
+        or base_resnet_checkpoint_config["download"]
+        or abs(float(base_resnet_checkpoint_config["target_head_gain_fraction"]) - 0.005) > 1e-12
+        or len(base_resnet_checkpoint_config["seeds"]) != 10
+    ):
+        raise AssertionError("CIFAR-100-LT ResNet18 checkpoint sweep should be the Slurm/GPU no-download run")
+    if not (
+        (cifar_resnet_checkpoint_summary["seeds"] == 10).all()
+        and (cifar_resnet_checkpoint_summary["tail_output_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (cifar_resnet_checkpoint_summary["centered_tail_output_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (cifar_resnet_checkpoint_summary["spectral_less_tail_output_drift_fraction"] == 1.0).all()
+    ):
+        raise AssertionError("CIFAR-100-LT ResNet18 checkpoint sweep must preserve lower full/centered drift")
+    early_resnet_checkpoints = cifar_resnet_checkpoint_summary[
+        cifar_resnet_checkpoint_summary["warmup_steps"].isin([250, 500])
+    ]
+    late_resnet_checkpoints = cifar_resnet_checkpoint_summary[
+        cifar_resnet_checkpoint_summary["warmup_steps"].isin([1000, 2000])
+    ]
+    if not (
+        (early_resnet_checkpoints["tail_loss_increase_diff_ci95_low"] > 0.0).all()
+        and (late_resnet_checkpoints["tail_loss_increase_diff_ci95_high"] < 0.0).all()
+        and cifar_resnet_checkpoint_summary["mean_tail_accuracy_before"].max() < 0.1
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 checkpoint sweep must preserve the tail-loss and weak-tail-predictor caveats"
+        )
     imbalance_steps = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv")
     imbalance_summary = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "summary.csv")
     if len(imbalance_steps) != 160:
@@ -2254,6 +2304,12 @@ def main() -> None:
         "\\EelevenCifarResNetOneStepMeanNrG",
         "\\EelevenCifarResNetRho002DriftRatio",
         "\\EelevenCifarResNetRho002TailLossDiff",
+        "\\EelevenCifarResNetCheckpointSweepSettings",
+        "\\EelevenCifarResNetCheckpointSweepWorstWarmupSteps",
+        "\\EelevenCifarResNetCheckpointSweepWorstDriftRatio",
+        "\\EelevenCifarResNetCheckpointSweepBestTailAccuracy",
+        "\\EelevenCifarResNetCheckpointSweepTailAccuracyRange",
+        "\\EelevenCifarResNetCheckpointSweepPositiveMarginRange",
         "\\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         "\\EelevenLocalLinearizationMaxRelativeErrorDirection",
         "\\EelevenLongTailImbalanceAblationSettings",
@@ -2345,6 +2401,8 @@ def main() -> None:
         r"\EelevenCifarResNetOneStepTailAccuracyDropDiff",
         r"\EelevenCifarResNetRho002DriftRatio",
         r"\EelevenCifarResNetRho002TailLossDiff",
+        r"\EelevenCifarResNetCheckpointSweepWorstDriftRatio",
+        r"\EelevenCifarResNetCheckpointSweepTailAccuracyRange",
         r"\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         r"\EelevenLocalLinearizationMaxRelativeErrorDirection",
         r"\EelevenLongTailImbalanceWorstRatioCiHigh",
@@ -2383,6 +2441,7 @@ def main() -> None:
         "make e11-main-results",
         "make e11-cifar-resnet-results",
         "make e11-cifar-resnet-rho002-results",
+        "make e11-cifar-resnet-checkpoint-sweep-results",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -2398,6 +2457,7 @@ def main() -> None:
         "Long-tailed one-step diagnostic",
         "CIFAR-100-LT ResNet18 one-step diagnostic",
         "CIFAR-100-LT ResNet18 smaller-head-gain check",
+        "CIFAR-100-LT ResNet18 checkpoint-quality sweep",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -2418,6 +2478,7 @@ def main() -> None:
     required_current_reproduction_phrases = [
         "CIFAR-100-LT ResNet18 one-step diagnostic",
         "CIFAR-100-LT ResNet18 smaller-head-gain check",
+        "CIFAR-100-LT ResNet18 checkpoint-quality sweep",
         "Long-tailed practical training diagnostic",
         "Long-tailed practical training LR sensitivity",
     ]
@@ -2650,6 +2711,7 @@ def main() -> None:
         "Top-Conference Upgrade Plan",
         "CIFAR-100-LT ResNet18 gives squared drift ratio",
         "ResNet checkpoint-quality sweep",
+        "checkpoint sweep now reduces single-checkpoint risk",
         "Natural-task condition scatter",
         "Long-tail imbalance sweep",
         "Practical optimizer bridge on CIFAR-100-LT",
@@ -2670,6 +2732,7 @@ def main() -> None:
         or "make e11-main-results" not in readme
         or "make e11-cifar-resnet-results" not in readme
         or "make e11-cifar-resnet-rho002-results" not in readme
+        or "make e11-cifar-resnet-checkpoint-sweep-results" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
     ):
