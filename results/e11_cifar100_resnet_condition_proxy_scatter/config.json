@@ -1,0 +1,8 @@
+{
+  "source": "results/e11_cifar100_resnet_checkpoint_sweep",
+  "point_unit": "seed_checkpoint_pair",
+  "rank_proxy": "mean Conv/Linear matrix-gradient nuclear rank across layers",
+  "bootstrap_samples": 2000,
+  "bootstrap_seed": 0,
+  "claim_boundary": "rank-side proxy only; downstream-aware tail sensitivity is not measured"
+}

@@ -80,6 +80,9 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_checkpoint_sweep/step_metrics.csv",
     "results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv",
     "results/e11_cifar100_resnet_checkpoint_sweep/layer_metrics.csv",
+    "results/e11_cifar100_resnet_condition_proxy_scatter/scatter_points.csv",
+    "results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv",
+    "results/e11_cifar100_resnet_condition_proxy_scatter/layer_summary.csv",
     "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/summary.csv",
     "results/e11_long_tail_checkpoint_sweep/step_metrics.csv",
@@ -157,6 +160,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_resnet_one_step.md",
     "discussion/e11_cifar100_resnet_one_step_rho002.md",
     "discussion/e11_cifar100_resnet_checkpoint_sweep.md",
+    "discussion/e11_cifar100_resnet_condition_proxy_scatter.md",
 )
 
 
@@ -194,6 +198,7 @@ MAIN_RESULT_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_run_cifar100_lt_one_step.py",
     "scripts/e11_run_cifar100_resnet_one_step.py",
     "scripts/e11_run_cifar100_resnet_checkpoint_sweep.py",
+    "scripts/e11_run_cifar100_resnet_condition_proxy_scatter.py",
     "scripts/e11_run_long_tail_imbalance_ablation.py",
     "scripts/e11_run_long_tail_checkpoint_sweep.py",
     "scripts/e11_run_long_tail_class_partition_sweep.py",
@@ -269,6 +274,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch",
         "produces": "results/e11_cifar100_resnet_checkpoint_sweep/* and figures/e11_cifar100_resnet_checkpoint_sweep/*",
         "paper_role": "GPU checkpoint sweep across 250, 500, 1000, and 2000 warmup steps; strengthens single-checkpoint robustness while preserving the weak-tail-predictor caveat.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 condition-proxy scatter",
+        "command": "python3 scripts/e11_run_cifar100_resnet_condition_proxy_scatter.py",
+        "produces": "results/e11_cifar100_resnet_condition_proxy_scatter/* and figures/e11_cifar100_resnet_condition_proxy_scatter/*",
+        "paper_role": "Natural-task rank-side proxy scatter showing that head-gradient rank alone is not the full downstream-aware condition.",
     },
     {
         "stage": "Long-tailed imbalance ablation",

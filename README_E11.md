@@ -104,6 +104,7 @@ make e11-cifar-results     # CIFAR-100-LT MLP local matched-head-gain diagnostic
 make e11-cifar-resnet-results # submit the CIFAR-100-LT ResNet18 GPU diagnostic via Slurm
 make e11-cifar-resnet-rho002-results # submit the CIFAR-100-LT ResNet18 rho=0.002 robustness check via Slurm
 make e11-cifar-resnet-checkpoint-sweep-results # submit the top-conference ResNet checkpoint-quality sweep via Slurm
+make e11-cifar-resnet-condition-proxy-results # regenerate the ResNet rank-proxy scatter from checkpoint-sweep CSVs
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
@@ -155,6 +156,7 @@ Paper-facing synthesis:
 - `discussion/e11_cifar100_resnet_one_step.md`
 - `discussion/e11_cifar100_resnet_one_step_rho002.md`
 - `discussion/e11_cifar100_resnet_checkpoint_sweep.md`
+- `discussion/e11_cifar100_resnet_condition_proxy_scatter.md`
 - `discussion/e11_long_tail_imbalance_ablation.md`
 - `discussion/e11_long_tail_checkpoint_sweep.md`
 - `discussion/e11_long_tail_class_partition_sweep.md`
@@ -194,6 +196,7 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_resnet_one_step/pair_summary.csv`
 - `results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv`
 - `results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv`
+- `results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv`
 - `results/e11_long_tail_imbalance_ablation/summary.csv`
 - `results/e11_long_tail_checkpoint_sweep/summary.csv`
 - `results/e11_long_tail_class_partition_sweep/summary.csv`
@@ -216,6 +219,7 @@ Primary paper figures:
 - `figures/e11_cifar100_resnet_one_step/cifar100_resnet_one_step_tail_response.png`
 - `figures/e11_cifar100_resnet_one_step_rho002/cifar100_resnet_one_step_tail_response.png`
 - `figures/e11_cifar100_resnet_checkpoint_sweep/cifar100_resnet_checkpoint_sweep.png`
+- `figures/e11_cifar100_resnet_condition_proxy_scatter/cifar100_resnet_condition_proxy_scatter.png`
 - `figures/e11_long_tail_imbalance_ablation/long_tail_imbalance_ablation.png`
 - `figures/e11_long_tail_checkpoint_sweep/long_tail_checkpoint_sweep.png`
 - `figures/e11_long_tail_class_partition_sweep/long_tail_class_partition_sweep.png`
@@ -244,6 +248,7 @@ Primary paper figures:
    - A smaller-head-gain GPU check at `rho=0.002 L_H` gives squared drift ratio about `0.7761 [0.7585, 0.7941]`.
    - A warmup-checkpoint sweep over 250/500/1000/2000 steps keeps the drift-ratio CI upper endpoint below 1 at every checkpoint; the worst endpoint is about `0.6026`.
    - The same sweep's best pre-update tail accuracy is only about `0.068`, so it reduces checkpoint-selection risk but does not prove preservation of a high-quality tail predictor.
+   - A ResNet rank-side proxy scatter over 40 seed/checkpoint points gives positive correlation between mean gradient nuclear rank and log drift ratio, Pearson about `0.7594 [0.6657, 0.8807]`; this supports the caveat that `nrank(G_H)` alone is not the downstream-aware condition.
    - In the default ResNet diagnostic, tail-loss increase diff spectral-minus-Fro is about `-0.000421 [-0.000592, -0.000249]`; tail-accuracy-drop diff still crosses zero, so this remains a local drift/loss diagnostic rather than an accuracy claim.
 4. The 8-step head-only forgetting diagnostic shows lower measured tail drift across the short horizon.
    - Final squared drift ratio is about `0.6167 [0.5744, 0.6622]`.
@@ -294,6 +299,7 @@ Do not claim:
 - `scripts/e11_run_cifar100_lt_one_step.py`: CIFAR-100-LT two-layer MLP runner.
 - `scripts/e11_run_cifar100_resnet_one_step.py`: CIFAR-100-LT ResNet18 runner called by the Slurm wrapper.
 - `scripts/e11_run_cifar100_resnet_checkpoint_sweep.py`: ResNet18 checkpoint-quality sweep for the top-conference upgrade path.
+- `scripts/e11_run_cifar100_resnet_condition_proxy_scatter.py`: rank-side proxy scatter generated from the ResNet checkpoint-sweep CSVs.
 - `scripts/slurm/e11_cifar100_resnet_one_step.sbatch`: GPU/Slurm submission wrapper for the ResNet18 diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch`: GPU/Slurm submission wrapper for the smaller-head-gain ResNet18 check.
 - `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`: GPU/Slurm submission wrapper for the checkpoint-quality sweep.

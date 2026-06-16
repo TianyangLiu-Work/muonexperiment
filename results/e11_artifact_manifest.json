@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 670271,
-      "size": "654.6 KB"
+      "size_bytes": 671772,
+      "size": "656.0 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1267695,
+      "size_bytes": 1294820,
       "size": "1.2 MB"
     },
     {
@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 615827,
-      "size": "601.4 KB"
+      "size_bytes": 624282,
+      "size": "609.7 KB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 268554624,
+      "size_bytes": 268590138,
       "size": "256.1 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 29531191,
-      "size": "28.2 MB"
+      "size_bytes": 29654550,
+      "size": "28.3 MB"
     },
     {
       "path": "configs",
@@ -54,15 +54,15 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 3319517,
+      "size_bytes": 3322405,
       "size": "3.2 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 3677,
-      "size": "3.6 KB"
+      "size_bytes": 3890,
+      "size": "3.8 KB"
     },
     {
       "path": ".gitignore",
@@ -174,6 +174,21 @@
       "path": "results/e11_cifar100_resnet_checkpoint_sweep/layer_metrics.csv",
       "rows": 1680,
       "size": "141.4 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_condition_proxy_scatter/scatter_points.csv",
+      "rows": 40,
+      "size": "23.6 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv",
+      "rows": 6,
+      "size": "784 B"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_condition_proxy_scatter/layer_summary.csv",
+      "rows": 84,
+      "size": "9.5 KB"
     },
     {
       "path": "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
@@ -434,7 +449,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "19.6 KB"
+      "size": "20.3 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -458,11 +473,11 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "16.9 KB"
+      "size": "17.5 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
-      "size": "15.7 KB"
+      "size": "15.8 KB"
     },
     {
       "path": "discussion/e11_pasted_review_audit.md",
@@ -482,11 +497,11 @@
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
-      "size": "17.1 KB"
+      "size": "17.4 KB"
     },
     {
       "path": "discussion/e11_top_conference_plan.md",
-      "size": "4.9 KB"
+      "size": "5.4 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",
@@ -502,7 +517,7 @@
     },
     {
       "path": "discussion/e11_claim_validity_audit.md",
-      "size": "11.3 KB"
+      "size": "11.7 KB"
     },
     {
       "path": "discussion/e11_cifar100_lt_one_step.md",
@@ -519,6 +534,10 @@
     {
       "path": "discussion/e11_cifar100_resnet_checkpoint_sweep.md",
       "size": "5.1 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_resnet_condition_proxy_scatter.md",
+      "size": "3.4 KB"
     }
   ],
   "ignore_policy": [

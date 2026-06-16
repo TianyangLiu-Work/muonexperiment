@@ -1734,6 +1734,38 @@ def main() -> None:
         raise AssertionError(
             "CIFAR-100-LT ResNet18 checkpoint sweep must preserve the tail-loss and weak-tail-predictor caveats"
         )
+    cifar_resnet_condition_points = pd.read_csv(
+        Path("results/e11_cifar100_resnet_condition_proxy_scatter") / "scatter_points.csv"
+    )
+    cifar_resnet_condition_summary = pd.read_csv(
+        Path("results/e11_cifar100_resnet_condition_proxy_scatter") / "summary.csv"
+    )
+    cifar_resnet_condition_layers = pd.read_csv(
+        Path("results/e11_cifar100_resnet_condition_proxy_scatter") / "layer_summary.csv"
+    )
+    cifar_resnet_condition_config = json.loads(
+        (Path("results/e11_cifar100_resnet_condition_proxy_scatter") / "config.json").read_text()
+    )
+    if len(cifar_resnet_condition_points) != 40 or len(cifar_resnet_condition_summary) != 6:
+        raise AssertionError("CIFAR-100-LT ResNet18 condition-proxy scatter must contain 40 points and 6 correlations")
+    if len(cifar_resnet_condition_layers) != 84:
+        raise AssertionError("CIFAR-100-LT ResNet18 condition-proxy layer summary must contain 4 checkpoints x 21 layers")
+    if set(cifar_resnet_condition_points["warmup_steps"]) != expected_resnet_checkpoint_steps:
+        raise AssertionError("CIFAR-100-LT ResNet18 condition-proxy scatter must cover the checkpoint-sweep schedule")
+    rank_proxy_pearson = cifar_resnet_condition_summary[
+        cifar_resnet_condition_summary["comparison"].eq("mean_gradient_nuclear_rank_vs_log_tail_drift_sq_ratio")
+        & cifar_resnet_condition_summary["correlation"].eq("pearson")
+    ].iloc[0]
+    if not (
+        (cifar_resnet_condition_points["tail_output_drift_sq_ratio_spectral_over_fro"] < 1.0).all()
+        and rank_proxy_pearson["estimate"] > 0.5
+        and rank_proxy_pearson["ci95_low"] > 0.0
+        and "downstream-aware tail sensitivity is not measured"
+        in cifar_resnet_condition_config["claim_boundary"]
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 condition-proxy scatter must preserve the rank-only caveat"
+        )
     imbalance_steps = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv")
     imbalance_summary = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "summary.csv")
     if len(imbalance_steps) != 160:
@@ -2310,6 +2342,10 @@ def main() -> None:
         "\\EelevenCifarResNetCheckpointSweepBestTailAccuracy",
         "\\EelevenCifarResNetCheckpointSweepTailAccuracyRange",
         "\\EelevenCifarResNetCheckpointSweepPositiveMarginRange",
+        "\\EelevenCifarResNetConditionProxyPoints",
+        "\\EelevenCifarResNetConditionProxyRankPearson",
+        "\\EelevenCifarResNetConditionProxyRankSpearman",
+        "\\EelevenCifarResNetConditionProxyTailAccuracySpearman",
         "\\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         "\\EelevenLocalLinearizationMaxRelativeErrorDirection",
         "\\EelevenLongTailImbalanceAblationSettings",
@@ -2403,6 +2439,7 @@ def main() -> None:
         r"\EelevenCifarResNetRho002TailLossDiff",
         r"\EelevenCifarResNetCheckpointSweepWorstDriftRatio",
         r"\EelevenCifarResNetCheckpointSweepTailAccuracyRange",
+        r"\EelevenCifarResNetConditionProxyRankPearson",
         r"\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         r"\EelevenLocalLinearizationMaxRelativeErrorDirection",
         r"\EelevenLongTailImbalanceWorstRatioCiHigh",
@@ -2442,6 +2479,7 @@ def main() -> None:
         "make e11-cifar-resnet-results",
         "make e11-cifar-resnet-rho002-results",
         "make e11-cifar-resnet-checkpoint-sweep-results",
+        "make e11-cifar-resnet-condition-proxy-results",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -2458,6 +2496,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 one-step diagnostic",
         "CIFAR-100-LT ResNet18 smaller-head-gain check",
         "CIFAR-100-LT ResNet18 checkpoint-quality sweep",
+        "CIFAR-100-LT ResNet18 condition-proxy scatter",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -2479,6 +2518,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 one-step diagnostic",
         "CIFAR-100-LT ResNet18 smaller-head-gain check",
         "CIFAR-100-LT ResNet18 checkpoint-quality sweep",
+        "CIFAR-100-LT ResNet18 condition-proxy scatter",
         "Long-tailed practical training diagnostic",
         "Long-tailed practical training LR sensitivity",
     ]
@@ -2712,7 +2752,8 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 gives squared drift ratio",
         "ResNet checkpoint-quality sweep",
         "checkpoint sweep now reduces single-checkpoint risk",
-        "Natural-task condition scatter",
+        "Rank-side proxy scatter",
+        "Downstream-aware ResNet condition scatter",
         "Long-tail imbalance sweep",
         "Practical optimizer bridge on CIFAR-100-LT",
         "Acceptance Gates",
@@ -2733,6 +2774,7 @@ def main() -> None:
         or "make e11-cifar-resnet-results" not in readme
         or "make e11-cifar-resnet-rho002-results" not in readme
         or "make e11-cifar-resnet-checkpoint-sweep-results" not in readme
+        or "make e11-cifar-resnet-condition-proxy-results" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
     ):

@@ -78,6 +78,12 @@ def main() -> None:
     cifar_resnet_checkpoint_sweep = pd.read_csv(
         "results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv"
     )
+    cifar_resnet_condition_proxy_points = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_proxy_scatter/scatter_points.csv"
+    )
+    cifar_resnet_condition_proxy = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv"
+    ).set_index(["comparison", "correlation"])
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -147,6 +153,15 @@ def main() -> None:
     cifar_resnet_checkpoint_positive_margin_max = cifar_resnet_checkpoint_sweep[
         "mean_tail_positive_margin_fraction_before"
     ].max()
+    cifar_resnet_condition_rank_pearson = cifar_resnet_condition_proxy.loc[
+        ("mean_gradient_nuclear_rank_vs_log_tail_drift_sq_ratio", "pearson")
+    ]
+    cifar_resnet_condition_rank_spearman = cifar_resnet_condition_proxy.loc[
+        ("mean_gradient_nuclear_rank_vs_log_tail_drift_sq_ratio", "spearman")
+    ]
+    cifar_resnet_condition_tail_accuracy_spearman = cifar_resnet_condition_proxy.loc[
+        ("tail_accuracy_before_vs_log_tail_drift_sq_ratio", "spearman")
+    ]
     one_step_alignment_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "alignment")
     one_step_update_fro_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_fro_norm")
     one_step_update_op_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_op_norm")
@@ -673,6 +688,37 @@ def main() -> None:
         macro(
             "EelevenCifarResNetCheckpointSweepPositiveMarginRange",
             f"{fmt(cifar_resnet_checkpoint_positive_margin_min)}\\text{{ to }}{fmt(cifar_resnet_checkpoint_positive_margin_max)}",
+        ),
+        macro("EelevenCifarResNetConditionProxyPoints", int(len(cifar_resnet_condition_proxy_points))),
+        macro(
+            "EelevenCifarResNetConditionProxyRankPearson",
+            fmt(cifar_resnet_condition_rank_pearson["estimate"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetConditionProxyRankPearson",
+            cifar_resnet_condition_rank_pearson,
+            "ci95_low",
+            "ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetConditionProxyRankSpearman",
+            fmt(cifar_resnet_condition_rank_spearman["estimate"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetConditionProxyRankSpearman",
+            cifar_resnet_condition_rank_spearman,
+            "ci95_low",
+            "ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetConditionProxyTailAccuracySpearman",
+            fmt(cifar_resnet_condition_tail_accuracy_spearman["estimate"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetConditionProxyTailAccuracySpearman",
+            cifar_resnet_condition_tail_accuracy_spearman,
+            "ci95_low",
+            "ci95_high",
         ),
         "",
         "% Local linearization quality",

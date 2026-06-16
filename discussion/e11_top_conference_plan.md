@@ -16,6 +16,7 @@ reduce tail-example function drift at matched head gain.
 | ConvNet architecture check | CIFAR-100-LT ResNet18 gives squared drift ratio `0.5611 [0.5224, 0.6026]` over 10 GPU seeds. | strengthen |
 | Step-scale check | CIFAR-100-LT ResNet18 at `rho=0.002 L_H` gives squared drift ratio `0.7761 [0.7585, 0.7941]`. | strengthen |
 | Checkpoint sweep | CIFAR-100-LT ResNet18 warmup checkpoints 250/500/1000/2000 all have drift-ratio CI upper endpoint below 1; worst endpoint is `0.6026`. | partial |
+| Rank-side proxy scatter | Across 40 ResNet seed/checkpoint points, mean gradient nuclear rank is positively correlated with log drift ratio, Pearson `0.7594 [0.6657, 0.8807]`. | caveat |
 | Claim boundary | Tail accuracy remains inconclusive; paper explicitly avoids performance claims. | keep |
 
 ## Paper-Critical Missing Evidence
@@ -23,7 +24,7 @@ reduce tail-example function drift at matched head gain.
 | priority | missing piece | minimum acceptable gate | why it matters |
 |---|---|---|---|
 | P0 | Higher-quality ResNet tail checkpoint | The completed checkpoint sweep now reduces single-checkpoint risk, but best pre-update tail accuracy is only `0.068`; add checkpoints or data where the tail predictor is meaningfully useful. | Reviewers will object that lower drift may preserve a weak tail function. |
-| P0 | Natural-task condition scatter | Across ResNet layers/checkpoints/seeds, plot condition score or rank-side proxy against observed drift ratio with uncertainty. | The theorem must look predictive beyond the synthetic construction. |
+| P0 | Downstream-aware ResNet condition scatter | The rank-side proxy scatter is complete and shows `nrank(G_H)` alone is insufficient; next measure a real downstream-aware tail sensitivity proxy. | The theorem must look predictive beyond the synthetic construction. |
 | P1 | Long-tail imbalance sweep | CIFAR-100-LT imbalance factors or explicit tail-count settings with at least 3 seeds each; keep paired matched-gain diagnostics. | Converts one dataset split into a systematic long-tail experiment. |
 | P1 | Practical optimizer bridge on CIFAR-100-LT | Sample Muon-style momentum/NS directions along CIFAR-100-LT ResNet training states, not only digits. | Bridges ideal polar directions to practical Muon without claiming final SOTA. |
 | P2 | Long-horizon sanity benchmark | Tuned SGD/AdamW/Muon-style baselines on CIFAR-100-LT with many/medium/few metrics and local drift probes sampled along the trajectory. | Needed only if the paper wants any optimizer-performance discussion. |
@@ -58,12 +59,13 @@ reduce tail-example function drift at matched head gain.
 
 The ResNet checkpoint-quality sweep has been run.
 
-The checkpoint sweep now reduces single-checkpoint risk, but it did not produce
-a strong tail predictor. The next highest-leverage experiment is therefore a
-natural-task condition scatter or a higher-quality tail-checkpoint run:
+The checkpoint sweep now reduces single-checkpoint risk, and the rank-side
+proxy scatter makes clear that head-gradient rank alone is not enough. The next
+highest-leverage experiment is therefore a downstream-aware condition scatter
+or a higher-quality tail-checkpoint run:
 
-1. record a ResNet layer/checkpoint/seed scatter of rank-side proxy versus
-   observed drift ratio; or
+1. record a ResNet layer/checkpoint/seed scatter with a downstream-aware tail
+   sensitivity proxy versus observed drift ratio; or
 2. train/load checkpoints with substantially higher tail accuracy and rerun the
    matched-head-gain diagnostic.
 
@@ -71,3 +73,7 @@ The completed checkpoint-sweep artifacts are:
 `results/e11_cifar100_resnet_checkpoint_sweep/*`,
 `figures/e11_cifar100_resnet_checkpoint_sweep/*`, and
 `discussion/e11_cifar100_resnet_checkpoint_sweep.md`.
+The completed rank-side proxy scatter artifacts are:
+`results/e11_cifar100_resnet_condition_proxy_scatter/*`,
+`figures/e11_cifar100_resnet_condition_proxy_scatter/*`, and
+`discussion/e11_cifar100_resnet_condition_proxy_scatter.md`.

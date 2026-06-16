@@ -32,6 +32,9 @@ def main() -> None:
     cifar_resnet = pd.read_csv("results/e11_cifar100_resnet_one_step/pair_summary.csv").iloc[0]
     cifar_resnet_rho002 = pd.read_csv("results/e11_cifar100_resnet_one_step_rho002/pair_summary.csv").iloc[0]
     cifar_resnet_checkpoint_sweep = pd.read_csv("results/e11_cifar100_resnet_checkpoint_sweep/pair_summary.csv")
+    cifar_resnet_condition_proxy = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_proxy_scatter/summary.csv"
+    ).set_index(["comparison", "correlation"])
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -55,6 +58,9 @@ def main() -> None:
     ]
     cifar_resnet_checkpoint_best_tail_accuracy = cifar_resnet_checkpoint_sweep.loc[
         cifar_resnet_checkpoint_sweep["mean_tail_accuracy_before"].idxmax()
+    ]
+    cifar_resnet_rank_proxy_pearson = cifar_resnet_condition_proxy.loc[
+        ("mean_gradient_nuclear_rank_vs_log_tail_drift_sq_ratio", "pearson")
     ]
 
     claim_status = pd.DataFrame(
@@ -116,10 +122,13 @@ def main() -> None:
                     f"squared drift ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
                     f"Negative setting: nrank={fmt(negative['mean_head_gradient_nuclear_rank'])}, "
                     f"ssrank={fmt(negative['mean_tail_downstream_aware_stable_rank'])}, "
-                    f"squared drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}."
+                    f"squared drift ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
+                    f"On the ResNet checkpoint sweep, mean gradient nuclear rank alone has Pearson correlation "
+                    f"{fmt(cifar_resnet_rank_proxy_pearson['estimate'])} "
+                    f"CI={interval(cifar_resnet_rank_proxy_pearson, 'ci95_low', 'ci95_high')} with log squared drift ratio."
                 ),
                 "why_it_is_ready": "The synthetic construction flips the theory inequality and the observed tail drift direction flips with it.",
-                "remaining_risk": "This is not yet a held-out predictor for natural tasks or larger architectures.",
+                "remaining_risk": "The natural-task rank-only proxy is explicitly insufficient; a downstream-aware tail-sensitivity scatter remains needed.",
             },
             {
                 "claim": "The mechanism is norm-specific scaled head-gain efficiency, not lower unit-direction tail sensitivity.",
@@ -204,7 +213,7 @@ def main() -> None:
             },
             {
                 "section": "Evidence",
-                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain and checkpoint-sweep robustness checks, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
+                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain and checkpoint-sweep robustness checks, a ResNet rank-proxy caveat scatter, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
             },
             {
                 "section": "Boundary",
@@ -231,13 +240,13 @@ def main() -> None:
                 "priority": "must-have for architecture claim",
                 "experiment": "Larger-architecture layerwise diagnostic",
                 "purpose": "Check whether the scaled head-gain mechanism persists across layers in deeper models.",
-                "minimum_standard": "Per-layer nrank(G_H,l), ssrank(B_T,l,A_T,l), unit JVP, scaled JVP, observed drift, and layer contribution.",
+                "minimum_standard": "Per-layer nrank(G_H,l), downstream-aware tail sensitivity or ssrank(B_T,l,A_T,l), unit JVP, scaled JVP, observed drift, and layer contribution.",
             },
             {
                 "priority": "should-have",
                 "experiment": "Held-out boundary prediction benchmark",
                 "purpose": "Determine whether nrank-vs-ssrank is predictive beyond constructed settings.",
-                "minimum_standard": "Pre-specified held-out family/architecture split with balanced accuracy, AUC, and confidence intervals.",
+                "minimum_standard": "The ResNet rank-only proxy scatter is a caveat; the next benchmark should include downstream-aware tail sensitivity with pre-specified held-out family/architecture splits.",
             },
             {
                 "priority": "should-have",
