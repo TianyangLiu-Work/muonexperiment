@@ -584,6 +584,13 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "config.json",
         Path("figures/e11_cifar100_resnet_layer_jvp_tail_quality") / "cifar100_resnet_layer_jvp_tail_quality.png",
         Path("discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md"),
+        Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv",
+        Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv",
+        Path("results/e11_cifar100_resnet_practical_muon_bridge") / "summary.csv",
+        Path("results/e11_cifar100_resnet_practical_muon_bridge") / "step_summary.csv",
+        Path("results/e11_cifar100_resnet_practical_muon_bridge") / "config.json",
+        Path("figures/e11_cifar100_resnet_practical_muon_bridge") / "cifar100_resnet_practical_muon_bridge.png",
+        Path("discussion/e11_cifar100_resnet_practical_muon_bridge.md"),
         Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv",
         Path("results/e11_long_tail_imbalance_ablation") / "summary.csv",
         Path("figures/e11_long_tail_imbalance_ablation") / "long_tail_imbalance_ablation.png",
@@ -643,6 +650,7 @@ def main() -> None:
         Path("paper/specgrad_activation_paper/figures") / "long_tail_head_only_forgetting.png",
         Path("paper/specgrad_activation_paper/figures") / "long_tail_layerwise_drift.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_tail_quality.png",
+        Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_practical_muon_bridge.png",
         Path("paper/specgrad_activation_paper/tables") / "head_tail_empirical_results.tex",
         Path("paper/specgrad_activation_paper/tables") / "local_linearization_errors.tex",
         Path("paper/specgrad_activation_paper/tables") / "e11_paper_numbers.tex",
@@ -949,6 +957,7 @@ def main() -> None:
         "\\label{fig:long-tail-muon-state-source-control}",
         "\\label{fig:long-tail-forgetting}",
         "\\label{fig:long-tail-layerwise}",
+        "\\label{fig:cifar-resnet-practical-muon-bridge}",
         "figures/head_tail_drift_ratio.png",
         "figures/head_tail_alignment_ablation.png",
         "figures/long_tail_one_step_tail_response.png",
@@ -960,6 +969,7 @@ def main() -> None:
         "figures/long_tail_muon_state_source_control.png",
         "figures/long_tail_head_only_forgetting.png",
         "figures/long_tail_layerwise_drift.png",
+        "figures/cifar100_resnet_practical_muon_bridge.png",
         "momentum-gradient alignment",
         "Tianyang Liu",
         "UCDavis",
@@ -1250,6 +1260,8 @@ def main() -> None:
         "long_tail_practical_training.png",
         "long_tail_head_only_forgetting.png",
         "long_tail_layerwise_drift.png",
+        "cifar100_resnet_layer_jvp_tail_quality.png",
+        "cifar100_resnet_practical_muon_bridge.png",
         "tables/",
         "e11_paper_numbers.tex",
         "head_tail_empirical_results.tex",
@@ -1941,6 +1953,79 @@ def main() -> None:
         raise AssertionError(
             "CIFAR-100-LT ResNet18 all-layer JVP diagnostic must preserve lower scaled-JVP and observed drift"
         )
+    cifar_resnet_practical_metrics = pd.read_csv(
+        Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv"
+    )
+    cifar_resnet_practical_paired = pd.read_csv(
+        Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv"
+    )
+    cifar_resnet_practical_summary = pd.read_csv(
+        Path("results/e11_cifar100_resnet_practical_muon_bridge") / "summary.csv"
+    )
+    cifar_resnet_practical_step_summary = pd.read_csv(
+        Path("results/e11_cifar100_resnet_practical_muon_bridge") / "step_summary.csv"
+    )
+    cifar_resnet_practical_config = json.loads(
+        (Path("results/e11_cifar100_resnet_practical_muon_bridge") / "config.json").read_text()
+    )
+    base_resnet_practical_config = cifar_resnet_practical_config["base_config"]
+    bridge_resnet_practical_config = cifar_resnet_practical_config["bridge_config"]
+    expected_resnet_bridge_sources = {"adamw_matrix_trajectory", "ns_muon_matrix_trajectory"}
+    expected_resnet_bridge_directions = {"frobenius_grad", "polar_grad", "polar_momentum", "ns_momentum"}
+    if (
+        len(cifar_resnet_practical_metrics) != 240
+        or len(cifar_resnet_practical_paired) != 180
+        or len(cifar_resnet_practical_summary) != 6
+        or len(cifar_resnet_practical_step_summary) != 18
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 practical Muon bridge must contain 10 seeds x 2 state sources x 3 trajectory steps x 4 directions"
+        )
+    if not (
+        cifar_resnet_practical_metrics["seed"].nunique() == 10
+        and cifar_resnet_practical_paired["seed"].nunique() == 10
+        and set(cifar_resnet_practical_metrics["state_source"]) == expected_resnet_bridge_sources
+        and set(cifar_resnet_practical_metrics["direction"]) == expected_resnet_bridge_directions
+        and set(cifar_resnet_practical_summary["state_source"]) == expected_resnet_bridge_sources
+        and set(cifar_resnet_practical_summary["direction"]) == {"polar_grad", "polar_momentum", "ns_momentum"}
+        and set(cifar_resnet_practical_metrics["updated_parameter_subset"]) == {"conv_and_linear_weights_only"}
+        and cifar_resnet_practical_metrics["matrix_parameter_count"].nunique() == 1
+        and int(cifar_resnet_practical_metrics["matrix_parameter_count"].iloc[0]) == 21
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 practical Muon bridge must cover both state sources, four directions, and all 21 matrix weights"
+        )
+    if (
+        base_resnet_practical_config["device"] != "cuda"
+        or base_resnet_practical_config["download"]
+        or abs(float(base_resnet_practical_config["target_head_gain_fraction"]) - 0.005) > 1e-12
+        or len(base_resnet_practical_config["seeds"]) != 10
+        or int(base_resnet_practical_config["warmup_steps"]) != 5000
+        or int(base_resnet_practical_config["head_train_per_class"]) != 300
+        or int(base_resnet_practical_config["tail_train_per_class"]) != 300
+        or int(bridge_resnet_practical_config["trajectory_steps"]) != 3
+        or int(bridge_resnet_practical_config["newton_schulz_steps"]) != 5
+        or bridge_resnet_practical_config["max_matrix_parameters"] is not None
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 practical Muon bridge should be the full tail-rich Slurm/GPU no-download run"
+        )
+    resnet_practical_by_source_direction = cifar_resnet_practical_summary.set_index(["state_source", "direction"])
+    for source in expected_resnet_bridge_sources:
+        ns_row = resnet_practical_by_source_direction.loc[(source, "ns_momentum")]
+        polar_row = resnet_practical_by_source_direction.loc[(source, "polar_momentum")]
+        if not (
+            int(ns_row["seeds"]) == 10
+            and int(ns_row["trajectory_steps"]) == 3
+            and int(ns_row["comparisons"]) == 30
+            and ns_row["tail_output_drift_sq_ratio_vs_fro_ci95_high"] < 1.0
+            and ns_row["geomean_tail_output_drift_sq_ratio_vs_fro"] < 1.0
+            and polar_row["tail_output_drift_sq_ratio_vs_fro_ci95_high"] < 1.0
+            and polar_row["geomean_tail_output_drift_sq_ratio_vs_fro"] < ns_row["geomean_tail_output_drift_sq_ratio_vs_fro"]
+        ):
+            raise AssertionError(
+                f"CIFAR-100-LT ResNet18 practical Muon bridge must preserve lower local NS(M_t) drift on {source}"
+            )
     imbalance_steps = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv")
     imbalance_summary = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "summary.csv")
     if len(imbalance_steps) != 160:
@@ -2381,6 +2466,7 @@ def main() -> None:
         "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png",
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
         "figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png",
+        "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
         "seven figures plus one generated table",
         "paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex",
         "older condition-geometry artifacts",
@@ -2543,6 +2629,14 @@ def main() -> None:
         "\\EelevenCifarResNetLayerJvpSupportedLayers",
         "\\EelevenCifarResNetLayerJvpWorstObservedRatio",
         "\\EelevenCifarResNetLayerJvpWorstScaledRatio",
+        "\\EelevenCifarResNetPracticalMuonBridgeStateSources",
+        "\\EelevenCifarResNetPracticalMuonBridgeComparisonsPerDirection",
+        "\\EelevenCifarResNetPracticalAdamStatePolarMomentumDriftRatio",
+        "\\EelevenCifarResNetPracticalAdamStateNsMomentumDriftRatio",
+        "\\EelevenCifarResNetPracticalAdamStateNsMomentumCosine",
+        "\\EelevenCifarResNetPracticalMuonStatePolarMomentumDriftRatio",
+        "\\EelevenCifarResNetPracticalMuonStateNsMomentumDriftRatio",
+        "\\EelevenCifarResNetPracticalMuonStateNsMomentumCosine",
         "\\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         "\\EelevenLocalLinearizationMaxRelativeErrorDirection",
         "\\EelevenLongTailImbalanceAblationSettings",
@@ -2645,6 +2739,8 @@ def main() -> None:
         r"\EelevenCifarResNetTailQualityBestTailAccuracy",
         r"\EelevenCifarResNetLayerJvpObservedRatio",
         r"\EelevenCifarResNetLayerJvpScaledRatio",
+        r"\EelevenCifarResNetPracticalAdamStateNsMomentumDriftRatio",
+        r"\EelevenCifarResNetPracticalMuonStateNsMomentumDriftRatio",
         r"\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         r"\EelevenLocalLinearizationMaxRelativeErrorDirection",
         r"\EelevenLongTailImbalanceWorstRatioCiHigh",
@@ -2688,6 +2784,7 @@ def main() -> None:
         "make e11-cifar-resnet-fc-condition-results",
         "make e11-cifar-resnet-tail-quality-results",
         "make e11-cifar-resnet-layer-jvp-tail-quality-results",
+        "make e11-cifar-resnet-practical-muon-bridge-results",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -2708,6 +2805,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
         "CIFAR-100 ResNet18 tail-quality control",
         "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
+        "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -2733,6 +2831,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
         "CIFAR-100 ResNet18 tail-quality control",
         "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
+        "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
         "Long-tailed practical training diagnostic",
         "Long-tailed practical training LR sensitivity",
     ]
@@ -2882,6 +2981,7 @@ def main() -> None:
         "figures/e11_long_tail_practical_training_lr_sweep/long_tail_practical_training_lr_sweep.png",
         "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png",
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
+        "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
         "squared drift ratio=0.5501",
         "head-alignment ratio=2.083",
         "Frobenius-norm ratio=3.112",
@@ -3003,6 +3103,7 @@ def main() -> None:
         or "make e11-cifar-resnet-checkpoint-sweep-results" not in readme
         or "make e11-cifar-resnet-condition-proxy-results" not in readme
         or "make e11-cifar-resnet-layer-jvp-tail-quality-results" not in readme
+        or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
     ):

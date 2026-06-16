@@ -36,6 +36,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch
+sbatch scripts/slurm/e11_cifar100_resnet_practical_muon_bridge.sbatch
 python3 scripts/e11_run_long_tail_imbalance_ablation.py
 python3 scripts/e11_run_long_tail_checkpoint_sweep.py
 python3 scripts/e11_run_long_tail_class_partition_sweep.py
@@ -111,6 +112,7 @@ make e11-cifar-resnet-condition-proxy-results # regenerate the ResNet rank-proxy
 make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downstream-aware condition diagnostic via Slurm
 make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm
 make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm
+make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practical Muon/AdamW trajectory bridge via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
@@ -128,6 +130,7 @@ make e11-cifar-resnet-checkpoint-sweep-results
 make e11-cifar-resnet-fc-condition-results
 make e11-cifar-resnet-tail-quality-results
 make e11-cifar-resnet-layer-jvp-tail-quality-results
+make e11-cifar-resnet-practical-muon-bridge-results
 ```
 
 This submits `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`, which
@@ -154,6 +157,13 @@ The all-layer JVP target submits
 5000-step ResNet checkpoint. It probes all 21 Conv/Linear matrix weights with
 finite-difference unit JVP, matched-head-gain scaled JVP, and observed
 layer-only drift.
+
+The ResNet practical Muon bridge target submits
+`scripts/slurm/e11_cifar100_resnet_practical_muon_bridge.sbatch`, which runs
+`scripts/e11_run_cifar100_resnet_practical_muon_bridge.py` from the same
+tail-rich 5000-step ResNet checkpoint. It samples AdamW and finite-step
+NS-Muon matrix-weight trajectory states and reruns the matched-head-gain
+direction diagnostic for `polar(G_t)`, `polar(M_t)`, and `NS(M_t)`.
 
 ## Core Artifacts
 
@@ -188,6 +198,7 @@ Paper-facing synthesis:
 - `discussion/e11_cifar100_resnet_fc_condition_scatter.md`
 - `discussion/e11_cifar100_resnet_tail_quality_control.md`
 - `discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md`
+- `discussion/e11_cifar100_resnet_practical_muon_bridge.md`
 - `discussion/e11_long_tail_imbalance_ablation.md`
 - `discussion/e11_long_tail_checkpoint_sweep.md`
 - `discussion/e11_long_tail_class_partition_sweep.md`
@@ -233,6 +244,7 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv`
 - `results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv`
 - `results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv`
+- `results/e11_cifar100_resnet_practical_muon_bridge/summary.csv`
 - `results/e11_long_tail_imbalance_ablation/summary.csv`
 - `results/e11_long_tail_checkpoint_sweep/summary.csv`
 - `results/e11_long_tail_class_partition_sweep/summary.csv`
@@ -259,6 +271,7 @@ Primary paper figures:
 - `figures/e11_cifar100_resnet_fc_condition_scatter/cifar100_resnet_fc_condition_scatter.png`
 - `figures/e11_cifar100_resnet_tail_quality_control/cifar100_resnet_checkpoint_sweep.png`
 - `figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png`
+- `figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png`
 - `figures/e11_long_tail_imbalance_ablation/long_tail_imbalance_ablation.png`
 - `figures/e11_long_tail_checkpoint_sweep/long_tail_checkpoint_sweep.png`
 - `figures/e11_long_tail_class_partition_sweep/long_tail_class_partition_sweep.png`
@@ -291,6 +304,7 @@ Primary paper figures:
    - A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`, all points favoring spectral, and worst final-layer-only squared drift ratio about `0.2391 [0.2201, 0.2597]`.
    - A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]` and still keeps the worst squared drift ratio below 1, about `0.7292 [0.6923, 0.768]`.
    - An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points; observed squared drift ratio is about `0.2011 [0.1845, 0.2192]`, scaled-JVP ratio is about `0.065 [0.06008, 0.07031]`, and every per-layer observed CI upper endpoint is below 1.
+   - A ResNet practical Muon trajectory bridge from the same tail-rich checkpoint gives `NS(M_t)` squared drift ratio about `0.8628 [0.8154, 0.913]` on AdamW-sampled states and `0.7247 [0.676, 0.777]` on NS-Muon-sampled states.
    - In the default ResNet diagnostic, tail-loss increase diff spectral-minus-Fro is about `-0.000421 [-0.000592, -0.000249]`; tail-accuracy-drop diff still crosses zero, so this remains a local drift/loss diagnostic rather than an accuracy claim.
 4. The 8-step head-only forgetting diagnostic shows lower measured tail drift across the short horizon.
    - Final squared drift ratio is about `0.6167 [0.5744, 0.6622]`.
@@ -344,6 +358,7 @@ Do not claim:
 - `scripts/e11_run_cifar100_resnet_condition_proxy_scatter.py`: rank-side proxy scatter generated from the ResNet checkpoint-sweep CSVs.
 - `scripts/e11_run_cifar100_resnet_fc_condition_scatter.py`: final-layer downstream-aware condition diagnostic for `fc.weight` on ResNet18 checkpoints.
 - `scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py`: all-layer ResNet finite-difference JVP diagnostic at the tail-rich checkpoint.
+- `scripts/e11_run_cifar100_resnet_practical_muon_bridge.py`: ResNet practical Muon/AdamW trajectory-state bridge from the tail-rich checkpoint.
 - `scripts/slurm/e11_cifar100_resnet_one_step.sbatch`: GPU/Slurm submission wrapper for the ResNet18 diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch`: GPU/Slurm submission wrapper for the smaller-head-gain ResNet18 check.
 - `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`: GPU/Slurm submission wrapper for the checkpoint-quality sweep.

@@ -24,6 +24,9 @@ def main() -> None:
     one_step = pd.read_csv("results/e11_long_tail_one_step/pair_summary.csv").iloc[0]
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
+    cifar_resnet_practical_bridge = pd.read_csv(
+        "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv"
+    ).set_index(["state_source", "direction"])
     practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
     layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
@@ -31,6 +34,8 @@ def main() -> None:
     negative = synthetic[synthetic["setting"].eq("low_head_rank_high_tail_srank")].iloc[0]
     layer_1 = layerwise[layerwise["layer"].eq(1)].iloc[0]
     layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
+    resnet_adam_ns = cifar_resnet_practical_bridge.loc[("adamw_matrix_trajectory", "ns_momentum")]
+    resnet_muon_ns = cifar_resnet_practical_bridge.loc[("ns_muon_matrix_trajectory", "ns_momentum")]
 
     main_items = pd.DataFrame(
         [
@@ -142,6 +147,17 @@ def main() -> None:
             {"artifact": "discussion/e11_long_tail_muon_state_source_control.md", "role": "Markdown summary and CSV links for the Muon state-source control."},
             {"artifact": "figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png", "role": "Appendix ResNet all-layer finite-difference JVP control at the tail-rich checkpoint; supports the architecture-level mechanism bridge without turning the paper into a benchmark claim."},
             {"artifact": "discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md", "role": "Markdown summary and CSV links for the ResNet all-layer JVP tail-quality diagnostic."},
+            {
+                "artifact": "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
+                "role": (
+                    "Appendix ResNet practical Muon bridge on AdamW- and NS-Muon-sampled matrix-weight states; "
+                    f"NS(M_t) drift ratios are {fmt(resnet_adam_ns['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{interval(resnet_adam_ns, 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')} and "
+                    f"{fmt(resnet_muon_ns['geomean_tail_output_drift_sq_ratio_vs_fro'])} "
+                    f"{interval(resnet_muon_ns, 'tail_output_drift_sq_ratio_vs_fro_ci95_low', 'tail_output_drift_sq_ratio_vs_fro_ci95_high')}."
+                ),
+            },
+            {"artifact": "discussion/e11_cifar100_resnet_practical_muon_bridge.md", "role": "Markdown summary and CSV links for the ResNet practical Muon/AdamW trajectory bridge."},
             {"artifact": "discussion/e11_long_tail_practical_training_lr_sweep.md", "role": "Supporting robustness check for the selected practical-training Muon learning rate."},
             {"artifact": "discussion/e11_activation_perturbation.md", "role": "Background activation-geometry evidence; not a current main result."},
             {"artifact": "discussion/e11_reproduction_checklist.md", "role": "Minimal reproduction and appendix/guardrail reproduction commands."},

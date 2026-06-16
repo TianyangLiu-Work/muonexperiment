@@ -93,6 +93,10 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_layer_jvp_tail_quality/paired_metrics.csv",
     "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv",
     "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv",
+    "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
+    "results/e11_cifar100_resnet_practical_muon_bridge/paired_metrics.csv",
+    "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv",
+    "results/e11_cifar100_resnet_practical_muon_bridge/step_summary.csv",
     "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
     "results/e11_long_tail_imbalance_ablation/summary.csv",
     "results/e11_long_tail_checkpoint_sweep/step_metrics.csv",
@@ -174,6 +178,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_resnet_fc_condition_scatter.md",
     "discussion/e11_cifar100_resnet_tail_quality_control.md",
     "discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md",
+    "discussion/e11_cifar100_resnet_practical_muon_bridge.md",
 )
 
 
@@ -214,6 +219,7 @@ MAIN_RESULT_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_run_cifar100_resnet_condition_proxy_scatter.py",
     "scripts/e11_run_cifar100_resnet_fc_condition_scatter.py",
     "scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py",
+    "scripts/e11_run_cifar100_resnet_practical_muon_bridge.py",
     "scripts/e11_run_long_tail_imbalance_ablation.py",
     "scripts/e11_run_long_tail_checkpoint_sweep.py",
     "scripts/e11_run_long_tail_class_partition_sweep.py",
@@ -313,6 +319,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch",
         "produces": "results/e11_cifar100_resnet_layer_jvp_tail_quality/* and figures/e11_cifar100_resnet_layer_jvp_tail_quality/*",
         "paper_role": "All Conv/Linear layer finite-difference tail-sensitivity check at the tail-rich ResNet checkpoint; reports unit JVP, matched-gain scaled JVP, and observed layer-only drift.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
+        "command": "sbatch scripts/slurm/e11_cifar100_resnet_practical_muon_bridge.sbatch",
+        "produces": "results/e11_cifar100_resnet_practical_muon_bridge/* and figures/e11_cifar100_resnet_practical_muon_bridge/*",
+        "paper_role": "GPU ResNet18 state-trajectory compatibility check for exact polar and finite Newton-Schulz Muon-style momentum directions on AdamW- and NS-Muon-sampled matrix-weight states.",
     },
     {
         "stage": "Long-tailed imbalance ablation",

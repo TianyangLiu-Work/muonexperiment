@@ -105,6 +105,9 @@ def main() -> None:
     rho_sweep = pd.read_csv("results/e11_long_tail_rho_sweep/summary.csv")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
+    cifar_resnet_practical_bridge = pd.read_csv(
+        "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv"
+    ).set_index(["state_source", "direction"])
     state_source_control = pd.read_csv(
         "results/e11_long_tail_muon_state_source_control/summary.csv"
     ).set_index(["state_source", "direction"])
@@ -213,6 +216,18 @@ def main() -> None:
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
     )
+    cifar_resnet_practical_adam_polar_momentum = cifar_resnet_practical_bridge.loc[
+        ("adamw_matrix_trajectory", "polar_momentum")
+    ]
+    cifar_resnet_practical_adam_ns_momentum = cifar_resnet_practical_bridge.loc[
+        ("adamw_matrix_trajectory", "ns_momentum")
+    ]
+    cifar_resnet_practical_muon_polar_momentum = cifar_resnet_practical_bridge.loc[
+        ("ns_muon_matrix_trajectory", "polar_momentum")
+    ]
+    cifar_resnet_practical_muon_ns_momentum = cifar_resnet_practical_bridge.loc[
+        ("ns_muon_matrix_trajectory", "ns_momentum")
+    ]
     one_step_alignment_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "alignment")
     one_step_update_fro_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_fro_norm")
     one_step_update_op_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_op_norm")
@@ -906,6 +921,76 @@ def main() -> None:
             cifar_resnet_layer_jvp_worst_scaled,
             "scaled_jvp_tail_drift_sq_ratio_ci95_low",
             "scaled_jvp_tail_drift_sq_ratio_ci95_high",
+        ),
+        "",
+        "% CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
+        macro(
+            "EelevenCifarResNetPracticalMuonBridgeStateSources",
+            int(cifar_resnet_practical_bridge.index.get_level_values("state_source").nunique()),
+        ),
+        macro(
+            "EelevenCifarResNetPracticalMuonBridgeComparisonsPerDirection",
+            int(cifar_resnet_practical_adam_ns_momentum["comparisons"]),
+        ),
+        macro(
+            "EelevenCifarResNetPracticalAdamStatePolarMomentumDriftRatio",
+            fmt(cifar_resnet_practical_adam_polar_momentum["geomean_tail_output_drift_sq_ratio_vs_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetPracticalAdamStatePolarMomentumDriftRatio",
+            cifar_resnet_practical_adam_polar_momentum,
+            "tail_output_drift_sq_ratio_vs_fro_ci95_low",
+            "tail_output_drift_sq_ratio_vs_fro_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetPracticalAdamStateNsMomentumDriftRatio",
+            fmt(cifar_resnet_practical_adam_ns_momentum["geomean_tail_output_drift_sq_ratio_vs_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetPracticalAdamStateNsMomentumDriftRatio",
+            cifar_resnet_practical_adam_ns_momentum,
+            "tail_output_drift_sq_ratio_vs_fro_ci95_low",
+            "tail_output_drift_sq_ratio_vs_fro_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetPracticalAdamStateNsMomentumCosine",
+            fmt(cifar_resnet_practical_adam_ns_momentum["mean_gradient_momentum_cosine"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetPracticalAdamStateNsMomentumCosine",
+            cifar_resnet_practical_adam_ns_momentum,
+            "gradient_momentum_cosine_ci95_low",
+            "gradient_momentum_cosine_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetPracticalMuonStatePolarMomentumDriftRatio",
+            fmt(cifar_resnet_practical_muon_polar_momentum["geomean_tail_output_drift_sq_ratio_vs_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetPracticalMuonStatePolarMomentumDriftRatio",
+            cifar_resnet_practical_muon_polar_momentum,
+            "tail_output_drift_sq_ratio_vs_fro_ci95_low",
+            "tail_output_drift_sq_ratio_vs_fro_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetPracticalMuonStateNsMomentumDriftRatio",
+            fmt(cifar_resnet_practical_muon_ns_momentum["geomean_tail_output_drift_sq_ratio_vs_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetPracticalMuonStateNsMomentumDriftRatio",
+            cifar_resnet_practical_muon_ns_momentum,
+            "tail_output_drift_sq_ratio_vs_fro_ci95_low",
+            "tail_output_drift_sq_ratio_vs_fro_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetPracticalMuonStateNsMomentumCosine",
+            fmt(cifar_resnet_practical_muon_ns_momentum["mean_gradient_momentum_cosine"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetPracticalMuonStateNsMomentumCosine",
+            cifar_resnet_practical_muon_ns_momentum,
+            "gradient_momentum_cosine_ci95_low",
+            "gradient_momentum_cosine_ci95_high",
         ),
         "",
         "% Local linearization quality",
