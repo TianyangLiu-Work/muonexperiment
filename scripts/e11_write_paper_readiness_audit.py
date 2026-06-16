@@ -52,6 +52,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_layer_jvp_checkpoint_residual_prediction = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
+    ).set_index("predictor")
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -130,6 +133,15 @@ def main() -> None:
     cifar_resnet_jvp_checkpoint_early_layer = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
         "architecture_early_layer_prior"
     ]
+    cifar_resnet_jvp_checkpoint_observed_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
+        "source_observed_residual"
+    ]
+    cifar_resnet_jvp_checkpoint_scaled_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
+        "source_scaled_jvp_residual"
+    ]
+    cifar_resnet_jvp_checkpoint_rank_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
+        "source_gradient_nuclear_rank_residual"
+    ]
     cifar_resnet_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
         "source_unit_jvp_ratio"
     ]
@@ -200,6 +212,15 @@ def main() -> None:
                     f"The scaled-JVP held-out layer-risk Spearman is "
                     f"{fmt(cifar_resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} "
                     f"CI={interval(cifar_resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}. "
+                    f"After source-fit early-layer residualization, observed residual Spearman is "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_observed_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_observed_residual, 'spearman_ci95_low', 'spearman_ci95_high')}, "
+                    f"scaled-JVP residual Spearman is "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_scaled_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_scaled_residual, 'spearman_ci95_low', 'spearman_ci95_high')}, "
+                    f"and gradient-rank residual Spearman is "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_rank_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_rank_residual, 'spearman_ci95_low', 'spearman_ci95_high')}. "
                     f"The standard CIFAR-100-LT ResNet18 reporting baseline gives many/medium/few balanced accuracy "
                     f"{fmt(cifar_resnet_lt_many['mean_balanced_accuracy'])}/"
                     f"{fmt(cifar_resnet_lt_medium['mean_balanced_accuracy'])}/"
@@ -276,7 +297,11 @@ def main() -> None:
                     f"{fmt(cifar_resnet_jvp_checkpoint_unit['mean_spearman_log_predictor_vs_log_target_observed'])}), "
                     f"but both are negative for layer-risk ranking, while source-observed and early-layer positive controls are strongly positive "
                     f"({fmt(cifar_resnet_jvp_checkpoint_observed['mean_spearman_log_predictor_vs_log_target_observed'])} and "
-                    f"{fmt(cifar_resnet_jvp_checkpoint_early_layer['mean_spearman_log_predictor_vs_log_target_observed'])})."
+                    f"{fmt(cifar_resnet_jvp_checkpoint_early_layer['mean_spearman_log_predictor_vs_log_target_observed'])}). "
+                    f"After removing the early-layer prior with source-checkpoint fits, observed residuals still transfer "
+                    f"({fmt(cifar_resnet_jvp_checkpoint_observed_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])}), "
+                    f"whereas scaled-JVP residuals remain inverted "
+                    f"({fmt(cifar_resnet_jvp_checkpoint_scaled_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])})."
                 ),
                 "why_it_is_ready": "The synthetic construction flips the theory inequality and the observed tail drift direction flips with it.",
                 "remaining_risk": "The all-layer ResNet bridge is finite-difference local evidence. The checkpoint-transfer benchmark now shows the target layer ordering is predictable, but the current scaled-JVP condition score is not the predictor.",
@@ -391,13 +416,13 @@ def main() -> None:
                 "priority": "partly complete; extend for predictive condition claim",
                 "experiment": "Larger-architecture layerwise diagnostic",
                 "purpose": "Check whether the scaled head-gain mechanism persists across layers in deeper models.",
-                "minimum_standard": "The ResNet all-layer JVP diagnostic now gives unit JVP, scaled JVP, observed drift, and layer contribution for Conv/Linear weights. The held-out checkpoint-transfer run shows source-observed and early-layer positive controls transfer, but scaled-JVP does not; a stronger version needs a better downstream-aware condition score and held-out architecture/dataset splits.",
+                "minimum_standard": "The ResNet all-layer JVP diagnostic now gives unit JVP, scaled JVP, observed drift, and layer contribution for Conv/Linear weights. The held-out checkpoint-transfer run shows source-observed and early-layer positive controls transfer, observed residuals transfer after source-fit depth adjustment, but scaled-JVP does not; a stronger version needs a better downstream-aware condition score and held-out architecture/dataset splits.",
             },
             {
                 "priority": "should-have",
                 "experiment": "Held-out boundary prediction benchmark",
                 "purpose": "Determine whether nrank-vs-ssrank is predictive beyond constructed settings.",
-                "minimum_standard": "The checkpoint-transfer benchmark is now a predictive-boundary check: layer ranking is stable under positive controls, while the current scaled-JVP score fails ranking. The next benchmark should improve the condition score and include pre-specified held-out family/architecture splits.",
+                "minimum_standard": "The checkpoint-transfer benchmark is now a predictive-boundary check: layer ranking is stable under positive controls and remains partly stable after source-fit depth residualization, while the current scaled-JVP score fails both raw and residual ranking. The next benchmark should improve the condition score and include pre-specified held-out family/architecture splits.",
             },
             {
                 "priority": "should-have",

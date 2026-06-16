@@ -54,6 +54,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_layer_jvp_checkpoint_residual_prediction = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
+    ).set_index("predictor")
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -100,6 +103,15 @@ def main() -> None:
         "architecture_early_layer_prior"
     ]
     resnet_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_unit_jvp_ratio"]
+    resnet_jvp_checkpoint_observed_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
+        "source_observed_residual"
+    ]
+    resnet_jvp_checkpoint_scaled_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
+        "source_scaled_jvp_residual"
+    ]
+    resnet_jvp_checkpoint_rank_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
+        "source_gradient_nuclear_rank_residual"
+    ]
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
@@ -342,10 +354,19 @@ def main() -> None:
                     f"{ci(resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}; "
                     f"unit-JVP held-out Spearman="
                     f"{fmt(resnet_jvp_checkpoint_unit['mean_spearman_log_predictor_vs_log_target_observed'])} "
-                    f"{ci(resnet_jvp_checkpoint_unit, 'spearman_ci95_low', 'spearman_ci95_high')}."
+                    f"{ci(resnet_jvp_checkpoint_unit, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"observed residual Spearman="
+                    f"{fmt(resnet_jvp_checkpoint_observed_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+                    f"{ci(resnet_jvp_checkpoint_observed_residual, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"scaled-JVP residual Spearman="
+                    f"{fmt(resnet_jvp_checkpoint_scaled_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+                    f"{ci(resnet_jvp_checkpoint_scaled_residual, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"rank residual Spearman="
+                    f"{fmt(resnet_jvp_checkpoint_rank_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+                    f"{ci(resnet_jvp_checkpoint_rank_residual, 'spearman_ci95_low', 'spearman_ci95_high')}."
                 ),
-                "how_to_read": "The source observed-drift and early-layer controls show that held-out layer-risk ordering is predictable, while the current scaled-JVP score only transfers the below-one direction.",
-                "caveat": "This is a useful predictive-boundary result: the missing ingredient is a better downstream-aware score, not merely target-checkpoint noise.",
+                "how_to_read": "The source observed-drift and early-layer controls show that held-out layer-risk ordering is predictable; the residual test shows stable risk structure remains after removing layer-depth, while scaled-JVP residuals still fail.",
+                "caveat": "This is a useful predictive-boundary result: the missing ingredient is a better downstream-aware score, not merely target-checkpoint noise or layer-depth adjustment.",
             },
             {
                 "claim": "The current paper now has a standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.",

@@ -155,5 +155,12 @@
   "positive_control_predictors": {
     "source_observed_drift_ratio": "geomean_observed_tail_drift_sq_ratio_spectral_over_fro",
     "architecture_early_layer_prior": "early_layer_prior"
-  }
+  },
+  "residual_predictors": {
+    "source_observed_residual": "geomean_observed_tail_drift_sq_ratio_spectral_over_fro",
+    "source_scaled_jvp_residual": "geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro",
+    "source_unit_jvp_residual": "geomean_jvp_tail_drift_sq_ratio_spectral_over_fro",
+    "source_gradient_nuclear_rank_residual": "mean_gradient_nuclear_rank"
+  },
+  "residual_adjustment": "source_checkpoint_log_observed_drift_on_log_early_layer_prior"
 }

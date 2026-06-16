@@ -596,6 +596,8 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "checkpoint_summary.csv",
         Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "prediction_pairs.csv",
         Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "prediction_summary.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "residual_prediction_pairs.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "residual_prediction_summary.csv",
         Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "config.json",
         Path("figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         Path("discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md"),
@@ -2097,6 +2099,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction_summary = pd.read_csv(
         checkpoint_prediction_dir / "prediction_summary.csv"
     )
+    cifar_resnet_layer_jvp_checkpoint_residual_pairs = pd.read_csv(
+        checkpoint_prediction_dir / "residual_prediction_pairs.csv"
+    )
+    cifar_resnet_layer_jvp_checkpoint_residual_summary = pd.read_csv(
+        checkpoint_prediction_dir / "residual_prediction_summary.csv"
+    )
     cifar_resnet_layer_jvp_checkpoint_config = json.loads(
         (checkpoint_prediction_dir / "config.json").read_text()
     )
@@ -2109,6 +2117,12 @@ def main() -> None:
         "source_gradient_nuclear_rank",
         "architecture_early_layer_prior",
     }
+    expected_checkpoint_prediction_residual_predictors = {
+        "source_observed_residual",
+        "source_scaled_jvp_residual",
+        "source_unit_jvp_residual",
+        "source_gradient_nuclear_rank_residual",
+    }
     if (
         len(cifar_resnet_layer_jvp_checkpoint_metrics) != 1260
         or len(cifar_resnet_layer_jvp_checkpoint_paired) != 630
@@ -2116,6 +2130,8 @@ def main() -> None:
         or len(cifar_resnet_layer_jvp_checkpoint_summary) != 3
         or len(cifar_resnet_layer_jvp_checkpoint_prediction_pairs) != 36
         or len(cifar_resnet_layer_jvp_checkpoint_prediction_summary) != 6
+        or len(cifar_resnet_layer_jvp_checkpoint_residual_pairs) != 24
+        or len(cifar_resnet_layer_jvp_checkpoint_residual_summary) != 4
     ):
         raise AssertionError(
             "CIFAR-100-LT ResNet18 JVP checkpoint prediction must contain 3 checkpoints x 10 seeds x 21 layers"
@@ -2133,9 +2149,11 @@ def main() -> None:
         and set(cifar_resnet_layer_jvp_checkpoint_metrics["geometry"]) == {"frobenius", "spectral"}
         and set(cifar_resnet_layer_jvp_checkpoint_prediction_summary["predictor"])
         == expected_checkpoint_prediction_predictors
+        and set(cifar_resnet_layer_jvp_checkpoint_residual_summary["predictor"])
+        == expected_checkpoint_prediction_residual_predictors
     ):
         raise AssertionError(
-            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must cover 10 seeds, 21 layers, four pre-registered predictors, and two positive controls"
+            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must cover 10 seeds, 21 layers, four pre-registered predictors, two positive controls, and four residual predictors"
         )
     base_checkpoint_prediction_config = cifar_resnet_layer_jvp_checkpoint_config["base_config"]
     if (
@@ -2149,6 +2167,10 @@ def main() -> None:
         != expected_checkpoint_prediction_steps
         or abs(float(cifar_resnet_layer_jvp_checkpoint_config["jvp_epsilon"]) - 1e-4) > 1e-12
         or cifar_resnet_layer_jvp_checkpoint_config["max_matrix_parameters"] is not None
+        or set(cifar_resnet_layer_jvp_checkpoint_config["residual_predictors"])
+        != expected_checkpoint_prediction_residual_predictors
+        or cifar_resnet_layer_jvp_checkpoint_config["residual_adjustment"]
+        != "source_checkpoint_log_observed_drift_on_log_early_layer_prior"
     ):
         raise AssertionError(
             "CIFAR-100-LT ResNet18 JVP checkpoint prediction should be the full tail-rich Slurm/GPU no-download run"
@@ -2175,6 +2197,15 @@ def main() -> None:
     rank_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["source_gradient_nuclear_rank"]
     observed_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["source_observed_drift_ratio"]
     early_layer_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["architecture_early_layer_prior"]
+    residual_prediction_by_predictor = cifar_resnet_layer_jvp_checkpoint_residual_summary.set_index(
+        "predictor"
+    )
+    observed_residual_prediction = residual_prediction_by_predictor.loc["source_observed_residual"]
+    scaled_residual_prediction = residual_prediction_by_predictor.loc["source_scaled_jvp_residual"]
+    unit_residual_prediction = residual_prediction_by_predictor.loc["source_unit_jvp_residual"]
+    rank_residual_prediction = residual_prediction_by_predictor.loc[
+        "source_gradient_nuclear_rank_residual"
+    ]
     if not (
         int(scaled_checkpoint_prediction["checkpoint_transfer_pairs"]) == 6
         and int(observed_checkpoint_prediction["checkpoint_transfer_pairs"]) == 6
@@ -2191,9 +2222,21 @@ def main() -> None:
         and float(unit_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"])
         < float(scaled_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"])
         and float(rank_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"]) < 0.0
+        and int(observed_residual_prediction["checkpoint_transfer_pairs"]) == 6
+        and float(observed_residual_prediction["mean_spearman_residual_predictor_vs_residual_target_observed"])
+        > 0.9
+        and float(observed_residual_prediction["spearman_ci95_low"]) > 0.9
+        and float(scaled_residual_prediction["mean_spearman_residual_predictor_vs_residual_target_observed"])
+        < -0.4
+        and float(scaled_residual_prediction["spearman_ci95_high"]) < -0.4
+        and float(unit_residual_prediction["mean_spearman_residual_predictor_vs_residual_target_observed"])
+        < float(scaled_residual_prediction["mean_spearman_residual_predictor_vs_residual_target_observed"])
+        and 0.2
+        < float(rank_residual_prediction["mean_spearman_residual_predictor_vs_residual_target_observed"])
+        < 0.4
     ):
         raise AssertionError(
-            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must preserve the current boundary result: positive controls transfer, scaled-JVP ranking does not"
+            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must preserve the current boundary result: positive controls and observed residual transfer, scaled-JVP ranking does not"
         )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")

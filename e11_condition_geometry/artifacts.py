@@ -102,6 +102,8 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/checkpoint_summary.csv",
     "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_pairs.csv",
     "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv",
+    "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_pairs.csv",
+    "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv",
     "results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv",
     "results/e11_cifar100_resnet_lt_standard_eval/class_metrics.csv",
     "results/e11_cifar100_resnet_lt_standard_eval/group_metrics.csv",

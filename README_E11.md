@@ -188,7 +188,10 @@ tail-rich 2000/5000/10000-step ResNet checkpoints. It asks whether source
 checkpoint layer scores predict held-out checkpoint observed layer drift. The
 current result is a useful predictive boundary condition: source-observed drift
 and an early-layer prior do transfer layer-risk ranking, while scaled-JVP
-preserves the below-one threshold direction but not the ranking.
+preserves the below-one threshold direction but not the ranking. The residual
+version fits source-checkpoint observed drift against early-layer structure and
+tests held-out residual risk: source observed residuals still transfer, while
+scaled-JVP residuals remain inverted.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -380,7 +383,7 @@ Primary paper figures:
    - A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]` and still keeps the worst squared drift ratio below 1, about `0.7292 [0.6923, 0.768]`.
    - A CIFAR-100-LT ResNet18 imbalance sweep over tail_train_per_class 10/30/100/300 keeps spectral/Frobenius squared drift ratio below 1 in every setting; worst CI upper endpoint is 0.936 at tail_train_per_class=100, and best pre-update tail accuracy is 0.3297 [0.2954, 0.3639] at tail_train_per_class=300. Tail-loss evidence is mixed, so this remains a local drift result.
    - An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points; observed squared drift ratio is about `0.2011 [0.1845, 0.2192]`, scaled-JVP ratio is about `0.065 [0.06008, 0.07031]`, and every per-layer observed CI upper endpoint is below 1.
-   - An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs; source-observed positive-control Spearman is about `0.981 [0.9739, 0.988]` and early-layer prior Spearman is about `0.9126 [0.9029, 0.9222]`, but the scaled-JVP predictor has below-one threshold accuracy `1` and held-out layer-risk Spearman about `-0.3203 [-0.3562, -0.2845]`, so the current score is not yet a positive layer-ranking predictor.
+   - An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs; source-observed positive-control Spearman is about `0.981 [0.9739, 0.988]` and early-layer prior Spearman is about `0.9126 [0.9029, 0.9222]`, but the scaled-JVP predictor has below-one threshold accuracy `1` and held-out layer-risk Spearman about `-0.3203 [-0.3562, -0.2845]`. After source-fit early-layer residualization, observed residual Spearman is about `0.9403 [0.9216, 0.959]`, while scaled-JVP residual Spearman is about `-0.4872 [-0.5373, -0.4372]`, so the current score is not yet a positive layer-ranking predictor even beyond depth structure.
    - A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`. This supplies a standard classification reporting surface, not a tuned benchmark or Muon comparison.
    - An augmented CIFAR-100-LT ResNet18 recipe benchmark pilot (5 seeds, 5000 steps) gives SGD-momentum all/few balanced accuracy `0.4105 [0.4044, 0.4166]` and `0.1047 [0.09389, 0.1156]`; the few-group diff versus augmented AdamW is `0.0194 [0.005581, 0.03322]`. Class-balanced AdamW is worse in this pilot, with few-group diff `-0.0114 [-0.0215, -0.001304]`.
    - A CIFAR-100-LT ResNet18 NS-Muon final-training pilot (3 seeds, 5000 steps) is negative: lr=1e-4 all/few balanced accuracy `0.1265 [0.1218, 0.1312]` / `0.0008889 [-0.0006533, 0.002431]`; paired all/few diff vs AdamW-aug `-0.2348 [-0.2395, -0.23]` / `-0.08767 [-0.09948, -0.07585]`; lr=3e-5 is worse.
@@ -464,7 +467,7 @@ The current evidence is consistent with a focused local-geometry paper. It is no
 Most important next steps:
 
 1. Extend the new standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline, augmented recipe pilot, negative NS-Muon final-training pilot, and local tail-count imbalance sweep into a tuned benchmark protocol with a wider grid, class-balanced samplers, better Muon schedules, and larger long-tail datasets; the current pilots are useful benchmark context, not a competitive optimizer result.
-2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run now shows source-observed and early-layer controls transfer, but the current scaled-JVP score has negative layer-risk ranking transfer, so the next version needs a stronger downstream-aware condition and held-out architecture or dataset splits.
+2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run now shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the current scaled-JVP score has negative raw and residual layer-risk ranking transfer. The next version needs a stronger downstream-aware condition and held-out architecture or dataset splits.
 3. Extend the current fixed-checkpoint, short-trajectory, small practical-training, and negative ResNet final-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
 5. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.

@@ -30,6 +30,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_layer_jvp_checkpoint_residual_prediction = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
+    ).set_index("predictor")
     cifar_resnet_imbalance_sweep = pd.read_csv(
         "results/e11_cifar100_resnet_imbalance_sweep/pair_summary.csv"
     )
@@ -63,6 +66,12 @@ def main() -> None:
     ]
     resnet_jvp_checkpoint_early_layer = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
         "architecture_early_layer_prior"
+    ]
+    resnet_jvp_checkpoint_observed_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
+        "source_observed_residual"
+    ]
+    resnet_jvp_checkpoint_scaled_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
+        "source_scaled_jvp_residual"
     ]
     resnet_imbalance_worst = cifar_resnet_imbalance_sweep.loc[
         cifar_resnet_imbalance_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
@@ -206,7 +215,13 @@ def main() -> None:
                     f"{interval(resnet_jvp_checkpoint_early_layer, 'spearman_ci95_low', 'spearman_ci95_high')}, "
                     f"but scaled-JVP held-out Spearman is "
                     f"{fmt(resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} "
-                    f"{interval(resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}."
+                    f"{interval(resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"after early-layer residualization, observed residual Spearman is "
+                    f"{fmt(resnet_jvp_checkpoint_observed_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+                    f"{interval(resnet_jvp_checkpoint_observed_residual, 'spearman_ci95_low', 'spearman_ci95_high')} "
+                    f"while scaled-JVP residual Spearman is "
+                    f"{fmt(resnet_jvp_checkpoint_scaled_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+                    f"{interval(resnet_jvp_checkpoint_scaled_residual, 'spearman_ci95_low', 'spearman_ci95_high')}."
                 ),
             },
             {"artifact": "discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md", "role": "Markdown summary and CSV links for the held-out checkpoint-transfer JVP benchmark."},

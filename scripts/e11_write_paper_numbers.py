@@ -114,6 +114,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_layer_jvp_checkpoint_residual_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_pairs.csv"
+    )
+    cifar_resnet_layer_jvp_checkpoint_residual_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
+    ).set_index("predictor")
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -268,6 +274,17 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_rank = cifar_resnet_layer_jvp_checkpoint_prediction_summary.loc[
         "source_gradient_nuclear_rank"
     ]
+    cifar_resnet_layer_jvp_checkpoint_observed_residual = (
+        cifar_resnet_layer_jvp_checkpoint_residual_summary.loc["source_observed_residual"]
+    )
+    cifar_resnet_layer_jvp_checkpoint_scaled_residual = (
+        cifar_resnet_layer_jvp_checkpoint_residual_summary.loc["source_scaled_jvp_residual"]
+    )
+    cifar_resnet_layer_jvp_checkpoint_rank_residual = (
+        cifar_resnet_layer_jvp_checkpoint_residual_summary.loc[
+            "source_gradient_nuclear_rank_residual"
+        ]
+    )
     cifar_resnet_lt_standard_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_standard_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     cifar_resnet_lt_standard_few = cifar_resnet_lt_standard_eval.loc["few"]
@@ -1067,6 +1084,10 @@ def main() -> None:
             int(len(cifar_resnet_layer_jvp_checkpoint_prediction_pairs)),
         ),
         macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionResidualDirectedRows",
+            int(len(cifar_resnet_layer_jvp_checkpoint_residual_pairs)),
+        ),
+        macro(
             "EelevenCifarResNetLayerJvpCheckpointPredictionObservedSpearman",
             fmt(cifar_resnet_layer_jvp_checkpoint_observed["mean_spearman_log_predictor_vs_log_target_observed"]),
         ),
@@ -1129,6 +1150,56 @@ def main() -> None:
         *ci_macros(
             "EelevenCifarResNetLayerJvpCheckpointPredictionRankSpearman",
             cifar_resnet_layer_jvp_checkpoint_rank,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionObservedResidualSpearman",
+            fmt(
+                cifar_resnet_layer_jvp_checkpoint_observed_residual[
+                    "mean_spearman_residual_predictor_vs_residual_target_observed"
+                ]
+            ),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionObservedResidualSpearman",
+            cifar_resnet_layer_jvp_checkpoint_observed_residual,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionObservedResidualTopFiveOverlap",
+            fmt(
+                cifar_resnet_layer_jvp_checkpoint_observed_residual[
+                    "mean_top5_residual_risk_overlap_fraction"
+                ]
+            ),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionScaledResidualSpearman",
+            fmt(
+                cifar_resnet_layer_jvp_checkpoint_scaled_residual[
+                    "mean_spearman_residual_predictor_vs_residual_target_observed"
+                ]
+            ),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionScaledResidualSpearman",
+            cifar_resnet_layer_jvp_checkpoint_scaled_residual,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionRankResidualSpearman",
+            fmt(
+                cifar_resnet_layer_jvp_checkpoint_rank_residual[
+                    "mean_spearman_residual_predictor_vs_residual_target_observed"
+                ]
+            ),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionRankResidualSpearman",
+            cifar_resnet_layer_jvp_checkpoint_rank_residual,
             "spearman_ci95_low",
             "spearman_ci95_high",
         ),

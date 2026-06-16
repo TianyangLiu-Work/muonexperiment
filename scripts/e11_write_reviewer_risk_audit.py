@@ -45,6 +45,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_layer_jvp_checkpoint_residual_prediction = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
+    ).set_index("predictor")
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -115,6 +118,12 @@ def main() -> None:
     ]
     cifar_resnet_jvp_checkpoint_early_layer = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
         "architecture_early_layer_prior"
+    ]
+    cifar_resnet_jvp_checkpoint_observed_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
+        "source_observed_residual"
+    ]
+    cifar_resnet_jvp_checkpoint_scaled_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
+        "source_scaled_jvp_residual"
     ]
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
@@ -238,7 +247,13 @@ def main() -> None:
                     f"CI={interval(cifar_resnet_jvp_checkpoint_early_layer, 'spearman_ci95_low', 'spearman_ci95_high')}, "
                     f"while scaled-JVP has Spearman "
                     f"{fmt(cifar_resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} "
-                    f"CI={interval(cifar_resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}."
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}. "
+                    f"After source-fit early-layer residualization, observed residual Spearman is "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_observed_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_observed_residual, 'spearman_ci95_low', 'spearman_ci95_high')}, "
+                    f"but scaled-JVP residual Spearman is "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_scaled_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_scaled_residual, 'spearman_ci95_low', 'spearman_ci95_high')}."
                 ),
                 "safe_response": "Call the synthetic result a mechanism sanity check, use the ResNet rank-only proxy as a caveat, and present the final-layer plus all-layer JVP diagnostics as downstream-aware natural-task bridges.",
                 "remaining_work": "Improve the downstream-aware score and repeat the held-out benchmark on architecture or dataset splits before claiming a general boundary predictor.",

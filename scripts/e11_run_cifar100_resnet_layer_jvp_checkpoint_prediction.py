@@ -75,6 +75,26 @@ def add_prediction_control_columns(layer_summary: pd.DataFrame) -> pd.DataFrame:
     return layer_summary
 
 
+def log_positive(values: pd.Series) -> pd.Series:
+    return values.astype(float).clip(lower=1e-300).map(math.log)
+
+
+def residualize_against_early_layer_prior(frame: pd.DataFrame, column: str) -> tuple[float, float, pd.Series]:
+    x = log_positive(frame["early_layer_prior"])
+    y = log_positive(frame[column])
+    x_mean = float(x.mean())
+    y_mean = float(y.mean())
+    x_centered = x - x_mean
+    denominator = float((x_centered * x_centered).sum())
+    slope = 0.0 if denominator <= 0.0 else float((x_centered * (y - y_mean)).sum() / denominator)
+    intercept = y_mean - slope * x_mean
+    return intercept, slope, y - (intercept + slope * x)
+
+
+def residual_from_fit(frame: pd.DataFrame, column: str, intercept: float, slope: float) -> pd.Series:
+    return log_positive(frame[column]) - (float(intercept) + float(slope) * log_positive(frame["early_layer_prior"]))
+
+
 def layer_checkpoint_table(paired: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for (warmup_steps, layer_index, parameter), group in paired.groupby(
@@ -247,6 +267,118 @@ def summarize_prediction_pairs(pairs: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+RESIDUAL_PREDICTORS = {
+    "source_observed_residual": "geomean_observed_tail_drift_sq_ratio_spectral_over_fro",
+    "source_scaled_jvp_residual": "geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro",
+    "source_unit_jvp_residual": "geomean_jvp_tail_drift_sq_ratio_spectral_over_fro",
+    "source_gradient_nuclear_rank_residual": "mean_gradient_nuclear_rank",
+}
+
+
+def residual_prediction_pairs(layer_summary: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    layer_summary = add_prediction_control_columns(layer_summary)
+    checkpoints = sorted(int(value) for value in layer_summary["warmup_steps"].unique())
+    for train_steps in checkpoints:
+        train = layer_summary[layer_summary["warmup_steps"].eq(train_steps)].copy()
+        observed_intercept, observed_slope, source_observed_residual = residualize_against_early_layer_prior(
+            train,
+            "geomean_observed_tail_drift_sq_ratio_spectral_over_fro",
+        )
+        source_residuals = {
+            "source_observed_residual": source_observed_residual,
+        }
+        for predictor_name, column in RESIDUAL_PREDICTORS.items():
+            if predictor_name == "source_observed_residual":
+                continue
+            _intercept, _slope, source_residuals[predictor_name] = residualize_against_early_layer_prior(
+                train,
+                column,
+            )
+        residual_frame = pd.DataFrame({"parameter": train["parameter"].to_numpy()})
+        for predictor_name, values in source_residuals.items():
+            residual_frame[predictor_name] = values.to_numpy(dtype=float)
+        for test_steps in checkpoints:
+            if test_steps == train_steps:
+                continue
+            test = layer_summary[layer_summary["warmup_steps"].eq(test_steps)].copy()
+            joined = train[["parameter"]].merge(test, on="parameter", how="inner")
+            target_residual = residual_from_fit(
+                joined,
+                "geomean_observed_tail_drift_sq_ratio_spectral_over_fro",
+                observed_intercept,
+                observed_slope,
+            )
+            target_top_k = set(
+                pd.DataFrame({"parameter": joined["parameter"], "target_residual": target_residual})
+                .nlargest(min(5, len(joined)), "target_residual")["parameter"]
+            )
+            source_joined = residual_frame.merge(
+                pd.DataFrame({"parameter": joined["parameter"], "target_residual": target_residual}),
+                on="parameter",
+                how="inner",
+            )
+            for predictor_name in RESIDUAL_PREDICTORS:
+                source = source_joined[predictor_name].astype(float)
+                target = source_joined["target_residual"].astype(float)
+                spearman, spearman_low, spearman_high, points = corr_ci95(source, target, method="spearman")
+                pearson, pearson_low, pearson_high, _ = corr_ci95(source, target, method="pearson")
+                predicted_top_k = set(source_joined.nlargest(min(5, len(source_joined)), predictor_name)["parameter"])
+                rows.append(
+                    {
+                        "source_warmup_steps": int(train_steps),
+                        "target_warmup_steps": int(test_steps),
+                        "predictor": predictor_name,
+                        "predictor_family": (
+                            "positive_control"
+                            if predictor_name == "source_observed_residual"
+                            else "architecture_adjusted"
+                        ),
+                        "points": int(points),
+                        "source_depth_fit_intercept": float(observed_intercept),
+                        "source_depth_fit_slope": float(observed_slope),
+                        "spearman_residual_predictor_vs_residual_target_observed": spearman,
+                        "spearman_ci95_low": spearman_low,
+                        "spearman_ci95_high": spearman_high,
+                        "pearson_residual_predictor_vs_residual_target_observed": pearson,
+                        "pearson_ci95_low": pearson_low,
+                        "pearson_ci95_high": pearson_high,
+                        "top5_residual_risk_overlap_fraction": len(predicted_top_k & target_top_k)
+                        / max(len(target_top_k), 1),
+                    }
+                )
+    return pd.DataFrame(rows)
+
+
+def summarize_residual_prediction_pairs(pairs: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for predictor, group in pairs.groupby("predictor", observed=True, sort=False):
+        spearman, spearman_low, spearman_high = ci95(
+            group["spearman_residual_predictor_vs_residual_target_observed"]
+        )
+        pearson, pearson_low, pearson_high = ci95(
+            group["pearson_residual_predictor_vs_residual_target_observed"]
+        )
+        top5, top5_low, top5_high = ci95(group["top5_residual_risk_overlap_fraction"])
+        rows.append(
+            {
+                "predictor": predictor,
+                "predictor_family": str(group["predictor_family"].iloc[0]),
+                "checkpoint_transfer_pairs": int(len(group)),
+                "mean_spearman_residual_predictor_vs_residual_target_observed": spearman,
+                "spearman_ci95_low": spearman_low,
+                "spearman_ci95_high": spearman_high,
+                "mean_pearson_residual_predictor_vs_residual_target_observed": pearson,
+                "pearson_ci95_low": pearson_low,
+                "pearson_ci95_high": pearson_high,
+                "mean_top5_residual_risk_overlap_fraction": top5,
+                "top5_residual_risk_overlap_ci95_low": top5_low,
+                "top5_residual_risk_overlap_ci95_high": top5_high,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def run_checkpoint_prediction(
     base_config: Cifar100ResNetOneStepConfig,
     *,
@@ -289,10 +421,11 @@ def run_checkpoint_prediction(
 def write_figure(
     checkpoint_summary: pd.DataFrame,
     prediction_summary: pd.DataFrame,
+    residual_prediction_summary: pd.DataFrame,
     figure_dir: Path,
 ) -> Path:
     figure_dir.mkdir(parents=True, exist_ok=True)
-    fig, axes = plt.subplots(1, 2, figsize=(11.6, 5.0))
+    fig, axes = plt.subplots(1, 3, figsize=(15.2, 5.0))
 
     ordered = checkpoint_summary.sort_values("warmup_steps")
     x = ordered["warmup_steps"].to_numpy(dtype=float)
@@ -345,6 +478,33 @@ def write_figure(
     axes[1].set_xlabel("held-out-checkpoint Spearman")
     axes[1].set_title("Layer-risk transfer")
 
+    ordered_residual = residual_prediction_summary.sort_values("predictor")
+    y_positions = list(range(len(ordered_residual)))
+    estimates = ordered_residual[
+        "mean_spearman_residual_predictor_vs_residual_target_observed"
+    ].to_numpy(dtype=float)
+    low = ordered_residual["spearman_ci95_low"].to_numpy(dtype=float)
+    high = ordered_residual["spearman_ci95_high"].to_numpy(dtype=float)
+    residual_colors = [
+        "#CC79A7" if family == "positive_control" else "#56B4E9"
+        for family in ordered_residual["predictor_family"]
+    ]
+    axes[2].barh(y_positions, estimates, color=residual_colors, alpha=0.88)
+    axes[2].errorbar(
+        estimates,
+        y_positions,
+        xerr=[estimates - low, high - estimates],
+        fmt="none",
+        color="black",
+        capsize=3,
+        linewidth=1,
+    )
+    axes[2].axvline(0.0, color="black", linestyle="--", linewidth=1)
+    axes[2].set_yticks(y_positions)
+    axes[2].set_yticklabels(ordered_residual["predictor"].tolist(), fontsize=8)
+    axes[2].set_xlabel("depth-adjusted Spearman")
+    axes[2].set_title("Residual layer-risk transfer")
+
     fig.suptitle("CIFAR-100-LT ResNet18 all-layer JVP checkpoint-prediction benchmark")
     fig.tight_layout()
     path = figure_dir / "cifar100_resnet_layer_jvp_checkpoint_prediction.png"
@@ -358,6 +518,7 @@ def write_discussion(
     warmup_steps: tuple[int, ...],
     checkpoint_summary: pd.DataFrame,
     prediction_summary: pd.DataFrame,
+    residual_prediction_summary: pd.DataFrame,
     figure_path: Path,
     output_dir: Path,
     discussion_path: Path,
@@ -372,6 +533,15 @@ def write_discussion(
     early_layer_row = prediction_summary[
         prediction_summary["predictor"].eq("architecture_early_layer_prior")
     ].iloc[0]
+    residual_observed_row = residual_prediction_summary[
+        residual_prediction_summary["predictor"].eq("source_observed_residual")
+    ].iloc[0]
+    residual_scaled_row = residual_prediction_summary[
+        residual_prediction_summary["predictor"].eq("source_scaled_jvp_residual")
+    ].iloc[0]
+    residual_nrank_row = residual_prediction_summary[
+        residual_prediction_summary["predictor"].eq("source_gradient_nuclear_rank_residual")
+    ].iloc[0]
     lines = [
         "# E11 CIFAR-100-LT ResNet18 All-Layer JVP Checkpoint-Prediction Benchmark",
         "",
@@ -385,6 +555,13 @@ def write_discussion(
         "added: source-checkpoint observed drift and an early-layer architecture",
         "prior. These controls test whether held-out layer-risk ordering is",
         "predictable at all, rather than attributing every failure to target noise.",
+        "",
+        "The same artifact also reports an architecture-adjusted residual test.",
+        "For each source checkpoint, it fits source observed log drift from",
+        "log early-layer prior, applies that source fit to the held-out target",
+        "checkpoint, and asks which source residual scores predict target",
+        "residual risk. This avoids fitting the depth correction on the target",
+        "checkpoint itself.",
         "",
         f"- Warmup checkpoints: {', '.join(str(step) for step in warmup_steps)}",
         f"- Seeds per checkpoint: {len(base_config.seeds)}",
@@ -450,13 +627,25 @@ def write_discussion(
         f"- Rank-only source predictor: Spearman "
         f"{fmt(rank_row['mean_spearman_log_predictor_vs_log_target_observed'])} "
         f"[{fmt(rank_row['spearman_ci95_low'])}, {fmt(rank_row['spearman_ci95_high'])}].",
+        f"- Architecture-adjusted source observed residual: Spearman "
+        f"{fmt(residual_observed_row['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+        f"[{fmt(residual_observed_row['spearman_ci95_low'])}, {fmt(residual_observed_row['spearman_ci95_high'])}], "
+        f"top-5 residual overlap {fmt(residual_observed_row['mean_top5_residual_risk_overlap_fraction'])}.",
+        f"- Architecture-adjusted scaled-JVP residual: Spearman "
+        f"{fmt(residual_scaled_row['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+        f"[{fmt(residual_scaled_row['spearman_ci95_low'])}, {fmt(residual_scaled_row['spearman_ci95_high'])}].",
+        f"- Architecture-adjusted gradient-rank residual: Spearman "
+        f"{fmt(residual_nrank_row['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
+        f"[{fmt(residual_nrank_row['spearman_ci95_low'])}, {fmt(residual_nrank_row['spearman_ci95_high'])}].",
         "",
         "Interpretation: this is a checkpoint-transfer mechanism benchmark. The",
         "positive controls show that layer-risk ordering is stable enough to",
         "transfer across the tested tail-rich checkpoints. The current scaled-JVP",
         "readout transfers the below-one direction but not the layer ranking, so",
         "the missing ingredient is in the measurable condition score rather than",
-        "only in target-checkpoint noise. It is still not a standard long-tailed",
+        "only in target-checkpoint noise. The residual benchmark further shows",
+        "that observed source residuals transfer after removing the early-layer",
+        "prior, while the scaled-JVP residual remains inverted. It is still not a standard long-tailed",
         "classification benchmark or a final optimizer-performance result.",
         "",
         "Artifacts:",
@@ -466,6 +655,8 @@ def write_discussion(
         f"- [checkpoint_summary.csv](../{(output_dir / 'checkpoint_summary.csv').as_posix()})",
         f"- [prediction_pairs.csv](../{(output_dir / 'prediction_pairs.csv').as_posix()})",
         f"- [prediction_summary.csv](../{(output_dir / 'prediction_summary.csv').as_posix()})",
+        f"- [residual_prediction_pairs.csv](../{(output_dir / 'residual_prediction_pairs.csv').as_posix()})",
+        f"- [residual_prediction_summary.csv](../{(output_dir / 'residual_prediction_summary.csv').as_posix()})",
         f"- [config.json](../{(output_dir / 'config.json').as_posix()})",
     ]
     discussion_path.parent.mkdir(parents=True, exist_ok=True)
@@ -574,8 +765,12 @@ def main() -> None:
         checkpoint_summary.to_csv(args.output_dir / "checkpoint_summary.csv", index=False)
     prediction_pair_summary = prediction_pairs(layer_summary)
     prediction_summary = summarize_prediction_pairs(prediction_pair_summary)
+    residual_prediction_pair_summary = residual_prediction_pairs(layer_summary)
+    residual_prediction_summary = summarize_residual_prediction_pairs(residual_prediction_pair_summary)
     prediction_pair_summary.to_csv(args.output_dir / "prediction_pairs.csv", index=False)
     prediction_summary.to_csv(args.output_dir / "prediction_summary.csv", index=False)
+    residual_prediction_pair_summary.to_csv(args.output_dir / "residual_prediction_pairs.csv", index=False)
+    residual_prediction_summary.to_csv(args.output_dir / "residual_prediction_summary.csv", index=False)
     (args.output_dir / "config.json").write_text(
         json.dumps(
             {
@@ -590,18 +785,21 @@ def main() -> None:
                 "positive_control_predictors": {
                     key: value for key, value in PREDICTORS.items() if key in POSITIVE_CONTROL_PREDICTORS
                 },
+                "residual_predictors": RESIDUAL_PREDICTORS,
+                "residual_adjustment": "source_checkpoint_log_observed_drift_on_log_early_layer_prior",
             },
             indent=2,
         )
         + "\n",
         encoding="utf-8",
     )
-    figure_path = write_figure(checkpoint_summary, prediction_summary, args.figure_dir)
+    figure_path = write_figure(checkpoint_summary, prediction_summary, residual_prediction_summary, args.figure_dir)
     write_discussion(
         config,
         warmup_steps,
         checkpoint_summary,
         prediction_summary,
+        residual_prediction_summary,
         figure_path,
         args.output_dir,
         args.discussion_path,
@@ -615,6 +813,7 @@ def main() -> None:
     print(f"figure: {figure_path}")
     print(f"discussion: {args.discussion_path}")
     print(prediction_summary.to_string(index=False))
+    print(residual_prediction_summary.to_string(index=False))
 
 
 if __name__ == "__main__":
