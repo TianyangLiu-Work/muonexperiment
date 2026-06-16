@@ -48,6 +48,12 @@ def main() -> None:
     cifar_resnet_lt_recipe_pairs = pd.read_csv(
         "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
     ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_muon_final = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_muon_final_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_muon_final_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_muon_final_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -95,6 +101,14 @@ def main() -> None:
     cifar_resnet_recipe_sgd_all = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "all")]
     cifar_resnet_recipe_sgd_few = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "few")]
     cifar_resnet_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
+    cifar_resnet_muon_final_lr1e4_all = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr1e-4", "all")]
+    cifar_resnet_muon_final_lr1e4_few = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr1e-4", "few")]
+    cifar_resnet_muon_final_lr1e4_all_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr1e-4", "all")
+    ]
+    cifar_resnet_muon_final_lr1e4_few_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr1e-4", "few")
+    ]
     layer_1 = layerwise[layerwise["layer"].eq(1)].iloc[0]
     layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
 
@@ -146,9 +160,15 @@ def main() -> None:
                     f"{fmt(cifar_resnet_recipe_sgd_all['mean_balanced_accuracy'])}/"
                     f"{fmt(cifar_resnet_recipe_sgd_few['mean_balanced_accuracy'])}, "
                     f"with few diff vs AdamW-aug "
-                    f"{fmt(cifar_resnet_recipe_sgd_few_diff['mean_balanced_accuracy_diff'])}."
+                    f"{fmt(cifar_resnet_recipe_sgd_few_diff['mean_balanced_accuracy_diff'])}. "
+                    f"The NS-Muon final-training pilot is negative: lr=1e-4 all/few balanced accuracy "
+                    f"{fmt(cifar_resnet_muon_final_lr1e4_all['mean_balanced_accuracy'])}/"
+                    f"{fmt(cifar_resnet_muon_final_lr1e4_few['mean_balanced_accuracy'])}, "
+                    f"with all/few paired diffs vs AdamW-aug "
+                    f"{fmt(cifar_resnet_muon_final_lr1e4_all_diff['mean_balanced_accuracy_diff'])}/"
+                    f"{fmt(cifar_resnet_muon_final_lr1e4_few_diff['mean_balanced_accuracy_diff'])}."
                 ),
-                "safe_response": "Make function drift the main measured quantity; use the tail-rich ResNet control and standard reporting baseline to address measurement-surface objections, while keeping practical tail-loss/margin evidence separate from tail accuracy.",
+                "safe_response": "Make function drift the main measured quantity; use the tail-rich ResNet control, standard reporting baseline, and negative NS-Muon final pilot to address measurement-surface objections, while keeping practical tail-loss/margin evidence separate from tail accuracy.",
                 "remaining_work": "Run retuned long-horizon optimizer benchmarks before making performance claims.",
             },
             {
@@ -238,10 +258,13 @@ def main() -> None:
                     f"{fmt(cifar_resnet_lt_few['mean_balanced_accuracy'])}. "
                     f"The augmented recipe pilot adds SGD-momentum all/few balanced accuracy "
                     f"{fmt(cifar_resnet_recipe_sgd_all['mean_balanced_accuracy'])}/"
-                    f"{fmt(cifar_resnet_recipe_sgd_few['mean_balanced_accuracy'])}."
+                    f"{fmt(cifar_resnet_recipe_sgd_few['mean_balanced_accuracy'])}. "
+                    f"The NS-Muon final-training pilot adds a negative boundary: lr=1e-4 all/few balanced accuracy "
+                    f"{fmt(cifar_resnet_muon_final_lr1e4_all['mean_balanced_accuracy'])}/"
+                    f"{fmt(cifar_resnet_muon_final_lr1e4_few['mean_balanced_accuracy'])}."
                 ),
                 "safe_response": "Present the manuscript as a theory-and-diagnostic mechanism paper with architecture, tail-quality, standard reporting, and recipe-pilot controls, not a tuned long-tail optimizer benchmark paper.",
-                "remaining_work": "Add ImageNet-LT or iNaturalist-style matched-head-gain diagnostics and long-horizon practical baselines before claiming benchmark-level generality.",
+                "remaining_work": "Add ImageNet-LT or iNaturalist-style matched-head-gain diagnostics, wider NS-Muon schedules, and long-horizon practical baselines before claiming benchmark-level generality.",
             },
             {
                 "reviewer_objection": "There are too many legacy E11 artifacts and the main claim may be hard to follow.",
@@ -278,7 +301,7 @@ def main() -> None:
             {
                 "claim": "The paper is a full long-tail classification benchmark.",
                 "decision": "do not claim",
-                "reason": "The CIFAR-100-LT ResNet standard run and augmented recipe pilot are benchmark context, not a tuned multi-dataset Muon/AdamW long-horizon benchmark.",
+                "reason": "The CIFAR-100-LT ResNet standard run, augmented recipe pilot, and negative NS-Muon final pilot are benchmark context, not a tuned multi-dataset Muon/AdamW long-horizon benchmark.",
             },
         ]
     )
@@ -321,6 +344,7 @@ This generated audit lists likely reviewer objections for the current head-to-ta
 - [CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic](e11_cifar100_resnet_layer_jvp_tail_quality.md)
 - [CIFAR-100-LT ResNet18 standard many/medium/few evaluation](e11_cifar100_resnet_lt_standard_eval.md)
 - [CIFAR-100-LT ResNet18 recipe benchmark pilot](e11_cifar100_resnet_lt_recipe_benchmark.md)
+- [CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot](e11_cifar100_resnet_lt_muon_final_benchmark.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

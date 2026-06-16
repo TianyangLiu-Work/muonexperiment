@@ -60,6 +60,12 @@ def main() -> None:
     cifar_resnet_lt_recipe_pairs = pd.read_csv(
         "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
     ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_muon_final = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_muon_final_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_muon_final_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_muon_final_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     cifar_resnet_practical_bridge = pd.read_csv(
         "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv"
     ).set_index(["state_source", "direction"])
@@ -87,6 +93,14 @@ def main() -> None:
     cifar_resnet_recipe_sgd_few = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "few")]
     cifar_resnet_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
     cifar_resnet_recipe_cb_few_diff = cifar_resnet_lt_recipe_pairs.loc[("adamw_aug_cb_loss", "few")]
+    cifar_resnet_muon_final_lr1e4_all = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr1e-4", "all")]
+    cifar_resnet_muon_final_lr1e4_few = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr1e-4", "few")]
+    cifar_resnet_muon_final_lr1e4_all_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr1e-4", "all")
+    ]
+    cifar_resnet_muon_final_lr1e4_few_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr1e-4", "few")
+    ]
 
     evidence = pd.DataFrame(
         [
@@ -332,6 +346,26 @@ def main() -> None:
                 ),
                 "how_to_read": "This starts separating optimizer/recipe effects from the local drift diagnostic by adding augmentation and common baselines.",
                 "caveat": "It is a 5-seed pilot over three recipes, not a full hyperparameter sweep, larger-dataset benchmark, or Muon final-performance comparison.",
+            },
+            {
+                "claim": "The NS-Muon final-training pilot is a negative CIFAR-100-LT ResNet18 boundary result.",
+                "recommended_figure": link(
+                    "figures/e11_cifar100_resnet_lt_muon_final_benchmark/cifar100_resnet_lt_recipe_benchmark.png"
+                ),
+                "source_data": link("results/e11_cifar100_resnet_lt_muon_final_benchmark/summary.csv"),
+                "quantitative_anchor": (
+                    "NS-Muon final-training lr=1e-4: "
+                    f"all={fmt(cifar_resnet_muon_final_lr1e4_all['mean_balanced_accuracy'])} "
+                    f"{ci(cifar_resnet_muon_final_lr1e4_all, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"few={fmt(cifar_resnet_muon_final_lr1e4_few['mean_balanced_accuracy'])} "
+                    f"{ci(cifar_resnet_muon_final_lr1e4_few, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"all diff vs AdamW-aug={fmt(cifar_resnet_muon_final_lr1e4_all_diff['mean_balanced_accuracy_diff'])} "
+                    f"{ci(cifar_resnet_muon_final_lr1e4_all_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')}; "
+                    f"few diff vs AdamW-aug={fmt(cifar_resnet_muon_final_lr1e4_few_diff['mean_balanced_accuracy_diff'])} "
+                    f"{ci(cifar_resnet_muon_final_lr1e4_few_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')}."
+                ),
+                "how_to_read": "The local ResNet Muon bridge does not automatically translate into final long-tail accuracy under this finite Newton-Schulz matrix-update recipe.",
+                "caveat": "This is only a two-learning-rate pilot, but it is direct final-performance evidence that the tested NS-Muon recipe underperforms augmented AdamW.",
             },
             {
                 "claim": "The current evidence does not prove broad tail-accuracy or benchmark improvement.",

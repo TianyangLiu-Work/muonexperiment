@@ -77,6 +77,10 @@ PAPER_FIGURE_SOURCES: tuple[tuple[Path, Path], ...] = (
         Path("paper/specgrad_activation_paper/figures/cifar100_resnet_lt_recipe_benchmark.png"),
     ),
     (
+        Path("figures/e11_cifar100_resnet_lt_muon_final_benchmark/cifar100_resnet_lt_recipe_benchmark.png"),
+        Path("paper/specgrad_activation_paper/figures/cifar100_resnet_lt_muon_final_benchmark.png"),
+    ),
+    (
         Path("figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png"),
         Path("paper/specgrad_activation_paper/figures/cifar100_resnet_practical_muon_bridge.png"),
     ),

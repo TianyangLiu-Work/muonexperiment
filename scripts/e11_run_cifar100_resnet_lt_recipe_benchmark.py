@@ -22,9 +22,11 @@ from e11_condition_geometry.cifar100_resnet_tail import (
     build_cifar_resnet18,
     dtype_from_name,
     load_cifar100_images,
+    matrix_named_parameters,
     resolve_device,
 )
 from e11_condition_geometry.long_tail_digits import make_generator, margins, sample_indices
+from e11_condition_geometry.long_tail_muon_bridge import newton_schulz_directions
 from e11_condition_geometry.reporting import fmt, markdown_table
 from e11_condition_geometry.statistics import ci95
 
@@ -38,6 +40,8 @@ RECIPE_COLORS = {
     "adamw_aug_ce": "#0072B2",
     "adamw_aug_cb_loss": "#009E73",
     "sgd_aug_ce": "#D55E00",
+    "ns_muon_aug_lr3e-5": "#CC79A7",
+    "ns_muon_aug_lr1e-4": "#E69F00",
 }
 
 
@@ -47,11 +51,13 @@ class Recipe:
     optimizer: str
     lr: float
     weight_decay: float
+    other_lr: float = 3e-4
     momentum: float = 0.0
     nesterov: bool = False
     class_balanced_loss: bool = False
     augmentation: bool = True
     cosine_lr: bool = True
+    newton_schulz_steps: int = 5
 
 
 @dataclass(frozen=True)
@@ -103,6 +109,28 @@ def recipe_from_name(name: str) -> Recipe:
             nesterov=True,
             class_balanced_loss=False,
             augmentation=True,
+        ),
+        "ns_muon_aug_lr3e-5": Recipe(
+            name="ns_muon_aug_lr3e-5",
+            optimizer="ns_muon",
+            lr=3e-5,
+            other_lr=3e-4,
+            weight_decay=1e-4,
+            momentum=0.9,
+            class_balanced_loss=False,
+            augmentation=True,
+            newton_schulz_steps=5,
+        ),
+        "ns_muon_aug_lr1e-4": Recipe(
+            name="ns_muon_aug_lr1e-4",
+            optimizer="ns_muon",
+            lr=1e-4,
+            other_lr=3e-4,
+            weight_decay=1e-4,
+            momentum=0.9,
+            class_balanced_loss=False,
+            augmentation=True,
+            newton_schulz_steps=5,
         ),
     }
     if name not in recipes:
@@ -201,6 +229,10 @@ def make_optimizer(model: torch.nn.Module, recipe: Recipe) -> torch.optim.Optimi
             weight_decay=recipe.weight_decay,
             nesterov=recipe.nesterov,
         )
+    if recipe.optimizer == "ns_muon":
+        matrix_ids = {id(param) for _name, param in matrix_named_parameters(model)}
+        other_params = [param for param in model.parameters() if param.requires_grad and id(param) not in matrix_ids]
+        return torch.optim.AdamW(other_params, lr=recipe.other_lr, weight_decay=recipe.weight_decay)
     raise ValueError(f"unknown optimizer: {recipe.optimizer}")
 
 
@@ -214,6 +246,36 @@ def scheduled_lr(recipe: Recipe, *, step: int, total_steps: int) -> float:
         return float(recipe.lr)
     progress = min(max((int(step) - 1) / max(int(total_steps), 1), 0.0), 1.0)
     return float(recipe.lr) * 0.5 * (1.0 + math.cos(math.pi * progress))
+
+
+def scheduled_other_lr(recipe: Recipe, *, step: int, total_steps: int) -> float:
+    if not recipe.cosine_lr:
+        return float(recipe.other_lr)
+    progress = min(max((int(step) - 1) / max(int(total_steps), 1), 0.0), 1.0)
+    return float(recipe.other_lr) * 0.5 * (1.0 + math.cos(math.pi * progress))
+
+
+def apply_ns_muon_matrix_step(
+    named_params: list[tuple[str, torch.nn.Parameter]],
+    momentum_buffers: list[torch.Tensor],
+    recipe: Recipe,
+    *,
+    lr: float,
+) -> list[torch.Tensor]:
+    if not momentum_buffers:
+        momentum_buffers = [torch.zeros_like(param) for _name, param in named_params]
+    beta = float(recipe.momentum)
+    for buffer, (_name, param) in zip(momentum_buffers, named_params):
+        if param.grad is None:
+            continue
+        buffer.mul_(beta).add_(param.grad.detach(), alpha=1.0 - beta)
+    directions = newton_schulz_directions(momentum_buffers, steps=recipe.newton_schulz_steps)
+    with torch.no_grad():
+        for (_name, param), direction in zip(named_params, directions):
+            if recipe.weight_decay:
+                param.mul_(1.0 - float(lr) * float(recipe.weight_decay))
+            param.add_(direction, alpha=-float(lr))
+    return momentum_buffers
 
 
 def _class_test_indices(labels: torch.Tensor, class_id: int) -> torch.Tensor:
@@ -431,6 +493,8 @@ def run_recipe_benchmark(
                 torch.cuda.manual_seed_all(seed + 62000)
             model = build_cifar_resnet18(device=device, dtype=dtype)
             optimizer = make_optimizer(model, recipe)
+            muon_named_params = matrix_named_parameters(model) if recipe.optimizer == "ns_muon" else []
+            muon_momentum: list[torch.Tensor] = []
             model.train()
 
             for step in range(1, config.train_steps + 1):
@@ -445,13 +509,28 @@ def run_recipe_benchmark(
                         hflip_probability=config.hflip_probability,
                     )
                 current_lr = scheduled_lr(recipe, step=step, total_steps=config.train_steps)
-                set_lr(optimizer, current_lr)
+                set_lr(
+                    optimizer,
+                    scheduled_other_lr(recipe, step=step, total_steps=config.train_steps)
+                    if recipe.optimizer == "ns_muon"
+                    else current_lr,
+                )
                 logits = model(batch_x)
                 batch_y = train_y[batch_indices]
                 loss = F.cross_entropy(logits, batch_y, weight=loss_weight if recipe.class_balanced_loss else None)
                 optimizer.zero_grad(set_to_none=True)
+                if recipe.optimizer == "ns_muon":
+                    for _name, param in muon_named_params:
+                        param.grad = None
                 loss.backward()
                 optimizer.step()
+                if recipe.optimizer == "ns_muon":
+                    muon_momentum = apply_ns_muon_matrix_step(
+                        muon_named_params,
+                        muon_momentum,
+                        recipe,
+                        lr=current_lr,
+                    )
                 if step == 1 or step == config.train_steps or step % max(config.eval_interval, 1) == 0:
                     with torch.no_grad():
                         prediction = logits.argmax(dim=1)
@@ -570,13 +649,43 @@ def write_discussion(
     output_dir: Path,
     discussion_path: Path,
 ) -> None:
+    has_muon = any(str(name).startswith("ns_muon") for name in config.recipe_names)
+    if has_muon:
+        title = "# E11 CIFAR-100-LT ResNet18 NS-Muon Final-Training Benchmark Pilot"
+        intro = [
+            "This run adds an actual final-performance pilot for finite Newton-Schulz",
+            "Muon-style matrix-weight training on the standard CIFAR-100-LT reporting",
+            "surface. It compares augmented AdamW to NS-Muon matrix updates with AdamW",
+            "on non-matrix parameters. It is a boundary check for optimizer-performance",
+            "claims, not a tuned Muon benchmark.",
+        ]
+        interpretation = [
+            "Interpretation: this pilot directly tests whether the local Muon-style",
+            "trajectory bridge turns into final long-tail classification performance.",
+            "The result should be read as a benchmark-boundary check: a top-tier",
+            "optimizer claim needs a wider Muon learning-rate grid, schedules, larger",
+            "datasets, and better practical Muon training recipes before making",
+            "performance claims.",
+        ]
+    else:
+        title = "# E11 CIFAR-100-LT ResNet18 Recipe Benchmark Pilot"
+        intro = [
+            "This run upgrades the standard reporting surface from an AdamW-only no-augmentation",
+            "baseline to a small recipe benchmark with data augmentation, a class-balanced",
+            "loss baseline, and SGD-momentum. It is a pilot benchmark, not a final tuned",
+            "leaderboard or a Muon comparison.",
+        ]
+        interpretation = [
+            "Interpretation: this pilot closes part of the standard-protocol gap by",
+            "adding augmentation and common long-tail baselines. It should be used as",
+            "benchmark-readout context only; a top-tier optimizer claim still needs a",
+            "wider hyperparameter grid, longer training schedules, larger datasets, and",
+            "a practical Muon/AdamW final-performance comparison.",
+        ]
     lines = [
-        "# E11 CIFAR-100-LT ResNet18 Recipe Benchmark Pilot",
+        title,
         "",
-        "This run upgrades the standard reporting surface from an AdamW-only no-augmentation",
-        "baseline to a small recipe benchmark with data augmentation, a class-balanced",
-        "loss baseline, and SGD-momentum. It is a pilot benchmark, not a final tuned",
-        "leaderboard or a Muon comparison.",
+        *intro,
         "",
         f"- Seeds: {config.seeds}",
         f"- Recipes: {config.recipe_names}",
@@ -638,11 +747,7 @@ def write_discussion(
     lines.extend(
         [
             "",
-            "Interpretation: this pilot closes part of the standard-protocol gap by",
-            "adding augmentation and common long-tail baselines. It should be used as",
-            "benchmark-readout context only; a top-tier optimizer claim still needs a",
-            "wider hyperparameter grid, longer training schedules, larger datasets, and",
-            "a practical Muon/AdamW final-performance comparison.",
+            *interpretation,
             "",
             "Artifacts:",
             f"- [train_trace.csv](../{(output_dir / 'train_trace.csv').as_posix()})",

@@ -609,6 +609,14 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_lt_recipe_benchmark") / "config.json",
         Path("figures/e11_cifar100_resnet_lt_recipe_benchmark") / "cifar100_resnet_lt_recipe_benchmark.png",
         Path("discussion/e11_cifar100_resnet_lt_recipe_benchmark.md"),
+        Path("results/e11_cifar100_resnet_lt_muon_final_benchmark") / "train_trace.csv",
+        Path("results/e11_cifar100_resnet_lt_muon_final_benchmark") / "class_metrics.csv",
+        Path("results/e11_cifar100_resnet_lt_muon_final_benchmark") / "group_metrics.csv",
+        Path("results/e11_cifar100_resnet_lt_muon_final_benchmark") / "summary.csv",
+        Path("results/e11_cifar100_resnet_lt_muon_final_benchmark") / "pair_summary.csv",
+        Path("results/e11_cifar100_resnet_lt_muon_final_benchmark") / "config.json",
+        Path("figures/e11_cifar100_resnet_lt_muon_final_benchmark") / "cifar100_resnet_lt_recipe_benchmark.png",
+        Path("discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md"),
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "summary.csv",
@@ -678,6 +686,7 @@ def main() -> None:
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_standard_eval.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_recipe_benchmark.png",
+        Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_muon_final_benchmark.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_practical_muon_bridge.png",
         Path("paper/specgrad_activation_paper/tables") / "head_tail_empirical_results.tex",
         Path("paper/specgrad_activation_paper/tables") / "local_linearization_errors.tex",
@@ -719,6 +728,7 @@ def main() -> None:
         "$(MAKE) -C paper/specgrad_activation_paper",
         "e11-paper-assets:",
         "scripts/e11_write_all_discussion_artifacts.py",
+        "e11-cifar-resnet-lt-muon-final-benchmark-results:",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -773,12 +783,14 @@ def main() -> None:
         "make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results # submit the all-layer ResNet JVP checkpoint-transfer benchmark via Slurm",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
+        "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
         "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
         "An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points",
         "An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs",
         "A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`",
         "An augmented CIFAR-100-LT ResNet18 recipe benchmark pilot (5 seeds, 5000 steps) gives SGD-momentum all/few balanced accuracy `0.4105 [0.4044, 0.4166]` and `0.1047 [0.09389, 0.1156]`",
+        "A CIFAR-100-LT ResNet18 NS-Muon final-training pilot (3 seeds, 5000 steps) is negative: lr=1e-4 all/few balanced accuracy `0.1265 [0.1218, 0.1312]` / `0.0008889 [-0.0006533, 0.002431]`",
         "make e11-all-results",
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
@@ -951,6 +963,7 @@ def main() -> None:
         "standard long-tailed benchmarks",
         "practical Muon training needs more complete ablation",
         "larger-architecture layerwise diagnostics",
+        "figures/cifar100_resnet_lt_muon_final_benchmark.png",
         "\\section{Conclusion}",
         "not a complete long-tailed classification optimizer benchmark",
         "\\label{fig:head-tail-boundary}",
@@ -992,6 +1005,7 @@ def main() -> None:
         "\\label{fig:long-tail-forgetting}",
         "\\label{fig:long-tail-layerwise}",
         "\\label{fig:cifar-resnet-practical-muon-bridge}",
+        "\\label{fig:cifar-resnet-lt-muon-final-benchmark}",
         "figures/head_tail_drift_ratio.png",
         "figures/head_tail_alignment_ablation.png",
         "figures/long_tail_one_step_tail_response.png",
@@ -1006,6 +1020,7 @@ def main() -> None:
         "figures/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         "figures/cifar100_resnet_lt_standard_eval.png",
         "figures/cifar100_resnet_lt_recipe_benchmark.png",
+        "figures/cifar100_resnet_lt_muon_final_benchmark.png",
         "figures/cifar100_resnet_practical_muon_bridge.png",
         "momentum-gradient alignment",
         "Tianyang Liu",
@@ -1301,6 +1316,7 @@ def main() -> None:
         "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         "cifar100_resnet_lt_standard_eval.png",
         "cifar100_resnet_lt_recipe_benchmark.png",
+        "cifar100_resnet_lt_muon_final_benchmark.png",
         "cifar100_resnet_practical_muon_bridge.png",
         "tables/",
         "e11_paper_numbers.tex",
@@ -2205,6 +2221,74 @@ def main() -> None:
         raise AssertionError(
             "CIFAR-100-LT ResNet18 recipe benchmark should preserve the current SGD-aug pilot improvement and class-balanced-loss caveat"
         )
+    lt_muon_dir = Path("results/e11_cifar100_resnet_lt_muon_final_benchmark")
+    lt_muon_trace = pd.read_csv(lt_muon_dir / "train_trace.csv")
+    lt_muon_class_metrics = pd.read_csv(lt_muon_dir / "class_metrics.csv")
+    lt_muon_group_metrics = pd.read_csv(lt_muon_dir / "group_metrics.csv")
+    lt_muon_summary = pd.read_csv(lt_muon_dir / "summary.csv")
+    lt_muon_pairs = pd.read_csv(lt_muon_dir / "pair_summary.csv")
+    lt_muon_config = json.loads((lt_muon_dir / "config.json").read_text())
+    expected_muon_recipe_names = {"adamw_aug_ce", "ns_muon_aug_lr3e-5", "ns_muon_aug_lr1e-4"}
+    if (
+        len(lt_muon_trace) != 54
+        or len(lt_muon_class_metrics) != 900
+        or len(lt_muon_group_metrics) != 36
+        or len(lt_muon_summary) != 12
+        or len(lt_muon_pairs) != 8
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 NS-Muon final benchmark must contain 3 seeds x 3 recipes with four group summaries"
+        )
+    if not (
+        len(lt_muon_config["seeds"]) == 3
+        and set(lt_muon_config["recipe_names"]) == expected_muon_recipe_names
+        and lt_muon_config["baseline_recipe"] == "adamw_aug_ce"
+        and int(lt_muon_config["num_classes"]) == 100
+        and int(lt_muon_config["train_steps"]) == 5000
+        and int(lt_muon_config["train_batch_size"]) == 256
+        and lt_muon_config["device"] == "cuda"
+        and not lt_muon_config["download"]
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 NS-Muon final benchmark should be the formal 3-seed Slurm/GPU no-download run"
+        )
+    if set(lt_muon_summary["recipe"]) != expected_muon_recipe_names or set(lt_muon_pairs["recipe"]) != {
+        "ns_muon_aug_lr3e-5",
+        "ns_muon_aug_lr1e-4",
+    }:
+        raise AssertionError("CIFAR-100-LT ResNet18 NS-Muon final benchmark must cover expected recipes and pairs")
+    lt_muon_by_group = lt_muon_summary.set_index(["recipe", "frequency_group"])
+    muon_pair_by_group = lt_muon_pairs.set_index(["recipe", "frequency_group"])
+    muon_adamw_all = float(lt_muon_by_group.loc[("adamw_aug_ce", "all"), "mean_balanced_accuracy"])
+    muon_adamw_few = float(lt_muon_by_group.loc[("adamw_aug_ce", "few"), "mean_balanced_accuracy"])
+    muon_lr1e4_all = float(lt_muon_by_group.loc[("ns_muon_aug_lr1e-4", "all"), "mean_balanced_accuracy"])
+    muon_lr1e4_few = float(lt_muon_by_group.loc[("ns_muon_aug_lr1e-4", "few"), "mean_balanced_accuracy"])
+    muon_lr3e5_all = float(lt_muon_by_group.loc[("ns_muon_aug_lr3e-5", "all"), "mean_balanced_accuracy"])
+    muon_lr3e5_few = float(lt_muon_by_group.loc[("ns_muon_aug_lr3e-5", "few"), "mean_balanced_accuracy"])
+    muon_lr1e4_all_diff = float(
+        muon_pair_by_group.loc[("ns_muon_aug_lr1e-4", "all"), "mean_balanced_accuracy_diff"]
+    )
+    muon_lr1e4_few_diff = float(
+        muon_pair_by_group.loc[("ns_muon_aug_lr1e-4", "few"), "mean_balanced_accuracy_diff"]
+    )
+    muon_lr3e5_all_diff = float(
+        muon_pair_by_group.loc[("ns_muon_aug_lr3e-5", "all"), "mean_balanced_accuracy_diff"]
+    )
+    if not (
+        0.35 <= muon_adamw_all <= 0.37
+        and 0.075 <= muon_adamw_few <= 0.105
+        and 0.12 <= muon_lr1e4_all <= 0.14
+        and muon_lr1e4_few <= 0.003
+        and 0.07 <= muon_lr3e5_all <= 0.09
+        and abs(muon_lr3e5_few) < 1e-12
+        and muon_lr1e4_all_diff < -0.2
+        and muon_lr1e4_few_diff < -0.07
+        and muon_lr3e5_all_diff < -0.27
+        and muon_adamw_all > muon_lr1e4_all > muon_lr3e5_all
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 NS-Muon final benchmark should preserve the current negative final-performance boundary"
+        )
     cifar_resnet_practical_metrics = pd.read_csv(
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv"
     )
@@ -2721,6 +2805,7 @@ def main() -> None:
         "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         "figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png",
         "figures/e11_cifar100_resnet_lt_recipe_benchmark/cifar100_resnet_lt_recipe_benchmark.png",
+        "figures/e11_cifar100_resnet_lt_muon_final_benchmark/cifar100_resnet_lt_recipe_benchmark.png",
         "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
         "seven figures plus one generated table",
         "paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex",
@@ -2884,6 +2969,16 @@ def main() -> None:
         "\\EelevenCifarResNetLayerJvpSupportedLayers",
         "\\EelevenCifarResNetLayerJvpWorstObservedRatio",
         "\\EelevenCifarResNetLayerJvpWorstScaledRatio",
+        "\\EelevenCifarResNetLtMuonFinalBenchmarkSeeds",
+        "\\EelevenCifarResNetLtMuonFinalAdamwAllBalancedAccuracy",
+        "\\EelevenCifarResNetLtMuonFinalAdamwFewBalancedAccuracy",
+        "\\EelevenCifarResNetLtMuonFinalLrOneEMinusFourAllBalancedAccuracy",
+        "\\EelevenCifarResNetLtMuonFinalLrOneEMinusFourFewBalancedAccuracy",
+        "\\EelevenCifarResNetLtMuonFinalLrThreeEMinusFiveAllBalancedAccuracy",
+        "\\EelevenCifarResNetLtMuonFinalLrThreeEMinusFiveFewBalancedAccuracy",
+        "\\EelevenCifarResNetLtMuonFinalLrOneEMinusFourAllBalancedAccuracyDiff",
+        "\\EelevenCifarResNetLtMuonFinalLrOneEMinusFourFewBalancedAccuracyDiff",
+        "\\EelevenCifarResNetLtMuonFinalLrThreeEMinusFiveAllBalancedAccuracyDiff",
         "\\EelevenCifarResNetPracticalMuonBridgeStateSources",
         "\\EelevenCifarResNetPracticalMuonBridgeComparisonsPerDirection",
         "\\EelevenCifarResNetPracticalAdamStatePolarMomentumDriftRatio",
@@ -2994,6 +3089,8 @@ def main() -> None:
         r"\EelevenCifarResNetTailQualityBestTailAccuracy",
         r"\EelevenCifarResNetLayerJvpObservedRatio",
         r"\EelevenCifarResNetLayerJvpScaledRatio",
+        r"\EelevenCifarResNetLtMuonFinalAdamwAllBalancedAccuracy",
+        r"\EelevenCifarResNetLtMuonFinalLrOneEMinusFourAllBalancedAccuracyDiff",
         r"\EelevenCifarResNetPracticalAdamStateNsMomentumDriftRatio",
         r"\EelevenCifarResNetPracticalMuonStateNsMomentumDriftRatio",
         r"\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
@@ -3040,6 +3137,7 @@ def main() -> None:
         "make e11-cifar-resnet-tail-quality-results",
         "make e11-cifar-resnet-layer-jvp-tail-quality-results",
         "make e11-cifar-resnet-practical-muon-bridge-results",
+        "make e11-cifar-resnet-lt-muon-final-benchmark-results",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -3060,6 +3158,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
         "CIFAR-100 ResNet18 tail-quality control",
         "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
+        "CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot",
         "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
@@ -3252,6 +3351,10 @@ def main() -> None:
         "SGD-aug all=0.4105",
         "SGD-aug few=0.1047",
         "few diff vs AdamW-aug=0.0194",
+        "NS-Muon final-training",
+        "all=0.1265",
+        "few=0.0008889",
+        "all diff vs AdamW-aug=-0.2348",
         "final squared drift ratio=0.6167",
         "broad tail-accuracy or benchmark improvement",
         "narrow tail-loss/margin diagnostic",
@@ -3347,6 +3450,7 @@ def main() -> None:
         "tail-quality control",
         "Long-tail imbalance sweep",
         "Practical optimizer bridge on CIFAR-100-LT",
+        "NS-Muon final-training pilot",
         "Acceptance Gates",
         "working test environment with both `torch` and `pytest`",
     ]
@@ -3367,6 +3471,7 @@ def main() -> None:
         or "make e11-cifar-resnet-checkpoint-sweep-results" not in readme
         or "make e11-cifar-resnet-condition-proxy-results" not in readme
         or "make e11-cifar-resnet-layer-jvp-tail-quality-results" not in readme
+        or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme

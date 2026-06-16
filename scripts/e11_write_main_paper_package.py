@@ -39,6 +39,12 @@ def main() -> None:
     cifar_resnet_lt_recipe_pairs = pd.read_csv(
         "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
     ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_muon_final = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_muon_final_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_muon_final_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_muon_final_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
     layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
@@ -55,6 +61,14 @@ def main() -> None:
     resnet_recipe_sgd_all = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "all")]
     resnet_recipe_sgd_few = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "few")]
     resnet_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
+    resnet_muon_final_lr1e4_all = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr1e-4", "all")]
+    resnet_muon_final_lr1e4_few = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr1e-4", "few")]
+    resnet_muon_final_lr1e4_all_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr1e-4", "all")
+    ]
+    resnet_muon_final_lr1e4_few_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr1e-4", "few")
+    ]
 
     main_items = pd.DataFrame(
         [
@@ -205,6 +219,22 @@ def main() -> None:
                 ),
             },
             {"artifact": "discussion/e11_cifar100_resnet_lt_recipe_benchmark.md", "role": "Markdown summary and CSV links for the augmented recipe benchmark pilot."},
+            {
+                "artifact": "figures/e11_cifar100_resnet_lt_muon_final_benchmark/cifar100_resnet_lt_recipe_benchmark.png",
+                "role": (
+                    "Appendix CIFAR-100-LT ResNet18 NS-Muon final-training pilot; "
+                    f"lr=1e-4 all/few balanced accuracies are {fmt(resnet_muon_final_lr1e4_all['mean_balanced_accuracy'])} "
+                    f"{interval(resnet_muon_final_lr1e4_all, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')} and "
+                    f"{fmt(resnet_muon_final_lr1e4_few['mean_balanced_accuracy'])} "
+                    f"{interval(resnet_muon_final_lr1e4_few, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}, "
+                    f"with all/few diffs vs AdamW-aug {fmt(resnet_muon_final_lr1e4_all_diff['mean_balanced_accuracy_diff'])} "
+                    f"{interval(resnet_muon_final_lr1e4_all_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')} and "
+                    f"{fmt(resnet_muon_final_lr1e4_few_diff['mean_balanced_accuracy_diff'])} "
+                    f"{interval(resnet_muon_final_lr1e4_few_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')}; "
+                    "negative final-performance boundary for the tested finite-NS Muon recipe."
+                ),
+            },
+            {"artifact": "discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md", "role": "Markdown summary and CSV links for the NS-Muon final-training benchmark pilot."},
             {
                 "artifact": "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
                 "role": (

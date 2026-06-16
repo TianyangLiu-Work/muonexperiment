@@ -120,6 +120,12 @@ def main() -> None:
     cifar_resnet_lt_recipe_pairs = pd.read_csv(
         "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
     ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_muon_final = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_muon_final_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_muon_final_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_muon_final_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -262,6 +268,21 @@ def main() -> None:
     cifar_resnet_lt_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
     cifar_resnet_lt_recipe_sgd_all_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "all")]
     cifar_resnet_lt_recipe_cb_few_diff = cifar_resnet_lt_recipe_pairs.loc[("adamw_aug_cb_loss", "few")]
+    cifar_resnet_lt_muon_final_adamw_all = cifar_resnet_lt_muon_final.loc[("adamw_aug_ce", "all")]
+    cifar_resnet_lt_muon_final_adamw_few = cifar_resnet_lt_muon_final.loc[("adamw_aug_ce", "few")]
+    cifar_resnet_lt_muon_final_lr1e4_all = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr1e-4", "all")]
+    cifar_resnet_lt_muon_final_lr1e4_few = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr1e-4", "few")]
+    cifar_resnet_lt_muon_final_lr3e5_all = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr3e-5", "all")]
+    cifar_resnet_lt_muon_final_lr3e5_few = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr3e-5", "few")]
+    cifar_resnet_lt_muon_final_lr1e4_all_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr1e-4", "all")
+    ]
+    cifar_resnet_lt_muon_final_lr1e4_few_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr1e-4", "few")
+    ]
+    cifar_resnet_lt_muon_final_lr3e5_all_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr3e-5", "all")
+    ]
     cifar_resnet_practical_adam_polar_momentum = cifar_resnet_practical_bridge.loc[
         ("adamw_matrix_trajectory", "polar_momentum")
     ]
@@ -1190,6 +1211,99 @@ def main() -> None:
         *ci_macros(
             "EelevenCifarResNetLtRecipeCbFewBalancedAccuracyDiff",
             cifar_resnet_lt_recipe_cb_few_diff,
+            "balanced_accuracy_diff_ci95_low",
+            "balanced_accuracy_diff_ci95_high",
+        ),
+        "",
+        "% CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot",
+        macro("EelevenCifarResNetLtMuonFinalBenchmarkSeeds", int(cifar_resnet_lt_muon_final_adamw_all["seeds"])),
+        macro(
+            "EelevenCifarResNetLtMuonFinalAdamwAllBalancedAccuracy",
+            fmt(cifar_resnet_lt_muon_final_adamw_all["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtMuonFinalAdamwAllBalancedAccuracy",
+            cifar_resnet_lt_muon_final_adamw_all,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtMuonFinalAdamwFewBalancedAccuracy",
+            fmt(cifar_resnet_lt_muon_final_adamw_few["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtMuonFinalAdamwFewBalancedAccuracy",
+            cifar_resnet_lt_muon_final_adamw_few,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtMuonFinalLrOneEMinusFourAllBalancedAccuracy",
+            fmt(cifar_resnet_lt_muon_final_lr1e4_all["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtMuonFinalLrOneEMinusFourAllBalancedAccuracy",
+            cifar_resnet_lt_muon_final_lr1e4_all,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtMuonFinalLrOneEMinusFourFewBalancedAccuracy",
+            fmt(cifar_resnet_lt_muon_final_lr1e4_few["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtMuonFinalLrOneEMinusFourFewBalancedAccuracy",
+            cifar_resnet_lt_muon_final_lr1e4_few,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtMuonFinalLrThreeEMinusFiveAllBalancedAccuracy",
+            fmt(cifar_resnet_lt_muon_final_lr3e5_all["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtMuonFinalLrThreeEMinusFiveAllBalancedAccuracy",
+            cifar_resnet_lt_muon_final_lr3e5_all,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtMuonFinalLrThreeEMinusFiveFewBalancedAccuracy",
+            fmt(cifar_resnet_lt_muon_final_lr3e5_few["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtMuonFinalLrThreeEMinusFiveFewBalancedAccuracy",
+            cifar_resnet_lt_muon_final_lr3e5_few,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtMuonFinalLrOneEMinusFourAllBalancedAccuracyDiff",
+            fmt(cifar_resnet_lt_muon_final_lr1e4_all_diff["mean_balanced_accuracy_diff"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtMuonFinalLrOneEMinusFourAllBalancedAccuracyDiff",
+            cifar_resnet_lt_muon_final_lr1e4_all_diff,
+            "balanced_accuracy_diff_ci95_low",
+            "balanced_accuracy_diff_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtMuonFinalLrOneEMinusFourFewBalancedAccuracyDiff",
+            fmt(cifar_resnet_lt_muon_final_lr1e4_few_diff["mean_balanced_accuracy_diff"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtMuonFinalLrOneEMinusFourFewBalancedAccuracyDiff",
+            cifar_resnet_lt_muon_final_lr1e4_few_diff,
+            "balanced_accuracy_diff_ci95_low",
+            "balanced_accuracy_diff_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtMuonFinalLrThreeEMinusFiveAllBalancedAccuracyDiff",
+            fmt(cifar_resnet_lt_muon_final_lr3e5_all_diff["mean_balanced_accuracy_diff"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtMuonFinalLrThreeEMinusFiveAllBalancedAccuracyDiff",
+            cifar_resnet_lt_muon_final_lr3e5_all_diff,
             "balanced_accuracy_diff_ci95_low",
             "balanced_accuracy_diff_ci95_high",
         ),

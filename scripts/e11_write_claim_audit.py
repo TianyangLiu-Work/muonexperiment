@@ -55,6 +55,12 @@ def main() -> None:
     cifar_resnet_lt_recipe_pairs = pd.read_csv(
         "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
     ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_muon_final = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_muon_final_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_muon_final_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_muon_final_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
@@ -98,6 +104,14 @@ def main() -> None:
     cifar_resnet_recipe_sgd_few = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "few")]
     cifar_resnet_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
     cifar_resnet_recipe_cb_few_diff = cifar_resnet_lt_recipe_pairs.loc[("adamw_aug_cb_loss", "few")]
+    cifar_resnet_muon_final_lr1e4_all = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr1e-4", "all")]
+    cifar_resnet_muon_final_lr1e4_few = cifar_resnet_lt_muon_final.loc[("ns_muon_aug_lr1e-4", "few")]
+    cifar_resnet_muon_final_lr1e4_all_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr1e-4", "all")
+    ]
+    cifar_resnet_muon_final_lr1e4_few_diff = cifar_resnet_lt_muon_final_pairs.loc[
+        ("ns_muon_aug_lr1e-4", "few")
+    ]
 
     claim_status = pd.DataFrame(
         [
@@ -215,6 +229,24 @@ def main() -> None:
                 "main_loophole": "This is a 5-seed three-recipe pilot; it is not a full tuned benchmark, larger-dataset result, or Muon final-performance comparison.",
             },
             {
+                "claim": "The tested CIFAR-100-LT ResNet18 NS-Muon final-training recipe improves final long-tail accuracy.",
+                "status": "not supported; current pilot is negative",
+                "evidence": (
+                    f"NS-Muon lr=1e-4 all balanced accuracy is "
+                    f"{fmt(cifar_resnet_muon_final_lr1e4_all['mean_balanced_accuracy'])} "
+                    f"CI={ci(cifar_resnet_muon_final_lr1e4_all, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"few balanced accuracy is "
+                    f"{fmt(cifar_resnet_muon_final_lr1e4_few['mean_balanced_accuracy'])} "
+                    f"CI={ci(cifar_resnet_muon_final_lr1e4_few, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}. "
+                    f"Paired all/few diffs vs AdamW-aug are "
+                    f"{fmt(cifar_resnet_muon_final_lr1e4_all_diff['mean_balanced_accuracy_diff'])} "
+                    f"CI={ci(cifar_resnet_muon_final_lr1e4_all_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')} and "
+                    f"{fmt(cifar_resnet_muon_final_lr1e4_few_diff['mean_balanced_accuracy_diff'])} "
+                    f"CI={ci(cifar_resnet_muon_final_lr1e4_few_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')}."
+                ),
+                "main_loophole": "This negative result covers only two NS-Muon learning rates, but it directly blocks any claim that the current finite-NS Muon recipe is a final-performance improvement.",
+            },
+            {
                 "claim": "The tail-drift reduction persists across a short head-only horizon.",
                 "status": "supported for eight steps",
                 "evidence": (
@@ -318,6 +350,11 @@ def main() -> None:
                 "role": "Augmented AdamW, class-balanced AdamW, and SGD-momentum many/medium/few final metrics.",
             },
             {
+                "table": "CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot",
+                "path": "results/e11_cifar100_resnet_lt_muon_final_benchmark/summary.csv",
+                "role": "Negative final-performance boundary for finite-Newton-Schulz Muon-style matrix-weight training against augmented AdamW.",
+            },
+            {
                 "table": "Long-tail Muon-style compatibility",
                 "path": "results/e11_long_tail_muon_bridge/pair_summary.csv",
                 "role": "Fixed-checkpoint compatibility check for polar(G_t), polar(M_t), and Newton-Schulz directions under matched head gain.",
@@ -360,8 +397,8 @@ The current data do **not** justify saying that this already proves better tail 
 
 ## Strongest Remaining Loopholes
 
-1. The CIFAR-100-LT ResNet evidence now includes a standard many/medium/few reporting baseline and an augmented recipe pilot, but it is still not a modern long-tail optimizer benchmark because Muon final-performance comparison, larger datasets, and a wider tuning grid are missing.
-2. The Muon-style compatibility evidence is local and small-scale; real long-tail practical Muon training remains unchecked.
+1. The CIFAR-100-LT ResNet evidence now includes a standard many/medium/few reporting baseline, an augmented recipe pilot, and a negative NS-Muon final-training pilot, but it is still not a modern long-tail optimizer benchmark because larger datasets and a wider tuning grid are missing.
+2. The Muon-style compatibility evidence is local and small-scale; the current ResNet final-training NS-Muon pilot is negative, so any practical Muon claim needs substantially better schedules and tuning.
 3. The all-layer ResNet JVP diagnostic addresses the classifier-only criticism locally, and the practical CIFAR-100-LT Muon/AdamW trajectory bridge is local rather than a final-performance benchmark.
 4. The current performance evidence is weaker than the function-drift evidence.
 5. The detailed layerwise JVP mechanism has only been checked in the current small MLP.

@@ -23,6 +23,7 @@ reduce tail-example function drift at matched head gain.
 | Held-out checkpoint-transfer JVP benchmark | Across tail-rich 2000/5000/10000-step ResNet checkpoints, scaled-JVP below-one threshold accuracy is `1`, but held-out layer-risk Spearman is `-0.3203 [-0.3562, -0.2845]`. | boundary/negative |
 | Standard long-tail reporting baseline | CIFAR-100-LT IF=100 AdamW ResNet18 over 10 seeds gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`. | reporting baseline |
 | Augmented recipe benchmark pilot | CIFAR-100-LT IF=100 ResNet18 with random crop/flip over 5 seeds gives SGD-momentum all/few balanced accuracy `0.4105 [0.4044, 0.4166]` and `0.1047 [0.09389, 0.1156]`; few diff vs AdamW-aug is `0.0194 [0.005581, 0.03322]`, while class-balanced AdamW is worse on few classes. | pilot |
+| NS-Muon final-training pilot | CIFAR-100-LT IF=100 ResNet18 finite-NS Muon matrix-weight training over 3 seeds is negative: lr=1e-4 all/few balanced accuracy `0.1265 [0.1218, 0.1312]` and `0.0008889 [-0.0006533, 0.002431]`; all/few diff vs AdamW-aug is `-0.2348 [-0.2395, -0.23]` and `-0.08767 [-0.09948, -0.07585]`. | boundary/negative |
 | Practical Muon bridge on CIFAR-100-LT ResNet18 | From the same tail-rich checkpoint, AdamW-sampled states give NS(M_t) squared drift ratio `0.8628 [0.8154, 0.913]`; NS-Muon-sampled states give `0.7247 [0.676, 0.777]` over 30 comparisons per state source. | partial |
 | Claim boundary | Tail accuracy remains inconclusive; paper explicitly avoids performance claims. | keep |
 
@@ -30,10 +31,10 @@ reduce tail-example function drift at matched head gain.
 
 | priority | missing piece | minimum acceptable gate | why it matters |
 |---|---|---|---|
-| P0 | Standard long-tail benchmark protocol | A first CIFAR-100-LT IF=100 ResNet18 many/medium/few reporting baseline and a 5-seed augmented AdamW/class-balanced/SGD pilot are complete. The remaining gate is a wider tuned multi-optimizer benchmark, including Muon final-performance, on CIFAR-100-LT plus ImageNet-LT/iNaturalist-style protocols if the paper wants benchmark-level performance claims. | Reviewers will still object if the paper implies optimizer-performance superiority from the current pilot. |
+| P0 | Standard long-tail benchmark protocol | A first CIFAR-100-LT IF=100 ResNet18 many/medium/few reporting baseline, a 5-seed augmented AdamW/class-balanced/SGD pilot, and a 3-seed negative NS-Muon final-training pilot are complete. The remaining gate is a wider tuned multi-optimizer benchmark with better Muon schedules on CIFAR-100-LT plus ImageNet-LT/iNaturalist-style protocols if the paper wants benchmark-level performance claims. | Reviewers will still object if the paper implies optimizer-performance superiority from the current pilots. |
 | P0 | Predictive downstream-aware condition benchmark | A first held-out checkpoint-transfer benchmark is complete and negative for layer-risk ranking: scaled-JVP preserves the below-one threshold direction but does not predict cross-checkpoint layer ordering. The next gate is a stronger downstream-aware condition score plus held-out architecture/dataset splits. | The theorem must look predictive beyond the synthetic construction and beyond one ResNet checkpoint family. |
 | P1 | Long-tail imbalance sweep | CIFAR-100-LT imbalance factors or explicit tail-count settings with at least 3 seeds each; keep paired matched-gain diagnostics. | Converts one dataset split into a systematic long-tail experiment. |
-| P1 | Practical optimizer bridge on CIFAR-100-LT | Completed as a local trajectory-state bridge; the remaining gate is final class-wise metrics under tuned practical training if the paper wants optimizer-performance discussion. | Bridges ideal polar directions to practical Muon without claiming final SOTA. |
+| P1 | Practical optimizer bridge on CIFAR-100-LT | Completed as a local trajectory-state bridge; an initial final-training NS-Muon pilot is complete and negative. The remaining gate is tuned practical training with schedules, wider learning-rate/weight-decay grids, and final class-wise metrics if the paper wants optimizer-performance discussion. | Bridges ideal polar directions to practical Muon without claiming final SOTA. |
 | P2 | Long-horizon sanity benchmark | Tuned SGD/AdamW/Muon-style baselines on CIFAR-100-LT with many/medium/few metrics and local drift probes sampled along the trajectory. | Needed only if the paper wants any optimizer-performance discussion. |
 | P2 | Larger dataset check | ImageNet-LT or iNaturalist-style matched-head-gain diagnostic on pretrained or partially trained features. | Needed for benchmark-level generality, not for the minimal mechanism paper. |
 
@@ -56,8 +57,8 @@ reduce tail-example function drift at matched head gain.
 - `scripts/e11_validate_outputs.py` checks the ResNet 10-seed, rho=0.002,
   checkpoint-sweep, rank-proxy, final-layer condition, tail-quality,
   all-layer JVP tail-quality, checkpoint-transfer JVP, standard
-  many/medium/few reporting, augmented recipe-pilot, and practical Muon
-  trajectory-bridge artifacts.
+  many/medium/few reporting, augmented recipe-pilot, negative NS-Muon
+  final-training pilot, and practical Muon trajectory-bridge artifacts.
 - The paper states one main claim in the abstract and conclusion: local
   matched-head-gain drift, not final accuracy.
 - Every ResNet result includes seed count, target gain, checkpoint quality, and
@@ -69,8 +70,9 @@ reduce tail-example function drift at matched head gain.
 
 The ResNet checkpoint-quality sweep, final-layer condition scatter,
 tail-quality control, all-layer JVP tail-quality diagnostic, standard
-CIFAR-100-LT reporting baseline, augmented recipe benchmark pilot, and
-practical Muon/AdamW trajectory bridge have been run. The first
+CIFAR-100-LT reporting baseline, augmented recipe benchmark pilot, negative
+NS-Muon final-training pilot, and practical Muon/AdamW trajectory bridge have
+been run. The first
 checkpoint-transfer JVP benchmark has also been run and is a boundary result
 rather than a positive predictor.
 
@@ -89,14 +91,17 @@ checkpoints but not the layer-risk ranking, which is exactly the sort of
 negative evidence a top-tier version should surface. The standard reporting
 baseline gives a benchmark-style classification readout but is still AdamW-only
 and untuned. The recipe pilot adds augmentation, class-balanced AdamW, and
-SGD-momentum; it improves benchmark context and shows recipe sensitivity, but
-it is still not a complete optimizer benchmark.
+SGD-momentum; it improves benchmark context and shows recipe sensitivity. The
+NS-Muon final-training pilot is a useful negative boundary: the tested finite
+Newton-Schulz Muon matrix-weight recipe underperforms augmented AdamW, so the
+current paper cannot make a practical Muon performance claim.
 The next highest-leverage experiments are therefore:
 
 1. improve the downstream-aware condition score and repeat the pre-registered
    predictive benchmark across held-out architectures or datasets;
-2. extend the CIFAR-100-LT practical Muon/AdamW trajectory bridge to final
-   class-wise metrics only if optimizer-performance discussion becomes central;
+2. retune the CIFAR-100-LT practical Muon final-training recipe with schedules,
+   weight decay, and a wider learning-rate grid only if optimizer-performance
+   discussion becomes central;
 3. extend the augmented CIFAR-100-LT recipe pilot into a tuned benchmark with
    more seeds, schedules, class-balanced samplers/losses, and Muon/AdamW final
    comparisons.
@@ -133,6 +138,10 @@ The completed augmented CIFAR-100-LT ResNet18 recipe pilot artifacts are:
 `results/e11_cifar100_resnet_lt_recipe_benchmark/*`,
 `figures/e11_cifar100_resnet_lt_recipe_benchmark/*`, and
 `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`.
+The completed NS-Muon final-training pilot artifacts are:
+`results/e11_cifar100_resnet_lt_muon_final_benchmark/*`,
+`figures/e11_cifar100_resnet_lt_muon_final_benchmark/*`, and
+`discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md`.
 The completed ResNet practical Muon bridge artifacts are:
 `results/e11_cifar100_resnet_practical_muon_bridge/*`,
 `figures/e11_cifar100_resnet_practical_muon_bridge/*`, and

@@ -109,6 +109,11 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_lt_recipe_benchmark/group_metrics.csv",
     "results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv",
     "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv",
+    "results/e11_cifar100_resnet_lt_muon_final_benchmark/train_trace.csv",
+    "results/e11_cifar100_resnet_lt_muon_final_benchmark/class_metrics.csv",
+    "results/e11_cifar100_resnet_lt_muon_final_benchmark/group_metrics.csv",
+    "results/e11_cifar100_resnet_lt_muon_final_benchmark/summary.csv",
+    "results/e11_cifar100_resnet_lt_muon_final_benchmark/pair_summary.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/paired_metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv",
@@ -197,6 +202,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md",
     "discussion/e11_cifar100_resnet_lt_standard_eval.md",
     "discussion/e11_cifar100_resnet_lt_recipe_benchmark.md",
+    "discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md",
     "discussion/e11_cifar100_resnet_practical_muon_bridge.md",
 )
 
@@ -359,6 +365,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch",
         "produces": "results/e11_cifar100_resnet_lt_recipe_benchmark/* and figures/e11_cifar100_resnet_lt_recipe_benchmark/*",
         "paper_role": "Augmented AdamW, class-balanced AdamW, and SGD-momentum CIFAR-100-LT ResNet18 recipe pilot for benchmark-style many/medium/few metrics.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 NS-Muon final-training pilot",
+        "command": "sbatch scripts/slurm/e11_cifar100_resnet_lt_muon_final_benchmark.sbatch",
+        "produces": "results/e11_cifar100_resnet_lt_muon_final_benchmark/* and figures/e11_cifar100_resnet_lt_muon_final_benchmark/*",
+        "paper_role": "Actual finite-Newton-Schulz Muon-style final-performance boundary check against augmented AdamW on CIFAR-100-LT ResNet18.",
     },
     {
         "stage": "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
