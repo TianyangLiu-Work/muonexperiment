@@ -58,6 +58,12 @@ def main() -> None:
     resnet_adam_ns = cifar_resnet_practical_bridge.loc[("adamw_matrix_trajectory", "ns_momentum")]
     resnet_muon_ns = cifar_resnet_practical_bridge.loc[("ns_muon_matrix_trajectory", "ns_momentum")]
     resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_scaled_jvp_ratio"]
+    resnet_jvp_checkpoint_observed = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "source_observed_drift_ratio"
+    ]
+    resnet_jvp_checkpoint_early_layer = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "architecture_early_layer_prior"
+    ]
     resnet_imbalance_worst = cifar_resnet_imbalance_sweep.loc[
         cifar_resnet_imbalance_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
     ]
@@ -193,8 +199,12 @@ def main() -> None:
                 "artifact": "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
                 "role": (
                     "Appendix checkpoint-transfer boundary check for the all-layer ResNet JVP readout; "
-                    f"scaled-JVP threshold accuracy is {fmt(resnet_jvp_checkpoint_scaled['mean_threshold_below_one_accuracy'])}, "
-                    f"but held-out layer-risk Spearman is "
+                    f"source-observed/early-layer controls have held-out Spearman "
+                    f"{fmt(resnet_jvp_checkpoint_observed['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"{interval(resnet_jvp_checkpoint_observed, 'spearman_ci95_low', 'spearman_ci95_high')} and "
+                    f"{fmt(resnet_jvp_checkpoint_early_layer['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"{interval(resnet_jvp_checkpoint_early_layer, 'spearman_ci95_low', 'spearman_ci95_high')}, "
+                    f"but scaled-JVP held-out Spearman is "
                     f"{fmt(resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} "
                     f"{interval(resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}."
                 ),

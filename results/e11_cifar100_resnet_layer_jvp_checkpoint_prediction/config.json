@@ -138,10 +138,22 @@
   ],
   "jvp_epsilon": 0.0001,
   "max_matrix_parameters": null,
+  "predictors": {
+    "source_observed_drift_ratio": "geomean_observed_tail_drift_sq_ratio_spectral_over_fro",
+    "source_scaled_jvp_ratio": "geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro",
+    "source_unit_jvp_ratio": "geomean_jvp_tail_drift_sq_ratio_spectral_over_fro",
+    "source_alignment_ratio": "mean_alignment_ratio_spectral_over_fro",
+    "source_gradient_nuclear_rank": "mean_gradient_nuclear_rank",
+    "architecture_early_layer_prior": "early_layer_prior"
+  },
   "pre_registered_predictors": {
     "source_scaled_jvp_ratio": "geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro",
     "source_unit_jvp_ratio": "geomean_jvp_tail_drift_sq_ratio_spectral_over_fro",
     "source_alignment_ratio": "mean_alignment_ratio_spectral_over_fro",
     "source_gradient_nuclear_rank": "mean_gradient_nuclear_rank"
+  },
+  "positive_control_predictors": {
+    "source_observed_drift_ratio": "geomean_observed_tail_drift_sq_ratio_spectral_over_fro",
+    "architecture_early_layer_prior": "early_layer_prior"
   }
 }

@@ -27,10 +27,22 @@ DEFAULT_FIGURE_DIR = Path("figures/e11_cifar100_resnet_layer_jvp_checkpoint_pred
 DEFAULT_DISCUSSION_PATH = Path("discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md")
 DEFAULT_WARMUP_STEPS = (2000, 5000, 10000)
 PREDICTORS = {
+    "source_observed_drift_ratio": "geomean_observed_tail_drift_sq_ratio_spectral_over_fro",
     "source_scaled_jvp_ratio": "geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro",
     "source_unit_jvp_ratio": "geomean_jvp_tail_drift_sq_ratio_spectral_over_fro",
     "source_alignment_ratio": "mean_alignment_ratio_spectral_over_fro",
     "source_gradient_nuclear_rank": "mean_gradient_nuclear_rank",
+    "architecture_early_layer_prior": "early_layer_prior",
+}
+PRE_REGISTERED_PREDICTORS = {
+    "source_scaled_jvp_ratio",
+    "source_unit_jvp_ratio",
+    "source_alignment_ratio",
+    "source_gradient_nuclear_rank",
+}
+POSITIVE_CONTROL_PREDICTORS = {
+    "source_observed_drift_ratio",
+    "architecture_early_layer_prior",
 }
 
 
@@ -55,6 +67,12 @@ def parse_warmup_steps(value: str) -> tuple[int, ...]:
 
 def _finite_ratio(numerator: float, denominator: float) -> float:
     return float(numerator / max(denominator, 1e-300))
+
+
+def add_prediction_control_columns(layer_summary: pd.DataFrame) -> pd.DataFrame:
+    layer_summary = layer_summary.copy()
+    layer_summary["early_layer_prior"] = 1.0 / layer_summary["layer_index"].astype(float).clip(lower=1.0)
+    return layer_summary
 
 
 def layer_checkpoint_table(paired: pd.DataFrame) -> pd.DataFrame:
@@ -134,6 +152,7 @@ def summarize_checkpoints(paired: pd.DataFrame) -> pd.DataFrame:
 
 def prediction_pairs(layer_summary: pd.DataFrame) -> pd.DataFrame:
     rows = []
+    layer_summary = add_prediction_control_columns(layer_summary)
     checkpoints = sorted(int(value) for value in layer_summary["warmup_steps"].unique())
     for train_steps in checkpoints:
         train = layer_summary[layer_summary["warmup_steps"].eq(train_steps)].copy()
@@ -162,18 +181,24 @@ def prediction_pairs(layer_summary: pd.DataFrame) -> pd.DataFrame:
                 ]
             )
             for predictor_name, column in PREDICTORS.items():
-                source = joined[column].astype(float).clip(lower=1e-300)
+                source_column = f"{column}_source" if f"{column}_source" in joined.columns else column
+                source = joined[source_column].astype(float).clip(lower=1e-300)
                 source_log = source.map(math.log)
                 spearman, spearman_low, spearman_high, points = corr_ci95(source_log, target_log, method="spearman")
                 pearson, pearson_low, pearson_high, _ = corr_ci95(source_log, target_log, method="pearson")
                 source_below_one = source < 1.0
                 sign_accuracy = float((source_below_one == target_below_one).mean())
-                predicted_top_k = set(joined.nlargest(min(5, len(joined)), column)["parameter"])
+                predicted_top_k = set(joined.nlargest(min(5, len(joined)), source_column)["parameter"])
                 rows.append(
                     {
                         "source_warmup_steps": int(train_steps),
                         "target_warmup_steps": int(test_steps),
                         "predictor": predictor_name,
+                        "predictor_family": (
+                            "pre_registered"
+                            if predictor_name in PRE_REGISTERED_PREDICTORS
+                            else "positive_control"
+                        ),
                         "points": int(points),
                         "spearman_log_predictor_vs_log_target_observed": spearman,
                         "spearman_ci95_low": spearman_low,
@@ -203,6 +228,7 @@ def summarize_prediction_pairs(pairs: pd.DataFrame) -> pd.DataFrame:
         rows.append(
             {
                 "predictor": predictor,
+                "predictor_family": str(group["predictor_family"].iloc[0]),
                 "checkpoint_transfer_pairs": int(len(group)),
                 "mean_spearman_log_predictor_vs_log_target_observed": spearman,
                 "spearman_ci95_low": spearman_low,
@@ -266,7 +292,7 @@ def write_figure(
     figure_dir: Path,
 ) -> Path:
     figure_dir.mkdir(parents=True, exist_ok=True)
-    fig, axes = plt.subplots(1, 2, figsize=(11.0, 4.3))
+    fig, axes = plt.subplots(1, 2, figsize=(11.6, 5.0))
 
     ordered = checkpoint_summary.sort_values("warmup_steps")
     x = ordered["warmup_steps"].to_numpy(dtype=float)
@@ -299,7 +325,11 @@ def write_figure(
     estimates = ordered_pred["mean_spearman_log_predictor_vs_log_target_observed"].to_numpy(dtype=float)
     low = ordered_pred["spearman_ci95_low"].to_numpy(dtype=float)
     high = ordered_pred["spearman_ci95_high"].to_numpy(dtype=float)
-    axes[1].barh(y_positions, estimates, color="#009E73", alpha=0.85)
+    colors = [
+        "#009E73" if predictor in PRE_REGISTERED_PREDICTORS else "#CC79A7"
+        for predictor in ordered_pred["predictor"]
+    ]
+    axes[1].barh(y_positions, estimates, color=colors, alpha=0.85)
     axes[1].errorbar(
         estimates,
         y_positions,
@@ -336,6 +366,12 @@ def write_discussion(
 ) -> None:
     scaled_row = prediction_summary[prediction_summary["predictor"].eq("source_scaled_jvp_ratio")].iloc[0]
     rank_row = prediction_summary[prediction_summary["predictor"].eq("source_gradient_nuclear_rank")].iloc[0]
+    observed_row = prediction_summary[
+        prediction_summary["predictor"].eq("source_observed_drift_ratio")
+    ].iloc[0]
+    early_layer_row = prediction_summary[
+        prediction_summary["predictor"].eq("architecture_early_layer_prior")
+    ].iloc[0]
     lines = [
         "# E11 CIFAR-100-LT ResNet18 All-Layer JVP Checkpoint-Prediction Benchmark",
         "",
@@ -343,8 +379,12 @@ def write_discussion(
         "checkpoint-transfer prediction test. For each tail-rich ResNet checkpoint,",
         "the script probes every Conv/Linear matrix weight, computes unit-JVP,",
         "matched-gain scaled-JVP, and observed layer-only drift ratios, then asks",
-        "whether layer risk measured at one checkpoint predicts observed layer risk",
-        "at held-out checkpoints without fitting a new model.",
+        "whether layer scores measured at one checkpoint predict observed layer risk",
+        "at held-out checkpoints without fitting a new model. The original",
+        "pre-registered predictors are retained, and two positive controls are",
+        "added: source-checkpoint observed drift and an early-layer architecture",
+        "prior. These controls test whether held-out layer-risk ordering is",
+        "predictable at all, rather than attributing every failure to target noise.",
         "",
         f"- Warmup checkpoints: {', '.join(str(step) for step in warmup_steps)}",
         f"- Seeds per checkpoint: {len(base_config.seeds)}",
@@ -382,6 +422,7 @@ def write_discussion(
             prediction_summary,
             [
                 "predictor",
+                "predictor_family",
                 "checkpoint_transfer_pairs",
                 "mean_spearman_log_predictor_vs_log_target_observed",
                 "spearman_ci95_low",
@@ -394,6 +435,14 @@ def write_discussion(
         "",
         "## Readout",
         "",
+        f"- Source observed-drift positive control: Spearman "
+        f"{fmt(observed_row['mean_spearman_log_predictor_vs_log_target_observed'])} "
+        f"[{fmt(observed_row['spearman_ci95_low'])}, {fmt(observed_row['spearman_ci95_high'])}], "
+        f"top-5 risk overlap {fmt(observed_row['mean_top5_risk_overlap_fraction'])}.",
+        f"- Early-layer architecture prior: Spearman "
+        f"{fmt(early_layer_row['mean_spearman_log_predictor_vs_log_target_observed'])} "
+        f"[{fmt(early_layer_row['spearman_ci95_low'])}, {fmt(early_layer_row['spearman_ci95_high'])}], "
+        f"top-5 risk overlap {fmt(early_layer_row['mean_top5_risk_overlap_fraction'])}.",
         f"- Pre-registered scaled-JVP transfer predictor: Spearman "
         f"{fmt(scaled_row['mean_spearman_log_predictor_vs_log_target_observed'])} "
         f"[{fmt(scaled_row['spearman_ci95_low'])}, {fmt(scaled_row['spearman_ci95_high'])}] "
@@ -402,9 +451,12 @@ def write_discussion(
         f"{fmt(rank_row['mean_spearman_log_predictor_vs_log_target_observed'])} "
         f"[{fmt(rank_row['spearman_ci95_low'])}, {fmt(rank_row['spearman_ci95_high'])}].",
         "",
-        "Interpretation: this is a checkpoint-transfer mechanism benchmark. It tests",
-        "whether a downstream-aware local JVP quantity carries layer-risk information",
-        "across held-out checkpoints. It is still not a standard long-tailed",
+        "Interpretation: this is a checkpoint-transfer mechanism benchmark. The",
+        "positive controls show that layer-risk ordering is stable enough to",
+        "transfer across the tested tail-rich checkpoints. The current scaled-JVP",
+        "readout transfers the below-one direction but not the layer ranking, so",
+        "the missing ingredient is in the measurable condition score rather than",
+        "only in target-checkpoint noise. It is still not a standard long-tailed",
         "classification benchmark or a final optimizer-performance result.",
         "",
         "Artifacts:",
@@ -440,6 +492,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--discussion-path", type=Path, default=DEFAULT_DISCUSSION_PATH)
     parser.add_argument("--download", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--progress", action="store_true")
+    parser.add_argument(
+        "--reuse-existing",
+        action="store_true",
+        help="Reuse existing layer/checkpoint summaries and refresh prediction CSVs, figure, and discussion.",
+    )
     return parser.parse_args()
 
 
@@ -489,19 +546,34 @@ def main() -> None:
     args = parse_args()
     config, warmup_steps, max_matrix_parameters = config_from_args(args)
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    metrics, paired, layer_summary, checkpoint_summary, prediction_pair_summary, prediction_summary = (
-        run_checkpoint_prediction(
-            config,
-            warmup_steps=warmup_steps,
-            jvp_epsilon=args.jvp_epsilon,
-            max_matrix_parameters=max_matrix_parameters,
-            progress=args.progress,
+    if args.reuse_existing:
+        metrics = pd.read_csv(args.output_dir / "metrics.csv")
+        paired = pd.read_csv(args.output_dir / "paired_metrics.csv")
+        layer_summary = pd.read_csv(args.output_dir / "layer_summary.csv")
+        checkpoint_summary = pd.read_csv(args.output_dir / "checkpoint_summary.csv")
+        config_path = args.output_dir / "config.json"
+        if config_path.exists():
+            existing = json.loads(config_path.read_text(encoding="utf-8"))
+            config = Cifar100ResNetOneStepConfig(**existing.get("base_config", {}))
+            warmup_steps = tuple(int(step) for step in existing.get("warmup_steps", warmup_steps))
+            args.jvp_epsilon = float(existing.get("jvp_epsilon", args.jvp_epsilon))
+            max_matrix_parameters = existing.get("max_matrix_parameters", max_matrix_parameters)
+    else:
+        metrics, paired, layer_summary, checkpoint_summary, prediction_pair_summary, prediction_summary = (
+            run_checkpoint_prediction(
+                config,
+                warmup_steps=warmup_steps,
+                jvp_epsilon=args.jvp_epsilon,
+                max_matrix_parameters=max_matrix_parameters,
+                progress=args.progress,
+            )
         )
-    )
-    metrics.to_csv(args.output_dir / "metrics.csv", index=False)
-    paired.to_csv(args.output_dir / "paired_metrics.csv", index=False)
-    layer_summary.to_csv(args.output_dir / "layer_summary.csv", index=False)
-    checkpoint_summary.to_csv(args.output_dir / "checkpoint_summary.csv", index=False)
+        metrics.to_csv(args.output_dir / "metrics.csv", index=False)
+        paired.to_csv(args.output_dir / "paired_metrics.csv", index=False)
+        layer_summary.to_csv(args.output_dir / "layer_summary.csv", index=False)
+        checkpoint_summary.to_csv(args.output_dir / "checkpoint_summary.csv", index=False)
+    prediction_pair_summary = prediction_pairs(layer_summary)
+    prediction_summary = summarize_prediction_pairs(prediction_pair_summary)
     prediction_pair_summary.to_csv(args.output_dir / "prediction_pairs.csv", index=False)
     prediction_summary.to_csv(args.output_dir / "prediction_summary.csv", index=False)
     (args.output_dir / "config.json").write_text(
@@ -511,7 +583,13 @@ def main() -> None:
                 "warmup_steps": list(warmup_steps),
                 "jvp_epsilon": float(args.jvp_epsilon),
                 "max_matrix_parameters": max_matrix_parameters,
-                "pre_registered_predictors": PREDICTORS,
+                "predictors": PREDICTORS,
+                "pre_registered_predictors": {
+                    key: value for key, value in PREDICTORS.items() if key in PRE_REGISTERED_PREDICTORS
+                },
+                "positive_control_predictors": {
+                    key: value for key, value in PREDICTORS.items() if key in POSITIVE_CONTROL_PREDICTORS
+                },
             },
             indent=2,
         )

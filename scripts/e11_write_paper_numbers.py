@@ -256,6 +256,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction_summary.loc[
         "source_scaled_jvp_ratio"
     ]
+    cifar_resnet_layer_jvp_checkpoint_observed = cifar_resnet_layer_jvp_checkpoint_prediction_summary.loc[
+        "source_observed_drift_ratio"
+    ]
+    cifar_resnet_layer_jvp_checkpoint_early_layer = cifar_resnet_layer_jvp_checkpoint_prediction_summary.loc[
+        "architecture_early_layer_prior"
+    ]
     cifar_resnet_layer_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction_summary.loc[
         "source_unit_jvp_ratio"
     ]
@@ -1059,6 +1065,34 @@ def main() -> None:
         macro(
             "EelevenCifarResNetLayerJvpCheckpointPredictionDirectedRows",
             int(len(cifar_resnet_layer_jvp_checkpoint_prediction_pairs)),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionObservedSpearman",
+            fmt(cifar_resnet_layer_jvp_checkpoint_observed["mean_spearman_log_predictor_vs_log_target_observed"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionObservedSpearman",
+            cifar_resnet_layer_jvp_checkpoint_observed,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionObservedTopFiveOverlap",
+            fmt(cifar_resnet_layer_jvp_checkpoint_observed["mean_top5_risk_overlap_fraction"]),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionEarlyLayerSpearman",
+            fmt(cifar_resnet_layer_jvp_checkpoint_early_layer["mean_spearman_log_predictor_vs_log_target_observed"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionEarlyLayerSpearman",
+            cifar_resnet_layer_jvp_checkpoint_early_layer,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpCheckpointPredictionEarlyLayerTopFiveOverlap",
+            fmt(cifar_resnet_layer_jvp_checkpoint_early_layer["mean_top5_risk_overlap_fraction"]),
         ),
         macro(
             "EelevenCifarResNetLayerJvpCheckpointPredictionScaledSpearman",

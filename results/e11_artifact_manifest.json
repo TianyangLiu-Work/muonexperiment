@@ -5,15 +5,15 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 750437,
+      "size_bytes": 750398,
       "size": "732.8 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2032311,
-      "size": "1.9 MB"
+      "size_bytes": 2062002,
+      "size": "2.0 MB"
     },
     {
       "path": "tests",
@@ -26,21 +26,21 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 772244,
-      "size": "754.1 KB"
+      "size_bytes": 777007,
+      "size": "758.8 KB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 271581541,
+      "size_bytes": 271586043,
       "size": "259.0 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 31004584,
+      "size_bytes": 31022112,
       "size": "29.6 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 4523291,
+      "size_bytes": 4542340,
       "size": "4.3 MB"
     },
     {
@@ -277,13 +277,13 @@
     },
     {
       "path": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_pairs.csv",
-      "rows": 24,
-      "size": "4.4 KB"
+      "rows": 36,
+      "size": "7.2 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv",
-      "rows": 4,
-      "size": "1.1 KB"
+      "rows": 6,
+      "size": "1.6 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv",
@@ -639,7 +639,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "33.9 KB"
+      "size": "34.2 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -687,15 +687,15 @@
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
-      "size": "31.2 KB"
+      "size": "32.5 KB"
     },
     {
       "path": "discussion/e11_top_conference_plan.md",
-      "size": "13.1 KB"
+      "size": "13.3 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",
-      "size": "23.9 KB"
+      "size": "24.3 KB"
     },
     {
       "path": "discussion/e11_research_synthesis.md",
@@ -747,7 +747,7 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md",
-      "size": "5.7 KB"
+      "size": "7.0 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_standard_eval.md",

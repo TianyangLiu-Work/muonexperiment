@@ -124,6 +124,12 @@ def main() -> None:
     cifar_resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
         "source_scaled_jvp_ratio"
     ]
+    cifar_resnet_jvp_checkpoint_observed = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "source_observed_drift_ratio"
+    ]
+    cifar_resnet_jvp_checkpoint_early_layer = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "architecture_early_layer_prior"
+    ]
     cifar_resnet_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
         "source_unit_jvp_ratio"
     ]
@@ -186,7 +192,12 @@ def main() -> None:
                     f"over {int(cifar_resnet_layer_jvp['paired_points'])} paired layer/seed points. "
                     f"The held-out checkpoint-transfer version keeps scaled-JVP threshold accuracy at "
                     f"{fmt(cifar_resnet_jvp_checkpoint_scaled['mean_threshold_below_one_accuracy'])}, "
-                    f"but its held-out layer-risk Spearman is "
+                    f"while source-observed and early-layer positive controls have held-out Spearman "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_observed['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_observed, 'spearman_ci95_low', 'spearman_ci95_high')} and "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_early_layer['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_early_layer, 'spearman_ci95_low', 'spearman_ci95_high')}. "
+                    f"The scaled-JVP held-out layer-risk Spearman is "
                     f"{fmt(cifar_resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} "
                     f"CI={interval(cifar_resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}. "
                     f"The standard CIFAR-100-LT ResNet18 reporting baseline gives many/medium/few balanced accuracy "
@@ -263,10 +274,12 @@ def main() -> None:
                     f"Across held-out checkpoints, scaled-JVP is less inverted than unit-JVP "
                     f"({fmt(cifar_resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} vs "
                     f"{fmt(cifar_resnet_jvp_checkpoint_unit['mean_spearman_log_predictor_vs_log_target_observed'])}), "
-                    f"but both are negative for layer-risk ranking."
+                    f"but both are negative for layer-risk ranking, while source-observed and early-layer positive controls are strongly positive "
+                    f"({fmt(cifar_resnet_jvp_checkpoint_observed['mean_spearman_log_predictor_vs_log_target_observed'])} and "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_early_layer['mean_spearman_log_predictor_vs_log_target_observed'])})."
                 ),
                 "why_it_is_ready": "The synthetic construction flips the theory inequality and the observed tail drift direction flips with it.",
-                "remaining_risk": "The all-layer ResNet bridge is finite-difference local evidence. The checkpoint-transfer benchmark is a useful boundary result, not yet a positive held-out predictor.",
+                "remaining_risk": "The all-layer ResNet bridge is finite-difference local evidence. The checkpoint-transfer benchmark now shows the target layer ordering is predictable, but the current scaled-JVP condition score is not the predictor.",
             },
             {
                 "claim": "The mechanism is norm-specific scaled head-gain efficiency, not lower unit-direction tail sensitivity.",
@@ -378,13 +391,13 @@ def main() -> None:
                 "priority": "partly complete; extend for predictive condition claim",
                 "experiment": "Larger-architecture layerwise diagnostic",
                 "purpose": "Check whether the scaled head-gain mechanism persists across layers in deeper models.",
-                "minimum_standard": "The ResNet all-layer JVP diagnostic now gives unit JVP, scaled JVP, observed drift, and layer contribution for Conv/Linear weights. The held-out checkpoint-transfer run exposes negative layer-risk transfer, so a stronger version needs a better downstream-aware condition score and held-out architecture/dataset splits.",
+                "minimum_standard": "The ResNet all-layer JVP diagnostic now gives unit JVP, scaled JVP, observed drift, and layer contribution for Conv/Linear weights. The held-out checkpoint-transfer run shows source-observed and early-layer positive controls transfer, but scaled-JVP does not; a stronger version needs a better downstream-aware condition score and held-out architecture/dataset splits.",
             },
             {
                 "priority": "should-have",
                 "experiment": "Held-out boundary prediction benchmark",
                 "purpose": "Determine whether nrank-vs-ssrank is predictive beyond constructed settings.",
-                "minimum_standard": "The checkpoint-transfer benchmark is now a negative boundary check for layer ranking; the next benchmark should improve the condition score and include pre-specified held-out family/architecture splits.",
+                "minimum_standard": "The checkpoint-transfer benchmark is now a predictive-boundary check: layer ranking is stable under positive controls, while the current scaled-JVP score fails ranking. The next benchmark should improve the condition score and include pre-specified held-out family/architecture splits.",
             },
             {
                 "priority": "should-have",

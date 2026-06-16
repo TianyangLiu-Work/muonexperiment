@@ -42,6 +42,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
     )
+    cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
+    ).set_index("predictor")
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -104,6 +107,15 @@ def main() -> None:
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
     )
+    cifar_resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "source_scaled_jvp_ratio"
+    ]
+    cifar_resnet_jvp_checkpoint_observed = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "source_observed_drift_ratio"
+    ]
+    cifar_resnet_jvp_checkpoint_early_layer = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "architecture_early_layer_prior"
+    ]
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
@@ -218,10 +230,18 @@ def main() -> None:
                     f"CI={interval(cifar_resnet_fc_condition_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
                     f"The all-layer ResNet JVP diagnostic covers {int(cifar_resnet_layer_jvp['parameters'])} Conv/Linear weights and "
                     f"{int(cifar_resnet_layer_jvp['paired_points'])} paired layer/seed points; "
-                    f"{cifar_resnet_layer_jvp_supported_layers}/{int(cifar_resnet_layer_jvp['parameters'])} observed per-layer CI upper endpoints are below one."
+                    f"{cifar_resnet_layer_jvp_supported_layers}/{int(cifar_resnet_layer_jvp['parameters'])} observed per-layer CI upper endpoints are below one. "
+                    f"In the held-out checkpoint-transfer benchmark, source-observed and early-layer controls have Spearman "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_observed['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_observed, 'spearman_ci95_low', 'spearman_ci95_high')} and "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_early_layer['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_early_layer, 'spearman_ci95_low', 'spearman_ci95_high')}, "
+                    f"while scaled-JVP has Spearman "
+                    f"{fmt(cifar_resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}."
                 ),
                 "safe_response": "Call the synthetic result a mechanism sanity check, use the ResNet rank-only proxy as a caveat, and present the final-layer plus all-layer JVP diagnostics as downstream-aware natural-task bridges.",
-                "remaining_work": "Turn the local all-layer JVP bridge into pre-registered held-out real-task or architecture-split prediction before claiming a general boundary predictor.",
+                "remaining_work": "Improve the downstream-aware score and repeat the held-out benchmark on architecture or dataset splits before claiming a general boundary predictor.",
             },
             {
                 "reviewer_objection": "The layerwise mechanism is not simply lower tail sensitivity.",

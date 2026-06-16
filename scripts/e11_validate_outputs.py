@@ -798,6 +798,7 @@ def main() -> None:
         "A CIFAR-100-LT ResNet18 imbalance sweep over tail_train_per_class 10/30/100/300 keeps spectral/Frobenius squared drift ratio below 1 in every setting",
         "An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points",
         "An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs",
+        "source-observed positive-control Spearman",
         "A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`",
         "An augmented CIFAR-100-LT ResNet18 recipe benchmark pilot (5 seeds, 5000 steps) gives SGD-momentum all/few balanced accuracy `0.4105 [0.4044, 0.4166]` and `0.1047 [0.09389, 0.1156]`",
         "A CIFAR-100-LT ResNet18 NS-Muon final-training pilot (3 seeds, 5000 steps) is negative: lr=1e-4 all/few balanced accuracy `0.1265 [0.1218, 0.1312]` / `0.0008889 [-0.0006533, 0.002431]`",
@@ -2101,18 +2102,20 @@ def main() -> None:
     )
     expected_checkpoint_prediction_steps = {2000, 5000, 10000}
     expected_checkpoint_prediction_predictors = {
+        "source_observed_drift_ratio",
         "source_scaled_jvp_ratio",
         "source_unit_jvp_ratio",
         "source_alignment_ratio",
         "source_gradient_nuclear_rank",
+        "architecture_early_layer_prior",
     }
     if (
         len(cifar_resnet_layer_jvp_checkpoint_metrics) != 1260
         or len(cifar_resnet_layer_jvp_checkpoint_paired) != 630
         or len(cifar_resnet_layer_jvp_checkpoint_layer_summary) != 63
         or len(cifar_resnet_layer_jvp_checkpoint_summary) != 3
-        or len(cifar_resnet_layer_jvp_checkpoint_prediction_pairs) != 24
-        or len(cifar_resnet_layer_jvp_checkpoint_prediction_summary) != 4
+        or len(cifar_resnet_layer_jvp_checkpoint_prediction_pairs) != 36
+        or len(cifar_resnet_layer_jvp_checkpoint_prediction_summary) != 6
     ):
         raise AssertionError(
             "CIFAR-100-LT ResNet18 JVP checkpoint prediction must contain 3 checkpoints x 10 seeds x 21 layers"
@@ -2132,7 +2135,7 @@ def main() -> None:
         == expected_checkpoint_prediction_predictors
     ):
         raise AssertionError(
-            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must cover 10 seeds, 21 layers, and four pre-registered predictors"
+            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must cover 10 seeds, 21 layers, four pre-registered predictors, and two positive controls"
         )
     base_checkpoint_prediction_config = cifar_resnet_layer_jvp_checkpoint_config["base_config"]
     if (
@@ -2170,10 +2173,19 @@ def main() -> None:
     scaled_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["source_scaled_jvp_ratio"]
     unit_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["source_unit_jvp_ratio"]
     rank_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["source_gradient_nuclear_rank"]
+    observed_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["source_observed_drift_ratio"]
+    early_layer_checkpoint_prediction = checkpoint_prediction_by_predictor.loc["architecture_early_layer_prior"]
     if not (
         int(scaled_checkpoint_prediction["checkpoint_transfer_pairs"]) == 6
+        and int(observed_checkpoint_prediction["checkpoint_transfer_pairs"]) == 6
         and abs(float(scaled_checkpoint_prediction["mean_threshold_below_one_accuracy"]) - 1.0) < 1e-12
         and abs(float(scaled_checkpoint_prediction["mean_top5_risk_overlap_fraction"]) - 0.2) < 1e-12
+        and abs(float(observed_checkpoint_prediction["mean_top5_risk_overlap_fraction"]) - 1.0) < 1e-12
+        and abs(float(early_layer_checkpoint_prediction["mean_top5_risk_overlap_fraction"]) - 1.0) < 1e-12
+        and float(observed_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"]) > 0.95
+        and float(observed_checkpoint_prediction["spearman_ci95_low"]) > 0.95
+        and float(early_layer_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"]) > 0.85
+        and float(early_layer_checkpoint_prediction["spearman_ci95_low"]) > 0.85
         and float(scaled_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"]) < 0.0
         and float(scaled_checkpoint_prediction["spearman_ci95_high"]) < 0.0
         and float(unit_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"])
@@ -2181,7 +2193,7 @@ def main() -> None:
         and float(rank_checkpoint_prediction["mean_spearman_log_predictor_vs_log_target_observed"]) < 0.0
     ):
         raise AssertionError(
-            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must preserve the current boundary result: threshold transfers, ranking does not"
+            "CIFAR-100-LT ResNet18 JVP checkpoint prediction must preserve the current boundary result: positive controls transfer, scaled-JVP ranking does not"
         )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
@@ -3434,6 +3446,8 @@ def main() -> None:
         "polar(M_t) squared drift ratio=0.8199",
         "trajectory NS(M_t) squared drift ratio=0.8019",
         "scaled-JVP threshold accuracy=1",
+        "source-observed positive-control Spearman=0.981",
+        "early-layer prior Spearman=0.9126",
         "scaled-JVP held-out Spearman=-0.3203",
         "CIFAR-100-LT ResNet18 imbalance sweep",
         "worst drift ratio=0.6075",

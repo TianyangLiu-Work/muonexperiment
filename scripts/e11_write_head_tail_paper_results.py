@@ -93,6 +93,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
         "source_scaled_jvp_ratio"
     ]
+    cifar_resnet_layer_jvp_checkpoint_observed = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "source_observed_drift_ratio"
+    ]
+    cifar_resnet_layer_jvp_checkpoint_early_layer = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "architecture_early_layer_prior"
+    ]
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
@@ -277,8 +283,25 @@ def main() -> None:
                 cifar_resnet_layer_jvp_checkpoint_scaled["spearman_ci95_high"],
             )
             + " & "
+            + "positive controls: observed "
+            + ci(
+                cifar_resnet_layer_jvp_checkpoint_observed[
+                    "mean_spearman_log_predictor_vs_log_target_observed"
+                ],
+                cifar_resnet_layer_jvp_checkpoint_observed["spearman_ci95_low"],
+                cifar_resnet_layer_jvp_checkpoint_observed["spearman_ci95_high"],
+            )
+            + ", early-layer "
+            + ci(
+                cifar_resnet_layer_jvp_checkpoint_early_layer[
+                    "mean_spearman_log_predictor_vs_log_target_observed"
+                ],
+                cifar_resnet_layer_jvp_checkpoint_early_layer["spearman_ci95_low"],
+                cifar_resnet_layer_jvp_checkpoint_early_layer["spearman_ci95_high"],
+            )
+            + "; "
             + fmt(cifar_resnet_layer_jvp_checkpoint_scaled["checkpoint_transfer_pairs"])
-            + " directed checkpoint-transfer pairs; layer ranking does not transfer \\\\"
+            + " directed pairs \\\\"
         ),
         (
             "CIFAR-100-LT ResNet18 standard reporting & many/medium/few balanced acc. "

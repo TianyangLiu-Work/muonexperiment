@@ -4,8 +4,12 @@ This diagnostic turns the single-checkpoint all-layer JVP bridge into a
 checkpoint-transfer prediction test. For each tail-rich ResNet checkpoint,
 the script probes every Conv/Linear matrix weight, computes unit-JVP,
 matched-gain scaled-JVP, and observed layer-only drift ratios, then asks
-whether layer risk measured at one checkpoint predicts observed layer risk
-at held-out checkpoints without fitting a new model.
+whether layer scores measured at one checkpoint predict observed layer risk
+at held-out checkpoints without fitting a new model. The original
+pre-registered predictors are retained, and two positive controls are
+added: source-checkpoint observed drift and an early-layer architecture
+prior. These controls test whether held-out layer-risk ordering is
+predictable at all, rather than attributing every failure to target noise.
 
 - Warmup checkpoints: 2000, 5000, 10000
 - Seeds per checkpoint: 10
@@ -28,21 +32,28 @@ at held-out checkpoints without fitting a new model.
 
 ## Held-Out Checkpoint Prediction Summary
 
-| predictor                    |   checkpoint_transfer_pairs |   mean_spearman_log_predictor_vs_log_target_observed |   spearman_ci95_low |   spearman_ci95_high |   mean_top5_risk_overlap_fraction |   top5_risk_overlap_ci95_low |   top5_risk_overlap_ci95_high |
-|:-----------------------------|----------------------------:|-----------------------------------------------------:|--------------------:|---------------------:|----------------------------------:|-----------------------------:|------------------------------:|
-| source_scaled_jvp_ratio      |                           6 |                                             -0.3203  |             -0.3562 |            -0.2845   |                               0.2 |                          0.2 |                           0.2 |
-| source_unit_jvp_ratio        |                           6 |                                             -0.8212  |             -0.8445 |            -0.7979   |                               0   |                          0   |                           0   |
-| source_alignment_ratio       |                           6 |                                             -0.07922 |             -0.1773 |             0.01883  |                               0   |                          0   |                           0   |
-| source_gradient_nuclear_rank |                           6 |                                             -0.0829  |             -0.1629 |            -0.002919 |                               0   |                          0   |                           0   |
+| predictor                      | predictor_family   |   checkpoint_transfer_pairs |   mean_spearman_log_predictor_vs_log_target_observed |   spearman_ci95_low |   spearman_ci95_high |   mean_top5_risk_overlap_fraction |   top5_risk_overlap_ci95_low |   top5_risk_overlap_ci95_high |
+|:-------------------------------|:-------------------|----------------------------:|-----------------------------------------------------:|--------------------:|---------------------:|----------------------------------:|-----------------------------:|------------------------------:|
+| source_observed_drift_ratio    | positive_control   |                           6 |                                              0.981   |              0.9739 |             0.988    |                               1   |                          1   |                           1   |
+| source_scaled_jvp_ratio        | pre_registered     |                           6 |                                             -0.3203  |             -0.3562 |            -0.2845   |                               0.2 |                          0.2 |                           0.2 |
+| source_unit_jvp_ratio          | pre_registered     |                           6 |                                             -0.8212  |             -0.8445 |            -0.7979   |                               0   |                          0   |                           0   |
+| source_alignment_ratio         | pre_registered     |                           6 |                                             -0.07922 |             -0.1773 |             0.01883  |                               0   |                          0   |                           0   |
+| source_gradient_nuclear_rank   | pre_registered     |                           6 |                                             -0.0829  |             -0.1629 |            -0.002919 |                               0   |                          0   |                           0   |
+| architecture_early_layer_prior | positive_control   |                           6 |                                              0.9126  |              0.9029 |             0.9222   |                               1   |                          1   |                           1   |
 
 ## Readout
 
+- Source observed-drift positive control: Spearman 0.981 [0.9739, 0.988], top-5 risk overlap 1.
+- Early-layer architecture prior: Spearman 0.9126 [0.9029, 0.9222], top-5 risk overlap 1.
 - Pre-registered scaled-JVP transfer predictor: Spearman -0.3203 [-0.3562, -0.2845] over 6 directed checkpoint-transfer pairs.
 - Rank-only source predictor: Spearman -0.0829 [-0.1629, -0.002919].
 
-Interpretation: this is a checkpoint-transfer mechanism benchmark. It tests
-whether a downstream-aware local JVP quantity carries layer-risk information
-across held-out checkpoints. It is still not a standard long-tailed
+Interpretation: this is a checkpoint-transfer mechanism benchmark. The
+positive controls show that layer-risk ordering is stable enough to
+transfer across the tested tail-rich checkpoints. The current scaled-JVP
+readout transfers the below-one direction but not the layer ranking, so
+the missing ingredient is in the measurable condition score rather than
+only in target-checkpoint noise. It is still not a standard long-tailed
 classification benchmark or a final optimizer-performance result.
 
 Artifacts:

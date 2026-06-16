@@ -93,6 +93,12 @@ def main() -> None:
     resnet_adam_ns = cifar_resnet_practical_bridge.loc[("adamw_matrix_trajectory", "ns_momentum")]
     resnet_muon_ns = cifar_resnet_practical_bridge.loc[("ns_muon_matrix_trajectory", "ns_momentum")]
     resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_scaled_jvp_ratio"]
+    resnet_jvp_checkpoint_observed = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "source_observed_drift_ratio"
+    ]
+    resnet_jvp_checkpoint_early_layer = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
+        "architecture_early_layer_prior"
+    ]
     resnet_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_unit_jvp_ratio"]
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
@@ -323,6 +329,12 @@ def main() -> None:
                 ),
                 "source_data": link("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"),
                 "quantitative_anchor": (
+                    f"source-observed positive-control Spearman="
+                    f"{fmt(resnet_jvp_checkpoint_observed['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"{ci(resnet_jvp_checkpoint_observed, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"early-layer prior Spearman="
+                    f"{fmt(resnet_jvp_checkpoint_early_layer['mean_spearman_log_predictor_vs_log_target_observed'])} "
+                    f"{ci(resnet_jvp_checkpoint_early_layer, 'spearman_ci95_low', 'spearman_ci95_high')}; "
                     f"scaled-JVP threshold accuracy="
                     f"{fmt(resnet_jvp_checkpoint_scaled['mean_threshold_below_one_accuracy'])}; "
                     f"scaled-JVP held-out Spearman="
@@ -332,8 +344,8 @@ def main() -> None:
                     f"{fmt(resnet_jvp_checkpoint_unit['mean_spearman_log_predictor_vs_log_target_observed'])} "
                     f"{ci(resnet_jvp_checkpoint_unit, 'spearman_ci95_low', 'spearman_ci95_high')}."
                 ),
-                "how_to_read": "The all-checkpoint directional below-one result transfers, but layer-risk ranking across checkpoints does not.",
-                "caveat": "This is a useful negative transfer result: the current downstream-aware JVP readout is not yet a held-out layer-risk predictor.",
+                "how_to_read": "The source observed-drift and early-layer controls show that held-out layer-risk ordering is predictable, while the current scaled-JVP score only transfers the below-one direction.",
+                "caveat": "This is a useful predictive-boundary result: the missing ingredient is a better downstream-aware score, not merely target-checkpoint noise.",
             },
             {
                 "claim": "The current paper now has a standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.",
