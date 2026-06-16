@@ -985,6 +985,15 @@ Figure \ref{fig:cifar-resnet-lt-standard-eval} adds a standard CIFAR-100-LT repo
 \label{fig:cifar-resnet-lt-standard-eval}
 \end{figure}
 
+Figure \ref{fig:cifar-resnet-lt-recipe-benchmark} adds a small augmented recipe pilot. With random crop/flip augmentation over \(\EelevenCifarResNetLtRecipeBenchmarkSeeds\) seeds, AdamW-aug reaches all-group balanced accuracy \(\EelevenCifarResNetLtRecipeAdamwAugAllBalancedAccuracy ~\EelevenCifarResNetLtRecipeAdamwAugAllBalancedAccuracyCi\). SGD-momentum-aug reaches \(\EelevenCifarResNetLtRecipeSgdAllBalancedAccuracy ~\EelevenCifarResNetLtRecipeSgdAllBalancedAccuracyCi\) overall and \(\EelevenCifarResNetLtRecipeSgdFewBalancedAccuracy ~\EelevenCifarResNetLtRecipeSgdFewBalancedAccuracyCi\) on few classes, with few-class paired difference \(\EelevenCifarResNetLtRecipeSgdFewBalancedAccuracyDiff ~\EelevenCifarResNetLtRecipeSgdFewBalancedAccuracyDiffCi\) versus AdamW-aug. The class-balanced AdamW loss is not a free improvement in this pilot: its few-class difference is \(\EelevenCifarResNetLtRecipeCbFewBalancedAccuracyDiff ~\EelevenCifarResNetLtRecipeCbFewBalancedAccuracyDiffCi\). This result improves benchmark context but still falls short of a full tuned long-tail optimizer comparison.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{figures/cifar100_resnet_lt_recipe_benchmark.png}
+\caption{CIFAR-100-LT ResNet18 augmented recipe benchmark pilot. The left panel reports final many/medium/few balanced accuracy for augmented AdamW, class-balanced AdamW, and SGD-momentum. The right panel reports paired balanced-accuracy differences relative to augmented AdamW. The pilot shows meaningful recipe sensitivity and supports keeping optimizer-performance claims separate from the local drift mechanism.}
+\label{fig:cifar-resnet-lt-recipe-benchmark}
+\end{figure}
+
 Figure \ref{fig:cifar-resnet-practical-muon-bridge} reports the ResNet practical trajectory bridge discussed in the Muon-style compatibility subsection.
 
 \begin{figure}[H]

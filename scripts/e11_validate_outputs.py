@@ -601,6 +601,14 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "config.json",
         Path("figures/e11_cifar100_resnet_lt_standard_eval") / "cifar100_resnet_lt_standard_eval.png",
         Path("discussion/e11_cifar100_resnet_lt_standard_eval.md"),
+        Path("results/e11_cifar100_resnet_lt_recipe_benchmark") / "train_trace.csv",
+        Path("results/e11_cifar100_resnet_lt_recipe_benchmark") / "class_metrics.csv",
+        Path("results/e11_cifar100_resnet_lt_recipe_benchmark") / "group_metrics.csv",
+        Path("results/e11_cifar100_resnet_lt_recipe_benchmark") / "summary.csv",
+        Path("results/e11_cifar100_resnet_lt_recipe_benchmark") / "pair_summary.csv",
+        Path("results/e11_cifar100_resnet_lt_recipe_benchmark") / "config.json",
+        Path("figures/e11_cifar100_resnet_lt_recipe_benchmark") / "cifar100_resnet_lt_recipe_benchmark.png",
+        Path("discussion/e11_cifar100_resnet_lt_recipe_benchmark.md"),
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "summary.csv",
@@ -669,6 +677,7 @@ def main() -> None:
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_tail_quality.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_standard_eval.png",
+        Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_recipe_benchmark.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_practical_muon_bridge.png",
         Path("paper/specgrad_activation_paper/tables") / "head_tail_empirical_results.tex",
         Path("paper/specgrad_activation_paper/tables") / "local_linearization_errors.tex",
@@ -763,11 +772,13 @@ def main() -> None:
         "make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm",
         "make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results # submit the all-layer ResNet JVP checkpoint-transfer benchmark via Slurm",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
+        "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
         "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
         "An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points",
         "An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs",
         "A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`",
+        "An augmented CIFAR-100-LT ResNet18 recipe benchmark pilot (5 seeds, 5000 steps) gives SGD-momentum all/few balanced accuracy `0.4105 [0.4044, 0.4166]` and `0.1047 [0.09389, 0.1156]`",
         "make e11-all-results",
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
@@ -994,6 +1005,7 @@ def main() -> None:
         "figures/long_tail_layerwise_drift.png",
         "figures/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         "figures/cifar100_resnet_lt_standard_eval.png",
+        "figures/cifar100_resnet_lt_recipe_benchmark.png",
         "figures/cifar100_resnet_practical_muon_bridge.png",
         "momentum-gradient alignment",
         "Tianyang Liu",
@@ -1288,6 +1300,7 @@ def main() -> None:
         "cifar100_resnet_layer_jvp_tail_quality.png",
         "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         "cifar100_resnet_lt_standard_eval.png",
+        "cifar100_resnet_lt_recipe_benchmark.png",
         "cifar100_resnet_practical_muon_bridge.png",
         "tables/",
         "e11_paper_numbers.tex",
@@ -2135,6 +2148,63 @@ def main() -> None:
         raise AssertionError(
             "CIFAR-100-LT ResNet18 standard reporting balanced accuracy should preserve the current many > medium > few result"
         )
+    lt_recipe_dir = Path("results/e11_cifar100_resnet_lt_recipe_benchmark")
+    lt_recipe_trace = pd.read_csv(lt_recipe_dir / "train_trace.csv")
+    lt_recipe_class_metrics = pd.read_csv(lt_recipe_dir / "class_metrics.csv")
+    lt_recipe_group_metrics = pd.read_csv(lt_recipe_dir / "group_metrics.csv")
+    lt_recipe_summary = pd.read_csv(lt_recipe_dir / "summary.csv")
+    lt_recipe_pairs = pd.read_csv(lt_recipe_dir / "pair_summary.csv")
+    lt_recipe_config = json.loads((lt_recipe_dir / "config.json").read_text())
+    expected_recipe_names = {"adamw_aug_ce", "adamw_aug_cb_loss", "sgd_aug_ce"}
+    if (
+        len(lt_recipe_trace) != 90
+        or len(lt_recipe_class_metrics) != 1500
+        or len(lt_recipe_group_metrics) != 60
+        or len(lt_recipe_summary) != 12
+        or len(lt_recipe_pairs) != 8
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 recipe benchmark must contain 5 seeds x 3 recipes with four group summaries"
+        )
+    if not (
+        len(lt_recipe_config["seeds"]) == 5
+        and set(lt_recipe_config["recipe_names"]) == expected_recipe_names
+        and lt_recipe_config["baseline_recipe"] == "adamw_aug_ce"
+        and int(lt_recipe_config["num_classes"]) == 100
+        and int(lt_recipe_config["train_steps"]) == 5000
+        and int(lt_recipe_config["train_batch_size"]) == 256
+        and lt_recipe_config["device"] == "cuda"
+        and not lt_recipe_config["download"]
+    ):
+        raise AssertionError("CIFAR-100-LT ResNet18 recipe benchmark should be the formal 5-seed Slurm/GPU no-download run")
+    if set(lt_recipe_summary["recipe"]) != expected_recipe_names or set(lt_recipe_pairs["recipe"]) != {
+        "adamw_aug_cb_loss",
+        "sgd_aug_ce",
+    }:
+        raise AssertionError("CIFAR-100-LT ResNet18 recipe benchmark must cover the expected recipes and paired comparisons")
+    lt_recipe_by_group = lt_recipe_summary.set_index(["recipe", "frequency_group"])
+    sgd_all = float(lt_recipe_by_group.loc[("sgd_aug_ce", "all"), "mean_balanced_accuracy"])
+    sgd_few = float(lt_recipe_by_group.loc[("sgd_aug_ce", "few"), "mean_balanced_accuracy"])
+    adamw_aug_all = float(lt_recipe_by_group.loc[("adamw_aug_ce", "all"), "mean_balanced_accuracy"])
+    adamw_aug_few = float(lt_recipe_by_group.loc[("adamw_aug_ce", "few"), "mean_balanced_accuracy"])
+    lt_recipe_pair_by_group = lt_recipe_pairs.set_index(["recipe", "frequency_group"])
+    sgd_few_diff = float(lt_recipe_pair_by_group.loc[("sgd_aug_ce", "few"), "mean_balanced_accuracy_diff"])
+    sgd_all_diff = float(lt_recipe_pair_by_group.loc[("sgd_aug_ce", "all"), "mean_balanced_accuracy_diff"])
+    cb_few_diff = float(lt_recipe_pair_by_group.loc[("adamw_aug_cb_loss", "few"), "mean_balanced_accuracy_diff"])
+    if not (
+        0.35 <= adamw_aug_all <= 0.37
+        and 0.075 <= adamw_aug_few <= 0.095
+        and 0.40 <= sgd_all <= 0.42
+        and 0.09 <= sgd_few <= 0.12
+        and 0.005 <= sgd_few_diff <= 0.035
+        and 0.04 <= sgd_all_diff <= 0.06
+        and cb_few_diff < 0.0
+        and sgd_all > adamw_aug_all
+        and sgd_few > adamw_aug_few
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 recipe benchmark should preserve the current SGD-aug pilot improvement and class-balanced-loss caveat"
+        )
     cifar_resnet_practical_metrics = pd.read_csv(
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv"
     )
@@ -2650,6 +2720,7 @@ def main() -> None:
         "figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png",
         "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         "figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png",
+        "figures/e11_cifar100_resnet_lt_recipe_benchmark/cifar100_resnet_lt_recipe_benchmark.png",
         "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
         "seven figures plus one generated table",
         "paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex",
@@ -3178,6 +3249,9 @@ def main() -> None:
         "many balanced accuracy=0.3665",
         "medium=0.1036",
         "few=0.0129",
+        "SGD-aug all=0.4105",
+        "SGD-aug few=0.1047",
+        "few diff vs AdamW-aug=0.0194",
         "final squared drift ratio=0.6167",
         "broad tail-accuracy or benchmark improvement",
         "narrow tail-loss/margin diagnostic",

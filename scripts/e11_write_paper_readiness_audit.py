@@ -52,6 +52,12 @@ def main() -> None:
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
+    cifar_resnet_lt_recipe = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_recipe_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -109,6 +115,9 @@ def main() -> None:
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
+    cifar_resnet_recipe_sgd_all = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "all")]
+    cifar_resnet_recipe_sgd_few = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "few")]
+    cifar_resnet_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
 
     claim_status = pd.DataFrame(
         [
@@ -152,10 +161,16 @@ def main() -> None:
                     f"The standard CIFAR-100-LT ResNet18 reporting baseline gives many/medium/few balanced accuracy "
                     f"{fmt(cifar_resnet_lt_many['mean_balanced_accuracy'])}/"
                     f"{fmt(cifar_resnet_lt_medium['mean_balanced_accuracy'])}/"
-                    f"{fmt(cifar_resnet_lt_few['mean_balanced_accuracy'])}."
+                    f"{fmt(cifar_resnet_lt_few['mean_balanced_accuracy'])}. "
+                    f"The augmented recipe pilot gives SGD-aug all/few balanced accuracy "
+                    f"{fmt(cifar_resnet_recipe_sgd_all['mean_balanced_accuracy'])}/"
+                    f"{fmt(cifar_resnet_recipe_sgd_few['mean_balanced_accuracy'])}, "
+                    f"with few-group diff vs AdamW-aug "
+                    f"{fmt(cifar_resnet_recipe_sgd_few_diff['mean_balanced_accuracy_diff'])} "
+                    f"CI={interval(cifar_resnet_recipe_sgd_few_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')}."
                 ),
                 "why_it_is_ready": "It is measured under the paper's matched-head-gain protocol with paired confidence intervals and explicit norm-specific scaling readouts.",
-                "remaining_risk": "The standard reporting baseline separates local drift from final accuracy, but it is AdamW-only and not a tuned optimizer comparison. The checkpoint-transfer result shows that the current local JVP score is not yet a held-out layer-ranking predictor.",
+                "remaining_risk": "The standard reporting and recipe pilot separate local drift from final accuracy, but they are still short of a tuned multi-dataset Muon/AdamW optimizer benchmark. The checkpoint-transfer result shows that the current local JVP score is not yet a held-out layer-ranking predictor.",
             },
             {
                 "claim": "The matched-head-gain drift readout survives a more appropriate CIFAR-100-LT ResNet architecture.",
@@ -297,7 +312,7 @@ def main() -> None:
             },
             {
                 "section": "Evidence",
-                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain, checkpoint-sweep, tail-quality, rank-proxy, final-layer condition, all-layer JVP checks, standard many/medium/few reporting, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
+                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain, checkpoint-sweep, tail-quality, rank-proxy, final-layer condition, all-layer JVP checks, standard many/medium/few reporting, augmented recipe benchmark pilot, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
             },
             {
                 "section": "Boundary",
@@ -312,7 +327,7 @@ def main() -> None:
                 "priority": "partly complete; extend for stronger empirical paper",
                 "experiment": "Real long-tail benchmark",
                 "purpose": "Test whether matched-head-gain tail drift reduction appears beyond scikit-learn digits.",
-                "minimum_standard": "The CIFAR-100-LT IF=100 ResNet18 many/medium/few reporting baseline is now present; strengthen further with augmentation, class-balanced losses/samplers, tuned baselines, Muon comparisons, and ImageNet-LT/iNaturalist-style protocols.",
+                "minimum_standard": "The CIFAR-100-LT IF=100 ResNet18 many/medium/few reporting baseline and a 5-seed augmented AdamW/class-balanced/SGD pilot are now present; strengthen further with a wider hyperparameter grid, class-balanced samplers, Muon final-performance comparisons, and ImageNet-LT/iNaturalist-style protocols.",
             },
             {
                 "priority": "must-have for full empirical optimizer claim",
@@ -387,6 +402,7 @@ In long-tailed small-batch training, head-only updates can perturb held-out tail
 - [CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic](e11_cifar100_resnet_layer_jvp_tail_quality.md)
 - [CIFAR-100-LT ResNet18 all-layer JVP checkpoint-transfer benchmark](e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md)
 - [CIFAR-100-LT ResNet18 standard many/medium/few evaluation](e11_cifar100_resnet_lt_standard_eval.md)
+- [CIFAR-100-LT ResNet18 recipe benchmark pilot](e11_cifar100_resnet_lt_recipe_benchmark.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

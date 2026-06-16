@@ -1,0 +1,65 @@
+{
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "recipe_names": [
+    "adamw_aug_ce",
+    "adamw_aug_cb_loss",
+    "sgd_aug_ce"
+  ],
+  "baseline_recipe": "adamw_aug_ce",
+  "num_classes": 100,
+  "max_train_count": 500,
+  "imbalance_factor": 100.0,
+  "many_threshold": 100,
+  "medium_threshold": 20,
+  "train_steps": 5000,
+  "train_batch_size": 256,
+  "eval_interval": 1000,
+  "crop_padding": 4,
+  "hflip_probability": 0.5,
+  "class_balance_beta": 0.9999,
+  "dtype": "float32",
+  "device": "cuda",
+  "data_root": "data/torchvision",
+  "download": false,
+  "recipes": [
+    {
+      "name": "adamw_aug_ce",
+      "optimizer": "adamw",
+      "lr": 0.0003,
+      "weight_decay": 0.0001,
+      "momentum": 0.0,
+      "nesterov": false,
+      "class_balanced_loss": false,
+      "augmentation": true,
+      "cosine_lr": true
+    },
+    {
+      "name": "adamw_aug_cb_loss",
+      "optimizer": "adamw",
+      "lr": 0.0003,
+      "weight_decay": 0.0001,
+      "momentum": 0.0,
+      "nesterov": false,
+      "class_balanced_loss": true,
+      "augmentation": true,
+      "cosine_lr": true
+    },
+    {
+      "name": "sgd_aug_ce",
+      "optimizer": "sgd",
+      "lr": 0.1,
+      "weight_decay": 0.0005,
+      "momentum": 0.9,
+      "nesterov": true,
+      "class_balanced_loss": false,
+      "augmentation": true,
+      "cosine_lr": true
+    }
+  ]
+}

@@ -114,6 +114,12 @@ def main() -> None:
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
+    cifar_resnet_lt_recipe_benchmark = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_recipe_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -244,6 +250,18 @@ def main() -> None:
     cifar_resnet_lt_standard_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     cifar_resnet_lt_standard_few = cifar_resnet_lt_standard_eval.loc["few"]
     cifar_resnet_lt_standard_all = cifar_resnet_lt_standard_eval.loc["all"]
+    cifar_resnet_lt_recipe_adamw_aug_many = cifar_resnet_lt_recipe_benchmark.loc[("adamw_aug_ce", "many")]
+    cifar_resnet_lt_recipe_adamw_aug_medium = cifar_resnet_lt_recipe_benchmark.loc[("adamw_aug_ce", "medium")]
+    cifar_resnet_lt_recipe_adamw_aug_few = cifar_resnet_lt_recipe_benchmark.loc[("adamw_aug_ce", "few")]
+    cifar_resnet_lt_recipe_adamw_aug_all = cifar_resnet_lt_recipe_benchmark.loc[("adamw_aug_ce", "all")]
+    cifar_resnet_lt_recipe_cb_few = cifar_resnet_lt_recipe_benchmark.loc[("adamw_aug_cb_loss", "few")]
+    cifar_resnet_lt_recipe_sgd_many = cifar_resnet_lt_recipe_benchmark.loc[("sgd_aug_ce", "many")]
+    cifar_resnet_lt_recipe_sgd_medium = cifar_resnet_lt_recipe_benchmark.loc[("sgd_aug_ce", "medium")]
+    cifar_resnet_lt_recipe_sgd_few = cifar_resnet_lt_recipe_benchmark.loc[("sgd_aug_ce", "few")]
+    cifar_resnet_lt_recipe_sgd_all = cifar_resnet_lt_recipe_benchmark.loc[("sgd_aug_ce", "all")]
+    cifar_resnet_lt_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
+    cifar_resnet_lt_recipe_sgd_all_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "all")]
+    cifar_resnet_lt_recipe_cb_few_diff = cifar_resnet_lt_recipe_pairs.loc[("adamw_aug_cb_loss", "few")]
     cifar_resnet_practical_adam_polar_momentum = cifar_resnet_practical_bridge.loc[
         ("adamw_matrix_trajectory", "polar_momentum")
     ]
@@ -1051,6 +1069,129 @@ def main() -> None:
             cifar_resnet_lt_standard_all,
             "balanced_accuracy_ci95_low",
             "balanced_accuracy_ci95_high",
+        ),
+        "",
+        "% CIFAR-100-LT ResNet18 augmented recipe benchmark pilot",
+        macro("EelevenCifarResNetLtRecipeBenchmarkSeeds", int(cifar_resnet_lt_recipe_adamw_aug_all["seeds"])),
+        macro(
+            "EelevenCifarResNetLtRecipeAdamwAugManyBalancedAccuracy",
+            fmt(cifar_resnet_lt_recipe_adamw_aug_many["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeAdamwAugManyBalancedAccuracy",
+            cifar_resnet_lt_recipe_adamw_aug_many,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeAdamwAugMediumBalancedAccuracy",
+            fmt(cifar_resnet_lt_recipe_adamw_aug_medium["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeAdamwAugMediumBalancedAccuracy",
+            cifar_resnet_lt_recipe_adamw_aug_medium,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeAdamwAugFewBalancedAccuracy",
+            fmt(cifar_resnet_lt_recipe_adamw_aug_few["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeAdamwAugFewBalancedAccuracy",
+            cifar_resnet_lt_recipe_adamw_aug_few,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeAdamwAugAllBalancedAccuracy",
+            fmt(cifar_resnet_lt_recipe_adamw_aug_all["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeAdamwAugAllBalancedAccuracy",
+            cifar_resnet_lt_recipe_adamw_aug_all,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeCbFewBalancedAccuracy",
+            fmt(cifar_resnet_lt_recipe_cb_few["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeCbFewBalancedAccuracy",
+            cifar_resnet_lt_recipe_cb_few,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeSgdManyBalancedAccuracy",
+            fmt(cifar_resnet_lt_recipe_sgd_many["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeSgdManyBalancedAccuracy",
+            cifar_resnet_lt_recipe_sgd_many,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeSgdMediumBalancedAccuracy",
+            fmt(cifar_resnet_lt_recipe_sgd_medium["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeSgdMediumBalancedAccuracy",
+            cifar_resnet_lt_recipe_sgd_medium,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeSgdFewBalancedAccuracy",
+            fmt(cifar_resnet_lt_recipe_sgd_few["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeSgdFewBalancedAccuracy",
+            cifar_resnet_lt_recipe_sgd_few,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeSgdAllBalancedAccuracy",
+            fmt(cifar_resnet_lt_recipe_sgd_all["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeSgdAllBalancedAccuracy",
+            cifar_resnet_lt_recipe_sgd_all,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeSgdFewBalancedAccuracyDiff",
+            fmt(cifar_resnet_lt_recipe_sgd_few_diff["mean_balanced_accuracy_diff"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeSgdFewBalancedAccuracyDiff",
+            cifar_resnet_lt_recipe_sgd_few_diff,
+            "balanced_accuracy_diff_ci95_low",
+            "balanced_accuracy_diff_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeSgdAllBalancedAccuracyDiff",
+            fmt(cifar_resnet_lt_recipe_sgd_all_diff["mean_balanced_accuracy_diff"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeSgdAllBalancedAccuracyDiff",
+            cifar_resnet_lt_recipe_sgd_all_diff,
+            "balanced_accuracy_diff_ci95_low",
+            "balanced_accuracy_diff_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtRecipeCbFewBalancedAccuracyDiff",
+            fmt(cifar_resnet_lt_recipe_cb_few_diff["mean_balanced_accuracy_diff"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtRecipeCbFewBalancedAccuracyDiff",
+            cifar_resnet_lt_recipe_cb_few_diff,
+            "balanced_accuracy_diff_ci95_low",
+            "balanced_accuracy_diff_ci95_high",
         ),
         "",
         "% CIFAR-100-LT ResNet18 practical Muon trajectory bridge",

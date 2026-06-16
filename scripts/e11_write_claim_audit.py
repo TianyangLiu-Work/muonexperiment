@@ -49,6 +49,12 @@ def main() -> None:
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
+    cifar_resnet_lt_recipe = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_recipe_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
@@ -88,6 +94,10 @@ def main() -> None:
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
+    cifar_resnet_recipe_sgd_all = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "all")]
+    cifar_resnet_recipe_sgd_few = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "few")]
+    cifar_resnet_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
+    cifar_resnet_recipe_cb_few_diff = cifar_resnet_lt_recipe_pairs.loc[("adamw_aug_cb_loss", "few")]
 
     claim_status = pd.DataFrame(
         [
@@ -184,6 +194,25 @@ def main() -> None:
                     f"CI={ci(cifar_resnet_lt_few, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}."
                 ),
                 "main_loophole": "This is AdamW-only, no augmentation/tuning, and has no Muon comparison, so it should not be framed as a competitive long-tail benchmark.",
+            },
+            {
+                "claim": "The paper includes an augmented CIFAR-100-LT recipe benchmark pilot.",
+                "status": "supported as pilot benchmark context",
+                "evidence": (
+                    f"SGD-aug all balanced accuracy is "
+                    f"{fmt(cifar_resnet_recipe_sgd_all['mean_balanced_accuracy'])} "
+                    f"CI={ci(cifar_resnet_recipe_sgd_all, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"SGD-aug few balanced accuracy is "
+                    f"{fmt(cifar_resnet_recipe_sgd_few['mean_balanced_accuracy'])} "
+                    f"CI={ci(cifar_resnet_recipe_sgd_few, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"few diff vs AdamW-aug is "
+                    f"{fmt(cifar_resnet_recipe_sgd_few_diff['mean_balanced_accuracy_diff'])} "
+                    f"CI={ci(cifar_resnet_recipe_sgd_few_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')}. "
+                    f"Class-balanced AdamW few diff is "
+                    f"{fmt(cifar_resnet_recipe_cb_few_diff['mean_balanced_accuracy_diff'])} "
+                    f"CI={ci(cifar_resnet_recipe_cb_few_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')}."
+                ),
+                "main_loophole": "This is a 5-seed three-recipe pilot; it is not a full tuned benchmark, larger-dataset result, or Muon final-performance comparison.",
             },
             {
                 "claim": "The tail-drift reduction persists across a short head-only horizon.",
@@ -284,6 +313,11 @@ def main() -> None:
                 "role": "Standard IF=100 classification reporting baseline that separates final accuracy from local matched-head-gain drift claims.",
             },
             {
+                "table": "CIFAR-100-LT ResNet18 augmented recipe benchmark pilot",
+                "path": "results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv",
+                "role": "Augmented AdamW, class-balanced AdamW, and SGD-momentum many/medium/few final metrics.",
+            },
+            {
                 "table": "Long-tail Muon-style compatibility",
                 "path": "results/e11_long_tail_muon_bridge/pair_summary.csv",
                 "role": "Fixed-checkpoint compatibility check for polar(G_t), polar(M_t), and Newton-Schulz directions under matched head gain.",
@@ -326,7 +360,7 @@ The current data do **not** justify saying that this already proves better tail 
 
 ## Strongest Remaining Loopholes
 
-1. The CIFAR-100-LT ResNet evidence now includes a standard many/medium/few reporting baseline, but it is still not a modern long-tail optimizer benchmark because the baseline is not tuned and has no optimizer comparison.
+1. The CIFAR-100-LT ResNet evidence now includes a standard many/medium/few reporting baseline and an augmented recipe pilot, but it is still not a modern long-tail optimizer benchmark because Muon final-performance comparison, larger datasets, and a wider tuning grid are missing.
 2. The Muon-style compatibility evidence is local and small-scale; real long-tail practical Muon training remains unchecked.
 3. The all-layer ResNet JVP diagnostic addresses the classifier-only criticism locally, and the practical CIFAR-100-LT Muon/AdamW trajectory bridge is local rather than a final-performance benchmark.
 4. The current performance evidence is weaker than the function-drift evidence.

@@ -37,6 +37,7 @@ condition is
 | CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic | completed | At the tail-rich 5000-step checkpoint, 21 Conv/Linear weights and 210 paired layer/seed points give observed squared drift ratio `0.2011 [0.1845, 0.2192]` and scaled-JVP ratio `0.065 [0.06008, 0.07031]`; every per-layer observed CI upper endpoint is below 1. | This closes the classifier-only mechanism gap locally, but it is still a finite-difference one-step diagnostic rather than a standard long-tail optimizer benchmark or held-out predictor. |
 | CIFAR-100-LT ResNet18 all-layer JVP checkpoint transfer | completed | Across tail-rich 2000/5000/10000-step checkpoints, scaled-JVP below-one threshold accuracy is `1`, while held-out layer-risk Spearman is `-0.3203 [-0.3562, -0.2845]`. | This is useful negative evidence: the current local score transfers the below-one direction but is not a positive cross-checkpoint layer-risk predictor. |
 | CIFAR-100-LT ResNet18 standard many/medium/few reporting | completed | IF=100 AdamW ResNet18 gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]` over 10 seeds. | This is a standard reporting baseline, not a tuned optimizer benchmark, augmentation study, or Muon comparison. |
+| CIFAR-100-LT ResNet18 augmented recipe benchmark pilot | completed | With random crop/flip over 5 seeds, SGD-momentum reaches all/few balanced accuracy `0.4105 [0.4044, 0.4166]` and `0.1047 [0.09389, 0.1156]`; few diff vs augmented AdamW is `0.0194 [0.005581, 0.03322]`. | This is useful benchmark context, but it is only a three-recipe pilot and still lacks a tuned Muon final-performance comparison. |
 | Long-tailed digits Muon bridge diagnostic | completed | `polar(M_t)` still has lower matched-head-gain tail drift than Fro/GD: squared drift ratio `0.8199 [0.6951, 0.9672]`. | Newton-Schulz `NS(M_t)` is weaker: `0.9116 [0.7696, 1.080]`, so this is a local bridge, not a full practical-Muon training claim. |
 | Short practical-Muon trajectory bridge | completed | Across 120 sampled state-step comparisons, `polar(M_t)` and `NS(M_t)` both have lower matched-head-gain squared tail-example logit drift than Fro/GD: ratios `0.7292 [0.6891, 0.7717]` and `0.8019 [0.7583, 0.848]`. | This is still a short local diagnostic on sampled states; it does not establish final tail accuracy, long-horizon training behavior, or hyperparameter robustness. |
 | Practical imbalanced-training diagnostic | completed | On the same small long-tailed digits task, NS-Muon-style training has lower final train loss, lower final tail eval loss, and lower tail output drift than Adam at the chosen lightweight hyperparameters. | Tail accuracy does not improve; this is not a tuned optimizer leaderboard and still needs larger long-tail benchmarks. |
@@ -58,6 +59,7 @@ condition is
 - CIFAR-100-LT ResNet18 all-layer JVP tail-quality results: `results/e11_cifar100_resnet_layer_jvp_tail_quality/`.
 - CIFAR-100-LT ResNet18 all-layer JVP checkpoint-transfer results: `results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/`.
 - CIFAR-100-LT ResNet18 standard reporting results: `results/e11_cifar100_resnet_lt_standard_eval/`.
+- CIFAR-100-LT ResNet18 augmented recipe benchmark results: `results/e11_cifar100_resnet_lt_recipe_benchmark/`.
 - Muon bridge results: `results/e11_long_tail_muon_bridge/`.
 - Practical-Muon trajectory bridge results: `results/e11_long_tail_practical_muon_bridge/`.
 - Practical training results: `results/e11_long_tail_practical_training/`.
@@ -70,6 +72,7 @@ condition is
   - `discussion/e11_long_tail_one_step.md`
   - `discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md`
   - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
+  - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
   - `discussion/e11_long_tail_muon_bridge.md`
   - `discussion/e11_long_tail_practical_muon_bridge.md`
   - `discussion/e11_long_tail_practical_training.md`
@@ -102,16 +105,17 @@ condition is
 - Do not claim lower tail-example logit drift automatically implies lower tail loss,
   better tail margin, or higher tail accuracy.
 - Do not claim the new CIFAR-100-LT ResNet18 one-step diagnostic or standard
-  reporting baseline is sufficient for ImageNet-LT, iNaturalist, or a tuned
-  long-tail optimizer benchmark claim.
+  reporting baseline or augmented recipe pilot is sufficient for ImageNet-LT,
+  iNaturalist, or a tuned long-tail optimizer benchmark claim.
 - Do not claim the small fixed-hyperparameter practical run is a full Muon
   benchmark.
 
 ## Remaining Experiments for a Publishable Empirical Paper
 
 1. **Standard real long-tail benchmark.** A CIFAR-100-LT IF=100 ResNet18
-   many/medium/few reporting baseline now exists, but the paper still needs
-   augmentation, class-balanced methods/losses, tuned AdamW/SGD/Muon-style
+   many/medium/few reporting baseline and a 5-seed augmented
+   AdamW/class-balanced/SGD pilot now exist, but the paper still needs a wider
+   tuning grid, class-balanced samplers, tuned Muon-style final-performance
    baselines, and ImageNet-LT/iNaturalist-style protocols if it wants
    benchmark-level empirical claims. Required outputs: matched head loss
    decrease, tail-example logit drift, tail loss increase, tail margin drop,
@@ -136,6 +140,6 @@ condition is
 
 The current draft is viable as a focused theory-and-diagnostic paper about
 head-to-tail function drift, now with a CIFAR-100-LT ResNet18 architecture
-robustness check and a standard CIFAR-100-LT reporting baseline. It is not yet
-viable as a broad empirical claim about long-tailed classification performance
-or Muon's full training behavior.
+robustness check, a standard CIFAR-100-LT reporting baseline, and an augmented
+recipe benchmark pilot. It is not yet viable as a broad empirical claim about
+long-tailed classification performance or Muon's full training behavior.

@@ -39,6 +39,12 @@ def main() -> None:
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
+    cifar_resnet_lt_recipe = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_recipe_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     cifar_resnet_practical_bridge = pd.read_csv(
@@ -77,6 +83,10 @@ def main() -> None:
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
+    cifar_resnet_recipe_sgd_all = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "all")]
+    cifar_resnet_recipe_sgd_few = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "few")]
+    cifar_resnet_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
+    cifar_resnet_recipe_cb_few_diff = cifar_resnet_lt_recipe_pairs.loc[("adamw_aug_cb_loss", "few")]
     layer1 = layerwise.set_index("layer").loc[1]
     layer2 = layerwise.set_index("layer").loc[2]
     cifar_resnet_practical_adam_ns = cifar_resnet_practical_bridge.loc[
@@ -248,6 +258,33 @@ def main() -> None:
                 cifar_resnet_lt_few["balanced_accuracy_ci95_high"],
             )
             + " & IF=100 AdamW ResNet18 reporting baseline; no augmentation, tuning, or Muon comparison \\\\"
+        ),
+        (
+            "CIFAR-100-LT ResNet18 recipe pilot & SGD-aug all/few balanced acc. "
+            + ci(
+                cifar_resnet_recipe_sgd_all["mean_balanced_accuracy"],
+                cifar_resnet_recipe_sgd_all["balanced_accuracy_ci95_low"],
+                cifar_resnet_recipe_sgd_all["balanced_accuracy_ci95_high"],
+            )
+            + " / "
+            + ci(
+                cifar_resnet_recipe_sgd_few["mean_balanced_accuracy"],
+                cifar_resnet_recipe_sgd_few["balanced_accuracy_ci95_low"],
+                cifar_resnet_recipe_sgd_few["balanced_accuracy_ci95_high"],
+            )
+            + " & few diff vs AdamW-aug "
+            + ci(
+                cifar_resnet_recipe_sgd_few_diff["mean_balanced_accuracy_diff"],
+                cifar_resnet_recipe_sgd_few_diff["balanced_accuracy_diff_ci95_low"],
+                cifar_resnet_recipe_sgd_few_diff["balanced_accuracy_diff_ci95_high"],
+            )
+            + "; class-balanced AdamW few diff "
+            + ci(
+                cifar_resnet_recipe_cb_few_diff["mean_balanced_accuracy_diff"],
+                cifar_resnet_recipe_cb_few_diff["balanced_accuracy_diff_ci95_low"],
+                cifar_resnet_recipe_cb_few_diff["balanced_accuracy_diff_ci95_high"],
+            )
+            + " \\\\"
         ),
         (
             "CIFAR-100-LT ResNet18 practical Muon bridge & AdamW-state NS$(M_t)$ "

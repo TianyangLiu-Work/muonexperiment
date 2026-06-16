@@ -54,6 +54,12 @@ def main() -> None:
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
+    cifar_resnet_lt_recipe = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_recipe_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     cifar_resnet_practical_bridge = pd.read_csv(
         "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv"
     ).set_index(["state_source", "direction"])
@@ -76,6 +82,11 @@ def main() -> None:
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
+    cifar_resnet_recipe_adamw_all = cifar_resnet_lt_recipe.loc[("adamw_aug_ce", "all")]
+    cifar_resnet_recipe_sgd_all = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "all")]
+    cifar_resnet_recipe_sgd_few = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "few")]
+    cifar_resnet_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
+    cifar_resnet_recipe_cb_few_diff = cifar_resnet_lt_recipe_pairs.loc[("adamw_aug_cb_loss", "few")]
 
     evidence = pd.DataFrame(
         [
@@ -299,6 +310,28 @@ def main() -> None:
                 ),
                 "how_to_read": "This is the benchmark-style classification readout that separates local drift diagnostics from final long-tail accuracy reporting.",
                 "caveat": "It is an IF=100 AdamW reporting baseline without augmentation, tuned long-tail baselines, or a Muon optimizer comparison.",
+            },
+            {
+                "claim": "The CIFAR-100-LT ResNet18 reporting surface now has an augmented recipe benchmark pilot.",
+                "recommended_figure": link(
+                    "figures/e11_cifar100_resnet_lt_recipe_benchmark/cifar100_resnet_lt_recipe_benchmark.png"
+                ),
+                "source_data": link("results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv"),
+                "quantitative_anchor": (
+                    f"AdamW-aug all balanced accuracy="
+                    f"{fmt(cifar_resnet_recipe_adamw_all['mean_balanced_accuracy'])} "
+                    f"{ci(cifar_resnet_recipe_adamw_all, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"SGD-aug all={fmt(cifar_resnet_recipe_sgd_all['mean_balanced_accuracy'])} "
+                    f"{ci(cifar_resnet_recipe_sgd_all, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"SGD-aug few={fmt(cifar_resnet_recipe_sgd_few['mean_balanced_accuracy'])} "
+                    f"{ci(cifar_resnet_recipe_sgd_few, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"few diff vs AdamW-aug={fmt(cifar_resnet_recipe_sgd_few_diff['mean_balanced_accuracy_diff'])} "
+                    f"{ci(cifar_resnet_recipe_sgd_few_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')}; "
+                    f"class-balanced AdamW few diff={fmt(cifar_resnet_recipe_cb_few_diff['mean_balanced_accuracy_diff'])} "
+                    f"{ci(cifar_resnet_recipe_cb_few_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')}."
+                ),
+                "how_to_read": "This starts separating optimizer/recipe effects from the local drift diagnostic by adding augmentation and common baselines.",
+                "caveat": "It is a 5-seed pilot over three recipes, not a full hyperparameter sweep, larger-dataset benchmark, or Muon final-performance comparison.",
             },
             {
                 "claim": "The current evidence does not prove broad tail-accuracy or benchmark improvement.",

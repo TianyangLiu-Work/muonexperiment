@@ -104,6 +104,11 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_lt_standard_eval/group_metrics.csv",
     "results/e11_cifar100_resnet_lt_standard_eval/summary.csv",
     "results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv",
+    "results/e11_cifar100_resnet_lt_recipe_benchmark/train_trace.csv",
+    "results/e11_cifar100_resnet_lt_recipe_benchmark/class_metrics.csv",
+    "results/e11_cifar100_resnet_lt_recipe_benchmark/group_metrics.csv",
+    "results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv",
+    "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/paired_metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv",
@@ -191,6 +196,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md",
     "discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md",
     "discussion/e11_cifar100_resnet_lt_standard_eval.md",
+    "discussion/e11_cifar100_resnet_lt_recipe_benchmark.md",
     "discussion/e11_cifar100_resnet_practical_muon_bridge.md",
 )
 
@@ -234,6 +240,7 @@ MAIN_RESULT_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py",
     "scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py",
     "scripts/e11_run_cifar100_resnet_lt_standard_eval.py",
+    "scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py",
     "scripts/e11_run_cifar100_resnet_practical_muon_bridge.py",
     "scripts/e11_run_long_tail_imbalance_ablation.py",
     "scripts/e11_run_long_tail_checkpoint_sweep.py",
@@ -346,6 +353,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch",
         "produces": "results/e11_cifar100_resnet_lt_standard_eval/* and figures/e11_cifar100_resnet_lt_standard_eval/*",
         "paper_role": "Standard long-tail IF=100 ResNet18 reporting surface for many/medium/few balanced accuracy; not a tuned optimizer benchmark.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 recipe benchmark pilot",
+        "command": "sbatch scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch",
+        "produces": "results/e11_cifar100_resnet_lt_recipe_benchmark/* and figures/e11_cifar100_resnet_lt_recipe_benchmark/*",
+        "paper_role": "Augmented AdamW, class-balanced AdamW, and SGD-momentum CIFAR-100-LT ResNet18 recipe pilot for benchmark-style many/medium/few metrics.",
     },
     {
         "stage": "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",

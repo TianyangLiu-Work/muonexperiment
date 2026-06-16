@@ -33,6 +33,12 @@ def main() -> None:
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
+    cifar_resnet_lt_recipe = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv"
+    ).set_index(["recipe", "frequency_group"])
+    cifar_resnet_lt_recipe_pairs = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_recipe_benchmark/pair_summary.csv"
+    ).set_index(["recipe", "frequency_group"])
     practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
     layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
@@ -46,6 +52,9 @@ def main() -> None:
     resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
+    resnet_recipe_sgd_all = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "all")]
+    resnet_recipe_sgd_few = cifar_resnet_lt_recipe.loc[("sgd_aug_ce", "few")]
+    resnet_recipe_sgd_few_diff = cifar_resnet_lt_recipe_pairs.loc[("sgd_aug_ce", "few")]
 
     main_items = pd.DataFrame(
         [
@@ -182,6 +191,20 @@ def main() -> None:
                 ),
             },
             {"artifact": "discussion/e11_cifar100_resnet_lt_standard_eval.md", "role": "Markdown summary and CSV links for the standard long-tail classification reporting baseline."},
+            {
+                "artifact": "figures/e11_cifar100_resnet_lt_recipe_benchmark/cifar100_resnet_lt_recipe_benchmark.png",
+                "role": (
+                    "Appendix CIFAR-100-LT IF=100 ResNet18 augmented recipe pilot; "
+                    f"SGD-aug all/few balanced accuracies are {fmt(resnet_recipe_sgd_all['mean_balanced_accuracy'])} "
+                    f"{interval(resnet_recipe_sgd_all, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')} and "
+                    f"{fmt(resnet_recipe_sgd_few['mean_balanced_accuracy'])} "
+                    f"{interval(resnet_recipe_sgd_few, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}, "
+                    f"with few-group diff vs AdamW-aug {fmt(resnet_recipe_sgd_few_diff['mean_balanced_accuracy_diff'])} "
+                    f"{interval(resnet_recipe_sgd_few_diff, 'balanced_accuracy_diff_ci95_low', 'balanced_accuracy_diff_ci95_high')}; "
+                    "pilot benchmark context only."
+                ),
+            },
+            {"artifact": "discussion/e11_cifar100_resnet_lt_recipe_benchmark.md", "role": "Markdown summary and CSV links for the augmented recipe benchmark pilot."},
             {
                 "artifact": "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
                 "role": (
