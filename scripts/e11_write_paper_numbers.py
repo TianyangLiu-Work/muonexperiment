@@ -111,6 +111,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_lt_standard_eval = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
+    ).set_index("frequency_group")
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -237,6 +240,10 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_rank = cifar_resnet_layer_jvp_checkpoint_prediction_summary.loc[
         "source_gradient_nuclear_rank"
     ]
+    cifar_resnet_lt_standard_many = cifar_resnet_lt_standard_eval.loc["many"]
+    cifar_resnet_lt_standard_medium = cifar_resnet_lt_standard_eval.loc["medium"]
+    cifar_resnet_lt_standard_few = cifar_resnet_lt_standard_eval.loc["few"]
+    cifar_resnet_lt_standard_all = cifar_resnet_lt_standard_eval.loc["all"]
     cifar_resnet_practical_adam_polar_momentum = cifar_resnet_practical_bridge.loc[
         ("adamw_matrix_trajectory", "polar_momentum")
     ]
@@ -996,6 +1003,54 @@ def main() -> None:
             cifar_resnet_layer_jvp_checkpoint_rank,
             "spearman_ci95_low",
             "spearman_ci95_high",
+        ),
+        "",
+        "% CIFAR-100-LT ResNet18 standard many/medium/few reporting baseline",
+        macro("EelevenCifarResNetLtStandardEvalSeeds", int(cifar_resnet_lt_standard_all["seeds"])),
+        macro("EelevenCifarResNetLtStandardEvalClasses", int(cifar_resnet_lt_standard_all["classes"])),
+        macro("EelevenCifarResNetLtStandardEvalManyClasses", int(cifar_resnet_lt_standard_many["classes"])),
+        macro("EelevenCifarResNetLtStandardEvalMediumClasses", int(cifar_resnet_lt_standard_medium["classes"])),
+        macro("EelevenCifarResNetLtStandardEvalFewClasses", int(cifar_resnet_lt_standard_few["classes"])),
+        macro("EelevenCifarResNetLtStandardEvalImbalanceFactor", fmt(100.0)),
+        macro(
+            "EelevenCifarResNetLtStandardEvalManyBalancedAccuracy",
+            fmt(cifar_resnet_lt_standard_many["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtStandardEvalManyBalancedAccuracy",
+            cifar_resnet_lt_standard_many,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtStandardEvalMediumBalancedAccuracy",
+            fmt(cifar_resnet_lt_standard_medium["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtStandardEvalMediumBalancedAccuracy",
+            cifar_resnet_lt_standard_medium,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtStandardEvalFewBalancedAccuracy",
+            fmt(cifar_resnet_lt_standard_few["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtStandardEvalFewBalancedAccuracy",
+            cifar_resnet_lt_standard_few,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLtStandardEvalAllBalancedAccuracy",
+            fmt(cifar_resnet_lt_standard_all["mean_balanced_accuracy"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLtStandardEvalAllBalancedAccuracy",
+            cifar_resnet_lt_standard_all,
+            "balanced_accuracy_ci95_low",
+            "balanced_accuracy_ci95_high",
         ),
         "",
         "% CIFAR-100-LT ResNet18 practical Muon trajectory bridge",

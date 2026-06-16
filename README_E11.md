@@ -37,6 +37,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.sbatch
+sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_practical_muon_bridge.sbatch
 python3 scripts/e11_run_long_tail_imbalance_ablation.py
 python3 scripts/e11_run_long_tail_checkpoint_sweep.py
@@ -114,6 +115,7 @@ make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downs
 make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm
 make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm
 make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results # submit the all-layer ResNet JVP checkpoint-transfer benchmark via Slurm
+make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm
 make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practical Muon/AdamW trajectory bridge via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
@@ -133,6 +135,7 @@ make e11-cifar-resnet-fc-condition-results
 make e11-cifar-resnet-tail-quality-results
 make e11-cifar-resnet-layer-jvp-tail-quality-results
 make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results
+make e11-cifar-resnet-lt-standard-eval-results
 make e11-cifar-resnet-practical-muon-bridge-results
 ```
 
@@ -170,6 +173,13 @@ checkpoint layer scores predict held-out checkpoint observed layer drift. The
 current result is a useful boundary condition: scaled-JVP preserves the
 below-one threshold direction across checkpoints, but layer-risk ranking does
 not transfer.
+
+The standard long-tail reporting target submits
+`scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
+`scripts/e11_run_cifar100_resnet_lt_standard_eval.py` on an exponential
+CIFAR-100-LT split with imbalance factor 100. It trains an AdamW ResNet18 and
+reports many/medium/few balanced accuracy. This is a reporting baseline, not a
+tuned benchmark, augmentation study, or Muon comparison.
 
 The ResNet practical Muon bridge target submits
 `scripts/slurm/e11_cifar100_resnet_practical_muon_bridge.sbatch`, which runs
@@ -212,6 +222,7 @@ Paper-facing synthesis:
 - `discussion/e11_cifar100_resnet_tail_quality_control.md`
 - `discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md`
 - `discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md`
+- `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_practical_muon_bridge.md`
 - `discussion/e11_long_tail_imbalance_ablation.md`
 - `discussion/e11_long_tail_checkpoint_sweep.md`
@@ -260,6 +271,8 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv`
 - `results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/checkpoint_summary.csv`
 - `results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv`
+- `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
+- `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
 - `results/e11_cifar100_resnet_practical_muon_bridge/summary.csv`
 - `results/e11_long_tail_imbalance_ablation/summary.csv`
 - `results/e11_long_tail_checkpoint_sweep/summary.csv`
@@ -288,6 +301,7 @@ Primary paper figures:
 - `figures/e11_cifar100_resnet_tail_quality_control/cifar100_resnet_checkpoint_sweep.png`
 - `figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png`
 - `figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png`
+- `figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png`
 - `figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png`
 - `figures/e11_long_tail_imbalance_ablation/long_tail_imbalance_ablation.png`
 - `figures/e11_long_tail_checkpoint_sweep/long_tail_checkpoint_sweep.png`
@@ -322,6 +336,7 @@ Primary paper figures:
    - A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]` and still keeps the worst squared drift ratio below 1, about `0.7292 [0.6923, 0.768]`.
    - An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points; observed squared drift ratio is about `0.2011 [0.1845, 0.2192]`, scaled-JVP ratio is about `0.065 [0.06008, 0.07031]`, and every per-layer observed CI upper endpoint is below 1.
    - An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs; the scaled-JVP predictor has below-one threshold accuracy `1` but held-out layer-risk Spearman about `-0.3203 [-0.3562, -0.2845]`, so the current score is not yet a positive layer-ranking predictor.
+   - A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`. This supplies a standard classification reporting surface, not a tuned benchmark or Muon comparison.
    - A ResNet practical Muon trajectory bridge from the same tail-rich checkpoint gives `NS(M_t)` squared drift ratio about `0.8628 [0.8154, 0.913]` on AdamW-sampled states and `0.7247 [0.676, 0.777]` on NS-Muon-sampled states.
    - In the default ResNet diagnostic, tail-loss increase diff spectral-minus-Fro is about `-0.000421 [-0.000592, -0.000249]`; tail-accuracy-drop diff still crosses zero, so this remains a local drift/loss diagnostic rather than an accuracy claim.
 4. The 8-step head-only forgetting diagnostic shows lower measured tail drift across the short horizon.
@@ -377,6 +392,7 @@ Do not claim:
 - `scripts/e11_run_cifar100_resnet_fc_condition_scatter.py`: final-layer downstream-aware condition diagnostic for `fc.weight` on ResNet18 checkpoints.
 - `scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py`: all-layer ResNet finite-difference JVP diagnostic at the tail-rich checkpoint.
 - `scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py`: all-layer ResNet JVP checkpoint-transfer benchmark across tail-rich checkpoints.
+- `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_practical_muon_bridge.py`: ResNet practical Muon/AdamW trajectory-state bridge from the tail-rich checkpoint.
 - `scripts/slurm/e11_cifar100_resnet_one_step.sbatch`: GPU/Slurm submission wrapper for the ResNet18 diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch`: GPU/Slurm submission wrapper for the smaller-head-gain ResNet18 check.
@@ -385,6 +401,7 @@ Do not claim:
 - `scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch`: GPU/Slurm submission wrapper for the tail-rich checkpoint-quality control.
 - `scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch`: GPU/Slurm submission wrapper for the all-layer ResNet JVP tail-quality diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.sbatch`: GPU/Slurm submission wrapper for the all-layer ResNet JVP checkpoint-transfer benchmark.
+- `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`: GPU/Slurm submission wrapper for the standard CIFAR-100-LT ResNet18 reporting baseline.
 - `scripts/e11_write_*.py`: generated discussion and paper-facing artifacts.
 - `tests/`: smoke and diagnostic tests.
 
@@ -394,7 +411,7 @@ The current evidence is consistent with a focused local-geometry paper. It is no
 
 Most important next steps:
 
-1. Add a stronger real long-tail dataset or standard benchmark protocol; the tail-rich ResNet control addresses the weak-tail-function objection, but it is not a tuned long-tail benchmark.
+1. Extend the new standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline into a tuned benchmark protocol with augmentation, class-balanced methods/losses, Muon comparisons, and larger long-tail datasets; the current baseline is AdamW-only reporting, not a competitive optimizer result.
 2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run is complete, but the current score has negative layer-risk ranking transfer, so the next version needs a stronger downstream-aware condition and held-out architecture or dataset splits.
 3. Extend the current fixed-checkpoint, short-trajectory, and small practical-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.

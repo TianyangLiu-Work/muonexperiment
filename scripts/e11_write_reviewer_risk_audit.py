@@ -39,6 +39,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
     )
+    cifar_resnet_lt_standard_eval = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
+    ).set_index("frequency_group")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -80,6 +83,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
     )
+    cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
+    cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
+    cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
     layer_1 = layerwise[layerwise["layer"].eq(1)].iloc[0]
     layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
 
@@ -122,10 +128,14 @@ def main() -> None:
                     f"higher tail margin diff={fmt(practical_training['mean_final_tail_eval_margin_diff_muon_minus_adam'])} "
                     f"CI={interval(practical_training, 'final_tail_eval_margin_diff_ci95_low', 'final_tail_eval_margin_diff_ci95_high')}, "
                     f"but tail accuracy diff={fmt(practical_training['mean_final_tail_eval_accuracy_diff_muon_minus_adam'])} "
-                    f"CI={interval(practical_training, 'final_tail_eval_accuracy_diff_ci95_low', 'final_tail_eval_accuracy_diff_ci95_high')}."
+                    f"CI={interval(practical_training, 'final_tail_eval_accuracy_diff_ci95_low', 'final_tail_eval_accuracy_diff_ci95_high')}. "
+                    f"The standard CIFAR-100-LT ResNet18 reporting baseline gives many/medium/few balanced accuracy "
+                    f"{fmt(cifar_resnet_lt_many['mean_balanced_accuracy'])}/"
+                    f"{fmt(cifar_resnet_lt_medium['mean_balanced_accuracy'])}/"
+                    f"{fmt(cifar_resnet_lt_few['mean_balanced_accuracy'])}."
                 ),
-                "safe_response": "Make function drift the main measured quantity; use the tail-rich ResNet control to address the weak-tail-function objection, while keeping practical tail-loss/margin evidence separate from tail accuracy.",
-                "remaining_work": "Run retuned long-horizon benchmarks before making performance claims.",
+                "safe_response": "Make function drift the main measured quantity; use the tail-rich ResNet control and standard reporting baseline to address measurement-surface objections, while keeping practical tail-loss/margin evidence separate from tail accuracy.",
+                "remaining_work": "Run retuned long-horizon optimizer benchmarks before making performance claims.",
             },
             {
                 "reviewer_objection": "The theory is local and uses a matched-head-gain protocol rather than a real optimizer schedule.",
@@ -207,9 +217,13 @@ def main() -> None:
                     f"and worst drift ratio={fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
                     f"The all-layer JVP diagnostic adds observed ratio="
                     f"{fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])} "
-                    f"over {int(cifar_resnet_layer_jvp['paired_points'])} layer/seed pairs."
+                    f"over {int(cifar_resnet_layer_jvp['paired_points'])} layer/seed pairs. "
+                    f"The standard IF=100 ResNet18 reporting run adds final many/medium/few balanced accuracy "
+                    f"{fmt(cifar_resnet_lt_many['mean_balanced_accuracy'])}/"
+                    f"{fmt(cifar_resnet_lt_medium['mean_balanced_accuracy'])}/"
+                    f"{fmt(cifar_resnet_lt_few['mean_balanced_accuracy'])}."
                 ),
-                "safe_response": "Present the manuscript as a theory-and-diagnostic mechanism paper with architecture and tail-quality controls, not a full long-tail benchmark paper.",
+                "safe_response": "Present the manuscript as a theory-and-diagnostic mechanism paper with architecture, tail-quality, and standard reporting controls, not a tuned long-tail optimizer benchmark paper.",
                 "remaining_work": "Add ImageNet-LT or iNaturalist-style matched-head-gain diagnostics and long-horizon practical baselines before claiming benchmark-level generality.",
             },
             {
@@ -247,7 +261,7 @@ def main() -> None:
             {
                 "claim": "The paper is a full long-tail classification benchmark.",
                 "decision": "do not claim",
-                "reason": "The CIFAR-100-LT ResNet run is still a local one-step diagnostic, not a tuned long-horizon benchmark.",
+                "reason": "The CIFAR-100-LT ResNet standard run is a reporting baseline, not an augmented, tuned, multi-optimizer long-horizon benchmark.",
             },
         ]
     )
@@ -288,6 +302,7 @@ This generated audit lists likely reviewer objections for the current head-to-ta
 - [CIFAR-100-LT ResNet18 final-layer condition scatter](e11_cifar100_resnet_fc_condition_scatter.md)
 - [CIFAR-100 ResNet18 tail-quality control](e11_cifar100_resnet_tail_quality_control.md)
 - [CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic](e11_cifar100_resnet_layer_jvp_tail_quality.md)
+- [CIFAR-100-LT ResNet18 standard many/medium/few evaluation](e11_cifar100_resnet_lt_standard_eval.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

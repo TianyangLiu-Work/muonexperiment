@@ -36,6 +36,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_lt_standard_eval = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
+    ).set_index("frequency_group")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     cifar_resnet_practical_bridge = pd.read_csv(
@@ -71,6 +74,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
         "source_scaled_jvp_ratio"
     ]
+    cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
+    cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
+    cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
     layer1 = layerwise.set_index("layer").loc[1]
     layer2 = layerwise.set_index("layer").loc[2]
     cifar_resnet_practical_adam_ns = cifar_resnet_practical_bridge.loc[
@@ -221,6 +227,27 @@ def main() -> None:
             + " & "
             + fmt(cifar_resnet_layer_jvp_checkpoint_scaled["checkpoint_transfer_pairs"])
             + " directed checkpoint-transfer pairs; layer ranking does not transfer \\\\"
+        ),
+        (
+            "CIFAR-100-LT ResNet18 standard reporting & many/medium/few balanced acc. "
+            + ci(
+                cifar_resnet_lt_many["mean_balanced_accuracy"],
+                cifar_resnet_lt_many["balanced_accuracy_ci95_low"],
+                cifar_resnet_lt_many["balanced_accuracy_ci95_high"],
+            )
+            + " / "
+            + ci(
+                cifar_resnet_lt_medium["mean_balanced_accuracy"],
+                cifar_resnet_lt_medium["balanced_accuracy_ci95_low"],
+                cifar_resnet_lt_medium["balanced_accuracy_ci95_high"],
+            )
+            + " / "
+            + ci(
+                cifar_resnet_lt_few["mean_balanced_accuracy"],
+                cifar_resnet_lt_few["balanced_accuracy_ci95_low"],
+                cifar_resnet_lt_few["balanced_accuracy_ci95_high"],
+            )
+            + " & IF=100 AdamW ResNet18 reporting baseline; no augmentation, tuning, or Muon comparison \\\\"
         ),
         (
             "CIFAR-100-LT ResNet18 practical Muon bridge & AdamW-state NS$(M_t)$ "

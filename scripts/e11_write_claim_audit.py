@@ -46,6 +46,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
     )
+    cifar_resnet_lt_standard_eval = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
+    ).set_index("frequency_group")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
@@ -82,6 +85,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_supported_layers = int(
         (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
     )
+    cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
+    cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
+    cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
 
     claim_status = pd.DataFrame(
         [
@@ -164,6 +170,20 @@ def main() -> None:
                     f"evidence for preserving a high-quality tail predictor."
                 ),
                 "main_loophole": "One-step tail-loss improvement in the ResNet diagnostic is encouraging but still not a retuned long-horizon classification result.",
+            },
+            {
+                "claim": "The paper includes a standard CIFAR-100-LT many/medium/few reporting surface.",
+                "status": "supported as reporting baseline, not optimizer benchmark",
+                "evidence": (
+                    f"IF=100 AdamW ResNet18 many/medium/few balanced accuracy is "
+                    f"{fmt(cifar_resnet_lt_many['mean_balanced_accuracy'])} "
+                    f"CI={ci(cifar_resnet_lt_many, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"{fmt(cifar_resnet_lt_medium['mean_balanced_accuracy'])} "
+                    f"CI={ci(cifar_resnet_lt_medium, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"{fmt(cifar_resnet_lt_few['mean_balanced_accuracy'])} "
+                    f"CI={ci(cifar_resnet_lt_few, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}."
+                ),
+                "main_loophole": "This is AdamW-only, no augmentation/tuning, and has no Muon comparison, so it should not be framed as a competitive long-tail benchmark.",
             },
             {
                 "claim": "The tail-drift reduction persists across a short head-only horizon.",
@@ -259,6 +279,11 @@ def main() -> None:
                 "role": "All Conv/Linear layer finite-difference JVP, scaled-JVP, and observed drift decomposition at the tail-rich checkpoint.",
             },
             {
+                "table": "CIFAR-100-LT ResNet18 standard many/medium/few reporting",
+                "path": "results/e11_cifar100_resnet_lt_standard_eval/summary.csv",
+                "role": "Standard IF=100 classification reporting baseline that separates final accuracy from local matched-head-gain drift claims.",
+            },
+            {
                 "table": "Long-tail Muon-style compatibility",
                 "path": "results/e11_long_tail_muon_bridge/pair_summary.csv",
                 "role": "Fixed-checkpoint compatibility check for polar(G_t), polar(M_t), and Newton-Schulz directions under matched head gain.",
@@ -301,9 +326,9 @@ The current data do **not** justify saying that this already proves better tail 
 
 ## Strongest Remaining Loopholes
 
-1. The CIFAR-100-LT ResNet evidence is still local diagnostics plus a tail-rich control; it is not a modern long-tail optimizer benchmark.
+1. The CIFAR-100-LT ResNet evidence now includes a standard many/medium/few reporting baseline, but it is still not a modern long-tail optimizer benchmark because the baseline is not tuned and has no optimizer comparison.
 2. The Muon-style compatibility evidence is local and small-scale; real long-tail practical Muon training remains unchecked.
-3. The all-layer ResNet JVP diagnostic addresses the classifier-only criticism locally, but practical CIFAR-100-LT Muon/AdamW trajectory diagnostics remain missing.
+3. The all-layer ResNet JVP diagnostic addresses the classifier-only criticism locally, and the practical CIFAR-100-LT Muon/AdamW trajectory bridge is local rather than a final-performance benchmark.
 4. The current performance evidence is weaker than the function-drift evidence.
 5. The detailed layerwise JVP mechanism has only been checked in the current small MLP.
 """

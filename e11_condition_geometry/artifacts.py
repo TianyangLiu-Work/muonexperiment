@@ -99,6 +99,11 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/checkpoint_summary.csv",
     "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_pairs.csv",
     "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv",
+    "results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv",
+    "results/e11_cifar100_resnet_lt_standard_eval/class_metrics.csv",
+    "results/e11_cifar100_resnet_lt_standard_eval/group_metrics.csv",
+    "results/e11_cifar100_resnet_lt_standard_eval/summary.csv",
+    "results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/paired_metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv",
@@ -185,6 +190,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_resnet_tail_quality_control.md",
     "discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md",
     "discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md",
+    "discussion/e11_cifar100_resnet_lt_standard_eval.md",
     "discussion/e11_cifar100_resnet_practical_muon_bridge.md",
 )
 
@@ -227,6 +233,7 @@ MAIN_RESULT_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_run_cifar100_resnet_fc_condition_scatter.py",
     "scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py",
     "scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py",
+    "scripts/e11_run_cifar100_resnet_lt_standard_eval.py",
     "scripts/e11_run_cifar100_resnet_practical_muon_bridge.py",
     "scripts/e11_run_long_tail_imbalance_ablation.py",
     "scripts/e11_run_long_tail_checkpoint_sweep.py",
@@ -333,6 +340,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.sbatch",
         "produces": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/* and figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/*",
         "paper_role": "Held-out checkpoint-transfer boundary check for whether all-layer downstream-aware JVP quantities predict observed layer risk across tail-rich ResNet checkpoints.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 standard many/medium/few reporting baseline",
+        "command": "sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch",
+        "produces": "results/e11_cifar100_resnet_lt_standard_eval/* and figures/e11_cifar100_resnet_lt_standard_eval/*",
+        "paper_role": "Standard long-tail IF=100 ResNet18 reporting surface for many/medium/few balanced accuracy; not a tuned optimizer benchmark.",
     },
     {
         "stage": "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",

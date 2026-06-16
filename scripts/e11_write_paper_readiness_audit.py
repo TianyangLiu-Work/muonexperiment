@@ -49,6 +49,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_lt_standard_eval = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
+    ).set_index("frequency_group")
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -103,6 +106,9 @@ def main() -> None:
     cifar_resnet_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
         "source_unit_jvp_ratio"
     ]
+    cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
+    cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
+    cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
 
     claim_status = pd.DataFrame(
         [
@@ -142,10 +148,14 @@ def main() -> None:
                     f"{fmt(cifar_resnet_jvp_checkpoint_scaled['mean_threshold_below_one_accuracy'])}, "
                     f"but its held-out layer-risk Spearman is "
                     f"{fmt(cifar_resnet_jvp_checkpoint_scaled['mean_spearman_log_predictor_vs_log_target_observed'])} "
-                    f"CI={interval(cifar_resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}."
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}. "
+                    f"The standard CIFAR-100-LT ResNet18 reporting baseline gives many/medium/few balanced accuracy "
+                    f"{fmt(cifar_resnet_lt_many['mean_balanced_accuracy'])}/"
+                    f"{fmt(cifar_resnet_lt_medium['mean_balanced_accuracy'])}/"
+                    f"{fmt(cifar_resnet_lt_few['mean_balanced_accuracy'])}."
                 ),
                 "why_it_is_ready": "It is measured under the paper's matched-head-gain protocol with paired confidence intervals and explicit norm-specific scaling readouts.",
-                "remaining_risk": "The tail-rich control weakens the weak-tail-predictor objection, but the checkpoint-transfer result shows that the current local JVP score is not yet a held-out layer-ranking predictor.",
+                "remaining_risk": "The standard reporting baseline separates local drift from final accuracy, but it is AdamW-only and not a tuned optimizer comparison. The checkpoint-transfer result shows that the current local JVP score is not yet a held-out layer-ranking predictor.",
             },
             {
                 "claim": "The matched-head-gain drift readout survives a more appropriate CIFAR-100-LT ResNet architecture.",
@@ -169,7 +179,7 @@ def main() -> None:
                     f"all-layer JVP observed ratio={fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])}."
                 ),
                 "why_it_is_ready": "It was rerun on GPU with a convolutional architecture, a CIFAR-100-LT split, two target gains, a warmup-checkpoint sweep, and a tail-rich checkpoint-quality control.",
-                "remaining_risk": "Still a one-step local intervention; BatchNorm/bias are frozen during the diagnostic, and the tail-rich control is not a standard long-tailed training benchmark.",
+                "remaining_risk": "Still a one-step local intervention; BatchNorm/bias are frozen during the diagnostic. The new standard many/medium/few run is a reporting baseline, not a tuned long-tailed optimizer benchmark.",
             },
             {
                 "claim": "The condition nrank(G_H) > ssrank(B_T,A_T) is a useful mechanism boundary.",
@@ -287,7 +297,7 @@ def main() -> None:
             },
             {
                 "section": "Evidence",
-                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain, checkpoint-sweep, tail-quality, rank-proxy, final-layer condition, and all-layer JVP checks, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
+                "content": "Synthetic boundary, one-step digits, CIFAR-100-LT ResNet18 with smaller-head-gain, checkpoint-sweep, tail-quality, rank-proxy, final-layer condition, all-layer JVP checks, standard many/medium/few reporting, fixed-checkpoint and trajectory Muon-style compatibility checks, small practical training, 8-step forgetting, and layerwise JVP diagnostics support the drift mechanism and its scope.",
             },
             {
                 "section": "Boundary",
@@ -302,7 +312,7 @@ def main() -> None:
                 "priority": "partly complete; extend for stronger empirical paper",
                 "experiment": "Real long-tail benchmark",
                 "purpose": "Test whether matched-head-gain tail drift reduction appears beyond scikit-learn digits.",
-                "minimum_standard": "The tail-rich ResNet control now weakens the weak-tail-predictor objection; strengthen further with standard CIFAR-100-LT/ImageNet-LT/iNaturalist-style protocols, class-wise metrics, and tuned baselines.",
+                "minimum_standard": "The CIFAR-100-LT IF=100 ResNet18 many/medium/few reporting baseline is now present; strengthen further with augmentation, class-balanced losses/samplers, tuned baselines, Muon comparisons, and ImageNet-LT/iNaturalist-style protocols.",
             },
             {
                 "priority": "must-have for full empirical optimizer claim",
@@ -376,6 +386,7 @@ In long-tailed small-batch training, head-only updates can perturb held-out tail
 - [CIFAR-100 ResNet18 tail-quality control](e11_cifar100_resnet_tail_quality_control.md)
 - [CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic](e11_cifar100_resnet_layer_jvp_tail_quality.md)
 - [CIFAR-100-LT ResNet18 all-layer JVP checkpoint-transfer benchmark](e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md)
+- [CIFAR-100-LT ResNet18 standard many/medium/few evaluation](e11_cifar100_resnet_lt_standard_eval.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

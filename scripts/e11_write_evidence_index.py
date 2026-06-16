@@ -51,6 +51,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_lt_standard_eval = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
+    ).set_index("frequency_group")
     cifar_resnet_practical_bridge = pd.read_csv(
         "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv"
     ).set_index(["state_source", "direction"])
@@ -70,6 +73,9 @@ def main() -> None:
     resnet_muon_ns = cifar_resnet_practical_bridge.loc[("ns_muon_matrix_trajectory", "ns_momentum")]
     resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_scaled_jvp_ratio"]
     resnet_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_unit_jvp_ratio"]
+    cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
+    cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
+    cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
 
     evidence = pd.DataFrame(
         [
@@ -275,6 +281,24 @@ def main() -> None:
                 ),
                 "how_to_read": "The all-checkpoint directional below-one result transfers, but layer-risk ranking across checkpoints does not.",
                 "caveat": "This is a useful negative transfer result: the current downstream-aware JVP readout is not yet a held-out layer-risk predictor.",
+            },
+            {
+                "claim": "The current paper now has a standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.",
+                "recommended_figure": link(
+                    "figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png"
+                ),
+                "source_data": link("results/e11_cifar100_resnet_lt_standard_eval/summary.csv"),
+                "quantitative_anchor": (
+                    f"many balanced accuracy="
+                    f"{fmt(cifar_resnet_lt_many['mean_balanced_accuracy'])} "
+                    f"{ci(cifar_resnet_lt_many, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"medium={fmt(cifar_resnet_lt_medium['mean_balanced_accuracy'])} "
+                    f"{ci(cifar_resnet_lt_medium, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    f"few={fmt(cifar_resnet_lt_few['mean_balanced_accuracy'])} "
+                    f"{ci(cifar_resnet_lt_few, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}."
+                ),
+                "how_to_read": "This is the benchmark-style classification readout that separates local drift diagnostics from final long-tail accuracy reporting.",
+                "caveat": "It is an IF=100 AdamW reporting baseline without augmentation, tuned long-tail baselines, or a Muon optimizer comparison.",
             },
             {
                 "claim": "The current evidence does not prove broad tail-accuracy or benchmark improvement.",

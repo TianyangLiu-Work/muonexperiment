@@ -30,6 +30,9 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_lt_standard_eval = pd.read_csv(
+        "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
+    ).set_index("frequency_group")
     practical_training = pd.read_csv("results/e11_long_tail_practical_training/summary.csv").iloc[0]
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
     layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
@@ -40,6 +43,9 @@ def main() -> None:
     resnet_adam_ns = cifar_resnet_practical_bridge.loc[("adamw_matrix_trajectory", "ns_momentum")]
     resnet_muon_ns = cifar_resnet_practical_bridge.loc[("ns_muon_matrix_trajectory", "ns_momentum")]
     resnet_jvp_checkpoint_scaled = cifar_resnet_layer_jvp_checkpoint_prediction.loc["source_scaled_jvp_ratio"]
+    resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
+    resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
+    resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
 
     main_items = pd.DataFrame(
         [
@@ -162,6 +168,20 @@ def main() -> None:
                 ),
             },
             {"artifact": "discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md", "role": "Markdown summary and CSV links for the held-out checkpoint-transfer JVP benchmark."},
+            {
+                "artifact": "figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png",
+                "role": (
+                    "Appendix standard CIFAR-100-LT IF=100 ResNet18 many/medium/few reporting baseline; "
+                    f"balanced accuracies are {fmt(resnet_lt_many['mean_balanced_accuracy'])} "
+                    f"{interval(resnet_lt_many, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}, "
+                    f"{fmt(resnet_lt_medium['mean_balanced_accuracy'])} "
+                    f"{interval(resnet_lt_medium, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}, and "
+                    f"{fmt(resnet_lt_few['mean_balanced_accuracy'])} "
+                    f"{interval(resnet_lt_few, 'balanced_accuracy_ci95_low', 'balanced_accuracy_ci95_high')}; "
+                    "not a tuned optimizer benchmark."
+                ),
+            },
+            {"artifact": "discussion/e11_cifar100_resnet_lt_standard_eval.md", "role": "Markdown summary and CSV links for the standard long-tail classification reporting baseline."},
             {
                 "artifact": "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
                 "role": (

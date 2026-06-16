@@ -21,6 +21,7 @@ reduce tail-example function drift at matched head gain.
 | Tail-quality control | A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy `0.3739 [0.3454, 0.4024]`; worst squared drift ratio remains `0.7292 [0.6923, 0.768]`. | partial |
 | All-layer downstream-aware ResNet condition scatter | The tail-rich ResNet all-layer finite-difference JVP diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points; observed squared drift ratio is `0.2011 [0.1845, 0.2192]`, scaled-JVP ratio is `0.065 [0.06008, 0.07031]`, and all per-layer observed CI upper endpoints are below 1. | partial |
 | Held-out checkpoint-transfer JVP benchmark | Across tail-rich 2000/5000/10000-step ResNet checkpoints, scaled-JVP below-one threshold accuracy is `1`, but held-out layer-risk Spearman is `-0.3203 [-0.3562, -0.2845]`. | boundary/negative |
+| Standard long-tail reporting baseline | CIFAR-100-LT IF=100 AdamW ResNet18 over 10 seeds gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`. | reporting baseline |
 | Practical Muon bridge on CIFAR-100-LT ResNet18 | From the same tail-rich checkpoint, AdamW-sampled states give NS(M_t) squared drift ratio `0.8628 [0.8154, 0.913]`; NS-Muon-sampled states give `0.7247 [0.676, 0.777]` over 30 comparisons per state source. | partial |
 | Claim boundary | Tail accuracy remains inconclusive; paper explicitly avoids performance claims. | keep |
 
@@ -28,7 +29,7 @@ reduce tail-example function drift at matched head gain.
 
 | priority | missing piece | minimum acceptable gate | why it matters |
 |---|---|---|---|
-| P0 | Standard long-tail benchmark protocol | The tail-rich control and all-layer JVP diagnostic address the weakest local-mechanism objections, but they are not tuned CIFAR-100-LT/ImageNet-LT/iNaturalist benchmarks with many/medium/few reporting. | Reviewers will still object if the paper implies benchmark-level optimizer performance. |
+| P0 | Standard long-tail benchmark protocol | A first CIFAR-100-LT IF=100 ResNet18 many/medium/few reporting baseline is complete. The remaining gate is an augmented, tuned, multi-optimizer benchmark on CIFAR-100-LT plus ImageNet-LT/iNaturalist-style protocols if the paper wants benchmark-level performance claims. | Reviewers will still object if the paper implies optimizer-performance superiority from the current AdamW-only reporting baseline. |
 | P0 | Predictive downstream-aware condition benchmark | A first held-out checkpoint-transfer benchmark is complete and negative for layer-risk ranking: scaled-JVP preserves the below-one threshold direction but does not predict cross-checkpoint layer ordering. The next gate is a stronger downstream-aware condition score plus held-out architecture/dataset splits. | The theorem must look predictive beyond the synthetic construction and beyond one ResNet checkpoint family. |
 | P1 | Long-tail imbalance sweep | CIFAR-100-LT imbalance factors or explicit tail-count settings with at least 3 seeds each; keep paired matched-gain diagnostics. | Converts one dataset split into a systematic long-tail experiment. |
 | P1 | Practical optimizer bridge on CIFAR-100-LT | Completed as a local trajectory-state bridge; the remaining gate is final class-wise metrics under tuned practical training if the paper wants optimizer-performance discussion. | Bridges ideal polar directions to practical Muon without claiming final SOTA. |
@@ -53,8 +54,8 @@ reduce tail-example function drift at matched head gain.
 - All headline numbers are generated from CSVs and LaTeX macros, not hand typed.
 - `scripts/e11_validate_outputs.py` checks the ResNet 10-seed, rho=0.002,
   checkpoint-sweep, rank-proxy, final-layer condition, tail-quality,
-  all-layer JVP tail-quality, checkpoint-transfer JVP, and practical Muon
-  trajectory-bridge artifacts.
+  all-layer JVP tail-quality, checkpoint-transfer JVP, standard
+  many/medium/few reporting, and practical Muon trajectory-bridge artifacts.
 - The paper states one main claim in the abstract and conclusion: local
   matched-head-gain drift, not final accuracy.
 - Every ResNet result includes seed count, target gain, checkpoint quality, and
@@ -65,10 +66,10 @@ reduce tail-example function drift at matched head gain.
 ## Next Implementation Step
 
 The ResNet checkpoint-quality sweep, final-layer condition scatter,
-tail-quality control, all-layer JVP tail-quality diagnostic, and practical
-Muon/AdamW trajectory bridge have been run. The first checkpoint-transfer JVP
-benchmark has also been run and is a boundary result rather than a positive
-predictor.
+tail-quality control, all-layer JVP tail-quality diagnostic, standard
+CIFAR-100-LT reporting baseline, and practical Muon/AdamW trajectory bridge
+have been run. The first checkpoint-transfer JVP benchmark has also been run
+and is a boundary result rather than a positive predictor.
 
 The checkpoint sweep now reduces single-checkpoint risk, the rank-side proxy
 scatter makes clear that head-gradient rank alone is not enough, and the
@@ -82,15 +83,17 @@ states at the same tail-rich ResNet scale, without turning the claim into final
 optimizer performance. The checkpoint-transfer benchmark shows that the
 current scaled-JVP readout transfers the below-one direction across tail-rich
 checkpoints but not the layer-risk ranking, which is exactly the sort of
-negative evidence a top-tier version should surface.
+negative evidence a top-tier version should surface. The standard reporting
+baseline gives a benchmark-style classification readout but is still AdamW-only
+and untuned.
 The next highest-leverage experiments are therefore:
 
 1. improve the downstream-aware condition score and repeat the pre-registered
    predictive benchmark across held-out architectures or datasets;
 2. extend the CIFAR-100-LT practical Muon/AdamW trajectory bridge to final
-   class-wise metrics only if optimizer-performance discussion becomes central.
-3. move the diagnostic to a standard long-tail benchmark protocol with
-   many/medium/few metrics.
+   class-wise metrics only if optimizer-performance discussion becomes central;
+3. upgrade the standard CIFAR-100-LT reporting baseline into a tuned benchmark
+   with augmentation, class-balanced methods, and Muon/AdamW comparisons.
 
 The completed checkpoint-sweep artifacts are:
 `results/e11_cifar100_resnet_checkpoint_sweep/*`,
@@ -116,6 +119,10 @@ The completed all-layer JVP checkpoint-transfer artifacts are:
 `results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/*`,
 `figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/*`, and
 `discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md`.
+The completed standard CIFAR-100-LT ResNet18 reporting artifacts are:
+`results/e11_cifar100_resnet_lt_standard_eval/*`,
+`figures/e11_cifar100_resnet_lt_standard_eval/*`, and
+`discussion/e11_cifar100_resnet_lt_standard_eval.md`.
 The completed ResNet practical Muon bridge artifacts are:
 `results/e11_cifar100_resnet_practical_muon_bridge/*`,
 `figures/e11_cifar100_resnet_practical_muon_bridge/*`, and

@@ -593,6 +593,14 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "config.json",
         Path("figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         Path("discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md"),
+        Path("results/e11_cifar100_resnet_lt_standard_eval") / "train_trace.csv",
+        Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_metrics.csv",
+        Path("results/e11_cifar100_resnet_lt_standard_eval") / "group_metrics.csv",
+        Path("results/e11_cifar100_resnet_lt_standard_eval") / "summary.csv",
+        Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_summary.csv",
+        Path("results/e11_cifar100_resnet_lt_standard_eval") / "config.json",
+        Path("figures/e11_cifar100_resnet_lt_standard_eval") / "cifar100_resnet_lt_standard_eval.png",
+        Path("discussion/e11_cifar100_resnet_lt_standard_eval.md"),
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "summary.csv",
@@ -660,6 +668,7 @@ def main() -> None:
         Path("paper/specgrad_activation_paper/figures") / "long_tail_layerwise_drift.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_tail_quality.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_standard_eval.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_practical_muon_bridge.png",
         Path("paper/specgrad_activation_paper/tables") / "head_tail_empirical_results.tex",
         Path("paper/specgrad_activation_paper/tables") / "local_linearization_errors.tex",
@@ -753,10 +762,12 @@ def main() -> None:
         "make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm",
         "make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm",
         "make e11-cifar-resnet-layer-jvp-checkpoint-prediction-results # submit the all-layer ResNet JVP checkpoint-transfer benchmark via Slurm",
+        "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
         "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
         "An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points",
         "An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs",
+        "A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`",
         "make e11-all-results",
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
@@ -982,6 +993,7 @@ def main() -> None:
         "figures/long_tail_head_only_forgetting.png",
         "figures/long_tail_layerwise_drift.png",
         "figures/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        "figures/cifar100_resnet_lt_standard_eval.png",
         "figures/cifar100_resnet_practical_muon_bridge.png",
         "momentum-gradient alignment",
         "Tianyang Liu",
@@ -1275,6 +1287,7 @@ def main() -> None:
         "long_tail_layerwise_drift.png",
         "cifar100_resnet_layer_jvp_tail_quality.png",
         "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        "cifar100_resnet_lt_standard_eval.png",
         "cifar100_resnet_practical_muon_bridge.png",
         "tables/",
         "e11_paper_numbers.tex",
@@ -2063,6 +2076,65 @@ def main() -> None:
         raise AssertionError(
             "CIFAR-100-LT ResNet18 JVP checkpoint prediction must preserve the current boundary result: threshold transfers, ranking does not"
         )
+    lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
+    lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
+    lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
+    lt_standard_group_metrics = pd.read_csv(lt_standard_dir / "group_metrics.csv")
+    lt_standard_summary = pd.read_csv(lt_standard_dir / "summary.csv")
+    lt_standard_class_summary = pd.read_csv(lt_standard_dir / "class_summary.csv")
+    lt_standard_config = json.loads((lt_standard_dir / "config.json").read_text())
+    if (
+        len(lt_standard_trace) != 110
+        or len(lt_standard_class_metrics) != 1000
+        or len(lt_standard_group_metrics) != 40
+        or len(lt_standard_summary) != 4
+        or len(lt_standard_class_summary) != 100
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 standard reporting run must contain 10 seeds, 100 classes, and four group summaries"
+        )
+    if not (
+        len(lt_standard_config["seeds"]) == 10
+        and int(lt_standard_config["num_classes"]) == 100
+        and int(lt_standard_config["max_train_count"]) == 500
+        and abs(float(lt_standard_config["imbalance_factor"]) - 100.0) < 1e-12
+        and int(lt_standard_config["train_steps"]) == 10000
+        and int(lt_standard_config["train_batch_size"]) == 256
+        and lt_standard_config["device"] == "cuda"
+        and not lt_standard_config["download"]
+    ):
+        raise AssertionError("CIFAR-100-LT ResNet18 standard reporting run should be the full Slurm/GPU no-download run")
+    lt_standard_by_group = lt_standard_summary.set_index("frequency_group")
+    if set(lt_standard_by_group.index) != {"many", "medium", "few", "all"}:
+        raise AssertionError("CIFAR-100-LT ResNet18 standard reporting summary must cover many, medium, few, and all")
+    expected_lt_group_counts = {
+        "many": (35, 103, 500),
+        "medium": (35, 20, 98),
+        "few": (30, 5, 19),
+        "all": (100, 5, 500),
+    }
+    for group, (classes, min_count, max_count) in expected_lt_group_counts.items():
+        row = lt_standard_by_group.loc[group]
+        if not (
+            int(row["classes"]) == classes
+            and int(row["min_train_count"]) == min_count
+            and int(row["max_train_count"]) == max_count
+        ):
+            raise AssertionError(f"CIFAR-100-LT ResNet18 standard reporting group metadata mismatch for {group}")
+    many_balanced_accuracy = float(lt_standard_by_group.loc["many", "mean_balanced_accuracy"])
+    medium_balanced_accuracy = float(lt_standard_by_group.loc["medium", "mean_balanced_accuracy"])
+    few_balanced_accuracy = float(lt_standard_by_group.loc["few", "mean_balanced_accuracy"])
+    all_balanced_accuracy = float(lt_standard_by_group.loc["all", "mean_balanced_accuracy"])
+    if not (
+        0.34 <= many_balanced_accuracy <= 0.39
+        and 0.09 <= medium_balanced_accuracy <= 0.12
+        and 0.009 <= few_balanced_accuracy <= 0.017
+        and 0.15 <= all_balanced_accuracy <= 0.18
+        and many_balanced_accuracy > medium_balanced_accuracy > few_balanced_accuracy
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 standard reporting balanced accuracy should preserve the current many > medium > few result"
+        )
     cifar_resnet_practical_metrics = pd.read_csv(
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv"
     )
@@ -2577,6 +2649,7 @@ def main() -> None:
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
         "figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png",
         "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        "figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png",
         "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
         "seven figures plus one generated table",
         "paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex",
@@ -3102,6 +3175,9 @@ def main() -> None:
         "trajectory NS(M_t) squared drift ratio=0.8019",
         "scaled-JVP threshold accuracy=1",
         "scaled-JVP held-out Spearman=-0.3203",
+        "many balanced accuracy=0.3665",
+        "medium=0.1036",
+        "few=0.0129",
         "final squared drift ratio=0.6167",
         "broad tail-accuracy or benchmark improvement",
         "narrow tail-loss/margin diagnostic",

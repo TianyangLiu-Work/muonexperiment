@@ -1,0 +1,28 @@
+{
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "num_classes": 100,
+  "max_train_count": 500,
+  "imbalance_factor": 100.0,
+  "many_threshold": 100,
+  "medium_threshold": 20,
+  "train_steps": 10000,
+  "train_batch_size": 256,
+  "lr": 0.0003,
+  "weight_decay": 0.0001,
+  "eval_interval": 1000,
+  "dtype": "float32",
+  "device": "cuda",
+  "data_root": "data/torchvision",
+  "download": false
+}

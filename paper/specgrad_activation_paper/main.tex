@@ -976,6 +976,15 @@ Figure \ref{fig:cifar-resnet-layer-jvp-checkpoint-prediction} turns the all-laye
 \label{fig:cifar-resnet-layer-jvp-checkpoint-prediction}
 \end{figure}
 
+Figure \ref{fig:cifar-resnet-lt-standard-eval} adds a standard CIFAR-100-LT reporting surface for final classification metrics. Under an IF=\(\EelevenCifarResNetLtStandardEvalImbalanceFactor\) exponential split, AdamW ResNet18 over \(\EelevenCifarResNetLtStandardEvalSeeds\) seeds gives many/medium/few balanced accuracy \(\EelevenCifarResNetLtStandardEvalManyBalancedAccuracy ~\EelevenCifarResNetLtStandardEvalManyBalancedAccuracyCi\), \(\EelevenCifarResNetLtStandardEvalMediumBalancedAccuracy ~\EelevenCifarResNetLtStandardEvalMediumBalancedAccuracyCi\), and \(\EelevenCifarResNetLtStandardEvalFewBalancedAccuracy ~\EelevenCifarResNetLtStandardEvalFewBalancedAccuracyCi\). This appendix result separates the paper's local matched-head-gain drift claims from benchmark-style classification readouts; it is not an augmented, tuned, or multi-optimizer comparison.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{figures/cifar100_resnet_lt_standard_eval.png}
+\caption{CIFAR-100-LT ResNet18 standard many/medium/few reporting baseline. The run uses an IF=100 exponential class-count split and reports final AdamW balanced accuracy by frequency group. It is a classification reporting surface for context, not evidence that the local drift mechanism improves final long-tail accuracy.}
+\label{fig:cifar-resnet-lt-standard-eval}
+\end{figure}
+
 Figure \ref{fig:cifar-resnet-practical-muon-bridge} reports the ResNet practical trajectory bridge discussed in the Muon-style compatibility subsection.
 
 \begin{figure}[H]
