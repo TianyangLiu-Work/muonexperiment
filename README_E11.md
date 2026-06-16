@@ -257,6 +257,7 @@ Paper-facing synthesis:
 - `discussion/e11_cifar100_resnet_imbalance_sweep.md`
 - `discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md`
 - `discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md`
+- `discussion/e11_cifar100_resnet_condition_score_audit.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
 - `discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md`
@@ -311,6 +312,10 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv`
 - `results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/checkpoint_summary.csv`
 - `results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/prediction_summary.csv`
+- `results/e11_cifar100_resnet_condition_score_audit/raw_score_pairs.csv`
+- `results/e11_cifar100_resnet_condition_score_audit/raw_score_summary.csv`
+- `results/e11_cifar100_resnet_condition_score_audit/residual_score_pairs.csv`
+- `results/e11_cifar100_resnet_condition_score_audit/residual_score_summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
 - `results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv`
@@ -346,6 +351,7 @@ Primary paper figures:
 - `figures/e11_cifar100_resnet_imbalance_sweep/cifar100_resnet_imbalance_sweep.png`
 - `figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png`
 - `figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png`
+- `figures/e11_cifar100_resnet_condition_score_audit/cifar100_resnet_condition_score_audit.png`
 - `figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png`
 - `figures/e11_cifar100_resnet_lt_recipe_benchmark/cifar100_resnet_lt_recipe_benchmark.png`
 - `figures/e11_cifar100_resnet_lt_muon_final_benchmark/cifar100_resnet_lt_recipe_benchmark.png`
@@ -384,6 +390,7 @@ Primary paper figures:
    - A CIFAR-100-LT ResNet18 imbalance sweep over tail_train_per_class 10/30/100/300 keeps spectral/Frobenius squared drift ratio below 1 in every setting; worst CI upper endpoint is 0.936 at tail_train_per_class=100, and best pre-update tail accuracy is 0.3297 [0.2954, 0.3639] at tail_train_per_class=300. Tail-loss evidence is mixed, so this remains a local drift result.
    - An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points; observed squared drift ratio is about `0.2011 [0.1845, 0.2192]`, scaled-JVP ratio is about `0.065 [0.06008, 0.07031]`, and every per-layer observed CI upper endpoint is below 1.
    - An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs; source-observed positive-control Spearman is about `0.981 [0.9739, 0.988]` and early-layer prior Spearman is about `0.9126 [0.9029, 0.9222]`, but the scaled-JVP predictor has below-one threshold accuracy `1` and held-out layer-risk Spearman about `-0.3203 [-0.3562, -0.2845]`. After source-fit early-layer residualization, observed residual Spearman is about `0.9403 [0.9216, 0.959]`, while scaled-JVP residual Spearman is about `-0.4872 [-0.5373, -0.4372]`, so the current score is not yet a positive layer-ranking predictor even beyond depth structure.
+   - A candidate condition-score audit over the same checkpoint-transfer tables confirms this boundary: the best simple source-only composite, early-minus-scaled-JVP, has held-out Spearman about `0.8656 [0.8578, 0.8734]`, below the early-layer prior, and scaled-JVP remains inverted in the residual score audit.
    - A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`. This supplies a standard classification reporting surface, not a tuned benchmark or Muon comparison.
    - An augmented CIFAR-100-LT ResNet18 recipe benchmark pilot (5 seeds, 5000 steps) gives SGD-momentum all/few balanced accuracy `0.4105 [0.4044, 0.4166]` and `0.1047 [0.09389, 0.1156]`; the few-group diff versus augmented AdamW is `0.0194 [0.005581, 0.03322]`. Class-balanced AdamW is worse in this pilot, with few-group diff `-0.0114 [-0.0215, -0.001304]`.
    - A CIFAR-100-LT ResNet18 NS-Muon final-training pilot (3 seeds, 5000 steps) is negative: lr=1e-4 all/few balanced accuracy `0.1265 [0.1218, 0.1312]` / `0.0008889 [-0.0006533, 0.002431]`; paired all/few diff vs AdamW-aug `-0.2348 [-0.2395, -0.23]` / `-0.08767 [-0.09948, -0.07585]`; lr=3e-5 is worse.
@@ -443,6 +450,7 @@ Do not claim:
 - `scripts/e11_run_cifar100_resnet_imbalance_sweep.py`: CIFAR-100-LT ResNet18 tail-count imbalance sweep for local matched-head-gain drift robustness.
 - `scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py`: all-layer ResNet finite-difference JVP diagnostic at the tail-rich checkpoint.
 - `scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py`: all-layer ResNet JVP checkpoint-transfer benchmark across tail-rich checkpoints.
+- `scripts/e11_write_cifar100_resnet_condition_score_audit.py`: offline candidate condition-score audit generated from checkpoint-transfer tables.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.
 - `scripts/e11_run_cifar100_resnet_practical_muon_bridge.py`: ResNet practical Muon/AdamW trajectory-state bridge from the tail-rich checkpoint.

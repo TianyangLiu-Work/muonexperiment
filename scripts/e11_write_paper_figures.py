@@ -73,6 +73,10 @@ PAPER_FIGURE_SOURCES: tuple[tuple[Path, Path], ...] = (
         Path("paper/specgrad_activation_paper/figures/cifar100_resnet_layer_jvp_checkpoint_prediction.png"),
     ),
     (
+        Path("figures/e11_cifar100_resnet_condition_score_audit/cifar100_resnet_condition_score_audit.png"),
+        Path("paper/specgrad_activation_paper/figures/cifar100_resnet_condition_score_audit.png"),
+    ),
+    (
         Path("figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png"),
         Path("paper/specgrad_activation_paper/figures/cifar100_resnet_lt_standard_eval.png"),
     ),

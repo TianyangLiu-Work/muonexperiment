@@ -601,6 +601,13 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "config.json",
         Path("figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         Path("discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md"),
+        Path("results/e11_cifar100_resnet_condition_score_audit") / "raw_score_pairs.csv",
+        Path("results/e11_cifar100_resnet_condition_score_audit") / "raw_score_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_audit") / "residual_score_pairs.csv",
+        Path("results/e11_cifar100_resnet_condition_score_audit") / "residual_score_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_audit") / "config.json",
+        Path("figures/e11_cifar100_resnet_condition_score_audit") / "cifar100_resnet_condition_score_audit.png",
+        Path("discussion/e11_cifar100_resnet_condition_score_audit.md"),
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "train_trace.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_metrics.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "group_metrics.csv",
@@ -692,6 +699,7 @@ def main() -> None:
         Path("paper/specgrad_activation_paper/figures") / "long_tail_layerwise_drift.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_tail_quality.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_condition_score_audit.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_imbalance_sweep.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_standard_eval.png",
         Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_lt_recipe_benchmark.png",
@@ -801,6 +809,8 @@ def main() -> None:
         "An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points",
         "An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs",
         "source-observed positive-control Spearman",
+        "candidate condition-score audit",
+        "scaled-JVP residual Spearman",
         "A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`",
         "An augmented CIFAR-100-LT ResNet18 recipe benchmark pilot (5 seeds, 5000 steps) gives SGD-momentum all/few balanced accuracy `0.4105 [0.4044, 0.4166]` and `0.1047 [0.09389, 0.1156]`",
         "A CIFAR-100-LT ResNet18 NS-Muon final-training pilot (3 seeds, 5000 steps) is negative: lr=1e-4 all/few balanced accuracy `0.1265 [0.1218, 0.1312]` / `0.0008889 [-0.0006533, 0.002431]`",
@@ -1033,6 +1043,7 @@ def main() -> None:
         "figures/long_tail_head_only_forgetting.png",
         "figures/long_tail_layerwise_drift.png",
         "figures/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        "figures/cifar100_resnet_condition_score_audit.png",
         "figures/cifar100_resnet_imbalance_sweep.png",
         "figures/cifar100_resnet_lt_standard_eval.png",
         "figures/cifar100_resnet_lt_recipe_benchmark.png",
@@ -1330,6 +1341,7 @@ def main() -> None:
         "long_tail_layerwise_drift.png",
         "cifar100_resnet_layer_jvp_tail_quality.png",
         "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        "cifar100_resnet_condition_score_audit.png",
         "cifar100_resnet_imbalance_sweep.png",
         "cifar100_resnet_lt_standard_eval.png",
         "cifar100_resnet_lt_recipe_benchmark.png",
@@ -2237,6 +2249,69 @@ def main() -> None:
     ):
         raise AssertionError(
             "CIFAR-100-LT ResNet18 JVP checkpoint prediction must preserve the current boundary result: positive controls and observed residual transfer, scaled-JVP ranking does not"
+        )
+    score_audit_dir = Path("results/e11_cifar100_resnet_condition_score_audit")
+    score_audit_raw_pairs = pd.read_csv(score_audit_dir / "raw_score_pairs.csv")
+    score_audit_raw_summary = pd.read_csv(score_audit_dir / "raw_score_summary.csv")
+    score_audit_residual_pairs = pd.read_csv(score_audit_dir / "residual_score_pairs.csv")
+    score_audit_residual_summary = pd.read_csv(score_audit_dir / "residual_score_summary.csv")
+    score_audit_config = json.loads((score_audit_dir / "config.json").read_text())
+    expected_raw_scores = {
+        "source_observed_drift_positive_control",
+        "early_layer_prior",
+        "gradient_nuclear_rank",
+        "alignment_ratio",
+        "step_size_ratio",
+        "scaled_jvp_ratio",
+        "inverse_scaled_jvp_ratio",
+        "early_plus_gradient_rank",
+        "early_minus_scaled_jvp",
+        "early_plus_rank_minus_scaled_jvp",
+    }
+    expected_residual_scores = {
+        "source_observed_residual_positive_control",
+        "scaled_jvp_residual",
+        "unit_jvp_residual",
+        "gradient_nuclear_rank_residual",
+        "alignment_ratio_residual",
+    }
+    if (
+        len(score_audit_raw_pairs) != 60
+        or len(score_audit_raw_summary) != 10
+        or len(score_audit_residual_pairs) != 30
+        or len(score_audit_residual_summary) != 5
+        or set(score_audit_raw_summary["score"]) != expected_raw_scores
+        or set(score_audit_residual_summary["score"]) != expected_residual_scores
+        or set(score_audit_config["raw_score_definitions"]) != expected_raw_scores
+        or set(score_audit_config["residual_score_definitions"]) != expected_residual_scores
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 condition-score audit must preserve raw and residual score coverage"
+        )
+    score_audit_raw_by_score = score_audit_raw_summary.set_index("score")
+    score_audit_residual_by_score = score_audit_residual_summary.set_index("score")
+    score_audit_early = score_audit_raw_by_score.loc["early_layer_prior"]
+    score_audit_best_simple = score_audit_raw_by_score.loc["early_minus_scaled_jvp"]
+    score_audit_scaled = score_audit_raw_by_score.loc["scaled_jvp_ratio"]
+    score_audit_observed_control = score_audit_raw_by_score.loc[
+        "source_observed_drift_positive_control"
+    ]
+    score_audit_observed_residual = score_audit_residual_by_score.loc[
+        "source_observed_residual_positive_control"
+    ]
+    score_audit_scaled_residual = score_audit_residual_by_score.loc["scaled_jvp_residual"]
+    if not (
+        float(score_audit_observed_control["mean_spearman"]) > 0.95
+        and float(score_audit_early["mean_spearman"]) > 0.9
+        and float(score_audit_best_simple["mean_spearman"]) < float(score_audit_early["mean_spearman"])
+        and float(score_audit_scaled["mean_spearman"]) < -0.3
+        and float(score_audit_scaled["spearman_ci95_high"]) < -0.25
+        and float(score_audit_observed_residual["mean_spearman"]) > 0.9
+        and float(score_audit_scaled_residual["mean_spearman"]) < -0.4
+        and float(score_audit_scaled_residual["spearman_ci95_high"]) < -0.4
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 condition-score audit must preserve the negative score-selection guardrail"
         )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
@@ -3481,6 +3556,7 @@ def main() -> None:
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
         "figures/e11_cifar100_resnet_practical_muon_bridge/cifar100_resnet_practical_muon_bridge.png",
         "figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        "figures/e11_cifar100_resnet_condition_score_audit/cifar100_resnet_condition_score_audit.png",
         "figures/e11_cifar100_resnet_imbalance_sweep/cifar100_resnet_imbalance_sweep.png",
         "squared drift ratio=0.5501",
         "head-alignment ratio=2.083",
@@ -3492,6 +3568,8 @@ def main() -> None:
         "source-observed positive-control Spearman=0.981",
         "early-layer prior Spearman=0.9126",
         "scaled-JVP held-out Spearman=-0.3203",
+        "best simple condition composite early-minus-scaled-JVP Spearman=0.8656",
+        "scaled-JVP residual Spearman=-0.4872",
         "CIFAR-100-LT ResNet18 imbalance sweep",
         "worst drift ratio=0.6075",
         "tail_train_per_class=100",

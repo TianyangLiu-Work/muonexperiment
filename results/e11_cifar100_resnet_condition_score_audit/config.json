@@ -1,0 +1,23 @@
+{
+  "input_layer_summary": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/layer_summary.csv",
+  "raw_score_definitions": {
+    "source_observed_drift_positive_control": "log_observed",
+    "early_layer_prior": "log_early_layer_prior",
+    "gradient_nuclear_rank": "log_gradient_nuclear_rank",
+    "alignment_ratio": "log_alignment_ratio",
+    "step_size_ratio": "log_step_size_ratio",
+    "scaled_jvp_ratio": "log_scaled_jvp_ratio",
+    "inverse_scaled_jvp_ratio": "neg_log_scaled_jvp_ratio",
+    "early_plus_gradient_rank": "early_plus_gradient_rank",
+    "early_minus_scaled_jvp": "early_minus_scaled_jvp",
+    "early_plus_rank_minus_scaled_jvp": "early_plus_rank_minus_scaled_jvp"
+  },
+  "residual_score_definitions": {
+    "source_observed_residual_positive_control": "geomean_observed_tail_drift_sq_ratio_spectral_over_fro",
+    "scaled_jvp_residual": "geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro",
+    "unit_jvp_residual": "geomean_jvp_tail_drift_sq_ratio_spectral_over_fro",
+    "gradient_nuclear_rank_residual": "mean_gradient_nuclear_rank",
+    "alignment_ratio_residual": "mean_alignment_ratio_spectral_over_fro"
+  },
+  "residual_adjustment": "source_checkpoint_log_observed_drift_on_log_early_layer_prior"
+}

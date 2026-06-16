@@ -46,6 +46,7 @@ specgrad_activation_paper/
 │   ├── long_tail_rho_sweep.png
 │   ├── cifar100_resnet_layer_jvp_tail_quality.png
 │   ├── cifar100_resnet_layer_jvp_checkpoint_prediction.png
+│   ├── cifar100_resnet_condition_score_audit.png
 │   ├── cifar100_resnet_imbalance_sweep.png
 │   ├── cifar100_resnet_lt_standard_eval.png
 │   ├── cifar100_resnet_lt_recipe_benchmark.png
@@ -89,6 +90,7 @@ or the higher-level `make e11-paper-assets` target. The source figures remain:
 - `figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png`
 - `figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png`
 - `figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png`
+- `figures/e11_cifar100_resnet_condition_score_audit/cifar100_resnet_condition_score_audit.png`
 - `figures/e11_cifar100_resnet_imbalance_sweep/cifar100_resnet_imbalance_sweep.png`
 - `figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png`
 - `figures/e11_cifar100_resnet_lt_recipe_benchmark/cifar100_resnet_lt_recipe_benchmark.png`

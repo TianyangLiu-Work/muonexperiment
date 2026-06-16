@@ -33,6 +33,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_residual_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_condition_score_audit_raw = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/raw_score_summary.csv"
+    ).set_index("score")
+    cifar_resnet_condition_score_audit_residual = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/residual_score_summary.csv"
+    ).set_index("score")
     cifar_resnet_imbalance_sweep = pd.read_csv(
         "results/e11_cifar100_resnet_imbalance_sweep/pair_summary.csv"
     )
@@ -72,6 +78,13 @@ def main() -> None:
     ]
     resnet_jvp_checkpoint_scaled_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
         "source_scaled_jvp_residual"
+    ]
+    resnet_score_audit_early = cifar_resnet_condition_score_audit_raw.loc["early_layer_prior"]
+    resnet_score_audit_best_simple = cifar_resnet_condition_score_audit_raw.loc[
+        "early_minus_scaled_jvp"
+    ]
+    resnet_score_audit_scaled_residual = cifar_resnet_condition_score_audit_residual.loc[
+        "scaled_jvp_residual"
     ]
     resnet_imbalance_worst = cifar_resnet_imbalance_sweep.loc[
         cifar_resnet_imbalance_sweep["tail_output_drift_sq_ratio_ci95_high"].idxmax()
@@ -225,6 +238,21 @@ def main() -> None:
                 ),
             },
             {"artifact": "discussion/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.md", "role": "Markdown summary and CSV links for the held-out checkpoint-transfer JVP benchmark."},
+            {
+                "artifact": "figures/e11_cifar100_resnet_condition_score_audit/cifar100_resnet_condition_score_audit.png",
+                "role": (
+                    "Appendix candidate condition-score audit; the best simple condition composite "
+                    f"has Spearman {fmt(resnet_score_audit_best_simple['mean_spearman'])} "
+                    f"{interval(resnet_score_audit_best_simple, 'spearman_ci95_low', 'spearman_ci95_high')}, "
+                    f"below the early-layer prior "
+                    f"{fmt(resnet_score_audit_early['mean_spearman'])} "
+                    f"{interval(resnet_score_audit_early, 'spearman_ci95_low', 'spearman_ci95_high')}, "
+                    f"and scaled-JVP residual Spearman is "
+                    f"{fmt(resnet_score_audit_scaled_residual['mean_spearman'])} "
+                    f"{interval(resnet_score_audit_scaled_residual, 'spearman_ci95_low', 'spearman_ci95_high')}."
+                ),
+            },
+            {"artifact": "discussion/e11_cifar100_resnet_condition_score_audit.md", "role": "Markdown summary and CSV links for the candidate condition-score audit."},
             {
                 "artifact": "figures/e11_cifar100_resnet_imbalance_sweep/cifar100_resnet_imbalance_sweep.png",
                 "role": (

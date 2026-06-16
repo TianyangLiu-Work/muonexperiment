@@ -57,6 +57,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_residual_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_condition_score_audit_raw = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/raw_score_summary.csv"
+    ).set_index("score")
+    cifar_resnet_condition_score_audit_residual = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/residual_score_summary.csv"
+    ).set_index("score")
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -111,6 +117,17 @@ def main() -> None:
     ]
     resnet_jvp_checkpoint_rank_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
         "source_gradient_nuclear_rank_residual"
+    ]
+    resnet_score_audit_early = cifar_resnet_condition_score_audit_raw.loc["early_layer_prior"]
+    resnet_score_audit_best_simple = cifar_resnet_condition_score_audit_raw.loc[
+        "early_minus_scaled_jvp"
+    ]
+    resnet_score_audit_scaled = cifar_resnet_condition_score_audit_raw.loc["scaled_jvp_ratio"]
+    resnet_score_audit_observed_residual = cifar_resnet_condition_score_audit_residual.loc[
+        "source_observed_residual_positive_control"
+    ]
+    resnet_score_audit_scaled_residual = cifar_resnet_condition_score_audit_residual.loc[
+        "scaled_jvp_residual"
     ]
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
@@ -367,6 +384,32 @@ def main() -> None:
                 ),
                 "how_to_read": "The source observed-drift and early-layer controls show that held-out layer-risk ordering is predictable; the residual test shows stable risk structure remains after removing layer-depth, while scaled-JVP residuals still fail.",
                 "caveat": "This is a useful predictive-boundary result: the missing ingredient is a better downstream-aware score, not merely target-checkpoint noise or layer-depth adjustment.",
+            },
+            {
+                "claim": "Simple source-only condition-score candidates do not solve held-out layer-risk prediction.",
+                "recommended_figure": link(
+                    "figures/e11_cifar100_resnet_condition_score_audit/cifar100_resnet_condition_score_audit.png"
+                ),
+                "source_data": link("results/e11_cifar100_resnet_condition_score_audit/raw_score_summary.csv"),
+                "quantitative_anchor": (
+                    f"early-layer prior Spearman="
+                    f"{fmt(resnet_score_audit_early['mean_spearman'])} "
+                    f"{ci(resnet_score_audit_early, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"best simple condition composite early-minus-scaled-JVP Spearman="
+                    f"{fmt(resnet_score_audit_best_simple['mean_spearman'])} "
+                    f"{ci(resnet_score_audit_best_simple, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"scaled-JVP raw Spearman="
+                    f"{fmt(resnet_score_audit_scaled['mean_spearman'])} "
+                    f"{ci(resnet_score_audit_scaled, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"observed residual Spearman="
+                    f"{fmt(resnet_score_audit_observed_residual['mean_spearman'])} "
+                    f"{ci(resnet_score_audit_observed_residual, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"scaled-JVP residual Spearman="
+                    f"{fmt(resnet_score_audit_scaled_residual['mean_spearman'])} "
+                    f"{ci(resnet_score_audit_scaled_residual, 'spearman_ci95_low', 'spearman_ci95_high')}."
+                ),
+                "how_to_read": "The audit evaluates obvious head-rank, JVP, and depth-composite source scores without using target-checkpoint fitting.",
+                "caveat": "This is a guardrail against post-hoc score selection, not a new positive condition theorem.",
             },
             {
                 "claim": "The current paper now has a standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.",

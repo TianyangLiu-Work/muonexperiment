@@ -55,6 +55,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_residual_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_condition_score_audit_raw = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/raw_score_summary.csv"
+    ).set_index("score")
+    cifar_resnet_condition_score_audit_residual = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/residual_score_summary.csv"
+    ).set_index("score")
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -144,6 +150,14 @@ def main() -> None:
     ]
     cifar_resnet_jvp_checkpoint_unit = cifar_resnet_layer_jvp_checkpoint_prediction.loc[
         "source_unit_jvp_ratio"
+    ]
+    cifar_resnet_score_audit_early = cifar_resnet_condition_score_audit_raw.loc["early_layer_prior"]
+    cifar_resnet_score_audit_best_simple = cifar_resnet_condition_score_audit_raw.loc[
+        "early_minus_scaled_jvp"
+    ]
+    cifar_resnet_score_audit_scaled = cifar_resnet_condition_score_audit_raw.loc["scaled_jvp_ratio"]
+    cifar_resnet_score_audit_scaled_residual = cifar_resnet_condition_score_audit_residual.loc[
+        "scaled_jvp_residual"
     ]
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
@@ -301,7 +315,16 @@ def main() -> None:
                     f"After removing the early-layer prior with source-checkpoint fits, observed residuals still transfer "
                     f"({fmt(cifar_resnet_jvp_checkpoint_observed_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])}), "
                     f"whereas scaled-JVP residuals remain inverted "
-                    f"({fmt(cifar_resnet_jvp_checkpoint_scaled_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])})."
+                    f"({fmt(cifar_resnet_jvp_checkpoint_scaled_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])}). "
+                    f"A candidate condition-score audit confirms that the best simple source-only composite reaches Spearman "
+                    f"{fmt(cifar_resnet_score_audit_best_simple['mean_spearman'])} "
+                    f"CI={interval(cifar_resnet_score_audit_best_simple, 'spearman_ci95_low', 'spearman_ci95_high')}, "
+                    f"below the early-layer prior "
+                    f"{fmt(cifar_resnet_score_audit_early['mean_spearman'])} "
+                    f"CI={interval(cifar_resnet_score_audit_early, 'spearman_ci95_low', 'spearman_ci95_high')}; "
+                    f"scaled-JVP raw/residual Spearman are "
+                    f"{fmt(cifar_resnet_score_audit_scaled['mean_spearman'])}/"
+                    f"{fmt(cifar_resnet_score_audit_scaled_residual['mean_spearman'])}."
                 ),
                 "why_it_is_ready": "The synthetic construction flips the theory inequality and the observed tail drift direction flips with it.",
                 "remaining_risk": "The all-layer ResNet bridge is finite-difference local evidence. The checkpoint-transfer benchmark now shows the target layer ordering is predictable, but the current scaled-JVP condition score is not the predictor.",

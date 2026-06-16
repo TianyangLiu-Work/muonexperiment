@@ -40,6 +40,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_residual_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_condition_score_audit_raw = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/raw_score_summary.csv"
+    ).set_index("score")
+    cifar_resnet_condition_score_audit_residual = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/residual_score_summary.csv"
+    ).set_index("score")
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -113,6 +119,14 @@ def main() -> None:
             "source_gradient_nuclear_rank_residual"
         ]
     )
+    cifar_resnet_score_audit_early = cifar_resnet_condition_score_audit_raw.loc["early_layer_prior"]
+    cifar_resnet_score_audit_best_simple = cifar_resnet_condition_score_audit_raw.loc[
+        "early_minus_scaled_jvp"
+    ]
+    cifar_resnet_score_audit_scaled = cifar_resnet_condition_score_audit_raw.loc["scaled_jvp_ratio"]
+    cifar_resnet_score_audit_scaled_residual = cifar_resnet_condition_score_audit_residual.loc[
+        "scaled_jvp_residual"
+    ]
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
     cifar_resnet_lt_few = cifar_resnet_lt_standard_eval.loc["few"]
@@ -343,6 +357,33 @@ def main() -> None:
                 cifar_resnet_layer_jvp_checkpoint_rank_residual["spearman_ci95_high"],
             )
             + "; source-fit early-layer residualization \\\\"
+        ),
+        (
+            "CIFAR-100-LT ResNet18 candidate condition-score audit & early-layer prior Spearman "
+            + ci(
+                cifar_resnet_score_audit_early["mean_spearman"],
+                cifar_resnet_score_audit_early["spearman_ci95_low"],
+                cifar_resnet_score_audit_early["spearman_ci95_high"],
+            )
+            + "; best simple composite "
+            + ci(
+                cifar_resnet_score_audit_best_simple["mean_spearman"],
+                cifar_resnet_score_audit_best_simple["spearman_ci95_low"],
+                cifar_resnet_score_audit_best_simple["spearman_ci95_high"],
+            )
+            + " & scaled-JVP raw/residual "
+            + ci(
+                cifar_resnet_score_audit_scaled["mean_spearman"],
+                cifar_resnet_score_audit_scaled["spearman_ci95_low"],
+                cifar_resnet_score_audit_scaled["spearman_ci95_high"],
+            )
+            + " / "
+            + ci(
+                cifar_resnet_score_audit_scaled_residual["mean_spearman"],
+                cifar_resnet_score_audit_scaled_residual["spearman_ci95_low"],
+                cifar_resnet_score_audit_scaled_residual["spearman_ci95_high"],
+            )
+            + "; negative score-selection guardrail \\\\"
         ),
         (
             "CIFAR-100-LT ResNet18 standard reporting & many/medium/few balanced acc. "

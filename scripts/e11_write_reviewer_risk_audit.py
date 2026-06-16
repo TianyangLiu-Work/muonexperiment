@@ -48,6 +48,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_residual_prediction = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_condition_score_audit_raw = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/raw_score_summary.csv"
+    ).set_index("score")
+    cifar_resnet_condition_score_audit_residual = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/residual_score_summary.csv"
+    ).set_index("score")
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -124,6 +130,13 @@ def main() -> None:
     ]
     cifar_resnet_jvp_checkpoint_scaled_residual = cifar_resnet_layer_jvp_checkpoint_residual_prediction.loc[
         "source_scaled_jvp_residual"
+    ]
+    cifar_resnet_score_audit_early = cifar_resnet_condition_score_audit_raw.loc["early_layer_prior"]
+    cifar_resnet_score_audit_best_simple = cifar_resnet_condition_score_audit_raw.loc[
+        "early_minus_scaled_jvp"
+    ]
+    cifar_resnet_score_audit_scaled_residual = cifar_resnet_condition_score_audit_residual.loc[
+        "scaled_jvp_residual"
     ]
     cifar_resnet_lt_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_medium = cifar_resnet_lt_standard_eval.loc["medium"]
@@ -253,7 +266,12 @@ def main() -> None:
                     f"CI={interval(cifar_resnet_jvp_checkpoint_observed_residual, 'spearman_ci95_low', 'spearman_ci95_high')}, "
                     f"but scaled-JVP residual Spearman is "
                     f"{fmt(cifar_resnet_jvp_checkpoint_scaled_residual['mean_spearman_residual_predictor_vs_residual_target_observed'])} "
-                    f"CI={interval(cifar_resnet_jvp_checkpoint_scaled_residual, 'spearman_ci95_low', 'spearman_ci95_high')}."
+                    f"CI={interval(cifar_resnet_jvp_checkpoint_scaled_residual, 'spearman_ci95_low', 'spearman_ci95_high')}. "
+                    f"The candidate condition-score audit finds the best simple condition composite below the early-layer prior "
+                    f"({fmt(cifar_resnet_score_audit_best_simple['mean_spearman'])} vs "
+                    f"{fmt(cifar_resnet_score_audit_early['mean_spearman'])}) "
+                    f"and scaled-JVP residual remains inverted "
+                    f"({fmt(cifar_resnet_score_audit_scaled_residual['mean_spearman'])})."
                 ),
                 "safe_response": "Call the synthetic result a mechanism sanity check, use the ResNet rank-only proxy as a caveat, and present the final-layer plus all-layer JVP diagnostics as downstream-aware natural-task bridges.",
                 "remaining_work": "Improve the downstream-aware score and repeat the held-out benchmark on architecture or dataset splits before claiming a general boundary predictor.",

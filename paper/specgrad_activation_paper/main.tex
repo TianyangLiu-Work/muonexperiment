@@ -978,6 +978,15 @@ Figure \ref{fig:cifar-resnet-layer-jvp-checkpoint-prediction} turns the all-laye
 \label{fig:cifar-resnet-layer-jvp-checkpoint-prediction}
 \end{figure}
 
+Figure \ref{fig:cifar-resnet-condition-score-audit} audits simple source-only candidate scores on the same checkpoint-transfer benchmark. The source-observed positive control and early-layer prior have Spearman \(\EelevenCifarResNetConditionScoreAuditObservedSpearman ~\EelevenCifarResNetConditionScoreAuditObservedSpearmanCi\) and \(\EelevenCifarResNetConditionScoreAuditEarlyLayerSpearman ~\EelevenCifarResNetConditionScoreAuditEarlyLayerSpearmanCi\), while the best simple condition composite in this audit, early-minus-scaled-JVP, reaches \(\EelevenCifarResNetConditionScoreAuditBestSimpleSpearman ~\EelevenCifarResNetConditionScoreAuditBestSimpleSpearmanCi\), below the architecture prior. After source-fit depth residualization, observed residual Spearman remains \(\EelevenCifarResNetConditionScoreAuditObservedResidualSpearman ~\EelevenCifarResNetConditionScoreAuditObservedResidualSpearmanCi\), but scaled-JVP residual Spearman is \(\EelevenCifarResNetConditionScoreAuditScaledJvpResidualSpearman ~\EelevenCifarResNetConditionScoreAuditScaledJvpResidualSpearmanCi\). We use this as a guardrail against post-hoc score selection: the current obvious score family does not solve the predictive condition problem.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{figures/cifar100_resnet_condition_score_audit.png}
+\caption{CIFAR-100-LT ResNet18 candidate condition-score audit. The left panel evaluates raw source-only scores for held-out checkpoint layer-risk ranking. The right panel repeats the comparison after source-fit early-layer residualization. Simple head-rank, JVP, and depth-composite scores do not beat the architecture prior, and scaled-JVP remains inverted in the residual test.}
+\label{fig:cifar-resnet-condition-score-audit}
+\end{figure}
+
 Figure \ref{fig:cifar-resnet-imbalance-sweep} sweeps explicit tail-count settings for the same CIFAR-100-LT ResNet18 local diagnostic. Across \(\EelevenCifarResNetImbalanceSweepSettings\) settings, the weakest squared drift-ratio interval remains below the Frobenius baseline: \(\EelevenCifarResNetImbalanceSweepWorstDriftRatio ~\EelevenCifarResNetImbalanceSweepWorstDriftRatioCi\) at tail count \(\EelevenCifarResNetImbalanceSweepWorstTailTrainPerClass\). The best pre-update tail accuracy is \(\EelevenCifarResNetImbalanceSweepBestTailAccuracy ~\EelevenCifarResNetImbalanceSweepBestTailAccuracyCi\) at tail count \(\EelevenCifarResNetImbalanceSweepBestTailTrainPerClass\), where the drift ratio is \(\EelevenCifarResNetImbalanceSweepBestTailDriftRatio ~\EelevenCifarResNetImbalanceSweepBestTailDriftRatioCi\). Tail-loss differences are not uniformly favorable, so the figure is a tail-frequency robustness check for the local function-drift claim.
 
 \begin{figure}[H]

@@ -120,6 +120,12 @@ def main() -> None:
     cifar_resnet_layer_jvp_checkpoint_residual_summary = pd.read_csv(
         "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/residual_prediction_summary.csv"
     ).set_index("predictor")
+    cifar_resnet_condition_score_raw_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/raw_score_summary.csv"
+    ).set_index("score")
+    cifar_resnet_condition_score_residual_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_condition_score_audit/residual_score_summary.csv"
+    ).set_index("score")
     cifar_resnet_lt_standard_eval = pd.read_csv(
         "results/e11_cifar100_resnet_lt_standard_eval/summary.csv"
     ).set_index("frequency_group")
@@ -284,6 +290,26 @@ def main() -> None:
         cifar_resnet_layer_jvp_checkpoint_residual_summary.loc[
             "source_gradient_nuclear_rank_residual"
         ]
+    )
+    cifar_resnet_condition_score_audit_observed = cifar_resnet_condition_score_raw_summary.loc[
+        "source_observed_drift_positive_control"
+    ]
+    cifar_resnet_condition_score_audit_early = cifar_resnet_condition_score_raw_summary.loc[
+        "early_layer_prior"
+    ]
+    cifar_resnet_condition_score_audit_best_simple = cifar_resnet_condition_score_raw_summary.loc[
+        "early_minus_scaled_jvp"
+    ]
+    cifar_resnet_condition_score_audit_scaled = cifar_resnet_condition_score_raw_summary.loc[
+        "scaled_jvp_ratio"
+    ]
+    cifar_resnet_condition_score_audit_observed_residual = (
+        cifar_resnet_condition_score_residual_summary.loc[
+            "source_observed_residual_positive_control"
+        ]
+    )
+    cifar_resnet_condition_score_audit_scaled_residual = (
+        cifar_resnet_condition_score_residual_summary.loc["scaled_jvp_residual"]
     )
     cifar_resnet_lt_standard_many = cifar_resnet_lt_standard_eval.loc["many"]
     cifar_resnet_lt_standard_medium = cifar_resnet_lt_standard_eval.loc["medium"]
@@ -1200,6 +1226,66 @@ def main() -> None:
         *ci_macros(
             "EelevenCifarResNetLayerJvpCheckpointPredictionRankResidualSpearman",
             cifar_resnet_layer_jvp_checkpoint_rank_residual,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetConditionScoreAuditObservedSpearman",
+            fmt(cifar_resnet_condition_score_audit_observed["mean_spearman"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetConditionScoreAuditObservedSpearman",
+            cifar_resnet_condition_score_audit_observed,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetConditionScoreAuditEarlyLayerSpearman",
+            fmt(cifar_resnet_condition_score_audit_early["mean_spearman"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetConditionScoreAuditEarlyLayerSpearman",
+            cifar_resnet_condition_score_audit_early,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetConditionScoreAuditBestSimpleSpearman",
+            fmt(cifar_resnet_condition_score_audit_best_simple["mean_spearman"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetConditionScoreAuditBestSimpleSpearman",
+            cifar_resnet_condition_score_audit_best_simple,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetConditionScoreAuditScaledJvpSpearman",
+            fmt(cifar_resnet_condition_score_audit_scaled["mean_spearman"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetConditionScoreAuditScaledJvpSpearman",
+            cifar_resnet_condition_score_audit_scaled,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetConditionScoreAuditObservedResidualSpearman",
+            fmt(cifar_resnet_condition_score_audit_observed_residual["mean_spearman"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetConditionScoreAuditObservedResidualSpearman",
+            cifar_resnet_condition_score_audit_observed_residual,
+            "spearman_ci95_low",
+            "spearman_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetConditionScoreAuditScaledJvpResidualSpearman",
+            fmt(cifar_resnet_condition_score_audit_scaled_residual["mean_spearman"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetConditionScoreAuditScaledJvpResidualSpearman",
+            cifar_resnet_condition_score_audit_scaled_residual,
             "spearman_ci95_low",
             "spearman_ci95_high",
         ),
