@@ -28,6 +28,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 condition-proxy scatter",
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
         "CIFAR-100 ResNet18 tail-quality control",
+        "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed Muon state-source control",
@@ -89,6 +90,7 @@ make e11-cifar-resnet-checkpoint-sweep-results # submit the top-conference ResNe
 make e11-cifar-resnet-condition-proxy-results # regenerate the ResNet rank-proxy scatter from checkpoint-sweep CSVs
 make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downstream-aware condition diagnostic via Slurm
 make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm
+make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets

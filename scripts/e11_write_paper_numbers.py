@@ -93,6 +93,12 @@ def main() -> None:
     cifar_resnet_tail_quality = pd.read_csv(
         "results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv"
     )
+    cifar_resnet_layer_jvp = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv"
+    ).iloc[0]
+    cifar_resnet_layer_jvp_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
+    )
     imbalance = pd.read_csv("results/e11_long_tail_imbalance_ablation/summary.csv")
     checkpoint_sweep = pd.read_csv("results/e11_long_tail_checkpoint_sweep/summary.csv")
     class_partition_sweep = pd.read_csv("results/e11_long_tail_class_partition_sweep/summary.csv")
@@ -198,6 +204,15 @@ def main() -> None:
     cifar_resnet_tail_quality_tail_accuracy_max = cifar_resnet_tail_quality[
         "mean_tail_accuracy_before"
     ].max()
+    cifar_resnet_layer_jvp_worst_observed = cifar_resnet_layer_jvp_summary.loc[
+        cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_layer_jvp_worst_scaled = cifar_resnet_layer_jvp_summary.loc[
+        cifar_resnet_layer_jvp_summary["scaled_jvp_tail_drift_sq_ratio_ci95_high"].idxmax()
+    ]
+    cifar_resnet_layer_jvp_supported_layers = int(
+        (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
+    )
     one_step_alignment_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "alignment")
     one_step_update_fro_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_fro_norm")
     one_step_update_op_ratio = paired_ratio_summary(one_step_metrics, "spectral", "frobenius", "update_op_norm")
@@ -828,6 +843,69 @@ def main() -> None:
         macro(
             "EelevenCifarResNetTailQualityTailAccuracyRange",
             f"{fmt(cifar_resnet_tail_quality_tail_accuracy_min)}\\text{{ to }}{fmt(cifar_resnet_tail_quality_tail_accuracy_max)}",
+        ),
+        macro("EelevenCifarResNetLayerJvpSeeds", int(cifar_resnet_layer_jvp["seeds"])),
+        macro("EelevenCifarResNetLayerJvpParameters", int(cifar_resnet_layer_jvp["parameters"])),
+        macro("EelevenCifarResNetLayerJvpPairedPoints", int(cifar_resnet_layer_jvp["paired_points"])),
+        macro(
+            "EelevenCifarResNetLayerJvpTailAccuracyBefore",
+            fmt(cifar_resnet_layer_jvp["mean_tail_accuracy_before"]),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpScaledRatio",
+            fmt(cifar_resnet_layer_jvp["geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpScaledRatio",
+            cifar_resnet_layer_jvp,
+            "scaled_jvp_tail_drift_sq_ratio_ci95_low",
+            "scaled_jvp_tail_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpObservedRatio",
+            fmt(cifar_resnet_layer_jvp["geomean_observed_tail_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpObservedRatio",
+            cifar_resnet_layer_jvp,
+            "observed_tail_drift_sq_ratio_ci95_low",
+            "observed_tail_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpSpectralLowerFraction",
+            fmt(cifar_resnet_layer_jvp["spectral_less_observed_tail_drift_fraction"]),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpSupportedLayers",
+            cifar_resnet_layer_jvp_supported_layers,
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpWorstObservedParameter",
+            latex_texttt(cifar_resnet_layer_jvp_worst_observed["parameter"]),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpWorstObservedRatio",
+            fmt(cifar_resnet_layer_jvp_worst_observed["geomean_observed_tail_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpWorstObservedRatio",
+            cifar_resnet_layer_jvp_worst_observed,
+            "observed_tail_drift_sq_ratio_ci95_low",
+            "observed_tail_drift_sq_ratio_ci95_high",
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpWorstScaledParameter",
+            latex_texttt(cifar_resnet_layer_jvp_worst_scaled["parameter"]),
+        ),
+        macro(
+            "EelevenCifarResNetLayerJvpWorstScaledRatio",
+            fmt(cifar_resnet_layer_jvp_worst_scaled["geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro"]),
+        ),
+        *ci_macros(
+            "EelevenCifarResNetLayerJvpWorstScaledRatio",
+            cifar_resnet_layer_jvp_worst_scaled,
+            "scaled_jvp_tail_drift_sq_ratio_ci95_low",
+            "scaled_jvp_tail_drift_sq_ratio_ci95_high",
         ),
         "",
         "% Local linearization quality",

@@ -5,15 +5,15 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 674708,
-      "size": "658.9 KB"
+      "size_bytes": 739636,
+      "size": "722.3 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1383333,
-      "size": "1.3 MB"
+      "size_bytes": 1610340,
+      "size": "1.5 MB"
     },
     {
       "path": "tests",
@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 643242,
-      "size": "628.2 KB"
+      "size_bytes": 668902,
+      "size": "653.2 KB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 268845919,
-      "size": "256.4 MB"
+      "size_bytes": 269348749,
+      "size": "256.9 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 29850274,
-      "size": "28.5 MB"
+      "size_bytes": 30128100,
+      "size": "28.7 MB"
     },
     {
       "path": "configs",
@@ -54,15 +54,15 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 3329010,
-      "size": "3.2 MB"
+      "size_bytes": 3611966,
+      "size": "3.4 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 4418,
-      "size": "4.3 KB"
+      "size_bytes": 4710,
+      "size": "4.6 KB"
     },
     {
       "path": ".gitignore",
@@ -221,9 +221,29 @@
       "size": "107.0 KB"
     },
     {
+      "path": "results/e11_cifar100_resnet_layer_jvp_tail_quality/metrics.csv",
+      "rows": 420,
+      "size": "405.8 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_layer_jvp_tail_quality/paired_metrics.csv",
+      "rows": 210,
+      "size": "70.4 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv",
+      "rows": 21,
+      "size": "10.9 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv",
+      "rows": 1,
+      "size": "1.4 KB"
+    },
+    {
       "path": "results/e11_long_tail_imbalance_ablation/step_metrics.csv",
       "rows": 160,
-      "size": "81.8 KB"
+      "size": "81.7 KB"
     },
     {
       "path": "results/e11_long_tail_imbalance_ablation/summary.csv",
@@ -238,12 +258,12 @@
     {
       "path": "results/e11_long_tail_checkpoint_sweep/summary.csv",
       "rows": 5,
-      "size": "10.1 KB"
+      "size": "10.0 KB"
     },
     {
       "path": "results/e11_long_tail_class_partition_sweep/step_metrics.csv",
       "rows": 200,
-      "size": "124.7 KB"
+      "size": "124.6 KB"
     },
     {
       "path": "results/e11_long_tail_class_partition_sweep/summary.csv",
@@ -479,7 +499,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "22.9 KB"
+      "size": "24.4 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -487,7 +507,7 @@
     },
     {
       "path": "discussion/e11_main_paper_package.md",
-      "size": "10.5 KB"
+      "size": "12.0 KB"
     },
     {
       "path": "discussion/e11_main_figure_captions.md",
@@ -503,11 +523,11 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "18.7 KB"
+      "size": "19.5 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
-      "size": "17.1 KB"
+      "size": "18.2 KB"
     },
     {
       "path": "discussion/e11_pasted_review_audit.md",
@@ -527,15 +547,15 @@
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
-      "size": "19.1 KB"
+      "size": "20.9 KB"
     },
     {
       "path": "discussion/e11_top_conference_plan.md",
-      "size": "6.8 KB"
+      "size": "7.7 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",
-      "size": "13.7 KB"
+      "size": "14.8 KB"
     },
     {
       "path": "discussion/e11_research_synthesis.md",
@@ -547,7 +567,7 @@
     },
     {
       "path": "discussion/e11_claim_validity_audit.md",
-      "size": "13.7 KB"
+      "size": "15.4 KB"
     },
     {
       "path": "discussion/e11_cifar100_lt_one_step.md",
@@ -576,6 +596,10 @@
     {
       "path": "discussion/e11_cifar100_resnet_tail_quality_control.md",
       "size": "4.7 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md",
+      "size": "13.8 KB"
     }
   ],
   "ignore_policy": [

@@ -35,6 +35,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_one_step.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch
+sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch
 python3 scripts/e11_run_long_tail_imbalance_ablation.py
 python3 scripts/e11_run_long_tail_checkpoint_sweep.py
 python3 scripts/e11_run_long_tail_class_partition_sweep.py
@@ -109,6 +110,7 @@ make e11-cifar-resnet-checkpoint-sweep-results # submit the top-conference ResNe
 make e11-cifar-resnet-condition-proxy-results # regenerate the ResNet rank-proxy scatter from checkpoint-sweep CSVs
 make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downstream-aware condition diagnostic via Slurm
 make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm
+make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
@@ -125,6 +127,7 @@ Top-conference upgrade runner:
 make e11-cifar-resnet-checkpoint-sweep-results
 make e11-cifar-resnet-fc-condition-results
 make e11-cifar-resnet-tail-quality-results
+make e11-cifar-resnet-layer-jvp-tail-quality-results
 ```
 
 This submits `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`, which
@@ -144,6 +147,13 @@ The tail-quality target submits
 the ResNet checkpoint-sweep runner with 300 tail-train examples per class. It is
 a tail-rich control for the weak-tail-predictor objection, not a standard
 long-tailed benchmark.
+
+The all-layer JVP target submits
+`scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch`, which runs
+`scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py` on the tail-rich
+5000-step ResNet checkpoint. It probes all 21 Conv/Linear matrix weights with
+finite-difference unit JVP, matched-head-gain scaled JVP, and observed
+layer-only drift.
 
 ## Core Artifacts
 
@@ -177,6 +187,7 @@ Paper-facing synthesis:
 - `discussion/e11_cifar100_resnet_condition_proxy_scatter.md`
 - `discussion/e11_cifar100_resnet_fc_condition_scatter.md`
 - `discussion/e11_cifar100_resnet_tail_quality_control.md`
+- `discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md`
 - `discussion/e11_long_tail_imbalance_ablation.md`
 - `discussion/e11_long_tail_checkpoint_sweep.md`
 - `discussion/e11_long_tail_class_partition_sweep.md`
@@ -220,6 +231,8 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_resnet_fc_condition_scatter/summary.csv`
 - `results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv`
 - `results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv`
+- `results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv`
+- `results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv`
 - `results/e11_long_tail_imbalance_ablation/summary.csv`
 - `results/e11_long_tail_checkpoint_sweep/summary.csv`
 - `results/e11_long_tail_class_partition_sweep/summary.csv`
@@ -245,6 +258,7 @@ Primary paper figures:
 - `figures/e11_cifar100_resnet_condition_proxy_scatter/cifar100_resnet_condition_proxy_scatter.png`
 - `figures/e11_cifar100_resnet_fc_condition_scatter/cifar100_resnet_fc_condition_scatter.png`
 - `figures/e11_cifar100_resnet_tail_quality_control/cifar100_resnet_checkpoint_sweep.png`
+- `figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png`
 - `figures/e11_long_tail_imbalance_ablation/long_tail_imbalance_ablation.png`
 - `figures/e11_long_tail_checkpoint_sweep/long_tail_checkpoint_sweep.png`
 - `figures/e11_long_tail_class_partition_sweep/long_tail_class_partition_sweep.png`
@@ -276,6 +290,7 @@ Primary paper figures:
    - A ResNet rank-side proxy scatter over 40 seed/checkpoint points gives positive correlation between mean gradient nuclear rank and log drift ratio, Pearson about `0.7594 [0.6657, 0.8807]`; this supports the caveat that `nrank(G_H)` alone is not the downstream-aware condition.
    - A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`, all points favoring spectral, and worst final-layer-only squared drift ratio about `0.2391 [0.2201, 0.2597]`.
    - A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]` and still keeps the worst squared drift ratio below 1, about `0.7292 [0.6923, 0.768]`.
+   - An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points; observed squared drift ratio is about `0.2011 [0.1845, 0.2192]`, scaled-JVP ratio is about `0.065 [0.06008, 0.07031]`, and every per-layer observed CI upper endpoint is below 1.
    - In the default ResNet diagnostic, tail-loss increase diff spectral-minus-Fro is about `-0.000421 [-0.000592, -0.000249]`; tail-accuracy-drop diff still crosses zero, so this remains a local drift/loss diagnostic rather than an accuracy claim.
 4. The 8-step head-only forgetting diagnostic shows lower measured tail drift across the short horizon.
    - Final squared drift ratio is about `0.6167 [0.5744, 0.6622]`.
@@ -328,11 +343,13 @@ Do not claim:
 - `scripts/e11_run_cifar100_resnet_checkpoint_sweep.py`: ResNet18 checkpoint-quality sweep for the top-conference upgrade path.
 - `scripts/e11_run_cifar100_resnet_condition_proxy_scatter.py`: rank-side proxy scatter generated from the ResNet checkpoint-sweep CSVs.
 - `scripts/e11_run_cifar100_resnet_fc_condition_scatter.py`: final-layer downstream-aware condition diagnostic for `fc.weight` on ResNet18 checkpoints.
+- `scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py`: all-layer ResNet finite-difference JVP diagnostic at the tail-rich checkpoint.
 - `scripts/slurm/e11_cifar100_resnet_one_step.sbatch`: GPU/Slurm submission wrapper for the ResNet18 diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch`: GPU/Slurm submission wrapper for the smaller-head-gain ResNet18 check.
 - `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`: GPU/Slurm submission wrapper for the checkpoint-quality sweep.
 - `scripts/slurm/e11_cifar100_resnet_fc_condition_scatter.sbatch`: GPU/Slurm submission wrapper for the final-layer condition diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch`: GPU/Slurm submission wrapper for the tail-rich checkpoint-quality control.
+- `scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch`: GPU/Slurm submission wrapper for the all-layer ResNet JVP tail-quality diagnostic.
 - `scripts/e11_write_*.py`: generated discussion and paper-facing artifacts.
 - `tests/`: smoke and diagnostic tests.
 
@@ -343,7 +360,7 @@ The current evidence is consistent with a focused local-geometry paper. It is no
 Most important next steps:
 
 1. Add a stronger real long-tail dataset or standard benchmark protocol; the tail-rich ResNet control addresses the weak-tail-function objection, but it is not a tuned long-tail benchmark.
-2. Extend the final-layer ResNet condition diagnostic to all Conv/Linear blocks with downstream-aware tail sensitivity, unit JVP, scaled JVP, observed drift, and layer contribution.
+2. Turn the all-layer ResNet JVP diagnostic into a pre-registered predictive condition benchmark across held-out checkpoints, architectures, or long-tail datasets.
 3. Extend the current fixed-checkpoint, short-trajectory, and small practical-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
 5. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.

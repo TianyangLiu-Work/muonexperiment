@@ -577,6 +577,13 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_tail_quality_control") / "config.json",
         Path("figures/e11_cifar100_resnet_tail_quality_control") / "cifar100_resnet_checkpoint_sweep.png",
         Path("discussion/e11_cifar100_resnet_tail_quality_control.md"),
+        Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "metrics.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "paired_metrics.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "summary.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "overall_summary.csv",
+        Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "config.json",
+        Path("figures/e11_cifar100_resnet_layer_jvp_tail_quality") / "cifar100_resnet_layer_jvp_tail_quality.png",
+        Path("discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md"),
         Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv",
         Path("results/e11_long_tail_imbalance_ablation") / "summary.csv",
         Path("figures/e11_long_tail_imbalance_ablation") / "long_tail_imbalance_ablation.png",
@@ -635,6 +642,7 @@ def main() -> None:
         Path("paper/specgrad_activation_paper/figures") / "long_tail_practical_training.png",
         Path("paper/specgrad_activation_paper/figures") / "long_tail_head_only_forgetting.png",
         Path("paper/specgrad_activation_paper/figures") / "long_tail_layerwise_drift.png",
+        Path("paper/specgrad_activation_paper/figures") / "cifar100_resnet_layer_jvp_tail_quality.png",
         Path("paper/specgrad_activation_paper/tables") / "head_tail_empirical_results.tex",
         Path("paper/specgrad_activation_paper/tables") / "local_linearization_errors.tex",
         Path("paper/specgrad_activation_paper/tables") / "e11_paper_numbers.tex",
@@ -725,8 +733,10 @@ def main() -> None:
         "Unit-direction spectral JVP is larger than Frobenius in both layers",
         "make e11-cifar-resnet-fc-condition-results # submit the ResNet final-layer downstream-aware condition diagnostic via Slurm",
         "make e11-cifar-resnet-tail-quality-results # submit the tail-rich ResNet checkpoint-quality control via Slurm",
+        "make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
         "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
+        "An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points",
         "make e11-all-results",
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
@@ -1871,6 +1881,66 @@ def main() -> None:
         raise AssertionError(
             "CIFAR-100 ResNet18 tail-quality control must preserve lower drift and the non-performance caveat"
         )
+    cifar_resnet_layer_jvp_metrics = pd.read_csv(
+        Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "metrics.csv"
+    )
+    cifar_resnet_layer_jvp_paired = pd.read_csv(
+        Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "paired_metrics.csv"
+    )
+    cifar_resnet_layer_jvp_summary = pd.read_csv(
+        Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "summary.csv"
+    )
+    cifar_resnet_layer_jvp_overall = pd.read_csv(
+        Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "overall_summary.csv"
+    )
+    cifar_resnet_layer_jvp_config = json.loads(
+        (Path("results/e11_cifar100_resnet_layer_jvp_tail_quality") / "config.json").read_text()
+    )
+    base_layer_jvp_config = cifar_resnet_layer_jvp_config["base_config"]
+    if (
+        len(cifar_resnet_layer_jvp_metrics) != 420
+        or len(cifar_resnet_layer_jvp_paired) != 210
+        or len(cifar_resnet_layer_jvp_summary) != 21
+        or len(cifar_resnet_layer_jvp_overall) != 1
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 all-layer JVP diagnostic must contain 10 seeds x 21 layers x 2 geometries"
+        )
+    if not (
+        set(cifar_resnet_layer_jvp_metrics["geometry"]) == {"frobenius", "spectral"}
+        and cifar_resnet_layer_jvp_metrics["seed"].nunique() == 10
+        and cifar_resnet_layer_jvp_metrics["parameter"].nunique() == 21
+        and cifar_resnet_layer_jvp_paired["parameter"].nunique() == 21
+    ):
+        raise AssertionError("CIFAR-100-LT ResNet18 all-layer JVP diagnostic must cover 10 seeds and 21 matrix layers")
+    if (
+        base_layer_jvp_config["device"] != "cuda"
+        or base_layer_jvp_config["download"]
+        or abs(float(base_layer_jvp_config["target_head_gain_fraction"]) - 0.005) > 1e-12
+        or len(base_layer_jvp_config["seeds"]) != 10
+        or int(base_layer_jvp_config["warmup_steps"]) != 5000
+        or int(base_layer_jvp_config["head_train_per_class"]) != 300
+        or int(base_layer_jvp_config["tail_train_per_class"]) != 300
+        or abs(float(cifar_resnet_layer_jvp_config["jvp_epsilon"]) - 1e-4) > 1e-12
+    ):
+        raise AssertionError("CIFAR-100-LT ResNet18 all-layer JVP diagnostic should be the tail-rich Slurm/GPU no-download run")
+    layer_jvp_row = cifar_resnet_layer_jvp_overall.iloc[0]
+    if not (
+        int(layer_jvp_row["parameters"]) == 21
+        and int(layer_jvp_row["paired_points"]) == 210
+        and layer_jvp_row["mean_tail_accuracy_before"] > 0.3
+        and layer_jvp_row["observed_tail_drift_sq_ratio_ci95_high"] < 1.0
+        and layer_jvp_row["scaled_jvp_tail_drift_sq_ratio_ci95_high"] < 1.0
+        and layer_jvp_row["spectral_less_observed_tail_drift_fraction"] == 1.0
+        and layer_jvp_row["spectral_less_scaled_jvp_tail_drift_fraction"] == 1.0
+        and (cifar_resnet_layer_jvp_summary["seeds"] == 10).all()
+        and (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (cifar_resnet_layer_jvp_summary["scaled_jvp_tail_drift_sq_ratio_ci95_high"] < 1.0).all()
+        and (cifar_resnet_layer_jvp_summary["spectral_less_observed_tail_drift_fraction"] == 1.0).all()
+    ):
+        raise AssertionError(
+            "CIFAR-100-LT ResNet18 all-layer JVP diagnostic must preserve lower scaled-JVP and observed drift"
+        )
     imbalance_steps = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv")
     imbalance_summary = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "summary.csv")
     if len(imbalance_steps) != 160:
@@ -2310,6 +2380,7 @@ def main() -> None:
         "figures/e11_long_tail_practical_training/long_tail_practical_training.png",
         "figures/e11_long_tail_forgetting/long_tail_head_only_forgetting.png",
         "figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png",
+        "figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png",
         "seven figures plus one generated table",
         "paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex",
         "older condition-geometry artifacts",
@@ -2464,6 +2535,14 @@ def main() -> None:
         "\\EelevenCifarResNetTailQualityWorstDriftRatio",
         "\\EelevenCifarResNetTailQualityBestTailAccuracy",
         "\\EelevenCifarResNetTailQualityTailAccuracyRange",
+        "\\EelevenCifarResNetLayerJvpSeeds",
+        "\\EelevenCifarResNetLayerJvpParameters",
+        "\\EelevenCifarResNetLayerJvpPairedPoints",
+        "\\EelevenCifarResNetLayerJvpScaledRatio",
+        "\\EelevenCifarResNetLayerJvpObservedRatio",
+        "\\EelevenCifarResNetLayerJvpSupportedLayers",
+        "\\EelevenCifarResNetLayerJvpWorstObservedRatio",
+        "\\EelevenCifarResNetLayerJvpWorstScaledRatio",
         "\\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         "\\EelevenLocalLinearizationMaxRelativeErrorDirection",
         "\\EelevenLongTailImbalanceAblationSettings",
@@ -2564,6 +2643,8 @@ def main() -> None:
         r"\EelevenCifarResNetFcConditionFavorsSpectralFraction",
         r"\EelevenCifarResNetTailQualityWorstDriftRatio",
         r"\EelevenCifarResNetTailQualityBestTailAccuracy",
+        r"\EelevenCifarResNetLayerJvpObservedRatio",
+        r"\EelevenCifarResNetLayerJvpScaledRatio",
         r"\EelevenLocalLinearizationMaxRelativeErrorCiHigh",
         r"\EelevenLocalLinearizationMaxRelativeErrorDirection",
         r"\EelevenLongTailImbalanceWorstRatioCiHigh",
@@ -2606,6 +2687,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-proxy-results",
         "make e11-cifar-resnet-fc-condition-results",
         "make e11-cifar-resnet-tail-quality-results",
+        "make e11-cifar-resnet-layer-jvp-tail-quality-results",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -2625,6 +2707,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 condition-proxy scatter",
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
         "CIFAR-100 ResNet18 tail-quality control",
+        "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -2649,6 +2732,7 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 condition-proxy scatter",
         "CIFAR-100-LT ResNet18 final-layer condition scatter",
         "CIFAR-100 ResNet18 tail-quality control",
+        "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
         "Long-tailed practical training diagnostic",
         "Long-tailed practical training LR sensitivity",
     ]
@@ -2669,6 +2753,7 @@ def main() -> None:
         "nrank-vs-ssrank condition",
         "final-layer condition scatter",
         "tail-rich ResNet control",
+        "all-layer JVP",
         "Treat Muon as motivation",
         "legacy update-spectrum artifacts",
     ]
@@ -2860,6 +2945,7 @@ def main() -> None:
         "operator-norm ratio=0.5543",
         "final-layer ResNet condition scatter",
         "tail-rich control",
+        "all-layer ResNet JVP",
     ]
     missing_claim_validity = [phrase for phrase in required_claim_validity_phrases if phrase not in claim_validity]
     if missing_claim_validity:
@@ -2874,6 +2960,7 @@ def main() -> None:
         "Larger-architecture layerwise diagnostic",
         "final-layer condition scatter",
         "tail-rich ResNet control",
+        "all-layer ResNet JVP",
         "lower tail-example logit drift automatically improves",
         "Head-to-Tail Interference in Long-Tailed Small-Batch Training",
         "explicit norm-specific scaling readouts",
@@ -2891,6 +2978,7 @@ def main() -> None:
         "Rank-side proxy scatter",
         "Final-layer downstream-aware condition",
         "All-layer downstream-aware ResNet condition scatter",
+        "all-layer JVP tail-quality",
         "Tail-quality control",
         "tail-quality control",
         "Long-tail imbalance sweep",
@@ -2914,6 +3002,7 @@ def main() -> None:
         or "make e11-cifar-resnet-rho002-results" not in readme
         or "make e11-cifar-resnet-checkpoint-sweep-results" not in readme
         or "make e11-cifar-resnet-condition-proxy-results" not in readme
+        or "make e11-cifar-resnet-layer-jvp-tail-quality-results" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
     ):

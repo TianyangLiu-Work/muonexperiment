@@ -140,6 +140,8 @@ def main() -> None:
             {"artifact": "discussion/e11_end_of_draft_self_review.md", "role": "Five-dimension self-review and claim-evidence map for the current draft."},
             {"artifact": "figures/e11_long_tail_muon_state_source_control/long_tail_muon_state_source_control.png", "role": "Appendix control for Muon trajectory state-selection risk; evaluates Muon-style directions on Fro/GD-generated states."},
             {"artifact": "discussion/e11_long_tail_muon_state_source_control.md", "role": "Markdown summary and CSV links for the Muon state-source control."},
+            {"artifact": "figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png", "role": "Appendix ResNet all-layer finite-difference JVP control at the tail-rich checkpoint; supports the architecture-level mechanism bridge without turning the paper into a benchmark claim."},
+            {"artifact": "discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md", "role": "Markdown summary and CSV links for the ResNet all-layer JVP tail-quality diagnostic."},
             {"artifact": "discussion/e11_long_tail_practical_training_lr_sweep.md", "role": "Supporting robustness check for the selected practical-training Muon learning rate."},
             {"artifact": "discussion/e11_activation_perturbation.md", "role": "Background activation-geometry evidence; not a current main result."},
             {"artifact": "discussion/e11_reproduction_checklist.md", "role": "Minimal reproduction and appendix/guardrail reproduction commands."},

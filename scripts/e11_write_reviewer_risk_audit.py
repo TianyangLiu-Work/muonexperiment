@@ -33,6 +33,12 @@ def main() -> None:
         "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
     )
     cifar_resnet_tail_quality = pd.read_csv("results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv")
+    cifar_resnet_layer_jvp = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv"
+    ).iloc[0]
+    cifar_resnet_layer_jvp_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
+    )
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     state_control = pd.read_csv(
@@ -71,6 +77,9 @@ def main() -> None:
     cifar_resnet_tail_quality_best_tail_accuracy = cifar_resnet_tail_quality.loc[
         cifar_resnet_tail_quality["mean_tail_accuracy_before"].idxmax()
     ]
+    cifar_resnet_layer_jvp_supported_layers = int(
+        (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
+    )
     layer_1 = layerwise[layerwise["layer"].eq(1)].iloc[0]
     layer_2 = layerwise[layerwise["layer"].eq(2)].iloc[0]
 
@@ -103,6 +112,9 @@ def main() -> None:
                     f"and keeps worst squared drift ratio at "
                     f"{fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                     f"CI={interval(cifar_resnet_tail_quality_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                    f"the all-layer JVP tail-quality diagnostic gives observed squared drift ratio "
+                    f"{fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={interval(cifar_resnet_layer_jvp, 'observed_tail_drift_sq_ratio_ci95_low', 'observed_tail_drift_sq_ratio_ci95_high')}; "
                     f"but tail-accuracy-drop diff CI={interval(cifar_resnet, 'tail_accuracy_drop_diff_ci95_low', 'tail_accuracy_drop_diff_ci95_high')} crosses zero. "
                     f"The small practical training run has lower tail eval loss ratio="
                     f"{fmt(practical_training['geomean_final_tail_eval_loss_ratio_muon_over_adam'])} "
@@ -142,10 +154,13 @@ def main() -> None:
                     f"(fraction {fmt(cifar_resnet_fc_condition_favors_fraction)}), "
                     f"with weakest mean score={fmt(cifar_resnet_fc_condition_weakest['mean_condition_score_nrank_over_tail_srank'])} "
                     f"and worst squared drift ratio={fmt(cifar_resnet_fc_condition_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
-                    f"CI={interval(cifar_resnet_fc_condition_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
+                    f"CI={interval(cifar_resnet_fc_condition_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
+                    f"The all-layer ResNet JVP diagnostic covers {int(cifar_resnet_layer_jvp['parameters'])} Conv/Linear weights and "
+                    f"{int(cifar_resnet_layer_jvp['paired_points'])} paired layer/seed points; "
+                    f"{cifar_resnet_layer_jvp_supported_layers}/{int(cifar_resnet_layer_jvp['parameters'])} observed per-layer CI upper endpoints are below one."
                 ),
-                "safe_response": "Call the synthetic result a mechanism sanity check, use the ResNet rank-only proxy as a caveat, and present the final-layer condition scatter as a partial downstream-aware natural-task bridge.",
-                "remaining_work": "Extend the downstream-aware boundary rule beyond fc.weight to Conv/Linear blocks and held-out real tasks or architecture splits.",
+                "safe_response": "Call the synthetic result a mechanism sanity check, use the ResNet rank-only proxy as a caveat, and present the final-layer plus all-layer JVP diagnostics as downstream-aware natural-task bridges.",
+                "remaining_work": "Turn the local all-layer JVP bridge into pre-registered held-out real-task or architecture-split prediction before claiming a general boundary predictor.",
             },
             {
                 "reviewer_objection": "The layerwise mechanism is not simply lower tail sensitivity.",
@@ -189,7 +204,10 @@ def main() -> None:
                     f"CI={interval(cifar_resnet_checkpoint_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
                     f"A tail-rich control reaches tail accuracy="
                     f"{fmt(cifar_resnet_tail_quality_best_tail_accuracy['mean_tail_accuracy_before'])} "
-                    f"and worst drift ratio={fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}."
+                    f"and worst drift ratio={fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])}. "
+                    f"The all-layer JVP diagnostic adds observed ratio="
+                    f"{fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])} "
+                    f"over {int(cifar_resnet_layer_jvp['paired_points'])} layer/seed pairs."
                 ),
                 "safe_response": "Present the manuscript as a theory-and-diagnostic mechanism paper with architecture and tail-quality controls, not a full long-tail benchmark paper.",
                 "remaining_work": "Add ImageNet-LT or iNaturalist-style matched-head-gain diagnostics and long-horizon practical baselines before claiming benchmark-level generality.",
@@ -269,6 +287,7 @@ This generated audit lists likely reviewer objections for the current head-to-ta
 - [CIFAR-100-LT ResNet18 condition-proxy scatter](e11_cifar100_resnet_condition_proxy_scatter.md)
 - [CIFAR-100-LT ResNet18 final-layer condition scatter](e11_cifar100_resnet_fc_condition_scatter.md)
 - [CIFAR-100 ResNet18 tail-quality control](e11_cifar100_resnet_tail_quality_control.md)
+- [CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic](e11_cifar100_resnet_layer_jvp_tail_quality.md)
 - [artifact manifest](e11_artifact_manifest.md)
 """
     write_markdown(OUTPUT_PATH, text)

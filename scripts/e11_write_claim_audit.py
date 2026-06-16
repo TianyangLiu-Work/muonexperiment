@@ -40,6 +40,12 @@ def main() -> None:
         "results/e11_cifar100_resnet_fc_condition_scatter/condition_metrics.csv"
     )
     cifar_resnet_tail_quality = pd.read_csv("results/e11_cifar100_resnet_tail_quality_control/pair_summary.csv")
+    cifar_resnet_layer_jvp = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv"
+    ).iloc[0]
+    cifar_resnet_layer_jvp_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
+    )
     muon_bridge = pd.read_csv("results/e11_long_tail_muon_bridge/pair_summary.csv").set_index("direction")
     practical_bridge = pd.read_csv("results/e11_long_tail_practical_muon_bridge/summary.csv").set_index("direction")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
@@ -73,6 +79,9 @@ def main() -> None:
     cifar_resnet_tail_quality_best_tail_accuracy = cifar_resnet_tail_quality.loc[
         cifar_resnet_tail_quality["mean_tail_accuracy_before"].idxmax()
     ]
+    cifar_resnet_layer_jvp_supported_layers = int(
+        (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
+    )
 
     claim_status = pd.DataFrame(
         [
@@ -88,13 +97,19 @@ def main() -> None:
                     f"{fmt(cifar_resnet_rank_proxy_pearson['estimate'])} "
                     f"CI=[{fmt(cifar_resnet_rank_proxy_pearson['ci95_low'])},{fmt(cifar_resnet_rank_proxy_pearson['ci95_high'])}] "
                     f"with log squared drift ratio, showing that the head-rank proxy alone is not the full downstream-aware condition. "
-                    f"The final-layer ResNet condition check measures nrank(G_H)/srank(H_T) directly for fc.weight; "
+                    f"The final-layer ResNet condition scatter/check measures nrank(G_H)/srank(H_T) directly for fc.weight; "
                     f"the weakest mean score is {fmt(cifar_resnet_fc_condition_weakest['mean_condition_score_nrank_over_tail_srank'])}, "
                     f"all {len(cifar_resnet_fc_condition_points)} seed/checkpoint points favor spectral, and the worst final-layer-only drift ratio is "
                     f"{fmt(cifar_resnet_fc_condition_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
-                    f"CI={ci(cifar_resnet_fc_condition_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
+                    f"CI={ci(cifar_resnet_fc_condition_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
+                    f"The all-layer ResNet finite-difference JVP diagnostic covers "
+                    f"{int(cifar_resnet_layer_jvp['parameters'])} Conv/Linear matrix weights and "
+                    f"{int(cifar_resnet_layer_jvp['paired_points'])} paired layer/seed points; observed squared drift ratio is "
+                    f"{fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={ci(cifar_resnet_layer_jvp, 'observed_tail_drift_sq_ratio_ci95_low', 'observed_tail_drift_sq_ratio_ci95_high')}, "
+                    f"with {cifar_resnet_layer_jvp_supported_layers}/{int(cifar_resnet_layer_jvp['parameters'])} per-layer CI upper endpoints below one."
                 ),
-                "main_loophole": "The final layer now has a downstream-aware natural-task check, but convolutional blocks still need all-layer tail sensitivity or JVP diagnostics.",
+                "main_loophole": "The ResNet all-layer JVP check is a strong local mechanism diagnostic, but it is still not a standard long-tail benchmark or a practical optimizer trajectory result.",
             },
             {
                 "claim": "Spectral/polar one-step updates reduce held-out tail-example logit drift at matched head gain.",
@@ -120,7 +135,10 @@ def main() -> None:
                     f"{fmt(cifar_resnet_tail_quality_best_tail_accuracy['mean_tail_accuracy_before'])} "
                     f"CI={ci(cifar_resnet_tail_quality_best_tail_accuracy, 'tail_accuracy_before_ci95_low', 'tail_accuracy_before_ci95_high')} "
                     f"while preserving worst drift ratio {fmt(cifar_resnet_tail_quality_worst['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
-                    f"CI={ci(cifar_resnet_tail_quality_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}."
+                    f"CI={ci(cifar_resnet_tail_quality_worst, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}. "
+                    f"At the tail-rich 5000-step checkpoint, all-layer layer-only interventions give observed squared drift ratio "
+                    f"{fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])} "
+                    f"CI={ci(cifar_resnet_layer_jvp, 'observed_tail_drift_sq_ratio_ci95_low', 'observed_tail_drift_sq_ratio_ci95_high')}."
                 ),
                 "main_loophole": "The result is about logits/function drift; the matched step is norm-specific, not uniformly smaller, and even the tail-rich control is not a tuned long-tail optimizer benchmark.",
             },
@@ -236,6 +254,11 @@ def main() -> None:
                 "role": "Tail-rich checkpoint control showing lower matched-gain drift with substantially higher pre-update tail accuracy.",
             },
             {
+                "table": "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
+                "path": "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv",
+                "role": "All Conv/Linear layer finite-difference JVP, scaled-JVP, and observed drift decomposition at the tail-rich checkpoint.",
+            },
+            {
                 "table": "Long-tail Muon-style compatibility",
                 "path": "results/e11_long_tail_muon_bridge/pair_summary.csv",
                 "role": "Fixed-checkpoint compatibility check for polar(G_t), polar(M_t), and Newton-Schulz directions under matched head gain.",
@@ -280,7 +303,7 @@ The current data do **not** justify saying that this already proves better tail 
 
 1. The CIFAR-100-LT ResNet evidence is still local diagnostics plus a tail-rich control; it is not a modern long-tail optimizer benchmark.
 2. The Muon-style compatibility evidence is local and small-scale; real long-tail practical Muon training remains unchecked.
-3. The final-layer ResNet condition scatter is useful, but all-layer convolutional downstream-aware condition diagnostics remain missing.
+3. The all-layer ResNet JVP diagnostic addresses the classifier-only criticism locally, but practical CIFAR-100-LT Muon/AdamW trajectory diagnostics remain missing.
 4. The current performance evidence is weaker than the function-drift evidence.
 5. The detailed layerwise JVP mechanism has only been checked in the current small MLP.
 """

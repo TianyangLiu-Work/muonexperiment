@@ -19,14 +19,15 @@ reduce tail-example function drift at matched head gain.
 | Rank-side proxy scatter | Across 40 ResNet seed/checkpoint points, mean gradient nuclear rank is positively correlated with log drift ratio, Pearson `0.7594 [0.6657, 0.8807]`. | caveat |
 | Final-layer downstream-aware condition | Across 40 ResNet final-layer seed/checkpoint points, the weakest mean `nrank(G_H) / srank(H_T)` score is `6.566`, all points favor spectral, and the worst final-layer-only squared drift ratio is `0.2391 [0.2201, 0.2597]`. | partial |
 | Tail-quality control | A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy `0.3739 [0.3454, 0.4024]`; worst squared drift ratio remains `0.7292 [0.6923, 0.768]`. | partial |
+| All-layer downstream-aware ResNet condition scatter | The tail-rich ResNet all-layer finite-difference JVP diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points; observed squared drift ratio is `0.2011 [0.1845, 0.2192]`, scaled-JVP ratio is `0.065 [0.06008, 0.07031]`, and all per-layer observed CI upper endpoints are below 1. | partial |
 | Claim boundary | Tail accuracy remains inconclusive; paper explicitly avoids performance claims. | keep |
 
 ## Paper-Critical Missing Evidence
 
 | priority | missing piece | minimum acceptable gate | why it matters |
 |---|---|---|---|
-| P0 | Standard long-tail benchmark protocol | The tail-rich control now addresses the weakest-tail-function objection, but it is not a tuned CIFAR-100-LT/ImageNet-LT/iNaturalist benchmark with many/medium/few reporting. | Reviewers will still object if the paper implies benchmark-level optimizer performance. |
-| P0 | All-layer downstream-aware ResNet condition scatter | The final-layer condition scatter is complete for `fc.weight`, but Conv/Linear blocks still need downstream-aware tail sensitivity, unit JVP, scaled JVP, observed drift, and layer contribution. | The theorem must look predictive beyond the synthetic construction and beyond the classifier layer. |
+| P0 | Standard long-tail benchmark protocol | The tail-rich control and all-layer JVP diagnostic address the weakest local-mechanism objections, but they are not tuned CIFAR-100-LT/ImageNet-LT/iNaturalist benchmarks with many/medium/few reporting. | Reviewers will still object if the paper implies benchmark-level optimizer performance. |
+| P0 | Predictive downstream-aware condition benchmark | The all-layer ResNet JVP diagnostic is complete locally, but the condition still needs pre-registered held-out checkpoint/architecture/dataset prediction rather than post-hoc explanation. | The theorem must look predictive beyond the synthetic construction and beyond one ResNet checkpoint family. |
 | P1 | Long-tail imbalance sweep | CIFAR-100-LT imbalance factors or explicit tail-count settings with at least 3 seeds each; keep paired matched-gain diagnostics. | Converts one dataset split into a systematic long-tail experiment. |
 | P1 | Practical optimizer bridge on CIFAR-100-LT | Sample Muon-style momentum/NS directions along CIFAR-100-LT ResNet training states, not only digits. | Bridges ideal polar directions to practical Muon without claiming final SOTA. |
 | P2 | Long-horizon sanity benchmark | Tuned SGD/AdamW/Muon-style baselines on CIFAR-100-LT with many/medium/few metrics and local drift probes sampled along the trajectory. | Needed only if the paper wants any optimizer-performance discussion. |
@@ -49,8 +50,8 @@ reduce tail-example function drift at matched head gain.
 
 - All headline numbers are generated from CSVs and LaTeX macros, not hand typed.
 - `scripts/e11_validate_outputs.py` checks the ResNet 10-seed, rho=0.002,
-  checkpoint-sweep, rank-proxy, final-layer condition, and tail-quality
-  artifacts.
+  checkpoint-sweep, rank-proxy, final-layer condition, tail-quality, and
+  all-layer JVP tail-quality artifacts.
 - The paper states one main claim in the abstract and conclusion: local
   matched-head-gain drift, not final accuracy.
 - Every ResNet result includes seed count, target gain, checkpoint quality, and
@@ -60,18 +61,20 @@ reduce tail-example function drift at matched head gain.
 
 ## Next Implementation Step
 
-The ResNet checkpoint-quality sweep, final-layer condition scatter, and
-tail-quality control have been run.
+The ResNet checkpoint-quality sweep, final-layer condition scatter,
+tail-quality control, and all-layer JVP tail-quality diagnostic have been run.
 
 The checkpoint sweep now reduces single-checkpoint risk, the rank-side proxy
 scatter makes clear that head-gradient rank alone is not enough, and the
 final-layer condition scatter directly measures a downstream-aware classifier
 proxy. The tail-rich control weakens the objection that the original ResNet
-checkpoints only protected a weak tail function. The next highest-leverage
-experiments are therefore:
+checkpoints only protected a weak tail function. The all-layer JVP diagnostic
+adds finite-difference tail sensitivity, scaled-JVP, observed drift, and layer
+contribution for every Conv/Linear matrix weight at the tail-rich checkpoint.
+The next highest-leverage experiments are therefore:
 
-1. extend the final-layer condition diagnostic to all Conv/Linear blocks with a
-   downstream-aware tail sensitivity or finite-difference JVP proxy; or
+1. turn the all-layer JVP bridge into a pre-registered predictive condition
+   benchmark across held-out checkpoints, architectures, or datasets;
 2. run CIFAR-100-LT practical Muon/AdamW trajectory diagnostics with sampled
    matched-head-gain probes and final class-wise metrics.
 3. move the diagnostic to a standard long-tail benchmark protocol with
@@ -93,3 +96,7 @@ The completed tail-quality control artifacts are:
 `results/e11_cifar100_resnet_tail_quality_control/*`,
 `figures/e11_cifar100_resnet_tail_quality_control/*`, and
 `discussion/e11_cifar100_resnet_tail_quality_control.md`.
+The completed all-layer JVP tail-quality artifacts are:
+`results/e11_cifar100_resnet_layer_jvp_tail_quality/*`,
+`figures/e11_cifar100_resnet_layer_jvp_tail_quality/*`, and
+`discussion/e11_cifar100_resnet_layer_jvp_tail_quality.md`.

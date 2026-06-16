@@ -57,6 +57,10 @@ PAPER_FIGURE_SOURCES: tuple[tuple[Path, Path], ...] = (
         Path("figures/e11_long_tail_layerwise/long_tail_layerwise_drift.png"),
         Path("paper/specgrad_activation_paper/figures/long_tail_layerwise_drift.png"),
     ),
+    (
+        Path("figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png"),
+        Path("paper/specgrad_activation_paper/figures/cifar100_resnet_layer_jvp_tail_quality.png"),
+    ),
 )
 
 

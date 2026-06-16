@@ -42,6 +42,12 @@ def main() -> None:
     practical_lr_sweep = pd.read_csv("results/e11_long_tail_practical_training_lr_sweep/sweep_summary.csv")
     forgetting = pd.read_csv("results/e11_long_tail_forgetting/summary.csv").iloc[0]
     layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
+    cifar_resnet_layer_jvp = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv"
+    ).iloc[0]
+    cifar_resnet_layer_jvp_summary = pd.read_csv(
+        "results/e11_cifar100_resnet_layer_jvp_tail_quality/summary.csv"
+    )
     layer_one = layerwise[layerwise["layer"].eq(1)].iloc[0]
     layer_two = layerwise[layerwise["layer"].eq(2)].iloc[0]
 
@@ -51,6 +57,9 @@ def main() -> None:
     alignment_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "alignment")
     update_fro_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "update_fro_norm")
     update_op_ratio = paired_geomean_ratio(one_step_steps, "spectral", "frobenius", "update_op_norm")
+    cifar_resnet_layer_jvp_supported_layers = int(
+        (cifar_resnet_layer_jvp_summary["observed_tail_drift_sq_ratio_ci95_high"] < 1.0).sum()
+    )
 
     evidence = pd.DataFrame(
         [
@@ -202,6 +211,24 @@ def main() -> None:
                 ),
                 "how_to_read": "After matching the head gain, spectral/polar can use a smaller operator-norm step despite a larger Frobenius-norm step, and the scaled readout matches observed lower tail drift.",
                 "caveat": "This is evidence for scaled head-gain efficiency, not a universal spectral-stability claim.",
+            },
+            {
+                "claim": "The all-layer ResNet JVP tail-quality diagnostic extends the local mechanism beyond the classifier layer.",
+                "recommended_figure": link(
+                    "figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png"
+                ),
+                "source_data": link("results/e11_cifar100_resnet_layer_jvp_tail_quality/overall_summary.csv"),
+                "quantitative_anchor": (
+                    f"observed squared drift ratio="
+                    f"{fmt(cifar_resnet_layer_jvp['geomean_observed_tail_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{ci(cifar_resnet_layer_jvp, 'observed_tail_drift_sq_ratio_ci95_low', 'observed_tail_drift_sq_ratio_ci95_high')}; "
+                    f"scaled JVP ratio="
+                    f"{fmt(cifar_resnet_layer_jvp['geomean_scaled_jvp_tail_drift_sq_ratio_spectral_over_fro'])} "
+                    f"{ci(cifar_resnet_layer_jvp, 'scaled_jvp_tail_drift_sq_ratio_ci95_low', 'scaled_jvp_tail_drift_sq_ratio_ci95_high')}; "
+                    f"{cifar_resnet_layer_jvp_supported_layers}/{int(cifar_resnet_layer_jvp['parameters'])} per-layer observed CI upper endpoints below 1."
+                ),
+                "how_to_read": "Every Conv/Linear matrix weight is probed by finite-difference JVP and layer-only matched-head-gain intervention at the tail-rich ResNet checkpoint.",
+                "caveat": "This is local mechanism evidence at one tail-rich checkpoint family, not a practical optimizer benchmark.",
             },
             {
                 "claim": "The current evidence does not prove broad tail-accuracy or benchmark improvement.",

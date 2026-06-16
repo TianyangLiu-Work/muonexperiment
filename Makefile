@@ -1,4 +1,4 @@
-.PHONY: e11-main-results e11-cifar-results e11-cifar-resnet-results e11-cifar-resnet-rho002-results e11-cifar-resnet-checkpoint-sweep-results e11-cifar-resnet-condition-proxy-results e11-cifar-resnet-fc-condition-results e11-cifar-resnet-tail-quality-results e11-appendix-results e11-all-results e11-paper-assets e11-guardrail-assets e11-all-assets e11-paper-pdf e11-artifacts e11-validate e11-test e11-check e11-full
+.PHONY: e11-main-results e11-cifar-results e11-cifar-resnet-results e11-cifar-resnet-rho002-results e11-cifar-resnet-checkpoint-sweep-results e11-cifar-resnet-condition-proxy-results e11-cifar-resnet-fc-condition-results e11-cifar-resnet-tail-quality-results e11-cifar-resnet-layer-jvp-tail-quality-results e11-appendix-results e11-all-results e11-paper-assets e11-guardrail-assets e11-all-assets e11-paper-pdf e11-artifacts e11-validate e11-test e11-check e11-full
 
 PYTHON ?= python3
 
@@ -42,6 +42,9 @@ e11-cifar-resnet-fc-condition-results: scripts/e11_run_cifar100_resnet_fc_condit
 
 e11-cifar-resnet-tail-quality-results: scripts/e11_run_cifar100_resnet_checkpoint_sweep.py scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch
 	sbatch scripts/slurm/e11_cifar100_resnet_tail_quality_control.sbatch
+
+e11-cifar-resnet-layer-jvp-tail-quality-results: scripts/e11_run_cifar100_resnet_layer_jvp_tail_quality.py scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch
+	sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_tail_quality.sbatch
 
 e11-appendix-results:
 	$(PYTHON) scripts/e11_run_overlap_followup.py
