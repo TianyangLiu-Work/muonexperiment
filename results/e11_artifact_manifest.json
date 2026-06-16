@@ -12,7 +12,7 @@
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1513236,
+      "size_bytes": 1513329,
       "size": "1.4 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5824832,
+      "size_bytes": 5827042,
       "size": "5.6 MB"
     },
     {
