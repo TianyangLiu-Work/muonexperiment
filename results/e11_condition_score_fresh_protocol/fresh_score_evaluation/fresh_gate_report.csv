@@ -1,4 +1,10 @@
 gate_id,scope,status,evidence
-fresh_final_heldout_architecture_generated,Fresh ResNet50 CIFAR-100-LT architecture split,not_run,missing fresh layer summary at results/e11_condition_score_fresh_protocol/fresh_architecture_resnet50/layer_summary.csv
-fresh_final_heldout_data_partition_generated,Fresh CIFAR-10-LT alternate-partition data split,not_run,missing fresh layer summary at results/e11_condition_score_fresh_protocol/fresh_data_cifar10_alt/layer_summary.csv
+fresh_final_heldout_architecture_residual_spearman,Fresh ResNet50 CIFAR-100-LT architecture split,fail,"primary residual Spearman=-0.8157 CI=[-0.8652, -0.7661]"
+fresh_final_heldout_architecture_threshold_accuracy,Fresh ResNet50 CIFAR-100-LT architecture split,pass,primary below-one threshold accuracy=1
+fresh_final_heldout_architecture_early_prior_comparison,Fresh ResNet50 CIFAR-100-LT architecture split,fail,primary Spearman=-0.8157; early-layer prior Spearman=0.1485
+fresh_final_heldout_architecture_baselines_reported,Fresh ResNet50 CIFAR-100-LT architecture split,pass,"early prior, retired v2 baseline, and source-observed positive control reported"
+fresh_final_heldout_data_partition_residual_spearman,Fresh CIFAR-10-LT alternate-partition data split,pass,"primary residual Spearman=0.642 CI=[0.6339, 0.6501]"
+fresh_final_heldout_data_partition_threshold_accuracy,Fresh CIFAR-10-LT alternate-partition data split,pass,primary below-one threshold accuracy=0.9841
+fresh_final_heldout_data_partition_early_prior_comparison,Fresh CIFAR-10-LT alternate-partition data split,pass,primary Spearman=0.642; early-layer prior Spearman=-0.8251
+fresh_final_heldout_data_partition_baselines_reported,Fresh CIFAR-10-LT alternate-partition data split,pass,"early prior, retired v2 baseline, and source-observed positive control reported"
 fresh_p0_predictive_condition_claim,fresh condition-score protocol,not_ready,"All fresh final splits must pass residual, threshold, baseline-comparison, and reporting gates."

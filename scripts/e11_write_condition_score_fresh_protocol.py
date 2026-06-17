@@ -178,6 +178,32 @@ def gate_rows() -> list[dict[str, str]]:
     ]
 
 
+def fresh_final_evidence_status() -> dict[str, str]:
+    architecture_summary = RESULT_DIR / "fresh_architecture_resnet50" / "layer_summary.csv"
+    data_summary = RESULT_DIR / "fresh_data_cifar10_alt" / "layer_summary.csv"
+    gate_report_path = RESULT_DIR / "fresh_score_evaluation" / "fresh_gate_report.csv"
+    if not (architecture_summary.exists() and data_summary.exists()):
+        return {
+            "item": "fresh final held-out evidence",
+            "status": "missing",
+            "evidence": "fresh ResNet50 and fresh CIFAR-10 alternate-partition Slurm jobs have not been run",
+        }
+    if not gate_report_path.exists():
+        return {
+            "item": "fresh final held-out evidence",
+            "status": "generated_pending_evaluation",
+            "evidence": "fresh final Slurm outputs exist, but fresh_score_evaluation/fresh_gate_report.csv is missing",
+        }
+    gate_report = pd.read_csv(gate_report_path)
+    p0_rows = gate_report[gate_report["gate_id"].eq("fresh_p0_predictive_condition_claim")]
+    p0_status = str(p0_rows.iloc[0]["status"]) if not p0_rows.empty else "missing"
+    return {
+        "item": "fresh final held-out evidence",
+        "status": "evaluated_pass" if p0_status == "pass" else "evaluated_not_ready",
+        "evidence": f"fresh final Slurm outputs exist; evaluator marks fresh P0 claim {p0_status}",
+    }
+
+
 def status_rows() -> list[dict[str, str]]:
     return [
         {
@@ -195,11 +221,7 @@ def status_rows() -> list[dict[str, str]]:
             "status": "registered",
             "evidence": "CIFAR ResNet model builder and checkpoint-prediction parser support model_arch=resnet50",
         },
-        {
-            "item": "fresh final held-out evidence",
-            "status": "missing",
-            "evidence": "fresh ResNet50 and fresh CIFAR-10 alternate-partition Slurm jobs have not been run",
-        },
+        fresh_final_evidence_status(),
     ]
 
 

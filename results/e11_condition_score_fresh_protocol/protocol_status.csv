@@ -2,4 +2,4 @@ item,status,evidence
 spent-heldout quarantine,registered,quarantine_register.csv lists both failed v2 final held-out splits and forbidden uses
 theory-derived score freeze registry,registered,score_freeze_registry.csv defines zero-fit scaled-JVP primary candidate and nested secondary candidate
 fresh ResNet50 implementation path,registered,CIFAR ResNet model builder and checkpoint-prediction parser support model_arch=resnet50
-fresh final held-out evidence,missing,fresh ResNet50 and fresh CIFAR-10 alternate-partition Slurm jobs have not been run
+fresh final held-out evidence,evaluated_not_ready,fresh final Slurm outputs exist; evaluator marks fresh P0 claim not_ready

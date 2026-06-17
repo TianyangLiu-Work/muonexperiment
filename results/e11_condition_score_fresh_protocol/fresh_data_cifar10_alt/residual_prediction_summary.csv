@@ -1,0 +1,5 @@
+predictor,predictor_family,checkpoint_transfer_pairs,mean_spearman_residual_predictor_vs_residual_target_observed,spearman_ci95_low,spearman_ci95_high,mean_pearson_residual_predictor_vs_residual_target_observed,pearson_ci95_low,pearson_ci95_high,mean_top5_residual_risk_overlap_fraction,top5_residual_risk_overlap_ci95_low,top5_residual_risk_overlap_ci95_high
+source_observed_residual,positive_control,6,0.9846320346320346,0.9813844318571733,0.987879637406896,0.9941344724583412,0.9917519200640407,0.9965170248526417,1.0,1.0,1.0
+source_scaled_jvp_residual,architecture_adjusted,6,0.7134199134199134,0.6798323430222828,0.747007483817544,0.8112578771093536,0.7916118511339454,0.8309039030847618,0.7999999999999999,0.7999999999999998,0.8
+source_unit_jvp_residual,architecture_adjusted,6,0.3512987012987013,0.3308424724117465,0.37175493018565603,0.4818503228866806,0.44473125371082994,0.5189693920625313,0.7999999999999999,0.7999999999999998,0.8
+source_gradient_nuclear_rank_residual,architecture_adjusted,6,-0.7080086580086579,-0.7353089134758999,-0.6807084025414158,-0.7350008640712185,-0.7546623591525898,-0.7153393689898471,0.0,0.0,0.0

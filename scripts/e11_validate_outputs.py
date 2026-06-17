@@ -2777,26 +2777,74 @@ def main() -> None:
         and "head=0,2,4,6,8; tail=1,3,5,7,9"
         in set(fresh_split_registry["class_partition"])
         and fresh_protocol_status.set_index("item").loc["fresh final held-out evidence", "status"]
-        == "missing"
+        in {"missing", "generated_pending_evaluation", "evaluated_not_ready", "evaluated_pass"}
     ):
         raise AssertionError(
-            "fresh condition-score protocol must quarantine spent held-outs, freeze the zero-fit scaled-JVP candidate, and keep fresh final evidence marked missing"
+            "fresh condition-score protocol must quarantine spent held-outs, freeze the zero-fit scaled-JVP candidate, and track fresh final evidence status"
         )
     fresh_eval_dir = fresh_protocol_dir / "fresh_score_evaluation"
     fresh_gate_report = pd.read_csv(fresh_eval_dir / "fresh_gate_report.csv")
+    fresh_score_summary = pd.read_csv(fresh_eval_dir / "fresh_score_summary.csv")
     fresh_eval_config = json.loads((fresh_eval_dir / "config.json").read_text())
     fresh_gate_status = fresh_gate_report.set_index("gate_id")["status"].to_dict()
-    if not (
-        len(fresh_gate_report) == 3
-        and fresh_gate_status.get("fresh_final_heldout_architecture_generated") == "not_run"
-        and fresh_gate_status.get("fresh_final_heldout_data_partition_generated") == "not_run"
-        and fresh_gate_status.get("fresh_p0_predictive_condition_claim") == "not_ready"
-        and fresh_eval_config["primary_score"] == "condition_score_v3_zero_fit_scaled_jvp"
-        and all(not item["generated"] for item in fresh_eval_config["fresh_splits"])
-    ):
-        raise AssertionError(
-            "fresh condition-score evaluator must preserve the current not_run/not_ready state until fresh final split outputs exist"
-        )
+    fresh_eval_generated = [bool(item["generated"]) for item in fresh_eval_config["fresh_splits"]]
+    fresh_evidence_status = fresh_protocol_status.set_index("item").loc["fresh final held-out evidence", "status"]
+    if all(fresh_eval_generated):
+        expected_fresh_gate_status = {
+            "fresh_final_heldout_architecture_residual_spearman": "fail",
+            "fresh_final_heldout_architecture_threshold_accuracy": "pass",
+            "fresh_final_heldout_architecture_early_prior_comparison": "fail",
+            "fresh_final_heldout_architecture_baselines_reported": "pass",
+            "fresh_final_heldout_data_partition_residual_spearman": "pass",
+            "fresh_final_heldout_data_partition_threshold_accuracy": "pass",
+            "fresh_final_heldout_data_partition_early_prior_comparison": "pass",
+            "fresh_final_heldout_data_partition_baselines_reported": "pass",
+            "fresh_p0_predictive_condition_claim": "not_ready",
+        }
+        primary_rows = fresh_score_summary[
+            fresh_score_summary["score"].eq("condition_score_v3_zero_fit_scaled_jvp")
+        ].set_index("split_id")
+        if not (
+            len(fresh_gate_report) == len(expected_fresh_gate_status)
+            and fresh_gate_status == expected_fresh_gate_status
+            and fresh_eval_config["primary_score"] == "condition_score_v3_zero_fit_scaled_jvp"
+            and fresh_evidence_status == "evaluated_not_ready"
+            and set(primary_rows.index)
+            == {
+                "fresh_final_architecture_resnet50_cifar100lt",
+                "fresh_final_data_cifar10lt_alt_partition",
+            }
+            and float(
+                primary_rows.loc[
+                    "fresh_final_architecture_resnet50_cifar100lt",
+                    "spearman_ci95_high",
+                ]
+            )
+            < 0.0
+            and float(
+                primary_rows.loc[
+                    "fresh_final_data_cifar10lt_alt_partition",
+                    "spearman_ci95_low",
+                ]
+            )
+            > 0.0
+        ):
+            raise AssertionError(
+                "fresh condition-score evaluator must preserve the evaluated ResNet50 fail, CIFAR-10 alternate pass, and P0 not_ready state"
+            )
+    elif not any(fresh_eval_generated):
+        if not (
+            len(fresh_gate_report) == 3
+            and fresh_gate_status.get("fresh_final_heldout_architecture_generated") == "not_run"
+            and fresh_gate_status.get("fresh_final_heldout_data_partition_generated") == "not_run"
+            and fresh_gate_status.get("fresh_p0_predictive_condition_claim") == "not_ready"
+            and fresh_eval_config["primary_score"] == "condition_score_v3_zero_fit_scaled_jvp"
+        ):
+            raise AssertionError(
+                "fresh condition-score evaluator must preserve the not_run/not_ready state until fresh final split outputs exist"
+            )
+    else:
+        raise AssertionError("fresh condition-score evaluator should not be committed with only one fresh final split generated")
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -4280,8 +4328,8 @@ def main() -> None:
         "condition_score_v3_zero_fit_scaled_jvp",
         "not_run",
         "not_ready",
-        "fresh_final_heldout_architecture_generated",
-        "fresh_final_heldout_data_partition_generated",
+        "fresh_final_heldout_architecture_residual_spearman",
+        "fresh_final_heldout_data_partition_residual_spearman",
         "spent ResNet34/original-CIFAR-10 held-outs out of fitting and final evidence",
     ]
     assert_required_phrases(
