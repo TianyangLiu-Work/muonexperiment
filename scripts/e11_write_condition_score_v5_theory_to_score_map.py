@@ -17,6 +17,8 @@ DISCUSSION_PATH = Path("discussion/e11_condition_score_v5_theory_to_score_map.md
 V5_THEORY_DIR = Path("results/e11_condition_score_v5_theory_protocol")
 V5_FREEZE_DIR = Path("results/e11_condition_score_v5_protocol/validation_score_freeze")
 V4_AUDIT_DIR = Path("results/e11_condition_score_v4_failure_mechanism_audit")
+V5_FINAL_DIR = Path("results/e11_condition_score_v5_protocol/final_score_evaluation")
+V5_FAILURE_DIR = Path("results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit")
 
 
 def ci_text(row: pd.Series, mean: str = "mean_spearman_score_vs_target_residual") -> str:
@@ -47,6 +49,9 @@ def load_inputs() -> dict[str, pd.DataFrame]:
         "freeze_formulas": pd.read_csv(V5_FREEZE_DIR / "score_formula_registry.csv"),
         "freeze_status": pd.read_csv(V5_FREEZE_DIR / "freeze_status.csv"),
         "freeze_gates": pd.read_csv(V5_FREEZE_DIR / "validation_gate_report.csv"),
+        "final_gates": pd.read_csv(V5_FINAL_DIR / "final_gate_report.csv"),
+        "final_gate_boundaries": pd.read_csv(V5_FAILURE_DIR / "gate_boundary_summary.csv"),
+        "next_protocol_requirements": pd.read_csv(V5_FAILURE_DIR / "next_protocol_requirements.csv"),
         "axis_pairs": pd.read_csv(V4_AUDIT_DIR / "axis_pair_summary.csv"),
         "obstructions": pd.read_csv(V4_AUDIT_DIR / "obstruction_summary.csv"),
     }
@@ -218,6 +223,90 @@ def build_transport_contract() -> pd.DataFrame:
     )
 
 
+def _gate_evidence(final_boundaries: pd.DataFrame, gate_id: str) -> str:
+    rows = final_boundaries[final_boundaries["gate_id"].eq(gate_id)]
+    if len(rows) != 1:
+        raise ValueError(f"expected one final boundary row for {gate_id}, found {len(rows)}")
+    row = rows.iloc[0]
+    return f"{row['status']}: {row['evidence']} ({row['claim_effect']})"
+
+
+def _next_requirement(requirements: pd.DataFrame, requirement_id: str) -> pd.Series:
+    rows = requirements[requirements["requirement_id"].eq(requirement_id)]
+    if len(rows) != 1:
+        raise ValueError(f"expected one next-protocol requirement for {requirement_id}, found {len(rows)}")
+    return rows.iloc[0]
+
+
+def build_post_final_transport_obligations(
+    final_boundaries: pd.DataFrame,
+    requirements: pd.DataFrame,
+) -> pd.DataFrame:
+    separate_endpoints = _next_requirement(requirements, "V5-DGF-NP1-separate-endpoints")
+    separate_transport = _next_requirement(requirements, "V5-DGF-NP2-separate-transport-axes")
+    no_repair = _next_requirement(requirements, "V5-DGF-NP3-no-post-final-repair")
+    direction_term = _next_requirement(requirements, "V5-DGF-NP4-direction-transport-term")
+    preserve_negative = _next_requirement(requirements, "V5-DGF-NP5-preserve-negative-boundaries")
+    return pd.DataFrame(
+        [
+            {
+                "obligation_id": "PFO-1-endpoint-factorization",
+                "theory_gap": "residual-risk ranking and below-one direction classification are separate endpoints",
+                "final_evidence": (
+                    _gate_evidence(final_boundaries, "v5_final_heldout_architecture_residual_spearman")
+                    + "; "
+                    + _gate_evidence(final_boundaries, "v5_final_heldout_architecture_direction_threshold_accuracy")
+                    + "; "
+                    + _gate_evidence(final_boundaries, "v5_final_heldout_data_partition_residual_spearman")
+                    + "; "
+                    + _gate_evidence(final_boundaries, "v5_final_heldout_data_partition_direction_threshold_accuracy")
+                ),
+                "required_next_protocol": separate_endpoints["requirement"],
+                "forbidden_shortcut": separate_endpoints["forbidden_shortcut"],
+                "claim_boundary": "one endpoint passing cannot rescue the other endpoint's failed registered gate",
+            },
+            {
+                "obligation_id": "PFO-2-architecture-direction-transport",
+                "theory_gap": "architecture transport can preserve residual ranking while breaking direction-threshold reliability",
+                "final_evidence": _gate_evidence(
+                    final_boundaries,
+                    "v5_final_heldout_architecture_direction_threshold_accuracy",
+                ),
+                "required_next_protocol": direction_term["requirement"],
+                "forbidden_shortcut": direction_term["forbidden_shortcut"],
+                "claim_boundary": "ResNeXt50 residual ranking is partial evidence only; it is not a v5 predictive-condition pass",
+            },
+            {
+                "obligation_id": "PFO-3-data-partition-residual-transport",
+                "theory_gap": "data-partition transport can preserve direction signs while reversing residual-risk ranking",
+                "final_evidence": _gate_evidence(
+                    final_boundaries,
+                    "v5_final_heldout_data_partition_residual_spearman",
+                ),
+                "required_next_protocol": separate_transport["requirement"],
+                "forbidden_shortcut": separate_transport["forbidden_shortcut"],
+                "claim_boundary": "CIFAR-10 direction-threshold success is not residual-risk prediction",
+            },
+            {
+                "obligation_id": "PFO-4-post-final-quarantine",
+                "theory_gap": "the observed final failures are spent evidence and cannot repair the score",
+                "final_evidence": _gate_evidence(final_boundaries, "v5_p0_predictive_condition_claim"),
+                "required_next_protocol": no_repair["requirement"],
+                "forbidden_shortcut": no_repair["forbidden_shortcut"],
+                "claim_boundary": "new score terms require new validation/final splits, not final-row refitting",
+            },
+            {
+                "obligation_id": "PFO-5-negative-boundary-ledger",
+                "theory_gap": "top-conference credibility depends on preserving both orthogonal failures",
+                "final_evidence": "ResNeXt50 direction failure and CIFAR-10 residual reversal are both active final failures",
+                "required_next_protocol": preserve_negative["requirement"],
+                "forbidden_shortcut": preserve_negative["forbidden_shortcut"],
+                "claim_boundary": "the current paper can use v5 as a completed negative boundary, not as a predictor",
+            },
+        ]
+    )
+
+
 def build_falsifiable_predictions() -> pd.DataFrame:
     return pd.DataFrame(
         [
@@ -314,33 +403,59 @@ def build_ablation_matrix(axis_pairs: pd.DataFrame, obstructions: pd.DataFrame) 
     )
 
 
-def build_readiness_ledger(freeze_status: pd.DataFrame, freeze_gates: pd.DataFrame) -> pd.DataFrame:
+def build_readiness_ledger(
+    freeze_status: pd.DataFrame,
+    freeze_gates: pd.DataFrame,
+    final_gates: pd.DataFrame,
+) -> pd.DataFrame:
     status = freeze_status.set_index("item")["status"].to_dict()
     gates = freeze_gates.set_index("gate_id")["status"].to_dict()
+    final_gate_status = final_gates.set_index("gate_id")["status"].to_dict()
     validation_status = status["v5 validation split output"]
     residual_status = status["v5 transport-normalized residual score"]
-    final_status = status["v5 final split outputs"]
-    final_unblocked = (
+    final_output_status = status["v5 final split outputs"]
+    final_unblocked_before_outputs = (
         validation_status == "generated"
         and residual_status == "frozen"
-        and final_status == "not_run"
+        and final_output_status == "not_run"
         and gates["V5F-6-final-claim-readiness"] == "pass"
     )
+    final_completed_failed = final_gate_status.get("v5_p0_predictive_condition_claim") == "not_ready" and (
+        final_gate_status.get("v5_final_heldout_architecture_direction_threshold_accuracy") == "fail"
+        or final_gate_status.get("v5_final_heldout_data_partition_residual_spearman") == "fail"
+    )
     validation_failed = validation_status == "generated" and residual_status == "validation_failed"
-    if final_unblocked:
+    if final_completed_failed:
+        predictive_evidence = (
+            "completed final gates failed under the frozen score: architecture direction-threshold failed "
+            "and data residual-ranking reversed; P0 remains not_ready"
+        )
+        final_family_status = "completed_failed_boundary"
+        final_family_evidence = (
+            "v5_final_heldout_architecture_direction_threshold_accuracy=fail; "
+            "v5_final_heldout_data_partition_residual_spearman=fail; "
+            "v5_p0_predictive_condition_claim=not_ready"
+        )
+    elif final_unblocked_before_outputs:
         predictive_evidence = (
             "frozen validation-selected score became eligible for final evaluation runs; "
-            "completed final gates are evaluated separately and P0 remains not_ready after the registered failures"
+            "final gates have not yet been evaluated"
         )
+        final_family_status = "not_run"
+        final_family_evidence = "final outputs were absent at validation-freeze time"
     elif validation_failed:
         predictive_evidence = (
             "validation output exists but the residual score failed its freeze gate, "
             "so final evaluation is not claim-eligible"
         )
+        final_family_status = "blocked_by_validation"
+        final_family_evidence = "validation freeze failed before final eligibility"
     else:
         predictive_evidence = (
             "validation freeze is pending and final split outputs are not claim-eligible yet"
         )
+        final_family_status = "not_ready"
+        final_family_evidence = "validation freeze incomplete"
     return pd.DataFrame(
         [
             {
@@ -368,6 +483,12 @@ def build_readiness_ledger(freeze_status: pd.DataFrame, freeze_gates: pd.DataFra
                 "blocks_p0_if_missing": "yes",
             },
             {
+                "item": "v5 final gate family",
+                "status": final_family_status,
+                "evidence": final_family_evidence,
+                "blocks_p0_if_missing": "yes",
+            },
+            {
                 "item": "predictive-condition claim",
                 "status": "not_ready",
                 "evidence": predictive_evidence,
@@ -380,6 +501,15 @@ def build_readiness_ledger(freeze_status: pd.DataFrame, freeze_gates: pd.DataFra
 def build_boundary_text(readiness: pd.DataFrame) -> str:
     readiness_lookup = readiness.set_index("item")["evidence"].to_dict()
     predictive_evidence = str(readiness_lookup["predictive-condition claim"])
+    if predictive_evidence.startswith("completed final gates failed"):
+        return """Allowed now: cite this map as a post-final theory-to-score failure analysis,
+use the completed v5 final rows only as negative boundary evidence, and state
+that architecture-direction transport and data-partition residual transport
+failed as separate obligations.
+
+Blocked now: fitting, selecting, thresholding, or reweighting any v5 score on
+v2/v3/v4/v5 final rows; claiming that the transport-normalized residual score
+predicts held-out layer risk after the registered final gates failed."""
     if predictive_evidence.startswith("frozen validation-selected score"):
         return """Allowed now: cite this map as the pre-final theory-to-score bridge, use spent
 v4 evidence only as diagnostic motivation, and run the v5 final splits with the
@@ -402,6 +532,7 @@ def write_discussion(
     theorem_proxy_map: pd.DataFrame,
     score_lineage: pd.DataFrame,
     transport_contract: pd.DataFrame,
+    post_final_obligations: pd.DataFrame,
     predictions: pd.DataFrame,
     ablations: pd.DataFrame,
     readiness: pd.DataFrame,
@@ -436,6 +567,15 @@ transport error. Subtracting the direction ratio removes a different target:
 the below-one direction comparison. Therefore residual ranking requires a
 frozen transport correction and a separate direction guardrail.
 
+## Post-Final Failure Reading
+
+The v5 final gates have now been consumed. ResNeXt50-32x4d preserves residual
+ranking but fails the direction-threshold gate; CIFAR-10 cross-partition keeps
+the direction threshold but reverses residual ranking. The theory-to-score
+lesson is endpoint factorization: architecture-direction transport and
+data-partition residual transport are separate obligations, and the frozen v5
+score cannot be repaired with these final rows.
+
 ## Theorem Proxy Map
 
 {markdown_table(theorem_proxy_map, ["map_id", "theorem_quantity", "measured_proxy", "score_feature", "transport_term", "validation_gate", "claim_boundary"])}
@@ -447,6 +587,10 @@ frozen transport correction and a separate direction guardrail.
 ## Transport Normalization Contract
 
 {markdown_table(transport_contract, ["step_id", "operation", "allowed_inputs", "forbidden_inputs", "output", "freeze_point", "gate"])}
+
+## Post-Final Transport Obligations
+
+{markdown_table(post_final_obligations, ["obligation_id", "theory_gap", "final_evidence", "required_next_protocol", "forbidden_shortcut", "claim_boundary"])}
 
 ## Falsifiable Predictions
 
@@ -468,6 +612,7 @@ Artifacts:
 - [theorem_proxy_map.csv](../results/e11_condition_score_v5_theory_to_score_map/theorem_proxy_map.csv)
 - [score_lineage.csv](../results/e11_condition_score_v5_theory_to_score_map/score_lineage.csv)
 - [transport_normalization_contract.csv](../results/e11_condition_score_v5_theory_to_score_map/transport_normalization_contract.csv)
+- [post_final_transport_obligations.csv](../results/e11_condition_score_v5_theory_to_score_map/post_final_transport_obligations.csv)
 - [falsifiable_predictions.csv](../results/e11_condition_score_v5_theory_to_score_map/falsifiable_predictions.csv)
 - [ablation_matrix.csv](../results/e11_condition_score_v5_theory_to_score_map/ablation_matrix.csv)
 - [claim_readiness_ledger.csv](../results/e11_condition_score_v5_theory_to_score_map/claim_readiness_ledger.csv)
@@ -481,14 +626,19 @@ def main() -> None:
     theorem_proxy_map = build_theorem_proxy_map()
     score_lineage = build_score_lineage(inputs["freeze_formulas"], inputs["freeze_status"])
     transport_contract = build_transport_contract()
+    post_final_obligations = build_post_final_transport_obligations(
+        inputs["final_gate_boundaries"],
+        inputs["next_protocol_requirements"],
+    )
     predictions = build_falsifiable_predictions()
     ablations = build_ablation_matrix(inputs["axis_pairs"], inputs["obstructions"])
-    readiness = build_readiness_ledger(inputs["freeze_status"], inputs["freeze_gates"])
+    readiness = build_readiness_ledger(inputs["freeze_status"], inputs["freeze_gates"], inputs["final_gates"])
     boundary = build_boundary_text(readiness)
 
     theorem_proxy_map.to_csv(OUTPUT_DIR / "theorem_proxy_map.csv", index=False)
     score_lineage.to_csv(OUTPUT_DIR / "score_lineage.csv", index=False)
     transport_contract.to_csv(OUTPUT_DIR / "transport_normalization_contract.csv", index=False)
+    post_final_obligations.to_csv(OUTPUT_DIR / "post_final_transport_obligations.csv", index=False)
     predictions.to_csv(OUTPUT_DIR / "falsifiable_predictions.csv", index=False)
     ablations.to_csv(OUTPUT_DIR / "ablation_matrix.csv", index=False)
     readiness.to_csv(OUTPUT_DIR / "claim_readiness_ledger.csv", index=False)
@@ -496,6 +646,7 @@ def main() -> None:
         theorem_proxy_map,
         score_lineage,
         transport_contract,
+        post_final_obligations,
         predictions,
         ablations,
         readiness,

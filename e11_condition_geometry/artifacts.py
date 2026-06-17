@@ -206,6 +206,7 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_condition_score_v5_theory_to_score_map/theorem_proxy_map.csv",
     "results/e11_condition_score_v5_theory_to_score_map/score_lineage.csv",
     "results/e11_condition_score_v5_theory_to_score_map/transport_normalization_contract.csv",
+    "results/e11_condition_score_v5_theory_to_score_map/post_final_transport_obligations.csv",
     "results/e11_condition_score_v5_theory_to_score_map/falsifiable_predictions.csv",
     "results/e11_condition_score_v5_theory_to_score_map/ablation_matrix.csv",
     "results/e11_condition_score_v5_theory_to_score_map/claim_readiness_ledger.csv",
@@ -779,7 +780,7 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "stage": "Condition-score v5 theory-to-score map",
         "command": "python3 scripts/e11_write_condition_score_v5_theory_to_score_map.py",
         "produces": "results/e11_condition_score_v5_theory_to_score_map/* and discussion/e11_condition_score_v5_theory_to_score_map.md",
-        "paper_role": "Pre-final theorem-to-measurement bridge that maps sandwich-tail-drift terms to score features, leakage boundaries, ablations, and falsifiable v5 gates.",
+        "paper_role": "Post-final theorem-to-measurement bridge that maps sandwich-tail-drift terms to score features, leakage boundaries, ablations, completed v5 final failures, and endpoint-specific transport obligations.",
     },
     {
         "stage": "Condition-score ablation audit",

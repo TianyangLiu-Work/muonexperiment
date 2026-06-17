@@ -3,4 +3,5 @@ theory-to-score map,generated,discussion/e11_condition_score_v5_theory_to_score_
 v5 validation output,generated,results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv,yes
 v5 residual score freeze,frozen,results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv,yes
 no final before freeze,pass,results/e11_condition_score_v5_protocol/final_* directories absent before freeze,yes
-predictive-condition claim,not_ready,frozen validation-selected score became eligible for final evaluation runs; completed final gates are evaluated separately and P0 remains not_ready after the registered failures,yes
+v5 final gate family,completed_failed_boundary,v5_final_heldout_architecture_direction_threshold_accuracy=fail; v5_final_heldout_data_partition_residual_spearman=fail; v5_p0_predictive_condition_claim=not_ready,yes
+predictive-condition claim,not_ready,completed final gates failed under the frozen score: architecture direction-threshold failed and data residual-ranking reversed; P0 remains not_ready,yes

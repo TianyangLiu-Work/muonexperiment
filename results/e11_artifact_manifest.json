@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 428375,
-      "size": "418.3 KB"
+      "size_bytes": 428519,
+      "size": "418.5 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2635939,
+      "size_bytes": 2647653,
       "size": "2.5 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1551983,
+      "size_bytes": 1561841,
       "size": "1.5 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 287669745,
+      "size_bytes": 287673834,
       "size": "274.3 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833065,
+      "size_bytes": 5833091,
       "size": "5.6 MB"
     },
     {
@@ -748,7 +748,7 @@
     {
       "path": "results/e11_theory_proof_obligation_register/proof_obligations.csv",
       "rows": 6,
-      "size": "4.5 KB"
+      "size": "4.8 KB"
     },
     {
       "path": "results/e11_theory_proof_obligation_register/assumption_stress_tests.csv",
@@ -763,7 +763,7 @@
     {
       "path": "results/e11_theory_proof_obligation_register/theorem_to_experiment_queue.csv",
       "rows": 7,
-      "size": "1.5 KB"
+      "size": "1.7 KB"
     },
     {
       "path": "results/e11_condition_score_v5_theory_protocol/theory_term_register.csv",
@@ -806,6 +806,11 @@
       "size": "1.8 KB"
     },
     {
+      "path": "results/e11_condition_score_v5_theory_to_score_map/post_final_transport_obligations.csv",
+      "rows": 5,
+      "size": "3.1 KB"
+    },
+    {
       "path": "results/e11_condition_score_v5_theory_to_score_map/falsifiable_predictions.csv",
       "rows": 5,
       "size": "1.6 KB"
@@ -817,8 +822,8 @@
     },
     {
       "path": "results/e11_condition_score_v5_theory_to_score_map/claim_readiness_ledger.csv",
-      "rows": 5,
-      "size": "711 B"
+      "rows": 6,
+      "size": "898 B"
     },
     {
       "path": "results/e11_condition_score_ablation/score_ablation_summary.csv",
@@ -883,7 +888,7 @@
     {
       "path": "results/e11_submission_repro_audit/build_gate_summary.csv",
       "rows": 6,
-      "size": "994 B"
+      "size": "1017 B"
     },
     {
       "path": "results/e11_artifact_review_packet/command_matrix.csv",
@@ -898,7 +903,7 @@
     {
       "path": "results/e11_artifact_review_packet/local_state_contract.csv",
       "rows": 7,
-      "size": "1.5 KB"
+      "size": "1.4 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/reviewer_response.csv",
@@ -1787,11 +1792,11 @@
     },
     {
       "path": "discussion/e11_submission_repro_audit.md",
-      "size": "8.3 KB"
+      "size": "8.2 KB"
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
-      "size": "14.7 KB"
+      "size": "14.5 KB"
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
@@ -1807,7 +1812,7 @@
     },
     {
       "path": "discussion/e11_top_conference_claim_decision_audit.md",
-      "size": "31.9 KB"
+      "size": "32.0 KB"
     },
     {
       "path": "discussion/e11_manuscript_claim_trace.md",
@@ -1995,7 +2000,7 @@
     },
     {
       "path": "discussion/e11_theory_proof_obligation_register.md",
-      "size": "16.0 KB"
+      "size": "17.3 KB"
     },
     {
       "path": "discussion/e11_condition_score_v5_theory_protocol.md",
@@ -2003,7 +2008,7 @@
     },
     {
       "path": "discussion/e11_condition_score_v5_theory_to_score_map.md",
-      "size": "20.3 KB"
+      "size": "28.6 KB"
     },
     {
       "path": "discussion/e11_condition_score_ablation.md",

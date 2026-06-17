@@ -1041,6 +1041,7 @@ def main() -> None:
         Path("results/e11_condition_score_v5_theory_to_score_map") / "theorem_proxy_map.csv",
         Path("results/e11_condition_score_v5_theory_to_score_map") / "score_lineage.csv",
         Path("results/e11_condition_score_v5_theory_to_score_map") / "transport_normalization_contract.csv",
+        Path("results/e11_condition_score_v5_theory_to_score_map") / "post_final_transport_obligations.csv",
         Path("results/e11_condition_score_v5_theory_to_score_map") / "falsifiable_predictions.csv",
         Path("results/e11_condition_score_v5_theory_to_score_map") / "ablation_matrix.csv",
         Path("results/e11_condition_score_v5_theory_to_score_map") / "claim_readiness_ledger.csv",
@@ -4193,6 +4194,7 @@ def main() -> None:
     v5_theorem_proxy_map = pd.read_csv(v5_map_dir / "theorem_proxy_map.csv")
     v5_score_lineage = pd.read_csv(v5_map_dir / "score_lineage.csv")
     v5_transport_contract = pd.read_csv(v5_map_dir / "transport_normalization_contract.csv")
+    v5_post_final_obligations = pd.read_csv(v5_map_dir / "post_final_transport_obligations.csv")
     v5_predictions = pd.read_csv(v5_map_dir / "falsifiable_predictions.csv")
     v5_ablations = pd.read_csv(v5_map_dir / "ablation_matrix.csv")
     v5_readiness = pd.read_csv(v5_map_dir / "claim_readiness_ledger.csv")
@@ -4224,11 +4226,19 @@ def main() -> None:
         "T4-final-evaluation",
         "T5-negative-path",
     }
+    expected_v5_post_final_obligations = {
+        "PFO-1-endpoint-factorization",
+        "PFO-2-architecture-direction-transport",
+        "PFO-3-data-partition-residual-transport",
+        "PFO-4-post-final-quarantine",
+        "PFO-5-negative-boundary-ledger",
+    }
     expected_v5_readiness_items = {
         "theory-to-score map",
         "v5 validation output",
         "v5 residual score freeze",
         "no final before freeze",
+        "v5 final gate family",
         "predictive-condition claim",
     }
     expected_v5_score_ids = {
@@ -4245,6 +4255,7 @@ def main() -> None:
         and set(v5_predictions["prediction_id"]) == expected_v5_prediction_ids
         and set(v5_ablations["ablation_id"]) == expected_v5_ablation_ids
         and set(v5_transport_contract["step_id"]) == expected_v5_transport_steps
+        and set(v5_post_final_obligations["obligation_id"]) == expected_v5_post_final_obligations
         and set(v5_readiness["item"]) == expected_v5_readiness_items
         and set(v5_score_lineage["score_id"]) == expected_v5_score_ids
     ):
@@ -4263,11 +4274,14 @@ def main() -> None:
         and v5_readiness_lookup["v5 validation output"] == "generated"
         and v5_readiness_lookup["v5 residual score freeze"] == "frozen"
         and v5_readiness_lookup["no final before freeze"] == "pass"
+        and v5_readiness_lookup["v5 final gate family"] == "completed_failed_boundary"
         and v5_readiness_lookup["predictive-condition claim"] == "not_ready"
-        and "frozen validation-selected score"
+        and "completed final gates failed"
         in str(v5_readiness_evidence["predictive-condition claim"])
-        and "completed final gates are evaluated separately"
+        and "architecture direction-threshold failed"
         in str(v5_readiness_evidence["predictive-condition claim"])
+        and v5_post_final_obligations["forbidden_shortcut"].astype(str).str.len().gt(20).all()
+        and v5_post_final_obligations["claim_boundary"].astype(str).str.len().gt(20).all()
     ):
         raise AssertionError(
             "condition-score v5 theory-to-score map must keep leakage boundaries, quantitative gates, ablation reports, and not_ready P0 claim status"
@@ -4285,16 +4299,24 @@ def main() -> None:
             "Theorem Proxy Map",
             "Score Lineage",
             "Transport Normalization Contract",
+            "Post-Final Failure Reading",
+            "Post-Final Transport Obligations",
             "Falsifiable Predictions",
             "Required Ablation Matrix",
             "Claim Readiness Ledger",
-            "frozen validation-selected score became eligible for final evaluation runs",
-            "run the v5 final splits with the",
-            "Blocked now: fitting, selecting, or reweighting any v5 score on v2/v3/v4 final",
+            "completed final gates failed under the frozen score",
+            "architecture-direction transport and data-partition residual transport",
+            "Blocked now: fitting, selecting, thresholding, or reweighting any v5 score on",
         ],
     )
-    if "validation is not frozen" in v5_map_text:
-        raise AssertionError("condition-score v5 theory-to-score map must not retain stale pre-freeze wording")
+    for stale_v5_phrase in [
+        "run the v5 final splits with the",
+        "validation is not frozen",
+    ]:
+        if stale_v5_phrase in v5_map_text:
+            raise AssertionError(
+                f"condition-score v5 theory-to-score map retained stale wording: {stale_v5_phrase}"
+            )
     score_ablation_dir = Path("results/e11_condition_score_ablation")
     score_ablation_summary = pd.read_csv(score_ablation_dir / "score_ablation_summary.csv")
     score_ablation_ladder = pd.read_csv(score_ablation_dir / "term_failure_ladder.csv")
@@ -7263,11 +7285,14 @@ def main() -> None:
         "Theorem Proxy Map",
         "Score Lineage",
         "Transport Normalization Contract",
+        "Post-Final Failure Reading",
+        "Post-Final Transport Obligations",
         "Falsifiable Predictions",
         "Required Ablation Matrix",
         "Claim Readiness Ledger",
         "not_ready",
-        "Blocked now: fitting, selecting, or reweighting any v5 score on v2/v3/v4 final",
+        "completed final gates failed under the frozen score",
+        "Blocked now: fitting, selecting, thresholding, or reweighting any v5 score on",
     ]
     assert_required_phrases(
         "condition-score v5 theory-to-score map",
@@ -7376,7 +7401,7 @@ def main() -> None:
         "main_theorem_contract_and_tightness_audit_generated",
         "make e11-matrix-block-theorem-proof",
         "make e11-matrix-block-tightness-audit",
-        "finite_registered_phase1_null_candidate",
+        "finite_registered_phase1_phase2_null_candidate_with_caveats",
         "optimizer-performance",
     ]
     assert_required_phrases(

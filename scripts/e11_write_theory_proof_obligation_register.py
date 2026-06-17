@@ -32,6 +32,12 @@ def load_evidence() -> dict[str, object]:
     v5_final_gates = pd.read_csv("results/e11_condition_score_v5_protocol/final_score_evaluation/final_gate_report.csv")
     natural_gates = pd.read_csv("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv")
     natural_decisions = pd.read_csv("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv")
+    natural_phase2_gates = pd.read_csv(
+        "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/gate_report.csv"
+    )
+    natural_phase2_decisions = pd.read_csv(
+        "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/primary_decisions.csv"
+    )
     tuned_gates = pd.read_csv("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv")
     v5_response_config = json.loads(
         Path("results/e11_condition_score_v5_protocol/reviewer_failure_response/config.json").read_text(
@@ -45,6 +51,8 @@ def load_evidence() -> dict[str, object]:
         "v5_final_gates": v5_final_gates,
         "natural_gates": natural_gates,
         "natural_decisions": natural_decisions,
+        "natural_phase2_gates": natural_phase2_gates,
+        "natural_phase2_decisions": natural_phase2_decisions,
         "tuned_gates": tuned_gates,
         "v5_response_config": v5_response_config,
     }
@@ -57,6 +65,11 @@ def build_proof_obligations(evidence: dict[str, object]) -> pd.DataFrame:
     v5_final_status = status_lookup(evidence["v5_final_gates"], "gate_id")
     natural_status = status_lookup(evidence["natural_gates"], "gate_id")
     natural_observed_count = int(evidence["natural_decisions"]["output_status"].eq("observed").sum())
+    natural_phase2_status = status_lookup(evidence["natural_phase2_gates"], "gate_id")
+    natural_phase2_observed_count = int(evidence["natural_phase2_decisions"]["output_status"].eq("observed").sum())
+    natural_phase2_head_gain_fail_count = int(
+        evidence["natural_phase2_decisions"]["head_gain_gate"].astype(str).str.lower().eq("false").sum()
+    )
     tuned_status = status_lookup(evidence["tuned_gates"], "gate_id")
     selected_score = str(evidence["v5_response_config"]["primary_score"])
     natural_complete = (
@@ -64,6 +77,10 @@ def build_proof_obligations(evidence: dict[str, object]) -> pd.DataFrame:
         and natural_status.get("NNS-E3-primary-multiplicity") == "pass"
     )
     natural_finite_null = natural_status.get("NNS-E4-natural-primary-claim") == "finite_null_candidate"
+    natural_phase2_finite_null = (
+        natural_phase2_status.get("NNS-P2-E2-phase2-output-completeness") == "pass"
+        and natural_phase2_status.get("NNS-P2-E4-heldout-architecture-claim") == "finite_null_candidate"
+    )
 
     positive = head_tail.loc["high_head_rank_low_tail_srank"]
     negative = head_tail.loc["low_head_rank_high_tail_srank"]
@@ -131,25 +148,28 @@ def build_proof_obligations(evidence: dict[str, object]) -> pd.DataFrame:
         {
             "obligation_id": "PTO-5-natural-falsification",
             "paper_claim": "The empirical story includes natural positive and negative boundary cases, not only constructed examples.",
-            "formal_object": "familywise Holm-adjusted natural negative search over 26 registered phase1 settings",
-            "assumptions_to_state": "complete metric rows for every declared setting; paired per-seed log-ratio tests; quality gates applied before claims",
+            "formal_object": "familywise Holm-adjusted natural negative search over 26 registered phase1 settings and 8 registered phase2 ResNet34 settings",
+            "assumptions_to_state": "complete metric rows for every declared setting; paired per-seed log-ratio tests; quality, head-gain, and power caveats applied before claims",
             "current_evidence": (
                 f"phase1 completeness={natural_status['NNS-E2-phase1-output-completeness']}; "
                 f"primary metric rows={natural_observed_count}/26; "
-                f"natural primary claim={natural_status['NNS-E4-natural-primary-claim']}"
+                f"natural primary claim={natural_status['NNS-E4-natural-primary-claim']}; "
+                f"phase2 observed rows={natural_phase2_observed_count}/8; "
+                f"phase2 claim={natural_phase2_status['NNS-P2-E4-heldout-architecture-claim']}; "
+                f"phase2 head_gain_gate_fail_rows={natural_phase2_head_gain_fail_count}"
             ),
             "current_status": (
-                "finite_registered_phase1_null_candidate"
-                if natural_complete and natural_finite_null
+                "finite_registered_phase1_phase2_null_candidate_with_caveats"
+                if natural_complete and natural_finite_null and natural_phase2_finite_null
                 else "partial_metric_outputs"
             ),
             "blocks_main_theory_claim": "no_but_blocks_falsification_upgrade",
             "required_upgrade": (
-                "replicate or extend the registered natural search before making broader natural-null claims"
-                if natural_complete and natural_finite_null
+                "replicate or extend the registered natural search on larger datasets or additional held-out architectures before making broader natural-null claims"
+                if natural_complete and natural_finite_null and natural_phase2_finite_null
                 else "finish the remaining phase1 metric rows and rerun the multiplicity evaluator"
             ),
-            "forbidden_wording": "do not call any setting a natural counterexample without an adjusted primary worse decision, and do not generalize the finite phase1 null outside its registered space",
+            "forbidden_wording": "do not call any setting a natural counterexample without an adjusted primary worse decision, and do not generalize the finite phase1/phase2 null outside its registered spaces",
         },
         {
             "obligation_id": "PTO-6-final-performance-separation",
@@ -208,9 +228,9 @@ def build_assumption_stress_tests() -> pd.DataFrame:
             {
                 "assumption_id": "AST-5-multiplicity-integrity",
                 "assumption": "natural negative examples survive familywise adjustment",
-                "stress_test": "phase1 multiplicity evaluator with 26 declared settings",
+                "stress_test": "phase1 multiplicity evaluator with 26 declared settings plus phase2 ResNet34 evaluator with 8 declared settings",
                 "failure_mode": "selected anecdotal counterexamples would be statistically weak",
-                "paper_action": "report the finite registered phase1 result with detectable-effect and quality-gate caveats",
+                "paper_action": "report the finite registered phase1/phase2 results with detectable-effect, head-gain, and quality-gate caveats",
                 "status": "finite_null_candidate_with_caveats",
             },
         ]
@@ -243,8 +263,8 @@ def build_claim_scope_boundaries() -> pd.DataFrame:
             },
             {
                 "claim_scope": "natural_counterexample",
-                "allowed_claim": "the registered 26-setting phase1 search found no adjusted primary full-drift counterexample and is a finite-null candidate with caveats",
-                "blocked_claim": "a natural primary counterexample exists, or no natural counterexample exists outside the registered phase1 space",
+                "allowed_claim": "the registered 26-setting phase1 and 8-setting phase2 searches found no adjusted primary full-drift counterexample and are finite-null candidates with caveats",
+                "blocked_claim": "a natural primary counterexample exists, or no natural counterexample exists outside the registered phase1/phase2 spaces",
                 "decisive_gate": "Holm-adjusted positive decision for a counterexample, or complete family plus finite-null caveats for null wording",
                 "current_status": "finite_null_candidate_with_caveats",
             },
@@ -271,10 +291,10 @@ def build_theorem_to_experiment_queue() -> pd.DataFrame:
             },
             {
                 "priority": "P0",
-                "task": "consume frozen v5 final splits without score edits",
+                "task": "preserve the completed frozen v5 final failures without score edits",
                 "artifact_or_command": "make e11-cifar-resnet-condition-score-v5-final-eval",
-                "unblocks": "predictive_condition if both finals pass",
-                "dependency": "pending Slurm outputs",
+                "unblocks": "completed negative predictive-condition boundary wording",
+                "dependency": "completed v5 final outputs",
             },
             {
                 "priority": "P0",
@@ -292,10 +312,10 @@ def build_theorem_to_experiment_queue() -> pd.DataFrame:
             },
             {
                 "priority": "P1",
-                "task": "replicate or extend the finite phase1 natural negative-search result before broader natural-null wording",
-                "artifact_or_command": "make e11-natural-negative-search-phase1-eval",
+                "task": "replicate or extend the finite phase1/phase2 natural negative-search result before broader natural-null wording",
+                "artifact_or_command": "make e11-natural-negative-search-phase1-eval && make e11-natural-negative-search-phase2-eval",
                 "unblocks": "broader natural-null or held-out natural boundary wording",
-                "dependency": "complete phase1 finite-null candidate",
+                "dependency": "complete phase1/phase2 finite-null candidates with caveats",
             },
             {
                 "priority": "P1",
@@ -306,10 +326,10 @@ def build_theorem_to_experiment_queue() -> pd.DataFrame:
             },
             {
                 "priority": "P2",
-                "task": "formalize transport-normalized residual proposition under explicit invariance assumptions",
-                "artifact_or_command": "theory appendix plus v5 ablation table",
+                "task": "formalize post-final transport obligations under explicit endpoint-specific invariance assumptions",
+                "artifact_or_command": "make e11-cifar-resnet-condition-score-v5-theory-to-score-map",
                 "unblocks": "stronger theorem-to-score alignment",
-                "dependency": "v5 final pass/fail localization",
+                "dependency": "completed v5 final pass/fail localization",
             },
         ]
     )
