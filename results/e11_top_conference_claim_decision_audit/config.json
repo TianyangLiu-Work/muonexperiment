@@ -17,5 +17,8 @@
     "blocked_partial_family",
     "blocked_protocol_pending"
   ],
+  "caveated_decisions": [
+    "finite_null_candidate_with_caveats"
+  ],
   "rebuttal_ready": true
 }

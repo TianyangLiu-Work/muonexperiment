@@ -10,7 +10,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 2.4 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 65.0 KB  |
 | discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 1.3 MB   |
-| results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 271.0 MB |
+| results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 271.5 MB |
 | figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 31.7 MB  |
 | configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
 | paper                  | Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.   | commit source and selected rendered PDFs | 5.6 MB   |
@@ -155,9 +155,9 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_matrix_block_tightness_audit/rank_boundary_cases.csv                                           |      4 | 884 B     |
 | results/e11_matrix_block_tightness_audit/formula_checks.csv                                                |      4 | 638 B     |
 | results/e11_matrix_block_tightness_audit/caveat_checks.csv                                                 |      3 | 764 B     |
-| results/e11_theory_proof_obligation_register/proof_obligations.csv                                         |      6 | 4.3 KB    |
-| results/e11_theory_proof_obligation_register/assumption_stress_tests.csv                                   |      5 | 1.6 KB    |
-| results/e11_theory_proof_obligation_register/claim_scope_boundaries.csv                                    |      5 | 1.1 KB    |
+| results/e11_theory_proof_obligation_register/proof_obligations.csv                                         |      6 | 4.4 KB    |
+| results/e11_theory_proof_obligation_register/assumption_stress_tests.csv                                   |      5 | 1.7 KB    |
+| results/e11_theory_proof_obligation_register/claim_scope_boundaries.csv                                    |      5 | 1.4 KB    |
 | results/e11_theory_proof_obligation_register/theorem_to_experiment_queue.csv                               |      6 | 1.2 KB    |
 | results/e11_condition_score_v5_theory_protocol/theory_term_register.csv                                    |      6 | 2.8 KB    |
 | results/e11_condition_score_v5_theory_protocol/score_contract.csv                                          |      6 | 1.8 KB    |
@@ -182,9 +182,9 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_submission_repro_audit/toolchain_status.csv                                                    |      7 | 580 B     |
 | results/e11_submission_repro_audit/pdf_artifact_checks.csv                                                 |      2 | 313 B     |
 | results/e11_submission_repro_audit/source_package_manifest.csv                                             |     11 | 1.8 KB    |
-| results/e11_submission_repro_audit/build_gate_summary.csv                                                  |      6 | 1.1 KB    |
+| results/e11_submission_repro_audit/build_gate_summary.csv                                                  |      6 | 994 B     |
 | results/e11_artifact_review_packet/command_matrix.csv                                                      |      8 | 2.7 KB    |
-| results/e11_artifact_review_packet/gate_matrix.csv                                                         |      6 | 1.6 KB    |
+| results/e11_artifact_review_packet/gate_matrix.csv                                                         |      6 | 1.5 KB    |
 | results/e11_artifact_review_packet/local_state_contract.csv                                                |      7 | 1.5 KB    |
 | results/e11_artifact_review_packet/reviewer_response.csv                                                   |      6 | 1.9 KB    |
 | results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv                 |      7 | 2.7 KB    |
@@ -210,7 +210,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_natural_negative_search_protocol/metric_contract.csv                                           |      5 | 2.0 KB    |
 | results/e11_natural_negative_search_protocol/stopping_rules.csv                                            |      6 | 1.5 KB    |
 | results/e11_natural_negative_search_protocol/acceptance_gates.csv                                          |      6 | 1.6 KB    |
-| results/e11_natural_negative_search_protocol/claim_ladder.csv                                              |      5 | 1.3 KB    |
+| results/e11_natural_negative_search_protocol/claim_ladder.csv                                              |      5 | 1.4 KB    |
 | results/e11_natural_negative_search_protocol/protocol_status.csv                                           |      7 | 1.3 KB    |
 | results/e11_natural_negative_search_protocol/phase1_power_audit/power_grid.csv                             |     72 | 6.3 KB    |
 | results/e11_natural_negative_search_protocol/phase1_power_audit/minimum_detectable_effect.csv              |     36 | 7.1 KB    |
@@ -226,25 +226,25 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/layer_metrics.csv                   |   1680 | 577.1 KB  |
 | results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/decision_template.csv               |      8 | 4.0 KB    |
 | results/e11_natural_negative_search_protocol/phase1_tail_quality_controls/settings_registry.csv            |      6 | 4.9 KB    |
-| results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/run_registry.csv               |      3 | 1.1 KB    |
-| results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv          |     26 | 11.8 KB   |
-| results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv                |      5 | 721 B     |
-| results/e11_natural_negative_search_protocol/phase1_interim_synthesis/family_coverage.csv                  |      3 | 375 B     |
-| results/e11_natural_negative_search_protocol/phase1_interim_synthesis/observed_primary_summary.csv         |      4 | 733 B     |
-| results/e11_natural_negative_search_protocol/phase1_interim_synthesis/claim_boundary.csv                   |      3 | 763 B     |
-| results/e11_natural_negative_search_protocol/phase1_interim_synthesis/remaining_work.csv                   |      1 | 306 B     |
-| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 19.2 KB   |
-| results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv                                  |      6 | 4.1 KB    |
-| results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv                              |      5 | 1.9 KB    |
-| results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv                                 |      5 | 2.9 KB    |
+| results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/run_registry.csv               |      3 | 1.0 KB    |
+| results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv          |     26 | 13.3 KB   |
+| results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv                |      5 | 725 B     |
+| results/e11_natural_negative_search_protocol/phase1_interim_synthesis/family_coverage.csv                  |      3 | 361 B     |
+| results/e11_natural_negative_search_protocol/phase1_interim_synthesis/observed_primary_summary.csv         |      4 | 919 B     |
+| results/e11_natural_negative_search_protocol/phase1_interim_synthesis/claim_boundary.csv                   |      3 | 965 B     |
+| results/e11_natural_negative_search_protocol/phase1_interim_synthesis/remaining_work.csv                   |      0 | 86 B      |
+| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 19.6 KB   |
+| results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv                                  |      6 | 4.4 KB    |
+| results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv                              |      5 | 2.0 KB    |
+| results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv                                 |      5 | 3.1 KB    |
 | results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv                                  |      6 | 2.7 KB    |
-| results/e11_top_conference_claim_decision_audit/paper_sequence.csv                                         |      6 | 1.4 KB    |
-| results/e11_top_conference_claim_decision_audit/readiness_summary.csv                                      |      6 | 225 B     |
-| results/e11_manuscript_claim_trace/claim_trace.csv                                                         |      6 | 2.2 KB    |
-| results/e11_manuscript_claim_trace/blocked_phrase_audit.csv                                                |      7 | 744 B     |
+| results/e11_top_conference_claim_decision_audit/paper_sequence.csv                                         |      6 | 1.5 KB    |
+| results/e11_top_conference_claim_decision_audit/readiness_summary.csv                                      |      6 | 237 B     |
+| results/e11_manuscript_claim_trace/claim_trace.csv                                                         |      6 | 2.4 KB    |
+| results/e11_manuscript_claim_trace/blocked_phrase_audit.csv                                                |      8 | 876 B     |
 | results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv                                     |      8 | 4.4 KB    |
 | results/e11_mechanism_referee_audit/theory_measurement_contract.csv                                        |      5 | 2.3 KB    |
-| results/e11_mechanism_referee_audit/falsification_trigger_matrix.csv                                       |      5 | 1.6 KB    |
+| results/e11_mechanism_referee_audit/falsification_trigger_matrix.csv                                       |      5 | 1.8 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv                                               |    110 | 5.7 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/class_metrics.csv                                             |   1000 | 58.6 KB   |
 | results/e11_cifar100_resnet_lt_standard_eval/group_metrics.csv                                             |     40 | 4.2 KB    |
@@ -332,32 +332,32 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                                                        | size    |
 |:--------------------------------------------------------------------------------------------|:--------|
-| README_E11.md                                                                               | 85.0 KB |
+| README_E11.md                                                                               | 85.3 KB |
 | discussion/e11_paper_skeleton.md                                                            | 10.9 KB |
 | discussion/e11_main_paper_package.md                                                        | 22.8 KB |
 | discussion/e11_main_figure_captions.md                                                      | 6.5 KB  |
 | discussion/e11_notation_glossary.md                                                         | 8.7 KB  |
-| discussion/e11_quantitative_claim_ledger.md                                                 | 17.6 KB |
-| discussion/e11_reproduction_checklist.md                                                    | 54.5 KB |
+| discussion/e11_quantitative_claim_ledger.md                                                 | 18.1 KB |
+| discussion/e11_reproduction_checklist.md                                                    | 54.9 KB |
 | discussion/e11_reviewer_risk_audit.md                                                       | 24.1 KB |
 | discussion/e11_pasted_review_audit.md                                                       | 8.3 KB  |
-| discussion/e11_completion_audit.md                                                          | 4.8 KB  |
-| discussion/e11_end_of_draft_self_review.md                                                  | 6.4 KB  |
+| discussion/e11_completion_audit.md                                                          | 5.3 KB  |
+| discussion/e11_end_of_draft_self_review.md                                                  | 7.3 KB  |
 | discussion/e11_reference_audit.md                                                           | 6.1 KB  |
-| discussion/e11_submission_repro_audit.md                                                    | 9.2 KB  |
-| discussion/e11_artifact_review_packet.md                                                    | 14.8 KB |
+| discussion/e11_submission_repro_audit.md                                                    | 8.3 KB  |
+| discussion/e11_artifact_review_packet.md                                                    | 14.1 KB |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB |
-| discussion/e11_top_conference_gap_register.md                                               | 48.5 KB |
-| discussion/e11_top_conference_claim_decision_audit.md                                       | 25.0 KB |
-| discussion/e11_manuscript_claim_trace.md                                                    | 6.7 KB  |
-| discussion/e11_mechanism_referee_audit.md                                                   | 16.4 KB |
+| discussion/e11_top_conference_gap_register.md                                               | 48.6 KB |
+| discussion/e11_top_conference_claim_decision_audit.md                                       | 27.9 KB |
+| discussion/e11_manuscript_claim_trace.md                                                    | 7.0 KB  |
+| discussion/e11_mechanism_referee_audit.md                                                   | 17.2 KB |
 | discussion/e11_natural_head_tail_boundary.md                                                | 17.5 KB |
-| discussion/e11_natural_negative_search_protocol.md                                          | 17.6 KB |
+| discussion/e11_natural_negative_search_protocol.md                                          | 17.4 KB |
 | discussion/e11_natural_negative_search_phase1_power_audit.md                                | 5.1 KB  |
 | discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md  | 11.1 KB |
 | discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md | 7.8 KB  |
-| discussion/e11_natural_negative_search_phase1_evaluation.md                                 | 7.2 KB  |
+| discussion/e11_natural_negative_search_phase1_evaluation.md                                 | 7.5 KB  |
 | discussion/e11_natural_negative_search_phase1_interim_synthesis.md                          | 6.2 KB  |
 | discussion/e11_evidence_index.md                                                            | 29.3 KB |
 | discussion/e11_research_synthesis.md                                                        | 7.8 KB  |
@@ -393,7 +393,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_condition_score_v4_failure_mechanism_audit.md                                | 8.7 KB  |
 | discussion/e11_matrix_block_theorem_proof.md                                                | 13.3 KB |
 | discussion/e11_matrix_block_tightness_audit.md                                              | 6.0 KB  |
-| discussion/e11_theory_proof_obligation_register.md                                          | 13.7 KB |
+| discussion/e11_theory_proof_obligation_register.md                                          | 15.5 KB |
 | discussion/e11_condition_score_v5_theory_protocol.md                                        | 17.8 KB |
 | discussion/e11_condition_score_v5_theory_to_score_map.md                                    | 20.2 KB |
 | discussion/e11_condition_score_ablation.md                                                  | 18.9 KB |

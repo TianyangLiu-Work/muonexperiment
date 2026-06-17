@@ -70,6 +70,8 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
     benchmark_scope = one(scopes, "claim_scope", "optimizer_benchmark")
     natural_all = one(natural_summary, "scope", "all_observed")
     v5_p0 = one(v5_gates, "gate_id", "v5_p0_predictive_condition_claim")
+    natural_complete = int(natural_all["missing_primary_rows"]) == 0
+    natural_finite_null = "finite_null_candidate" in set(natural_claims["current_status"].astype(str))
 
     tuned_blockers = tuned_gates[tuned_gates["blocks_final_claim"].astype(str).str.lower().eq("yes")]
     submission_not_ready = submission_gates[submission_gates["status"].astype(str).eq("not_ready")]
@@ -112,15 +114,21 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
             {
                 "claim_id": "TCD-4-natural-counterexample-or-finite-null",
                 "paper_section": "natural falsification",
-                "current_decision": "blocked_partial_family",
+                "current_decision": (
+                    "finite_null_candidate_with_caveats"
+                    if natural_complete and natural_finite_null
+                    else "blocked_partial_family"
+                ),
                 "evidence_status": (
                     f"{pto5['current_status']}; observed={int(natural_all['observed_primary_rows'])}/"
                     f"{int(natural_all['observed_primary_rows']) + int(natural_all['missing_primary_rows'])}; "
                     f"raw_worse_rows={int(natural_all['raw_worse_rows'])}; "
+                    f"quality_gate_pass_rows={int(natural_all['quality_gate_pass_rows'])}; "
+                    f"quality_gate_fail_rows={int(natural_all['quality_gate_fail_rows'])}; "
                     f"{status_line(natural_claims, 'claim_id', 'current_status')}"
                 ),
                 "author_allowed_wording": counterexample_scope["allowed_claim"],
-                "author_blocked_wording": "fresh natural primary counterexample; finite null over the 26-setting phase1 family",
+                "author_blocked_wording": "fresh natural primary counterexample; unqualified absence of natural counterexamples outside the registered phase1 space; quality-failed rows validate the mechanism",
                 "decisive_gate": counterexample_scope["decisive_gate"],
                 "required_next_action": pto5["required_upgrade"],
                 "source_artifacts": "discussion/e11_natural_negative_search_phase1_evaluation.md; discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
@@ -179,10 +187,10 @@ def build_reviewer_objection_matrix(claims: pd.DataFrame) -> pd.DataFrame:
             {
                 "objection_id": "RO-3-no-natural-negative",
                 "likely_objection": "Only positive natural examples are available.",
-                "current_response": "The natural negative-search family is registered, powered, and currently reports 20/26 observed rows without a raw worse row.",
+                "current_response": "The natural negative-search family is registered, powered, complete for phase1, and reports 26/26 observed rows without a raw or adjusted primary worse row.",
                 "response_status": lookup.loc["TCD-4-natural-counterexample-or-finite-null", "current_decision"],
-                "missing_gate": "tail-quality controls and Holm-adjusted complete-family decision",
-                "forbidden_shortcut": "claiming a finite null or natural counterexample before all 26 settings finish",
+                "missing_gate": "larger-family or held-out natural replication before broad natural-null wording",
+                "forbidden_shortcut": "claiming a universal finite null or natural counterexample without adjusted primary evidence",
             },
             {
                 "objection_id": "RO-4-muon-overclaim",
@@ -228,8 +236,8 @@ def build_paper_sequence(claims: pd.DataFrame) -> pd.DataFrame:
             {
                 "sequence_step": 4,
                 "claim_id": "TCD-4-natural-counterexample-or-finite-null",
-                "paper_move": "Report the natural negative-search family as incomplete claim-boundary evidence.",
-                "writing_rule": "No finite-null wording until the 26-setting family is complete and adjusted decisions are final.",
+                "paper_move": "Report the natural negative-search family as a complete registered phase1 finite-null candidate with caveats.",
+                "writing_rule": "Do not generalize beyond the 26-setting phase1 family or convert the null candidate into a natural counterexample claim.",
             },
             {
                 "sequence_step": 5,
@@ -282,7 +290,7 @@ def build_rebuttal_response_pack(claims: pd.DataFrame, objections: pd.DataFrame)
                     "TCD-4-natural-counterexample-or-finite-null", "current_decision"
                 ],
                 "evidence_to_cite": "discussion/e11_natural_negative_search_protocol.md; discussion/e11_natural_negative_search_phase1_power_audit.md; discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
-                "manuscript_edit": "Report the natural negative search as a registered incomplete family: 20/26 observed, raw_worse_rows=0, and tail-quality controls still missing.",
+                "manuscript_edit": "Report the natural negative search as a complete registered phase1 family: 26/26 observed, raw_worse_rows=0, adjusted primary worse rows=0, and finite-null-candidate wording only with detectable-effect and tail-quality caveats.",
                 "missing_gate": objection_lookup.loc["RO-3-no-natural-negative", "missing_gate"],
                 "forbidden_rebuttal": objection_lookup.loc["RO-3-no-natural-negative", "forbidden_shortcut"],
             },
@@ -355,7 +363,7 @@ def build_manuscript_edit_queue(claims: pd.DataFrame, gaps: pd.DataFrame) -> pd.
                 "edit_id": "MEQ-4-natural-negative-incomplete-family",
                 "target_section": "Natural boundary cases",
                 "claim_id": "TCD-4-natural-counterexample-or-finite-null",
-                "edit_action": "Report 20/26 observed and raw_worse_rows=0 only as incomplete family evidence; defer finite-null and counterexample wording.",
+                "edit_action": "Report 26/26 observed, raw_worse_rows=0, and no adjusted primary worse row as a finite registered phase1 null candidate with quality and detectable-effect caveats.",
                 "acceptance_check": gap_lookup.loc["P2-NaturalBoundaryCases", "acceptance_gate"],
                 "current_decision": claim_lookup.loc[
                     "TCD-4-natural-counterexample-or-finite-null", "current_decision"
@@ -430,9 +438,10 @@ submission-reproducibility tables; it does not add new empirical results.
 
 Allowed manuscript wording is limited to rows whose `current_decision` starts
 with `supportable`. Rows marked `registered_not_ready` or `blocked` can be
-reported as protocols, pending tests, or claim boundaries only. They cannot be
-used as positive claims unless their decisive gate is rerun and this audit is
-regenerated.
+reported as protocols, pending tests, or claim boundaries only. Rows marked
+`finite_null_candidate` can be reported only with their stated caveats. No row
+can be used as a stronger positive claim unless its decisive gate is rerun and
+this audit is regenerated.
 """
     write_markdown(DISCUSSION_PATH, text)
 
@@ -466,6 +475,7 @@ def main() -> None:
                 "new_empirical_results": False,
                 "supportable_prefix": "supportable",
                 "blocked_decisions": ["registered_not_ready_wait_for_v5_finals", "blocked_partial_family", "blocked_protocol_pending"],
+                "caveated_decisions": ["finite_null_candidate_with_caveats"],
                 "rebuttal_ready": True,
             },
             indent=2,

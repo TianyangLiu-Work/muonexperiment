@@ -261,10 +261,15 @@ def assert_valid_artifact_manifest(manifest_json: dict) -> None:
     manifest_tables = {item.get("path") for item in manifest_json.get("key_tables", [])}
     if not required_manifest_tables.issubset(manifest_tables):
         raise AssertionError(f"artifact manifest missing key tables: {required_manifest_tables - manifest_tables}")
+    zero_row_allowed_tables = {
+        "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/remaining_work.csv"
+    }
     bad_manifest_tables = [
         item.get("path")
         for item in manifest_json.get("key_tables", [])
-        if item.get("path") in required_manifest_tables and int(item.get("rows", 0)) <= 0
+        if item.get("path") in required_manifest_tables
+        and item.get("path") not in zero_row_allowed_tables
+        and int(item.get("rows", 0)) <= 0
     ]
     if bad_manifest_tables:
         raise AssertionError(f"artifact manifest has non-positive row counts: {bad_manifest_tables}")
@@ -468,7 +473,7 @@ def assert_top_conference_claim_decision_audit(
         "TCD-1-main-mechanism-theorem": "supportable_main_with_assumptions",
         "TCD-2-natural-drift-diagnostic": "supportable_diagnostic_only",
         "TCD-3-predictive-condition-generalization": "registered_not_ready_wait_for_v5_finals",
-        "TCD-4-natural-counterexample-or-finite-null": "blocked_partial_family",
+        "TCD-4-natural-counterexample-or-finite-null": "finite_null_candidate_with_caveats",
         "TCD-5-optimizer-performance-benchmark": "blocked_protocol_pending",
         "TCD-6-artifact-reproducibility": "supportable_with_toolchain_caveat",
     }
@@ -479,7 +484,8 @@ def assert_top_conference_claim_decision_audit(
         "global convergence or optimizer superiority",
         "the v5 score predicts unseen real-task residual risk",
         "fresh natural primary counterexample",
-        "finite null over the 26-setting phase1 family",
+        "unqualified absence of natural counterexamples outside the registered phase1 space",
+        "quality-failed rows validate the mechanism",
         "Muon or spectral training is competitive on long-tail benchmarks",
         "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server",
     ]:
@@ -488,8 +494,9 @@ def assert_top_conference_claim_decision_audit(
     evidence_text = " ".join(claim_matrix["evidence_status"].astype(str))
     for phrase in [
         "v5_p0_predictive_condition_claim=not_ready",
-        "observed=20/26",
+        "observed=26/26",
         "raw_worse_rows=0",
+        "quality_gate_fail_rows=23",
         "TVS-1-validation-grid-complete=not_ready",
         "R3-preferred-latex-toolchain=not_ready",
     ]:
@@ -508,7 +515,7 @@ def assert_top_conference_claim_decision_audit(
     forbidden_shortcuts = " ".join(reviewer_objections["forbidden_shortcut"].astype(str))
     for phrase in [
         "using any final row to refit or reselect the score",
-        "claiming a finite null or natural counterexample before all 26 settings finish",
+        "claiming a universal finite null or natural counterexample without adjusted primary evidence",
         "turning lower local drift into a final tail-accuracy claim",
     ]:
         if phrase not in forbidden_shortcuts:
@@ -521,7 +528,8 @@ def assert_top_conference_claim_decision_audit(
     for phrase in [
         "answer_now_with_scope_and_real-diagnostic_bridge",
         "do not use final rows for refit or score selection",
-        "20/26 observed, raw_worse_rows=0",
+        "26/26 observed, raw_worse_rows=0",
+        "finite-null-candidate wording only with detectable-effect and tail-quality caveats",
         "quarantine benchmark claims",
         "preferred-LaTeX clean-checkout completion",
     ]:
@@ -542,7 +550,7 @@ def assert_top_conference_claim_decision_audit(
         "worst-case-vs-realized distinction",
         "No result paragraph may convert matched-head-gain logit drift into tail-accuracy",
         "frozen pending test",
-        "defer finite-null and counterexample wording",
+        "finite registered phase1 null candidate with quality and detectable-effect caveats",
         "quarantine all competitive optimizer wording",
         "preferred-LaTeX clean-checkout gap",
     ]:
@@ -1626,11 +1634,12 @@ def main() -> None:
         "validation/final seed splits",
         "tuned AdamW/SGD/class-balanced baselines",
         "phase1 GPU entrypoint is now implemented",
-        "20/26 primary metric rows",
+        "26/26 primary metric rows",
         "discussion/e11_natural_negative_search_phase1_evaluation.md",
         "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
         "raw_worse_rows=0",
-        "finite-null wording",
+        "finite registered phase1 null candidate",
+        "quality_gate_fail_rows=23",
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-results",
         "make e11-natural-negative-search-phase1-eval",
@@ -1840,9 +1849,11 @@ def main() -> None:
         "The theorem is a local worst-case comparison",
         "not a global optimizer theorem",
         "v5 condition-score program is a registered pending test",
-        "observed \\(20/26\\) settings",
+        "observed \\(26/26\\) settings",
         "\\texttt{raw\\_worse\\_rows=0}",
-        "block finite-null wording and block a natural counterexample claim",
+        "finite registered phase1 null candidate",
+        "detectable-effect and tail-quality caveats",
+        "does not prove that no natural counterexample exists outside the registered phase1 space",
         "negative benchmark boundary, not evidence for an optimizer-performance advantage",
         "preferred LaTeX clean-checkout reproduction remains an explicit gate",
         "\\label{tab:claim-boundary}",
@@ -4891,10 +4902,11 @@ def main() -> None:
         "protocol_generated": natural_protocol_status_lookup["fresh natural search protocol"] == "generated",
         "entrypoints_implemented": natural_protocol_status_lookup["fresh natural search entrypoints"] == "implemented",
         "settings_locked": natural_protocol_status_lookup["fresh natural search settings registries"] == "locked",
-        "metric_outputs_partial": natural_protocol_status_lookup["fresh natural search outputs"] == "partial_metric_outputs",
+        "metric_outputs_complete": natural_protocol_status_lookup["fresh natural search outputs"] == "metric_outputs_complete",
         "evaluator_implemented": natural_protocol_status_lookup["multiplicity-adjusted evaluator"]
-        == "implemented_partial_outputs",
-        "claim_not_ready": natural_protocol_status_lookup["natural negative claim"] == "not_ready",
+        == "implemented_complete_outputs",
+        "claim_finite_null_candidate": natural_protocol_status_lookup["natural negative claim"]
+        == "finite_null_candidate",
         "phase1_entrypoint": set(natural_phase1_search["entrypoint"])
         == {"scripts/slurm/e11_natural_negative_search_phase1.sbatch"},
         "phase1_entrypoint_status": set(natural_phase1_search["entrypoint_status"]) == {"implemented_sbatch"},
@@ -4916,51 +4928,61 @@ def main() -> None:
         "phase1_cifar10_decision_rows": len(natural_phase1_cifar10_decision) == 8,
         "phase2_prefixes_absent": phase2_prefixes_absent,
         "eval_decision_count": len(natural_eval_decisions) == 26,
-        "eval_observed_count": natural_eval_observed_count == 20,
-        "eval_not_run_count": natural_eval_not_run_count == 6,
-        "eval_seed_ratio_rows": len(natural_eval_seed_ratios) == 100,
+        "eval_observed_count": natural_eval_observed_count == 26,
+        "eval_not_run_count": natural_eval_not_run_count == 0,
+        "eval_seed_ratio_rows": len(natural_eval_seed_ratios) == 130,
         "eval_observed_inference_source": bool(
             natural_eval_observed["inference_source"].eq("paired_seed_log_ratio_t_test").all()
         ),
         "eval_not_run_missing_source": bool(natural_eval_not_run["inference_source"].eq("missing_output").all()),
-        "eval_observed_pending_completion": bool(
-            natural_eval_observed["adjusted_primary_decision"].eq("pending_phase_completion").all()
+        "eval_observed_adjusted_null": bool(
+            natural_eval_observed["adjusted_primary_decision"].eq("not_primary_worse_adjusted").all()
         ),
-        "eval_claims_not_ready": bool(natural_eval_decisions["claim_status"].eq("not_ready").all()),
+        "eval_claims_no_counterexample": bool(
+            natural_eval_decisions["claim_status"].eq("no_primary_counterexample_for_setting").all()
+        ),
         "eval_run_status": natural_eval_run_status
         == {
             "NNS-P1-cifar100lt-resnet18-new-partitions": "complete",
             "NNS-P1-cifar10lt-resnet18-cross-partitions": "complete",
-            "NNS-P1-tail-quality-controls": "settings_only_no_metrics",
+            "NNS-P1-tail-quality-controls": "complete",
         },
         "eval_run_pair_rows": {key: int(value) for key, value in natural_eval_run_pair_rows.items()}
         == {
             "NNS-P1-cifar100lt-resnet18-new-partitions": 12,
             "NNS-P1-cifar10lt-resnet18-cross-partitions": 8,
-            "NNS-P1-tail-quality-controls": 0,
+            "NNS-P1-tail-quality-controls": 6,
         },
         "eval_gate_implemented": natural_eval_gate_lookup["NNS-E1-evaluator-implemented"] == "pass",
-        "eval_gate_completeness": natural_eval_gate_lookup["NNS-E2-phase1-output-completeness"] == "not_ready",
-        "eval_gate_multiplicity": natural_eval_gate_lookup["NNS-E3-primary-multiplicity"] == "not_ready",
+        "eval_gate_completeness": natural_eval_gate_lookup["NNS-E2-phase1-output-completeness"] == "pass",
+        "eval_gate_multiplicity": natural_eval_gate_lookup["NNS-E3-primary-multiplicity"] == "pass",
+        "eval_gate_finite_null": natural_eval_gate_lookup["NNS-E4-natural-primary-claim"]
+        == "finite_null_candidate",
         "eval_gate_reporting": natural_eval_gate_lookup["NNS-E5-full-reporting-boundary"] == "pass",
         "interim_coverage_rows": {key: int(value) for key, value in natural_interim_coverage_lookup.items()}
         == {
             "NNS-P1-cifar100lt-resnet18-new-partitions": 12,
             "NNS-P1-cifar10lt-resnet18-cross-partitions": 8,
-            "NNS-P1-tail-quality-controls": 0,
+            "NNS-P1-tail-quality-controls": 6,
         },
-        "interim_all_observed": int(natural_interim_all_observed["observed_primary_rows"]) == 20,
-        "interim_missing": int(natural_interim_all_observed["missing_primary_rows"]) == 6,
+        "interim_all_observed": int(natural_interim_all_observed["observed_primary_rows"]) == 26,
+        "interim_missing": int(natural_interim_all_observed["missing_primary_rows"]) == 0,
         "interim_raw_worse_zero": int(natural_interim_all_observed["raw_worse_rows"]) == 0,
-        "interim_quality_failures_recorded": int(natural_interim_all_observed["quality_gate_fail_rows"]) == 18,
-        "interim_claim_boundary_blocked": set(natural_interim_claim_boundary["current_status"])
-        == {"blocked_partial_family", "blocked_until_quality_and_completeness_pass"},
-        "interim_remaining_tail_quality": set(natural_interim_remaining["search_id"])
-        == {"NNS-P1-tail-quality-controls"},
-        "interim_config_blocks_claim": natural_interim_config["natural_claim_allowed"] is False
-        and int(natural_interim_config["observed_primary_rows"]) == 20
-        and int(natural_interim_config["missing_primary_rows"]) == 6,
-        "claim_ladder_not_ready": natural_protocol_claim_lookup["fresh_natural_primary_counterexample"] == "not_ready",
+        "interim_quality_failures_recorded": int(natural_interim_all_observed["quality_gate_fail_rows"]) == 23,
+        "interim_claim_boundary_caveated": set(natural_interim_claim_boundary["current_status"])
+        == {
+            "no_adjusted_primary_counterexample",
+            "finite_null_candidate",
+            "quality_caveated_complete_family",
+        },
+        "interim_remaining_empty": len(natural_interim_remaining) == 0,
+        "interim_config_finite_null": natural_interim_config["finite_null_candidate"] is True
+        and int(natural_interim_config["observed_primary_rows"]) == 26
+        and int(natural_interim_config["missing_primary_rows"]) == 0,
+        "claim_ladder_no_counterexample": natural_protocol_claim_lookup["fresh_natural_primary_counterexample"]
+        == "not_found_in_phase1",
+        "claim_ladder_finite_null": natural_protocol_claim_lookup["finite_natural_null_search"]
+        == "finite_null_candidate",
         "primary_rule_holm": "Holm-adjusted" in str(natural_primary_metric["worse_rule"]),
         "primary_boundary": "full-drift counterexample" in str(natural_primary_metric["claim_boundary"]),
         "power_grid_shape": len(natural_power_grid) == 72,
@@ -4993,11 +5015,11 @@ def main() -> None:
             "pre-registered fresh search",
             "does not claim a new natural counterexample",
             "multiplicity procedure",
-            "partial_metric_outputs",
-            "20/26 phase1 settings have primary metric rows",
-            "phase1 Slurm entrypoint and multiplicity evaluator",
+            "metric_outputs_complete",
+            "26/26 fresh metric rows exist",
+            "Phase1 boundary: The phase1 Slurm outputs are complete",
             "multiplicity evaluator",
-            "complete fresh metric outputs",
+            "finite_null_candidate",
             "Blocked now: claiming a fresh natural primary counterexample",
         ],
     )
@@ -5029,10 +5051,10 @@ def main() -> None:
             "all 26 declared settings",
             "Holm",
             "paired per-seed log-ratio tests",
-            "Current primary metric coverage: 20/26 settings",
-            "Current seed-level primary rows: 100",
+            "Current primary metric coverage: 26/26 settings",
+            "Current seed-level primary rows: 130",
             "NNS-E2-phase1-output-completeness",
-            "not_ready",
+            "finite_null_candidate",
         ],
     )
     natural_interim_text = Path("discussion/e11_natural_negative_search_phase1_interim_synthesis.md").read_text(
@@ -5043,14 +5065,14 @@ def main() -> None:
         natural_interim_text,
         [
             "E11 Natural Negative Search Phase1 Interim Synthesis",
-            "20/26 observed",
+            "26/26 observed",
             "raw_worse_rows=0",
-            "Natural claims remain",
-            "tail-quality controls",
-            "no adjusted primary decision is claimable",
+            "finite-null candidate",
+            "tail-quality and detectable-effect caveats",
+            "no adjusted primary full-drift counterexample",
             "NNI-1-primary-natural-counterexample",
-            "blocked_partial_family",
-            "finite null over the 26-setting phase1 family",
+            "finite_null_candidate",
+            "unqualified finite null over all natural settings",
         ],
     )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
@@ -5977,7 +5999,7 @@ def main() -> None:
         "E11 Mechanism Referee Audit",
         "unit-JVP ratios are above one while matched-gain observed ratios are below one",
         "v5 final split outputs=not_run",
-        "Block natural-counterexample and finite-null wording",
+        "Use only finite registered phase1 null-candidate wording with detectable-effect and quality caveats",
         "local drift improvements imply final long-tail optimizer superiority",
     ]
     missing_claim_ledger = [phrase for phrase in required_claim_ledger_phrases if phrase not in claim_ledger]
@@ -6280,9 +6302,9 @@ def main() -> None:
         "discussion/e11_matrix_block_tightness_audit.md",
         "Deterministic exact-witness and ratio-identity audit",
         "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md",
-        "20/26 observed primary rows",
+        "26/26 observed primary rows",
         "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
-        "Partial-family claim-boundary synthesis",
+        "Complete-family claim-boundary synthesis",
         "make e11-natural-negative-search-phase1-interim-synthesis",
         "discussion/e11_top_conference_claim_decision_audit.md",
         "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract",
@@ -6380,12 +6402,23 @@ def main() -> None:
         "Two-page final-report version exists and is exactly two pages",
         "Major claims are tied to quantitative evidence",
         "PDF/build/test gates pass",
+        "CIFAR-100-LT ResNet18 local diagnostics",
+        "negative NS-Muon final-training pilot",
+        "registered-not-ready until unspent v5 ResNeXt50-32x4d and CIFAR-10 cross-partition final splits finish",
     ]
     missing_completion_audit = [
         phrase for phrase in required_completion_audit_phrases if phrase not in completion_audit
     ]
     if missing_completion_audit:
         raise AssertionError(f"completion audit missing required content: {missing_completion_audit}")
+    assert_forbidden_phrases_absent(
+        "completion audit stale evidence wording",
+        completion_audit,
+        [
+            "The real-data evidence is controlled scikit-learn digits.",
+            "Add CIFAR-100-LT, ImageNet-LT, or iNaturalist-style diagnostics.",
+        ],
+    )
     end_self_review = Path("discussion/e11_end_of_draft_self_review.md").read_text(encoding="utf-8")
     required_end_self_review_phrases = [
         "E11 End-of-Draft Self-Review",
@@ -6396,13 +6429,27 @@ def main() -> None:
         "pass for mechanism paper",
         "not supported",
         "selected-state compatibility",
-        "standard long-tail tasks",
+        "larger long-tail datasets",
+        "CIFAR-100-LT NS-Muon final-training pilot is negative",
+        "registered tuned benchmark protocol is still not_ready",
+        "All-layer ResNet18 JVP diagnostics are present",
+        "v5 ResNeXt50-32x4d and CIFAR-10 cross-partition final condition-score outputs are still pending",
     ]
     missing_end_self_review = [
         phrase for phrase in required_end_self_review_phrases if phrase not in end_self_review
     ]
     if missing_end_self_review:
         raise AssertionError(f"end-of-draft self-review missing required content: {missing_end_self_review}")
+    assert_forbidden_phrases_absent(
+        "end-of-draft self-review stale evidence wording",
+        end_self_review,
+        [
+            "long-tail benchmarks are absent",
+            "No standard long-tailed benchmark or tuned practical optimizer comparison.",
+            "The core real-data evidence is controlled scikit-learn digits.",
+            "Layerwise diagnostics are for a two-layer MLP.",
+        ],
+    )
     reference_audit = Path("discussion/e11_reference_audit.md").read_text(encoding="utf-8")
     required_reference_audit_phrases = [
         "E11 Reference Audit",
@@ -6880,7 +6927,7 @@ def main() -> None:
         "main_theorem_contract_and_tightness_audit_generated",
         "make e11-matrix-block-theorem-proof",
         "make e11-matrix-block-tightness-audit",
-        "partial_metric_outputs",
+        "finite_registered_phase1_null_candidate",
         "optimizer-performance",
     ]
     assert_required_phrases(
@@ -6972,19 +7019,21 @@ def main() -> None:
         "search-space registry, metric contract, multiplicity rule, stopping rule",
         "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md",
         "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md",
-        "20/26 primary metric rows",
+        "discussion/e11_natural_negative_search_phase1_NNS-P1-tail-quality-controls.md",
+        "26/26 primary metric rows",
         "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
         "raw_worse_rows=0",
-        "finite-null wording",
+        "finite registered phase1 null candidate",
+        "quality_gate_fail_rows=23",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "make e11-natural-negative-search-phase1-power-audit",
-        "make e11-natural-negative-search-phase1-results",
         "make e11-natural-negative-search-phase1-eval",
         "scripts/e11_write_natural_negative_phase1_interim_synthesis.py",
         "multiplicity evaluator",
-        "Holm-adjusted decisions",
+        "NNS-E4 returning finite_null_candidate",
+        "quality_gate_fail_rows=23",
         "held-out architecture",
         "benchmark-level performance claim",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md",
@@ -7028,15 +7077,16 @@ def main() -> None:
             "TCD-1-main-mechanism-theorem",
             "supportable_main_with_assumptions",
             "registered_not_ready_wait_for_v5_finals",
-            "blocked_partial_family",
+            "finite_null_candidate_with_caveats",
             "blocked_protocol_pending",
             "v5_p0_predictive_condition_claim=not_ready",
-            "observed=20/26",
+            "observed=26/26",
             "raw_worse_rows=0",
+            "quality_gate_fail_rows=23",
             "using any final row to refit or reselect the score",
             "quarantine benchmark claims",
             "worst-case-vs-realized distinction",
-            "No finite-null wording until the 26-setting family is complete",
+            "finite-null-candidate wording only with detectable-effect and tail-quality caveats",
         ],
     )
     manuscript_trace = pd.read_csv("results/e11_manuscript_claim_trace/claim_trace.csv")
@@ -7077,7 +7127,7 @@ def main() -> None:
             "Blocked Phrase Audit",
             "present_as_supportable_scoped_claim",
             "present_as_registered_not_ready",
-            "present_as_blocked_partial_family",
+            "present_as_finite_null_candidate_with_caveats",
             "present_as_blocked_protocol_context",
             "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server",
             "Every `supportable` decision must have a local scoped manuscript anchor",
@@ -7260,7 +7310,7 @@ def main() -> None:
         "preferred venue-toolchain reproducibility",
         "serverREADME.md",
         "No. The current submitted evidence bundle is checked by CPU-side Make targets",
-        "Do not use not_run, not_ready, or partial-family outputs as positive final evidence",
+        "Do not use not_run, not_ready, partial-family, or finite phase1 outputs as broader positive evidence",
         "Do not infer broad optimizer-performance, accuracy, or general predictive-condition claims",
     ]:
         if phrase not in artifact_response_text:
@@ -7278,7 +7328,7 @@ def main() -> None:
             "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full",
             "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility",
             "v5 predictive-condition upgrade",
-            "natural finite-null",
+            "unqualified natural-null",
             "broad optimizer-performance claim",
             "Machine-readable tables",
         ],
@@ -7306,7 +7356,7 @@ def main() -> None:
     for phrase in [
         "addressed_for_local_claim",
         "rejected_as_primary_explanation",
-        "blocked_until_complete",
+        "finite_phase1_null_candidate_with_quality_caveat",
         "not_claimed",
         "the validator enforces matched-update/head-gain consistency",
         "unit-JVP ratios",
@@ -7347,7 +7397,8 @@ def main() -> None:
     trigger_text = " ".join(falsification_triggers.astype(str).agg(" ".join, axis=1).tolist())
     for phrase in [
         "Downgrade predictive-condition wording",
-        "Block natural-counterexample and finite-null wording",
+        "Allow only finite registered phase1 null-candidate wording",
+        "finite phase1 null candidate with detectable-effect and quality caveats",
         "matched-head-gain local mechanism only",
         "mechanism diagnostic, not benchmark claim",
         "toolchain caveat",

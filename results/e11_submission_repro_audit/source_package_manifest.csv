@@ -1,5 +1,5 @@
 path,exists,size_bytes,sha256,role,audit_status
-paper/specgrad_activation_paper/main.tex,yes,111525,620d022ebc4e4bf144aa505a97779c12fe399436e5ce211375fc31185ea85dc1,paper source or root reproduction entrypoint,pass
+paper/specgrad_activation_paper/main.tex,yes,111652,293c333e296d0ab9867eefbcd7885fe07980a450c3d655cc0885d6c9ebe30546,paper source or root reproduction entrypoint,pass
 paper/specgrad_activation_paper/two_page.tex,yes,13228,f1e3bff2a16a58c6b6ae373307149578e96633d46acf2c819beacb2e8302cca9,paper source or root reproduction entrypoint,pass
 paper/specgrad_activation_paper/references.bib,yes,4906,64c7430cdd52637a545554f05e4e48575e0dd955877bc81db576b05fbcf52f48,paper source or root reproduction entrypoint,pass
 paper/specgrad_activation_paper/Makefile,yes,817,b19b4b3fdf5d4fec90db0de6af2d86b107956c8f9c9c7a5341d03c4f103996b2,paper source or root reproduction entrypoint,pass
@@ -8,5 +8,5 @@ paper/specgrad_activation_paper/tables/e11_paper_numbers.tex,yes,55974,70b0130ae
 paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex,yes,4934,1264d8923f3cfff52ae9af90f44b10bd29710c949ed93fc3d2eda5dff7b30471,paper source or root reproduction entrypoint,pass
 paper/specgrad_activation_paper/tables/local_linearization_errors.tex,yes,961,12c108dd5bfdfd2d1ad219904a4f82f1d10e01ab6d6de4cd86a9252cb298a5ef,paper source or root reproduction entrypoint,pass
 Makefile,yes,17203,4b5fa1de5dbfe0e6013e799c8800dfac15a668e57a182ce4b275cb44d0b4668a,paper source or root reproduction entrypoint,pass
-README_E11.md,yes,87043,62b4acaac21f2593e1c21cbe267bc68755ecf40c36c0984e263e5a9b57fdd7f2,paper source or root reproduction entrypoint,pass
+README_E11.md,yes,87348,1b7016a2c238dea932a0fc55766f6d58fae9f800a6278550951f883ecd578f5d,paper source or root reproduction entrypoint,pass
 paper/specgrad_activation_paper/figures,yes,2923280,21 png files,paper-local figure bundle,pass

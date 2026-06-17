@@ -40,6 +40,12 @@ def build_evidence() -> dict[str, object]:
     phase1_coverage = pd.read_csv(
         "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/family_coverage.csv"
     )
+    phase1_summary = pd.read_csv(
+        "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/observed_primary_summary.csv"
+    )
+    phase1_gates = pd.read_csv(
+        "results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv"
+    )
     muon_final_pairs = pd.read_csv(
         "results/e11_cifar100_resnet_lt_muon_final_benchmark/pair_summary.csv"
     ).set_index(["recipe", "frequency_group"])
@@ -63,6 +69,8 @@ def build_evidence() -> dict[str, object]:
         "residual_observed": residual_scores.loc["source_observed_residual_positive_control"],
         "v5_final_gates": v5_final_gates,
         "phase1_coverage": phase1_coverage,
+        "phase1_summary": phase1_summary,
+        "phase1_gates": phase1_gates,
         "muon_final_few": muon_final_pairs.loc[("ns_muon_aug_lr1e-4", "few")],
         "local_linear": local_linear,
         "v5_freeze": v5_freeze,
@@ -83,12 +91,16 @@ def build_alternative_explanations(e: dict[str, object]) -> pd.DataFrame:
     residual_scaled_jvp = e["residual_scaled_jvp"]
     residual_observed = e["residual_observed"]
     phase1_coverage = e["phase1_coverage"]
+    phase1_summary = e["phase1_summary"]
+    phase1_gates = e["phase1_gates"]
     muon_final_few = e["muon_final_few"]
 
     coverage = (
         f"{int(phase1_coverage['observed_primary_rows'].sum())}/"
         f"{int(phase1_coverage['expected_settings'].sum())}"
     )
+    all_observed = phase1_summary[phase1_summary["scope"].eq("all_observed")].iloc[0]
+    gate_status = phase1_gates.set_index("gate_id")["status"].astype(str).to_dict()
     rows = [
         {
             "audit_id": "MEA-1-head-gain-mismatch",
@@ -182,14 +194,17 @@ def build_alternative_explanations(e: dict[str, object]) -> pd.DataFrame:
         {
             "audit_id": "MEA-7-anecdotal-natural-negative",
             "alternative_explanation": "Natural positive/negative claims are cherry-picked.",
-            "current_status": "blocked_until_complete",
+            "current_status": "finite_phase1_null_candidate_with_quality_caveat",
             "decisive_evidence": (
-                f"Current phase1 coverage is {coverage} observed registered settings across the completed families; "
-                "tail-quality controls remain pending, so natural counterexample and finite-null wording stay blocked."
+                f"Current phase1 coverage is {coverage} observed registered settings; "
+                f"raw_worse_rows={int(all_observed['raw_worse_rows'])}; "
+                f"adjusted primary gate={gate_status['NNS-E4-natural-primary-claim']}; "
+                f"quality_gate_pass_rows={int(all_observed['quality_gate_pass_rows'])} and "
+                f"quality_gate_fail_rows={int(all_observed['quality_gate_fail_rows'])}."
             ),
-            "remaining_risk": "No familywise natural-negative conclusion until all 26 settings and quality gates are complete.",
-            "manuscript_action": "Use the registered protocol and interim synthesis only as boundary evidence.",
-            "forbidden_wording": "no natural counterexample exists or a natural counterexample has been found",
+            "remaining_risk": "The result is a finite registered phase1 null candidate, not a universal absence claim or a quality-gated mechanism validation.",
+            "manuscript_action": "Report no adjusted primary phase1 counterexample with detectable-effect and tail-quality caveats.",
+            "forbidden_wording": "no natural counterexample exists, or a natural counterexample has been found",
         },
         {
             "audit_id": "MEA-8-performance-proxy",
@@ -275,11 +290,15 @@ def build_theory_measurement_contract(e: dict[str, object]) -> pd.DataFrame:
 def build_falsification_triggers(e: dict[str, object]) -> pd.DataFrame:
     v5_final_gates = e["v5_final_gates"]
     phase1_coverage = e["phase1_coverage"]
+    phase1_summary = e["phase1_summary"]
+    phase1_gates = e["phase1_gates"]
     all_layer_jvp = e["all_layer_jvp"]
     v5_status_text = "; ".join(
         f"{row.gate_id}={row.status}" for row in v5_final_gates[["gate_id", "status"]].itertuples(index=False)
     )
     phase1_missing = int(phase1_coverage["missing_primary_rows"].sum())
+    phase1_all = phase1_summary[phase1_summary["scope"].eq("all_observed")].iloc[0]
+    phase1_gate_status = phase1_gates.set_index("gate_id")["status"].astype(str).to_dict()
     rows = [
         {
             "trigger_id": "FT-1-v5-final-fails",
@@ -290,10 +309,14 @@ def build_falsification_triggers(e: dict[str, object]) -> pd.DataFrame:
         },
         {
             "trigger_id": "FT-2-natural-family-incomplete",
-            "trigger_condition": "Any registered phase1 natural-negative metric row or quality gate is missing.",
-            "current_status": f"{phase1_missing} registered primary rows missing in completed coverage table; tail-quality controls pending",
-            "required_action": "Block natural-counterexample and finite-null wording.",
-            "claim_downgrade": "registered search protocol only",
+            "trigger_condition": "Any future registered natural-negative family is incomplete, or finite-null wording drops the detectable-effect and quality caveats.",
+            "current_status": (
+                f"{phase1_missing} registered primary rows missing in completed coverage table; "
+                f"NNS-E4={phase1_gate_status['NNS-E4-natural-primary-claim']}; "
+                f"quality_gate_fail_rows={int(phase1_all['quality_gate_fail_rows'])}"
+            ),
+            "required_action": "Allow only finite registered phase1 null-candidate wording and block natural-counterexample wording without adjusted primary evidence.",
+            "claim_downgrade": "finite phase1 null candidate with detectable-effect and quality caveats",
         },
         {
             "trigger_id": "FT-3-unit-jvp-misread",
@@ -337,7 +360,7 @@ def write_outputs(
         "alternative_explanations": int(len(alternatives)),
         "theory_measurement_contracts": int(len(contract)),
         "falsification_triggers": int(len(triggers)),
-        "claim_boundary": "local matched-head-gain mechanism; no final-performance, natural finite-null, or v5 predictive-condition upgrade",
+        "claim_boundary": "local matched-head-gain mechanism; finite registered phase1 natural-null candidate only; no final-performance or v5 predictive-condition upgrade",
     }
     (OUTPUT_DIR / "config.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
 
@@ -361,7 +384,7 @@ This generated audit takes an adversarial referee stance. It lists the strongest
 
 Allowed now: a local matched-head-gain mechanism paper with explicit theorem assumptions, diagnostic natural evidence, artifact-review reproducibility, and locked pending gates.
 
-Blocked now: broad optimizer-performance claims, natural finite-null or counterexample wording, and v5 predictive-condition generality before the registered final split gates pass.
+Blocked now: broad optimizer-performance claims, unqualified natural-null or counterexample wording, and v5 predictive-condition generality before the registered final split gates pass.
 
 Artifacts:
 - [alternative_explanation_matrix.csv](../results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv)

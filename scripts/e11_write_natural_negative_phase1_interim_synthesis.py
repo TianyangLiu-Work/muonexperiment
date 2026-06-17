@@ -38,7 +38,7 @@ def build_family_coverage(run_registry: pd.DataFrame) -> pd.DataFrame:
                 "missing_primary_rows": expected - observed,
                 "coverage_fraction": observed / expected if expected else 0.0,
                 "output_status": row.output_status,
-                "claim_use": "interim_evidence_only" if observed else "missing_required_family_rows",
+                "claim_use": "complete_family_evidence" if observed == expected else "interim_evidence_only",
             }
         )
     return pd.DataFrame(rows)
@@ -79,30 +79,43 @@ def build_claim_boundary(decisions: pd.DataFrame, gate_report: pd.DataFrame) -> 
     observed_count = int(decisions["output_status"].eq("observed").sum())
     missing_count = TOTAL_FAMILY_SIZE - observed_count
     gate_status = gate_report.set_index("gate_id")["status"].to_dict()
-    raw_worse_rows = bool_sum(decisions[decisions["output_status"].eq("observed")], "raw_ci_worse")
+    observed = decisions[decisions["output_status"].eq("observed")]
+    raw_worse_rows = bool_sum(observed, "raw_ci_worse")
+    quality_pass_rows = bool_sum(observed, "quality_gate")
+    quality_fail_rows = int(len(observed)) - quality_pass_rows
     adjusted_worse_rows = int(decisions["adjusted_primary_decision"].eq("primary_worse_adjusted").sum())
+    complete = missing_count == 0 and gate_status.get("NNS-E2-phase1-output-completeness") == "pass"
+    finite_null_candidate = complete and gate_status.get("NNS-E4-natural-primary-claim") == "finite_null_candidate"
     return pd.DataFrame(
         [
             {
                 "claim_id": "NNI-1-primary-natural-counterexample",
-                "current_status": "blocked_partial_family",
+                "current_status": "no_adjusted_primary_counterexample" if complete else "blocked_partial_family",
                 "evidence": f"{observed_count}/{TOTAL_FAMILY_SIZE} observed; raw_worse_rows={raw_worse_rows}; adjusted_worse_rows={adjusted_worse_rows}; NNS-E2={gate_status.get('NNS-E2-phase1-output-completeness')}",
-                "allowed_wording": "partial phase1 readout only; no natural primary counterexample",
+                "allowed_wording": (
+                    "complete registered phase1 family found no adjusted primary full-drift counterexample"
+                    if complete
+                    else "partial phase1 readout only; no natural primary counterexample"
+                ),
                 "blocked_wording": "fresh natural primary counterexample",
             },
             {
                 "claim_id": "NNI-2-finite-null-search",
-                "current_status": "blocked_partial_family",
-                "evidence": f"{missing_count} declared settings are still missing, including tail-quality controls",
-                "allowed_wording": "20/26 observed rows are reported under the frozen family",
-                "blocked_wording": "finite null over the 26-setting phase1 family",
+                "current_status": "finite_null_candidate" if finite_null_candidate else "blocked_partial_family",
+                "evidence": f"{missing_count} declared settings missing; adjusted_worse_rows={adjusted_worse_rows}; NNS-E4={gate_status.get('NNS-E4-natural-primary-claim')}",
+                "allowed_wording": (
+                    "finite-null candidate for the registered 26-setting phase1 primary family, with tail-quality and detectable-effect caveats"
+                    if finite_null_candidate
+                    else "partial observed rows are reported under the frozen family"
+                ),
+                "blocked_wording": "unqualified finite null over all natural settings",
             },
             {
                 "claim_id": "NNI-3-quality-gated-interpretation",
-                "current_status": "blocked_until_quality_and_completeness_pass",
-                "evidence": f"NNS-E3={gate_status.get('NNS-E3-primary-multiplicity')}; NNS-E4={gate_status.get('NNS-E4-natural-primary-claim')}",
-                "allowed_wording": "quality and multiplicity gates remain the claim boundary",
-                "blocked_wording": "using low-tail-quality or incomplete rows as mechanism falsification",
+                "current_status": "quality_caveated_complete_family" if complete else "blocked_until_quality_and_completeness_pass",
+                "evidence": f"NNS-E3={gate_status.get('NNS-E3-primary-multiplicity')}; NNS-E4={gate_status.get('NNS-E4-natural-primary-claim')}; quality_gate_pass_rows={quality_pass_rows}; quality_gate_fail_rows={quality_fail_rows}",
+                "allowed_wording": "quality and multiplicity gates remain the claim boundary; low-tail-quality rows limit interpretation",
+                "blocked_wording": "using low-tail-quality rows as mechanism validation or falsification",
             },
         ]
     )
@@ -110,6 +123,13 @@ def build_claim_boundary(decisions: pd.DataFrame, gate_report: pd.DataFrame) -> 
 
 def build_remaining_work(run_registry: pd.DataFrame) -> pd.DataFrame:
     missing = run_registry[run_registry["output_status"].ne("complete")].copy()
+    columns = [
+        "search_id",
+        "missing_primary_rows",
+        "current_status",
+        "required_action",
+        "claim_unblocked_if_done",
+    ]
     rows = []
     for row in missing.itertuples():
         rows.append(
@@ -121,7 +141,7 @@ def build_remaining_work(run_registry: pd.DataFrame) -> pd.DataFrame:
                 "claim_unblocked_if_done": "fresh primary candidate or finite-null boundary, depending on adjusted decisions",
             }
         )
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows, columns=columns)
 
 
 def write_discussion(
@@ -133,19 +153,33 @@ def write_discussion(
     observed_total = int(coverage["observed_primary_rows"].sum())
     missing_total = int(coverage["missing_primary_rows"].sum())
     all_observed = observed_summary[observed_summary["scope"].eq("all_observed")].iloc[0]
+    finite_null_candidate = "finite_null_candidate" in set(claim_boundary["current_status"].astype(str))
+    if missing_total == 0:
+        status_sentence = (
+            "The registered family is complete. The evaluator reports no adjusted primary full-drift counterexample, "
+            "so the allowed wording is a finite-null candidate for the registered phase1 primary family, with "
+            "tail-quality and detectable-effect caveats."
+            if finite_null_candidate
+            else "The registered family is complete, but the adjusted gate does not authorize a finite-null candidate."
+        )
+        decision_sentence = (
+            "This is stronger than the previous partial-family readout, but it is still not a universal natural-task theorem."
+        )
+    else:
+        status_sentence = (
+            "Natural claims remain blocked because declared rows are still missing and the evaluator gates remain incomplete."
+        )
+        decision_sentence = "No adjusted primary decision is claimable until the full 26-setting family is complete."
     text = f"""# E11 Natural Negative Search Phase1 Interim Synthesis
 
-This generated artifact summarizes the partial Holm-family state for the
-pre-registered natural negative-search phase1 family. It is not a discovery
-claim. The current evaluator has {observed_total}/{TOTAL_FAMILY_SIZE} observed
-primary rows and {missing_total} missing declared rows. Natural claims remain
-blocked because the tail-quality controls are not complete and the evaluator
-gates remain `not_ready`.
+This generated artifact summarizes the Holm-family state for the
+pre-registered natural negative-search phase1 family. It does not add a new
+search after looking at outcomes. The current evaluator has
+{observed_total}/{TOTAL_FAMILY_SIZE} observed primary rows and {missing_total}
+missing declared rows. {status_sentence}
 
 Observed rows have raw_worse_rows={int(all_observed["raw_worse_rows"])} and
-max raw CI high {fmt(all_observed["raw_ci95_high_max"])}. This is useful
-interim evidence, but no adjusted primary decision is claimable until the full
-26-setting family is complete.
+max raw CI high {fmt(all_observed["raw_ci95_high_max"])}. {decision_sentence}
 
 ## Family Coverage
 
@@ -195,12 +229,14 @@ def main() -> None:
     (OUTPUT_DIR / "config.json").write_text(
         json.dumps(
             {
-                "purpose": "interim synthesis for partial natural negative-search phase1 outputs",
+                "purpose": "synthesis for natural negative-search phase1 outputs",
                 "analysis_scope": "claim-boundary synthesis; no new empirical computation beyond registered evaluator tables",
                 "observed_primary_rows": observed_total,
                 "missing_primary_rows": missing_total,
                 "raw_worse_rows": raw_worse_total,
-                "natural_claim_allowed": False,
+                "finite_null_candidate": bool(
+                    "finite_null_candidate" in set(claim_boundary["current_status"].astype(str))
+                ),
                 "full_family_required_rows": TOTAL_FAMILY_SIZE,
             },
             indent=2,

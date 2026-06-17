@@ -191,7 +191,7 @@ make e11-natural-negative-search-phase1-power-audit # compute the phase1 detecta
 make e11-natural-negative-search-phase1-settings # write settings-only registries for all registered phase1 natural negative-search settings
 make e11-natural-negative-search-phase1-results # submit the registered phase1 natural negative-search settings via Slurm
 make e11-natural-negative-search-phase1-eval # evaluate Holm-adjusted phase1 decisions after fresh metric outputs exist
-make e11-natural-negative-search-phase1-interim-synthesis # summarize partial phase1 coverage and blocked claim boundaries
+make e11-natural-negative-search-phase1-interim-synthesis # summarize complete phase1 coverage and caveated finite-null boundaries
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
@@ -476,18 +476,22 @@ phase1 readout in
 `discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md`,
 and a complete 8-setting CIFAR-10-LT ResNet18 cross-partition phase1 readout in
 `discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md`,
-while the tail-quality-control family remains settings-only. The
+plus the complete 6-setting tail-quality-control readout in
+`discussion/e11_natural_negative_search_phase1_NNS-P1-tail-quality-controls.md`.
+Together they complete the registered 26-setting phase1 family. The
 multiplicity evaluator is `scripts/e11_evaluate_natural_negative_search_phase1.py`;
 its current generated artifact
 `discussion/e11_natural_negative_search_phase1_evaluation.md` preserves all 26
 phase1 settings, uses paired per-seed log-ratio tests for the primary
-tail-output drift ratio when `step_metrics.csv` is available, and remains
-`not_ready` at 20/26 primary metric rows until fresh metric outputs are complete.
+tail-output drift ratio, and reports 26/26 primary metric rows with
+`NNS-E4-natural-primary-claim=finite_null_candidate`.
 The interim synthesis
 `discussion/e11_natural_negative_search_phase1_interim_synthesis.md` records
-the partial 20/26 family coverage, `raw_worse_rows=0`, low-tail-quality gate
-failures, and the remaining tail-quality-control rows that block both fresh
-natural primary counterexample wording and finite-null wording.
+the complete 26/26 family coverage, `raw_worse_rows=0`,
+`quality_gate_fail_rows=23`, and a finite registered phase1 null candidate with
+detectable-effect and tail-quality caveats; it still blocks any fresh natural
+primary counterexample wording or broad natural-null wording outside the
+registered phase1 space.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -619,6 +623,7 @@ Paper-facing synthesis:
 - `discussion/e11_natural_negative_search_phase1_power_audit.md`
 - `discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md`
 - `discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md`
+- `discussion/e11_natural_negative_search_phase1_NNS-P1-tail-quality-controls.md`
 - `discussion/e11_natural_negative_search_phase1_evaluation.md`
 - `discussion/e11_natural_negative_search_phase1_interim_synthesis.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
@@ -974,8 +979,8 @@ Do not claim:
 - `scripts/e11_write_natural_negative_search_protocol.py`: pre-registered fresh natural negative-search protocol with search space, metric contract, multiplicity rule, stopping rules, gates, and claim ladder.
 - `scripts/e11_write_natural_negative_power_audit.py`: phase1 natural-negative power/MDE audit for interpreting adjusted positive and finite-null outcomes.
 - `scripts/e11_run_natural_negative_search_phase1.py`: executable phase1 runner for the registered natural negative-search settings; supports `--list-settings` without launching training and writes fresh outputs only when submitted.
-- `scripts/e11_evaluate_natural_negative_search_phase1.py`: Holm-adjusted phase1 evaluator for the natural negative-search protocol; uses paired per-seed log-ratio tests when metric outputs exist and keeps every registered setting as pending until they are complete.
-- `scripts/e11_write_natural_negative_phase1_interim_synthesis.py`: claim-boundary synthesis for partial phase1 coverage, raw-worse counts, quality gates, and remaining tail-quality controls.
+- `scripts/e11_evaluate_natural_negative_search_phase1.py`: Holm-adjusted phase1 evaluator for the natural negative-search protocol; uses paired per-seed log-ratio tests and keeps every registered setting in the complete 26-setting decision family.
+- `scripts/e11_write_natural_negative_phase1_interim_synthesis.py`: claim-boundary synthesis for complete phase1 coverage, raw-worse counts, quality gates, and finite registered phase1 null-candidate caveats.
 - `scripts/e11_write_submission_repro_audit.py`: submission reproducibility audit for LaTeX toolchain availability, rendered PDF hashes, paper source hashes, and clean-checkout gates.
 - `scripts/e11_write_artifact_review_packet.py`: artifact-review command, gate, local-state, and reviewer-response packet for reproducing the current bundle without expanding claims.
 - `scripts/e11_write_mechanism_referee_audit.py`: adversarial mechanism/referee audit that maps alternative explanations, theory-to-measurement contracts, and falsification triggers to current evidence and forbidden wording.
@@ -1025,5 +1030,5 @@ Most important next steps:
 2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the frozen v2 condition score fails the registered ResNet34 and CIFAR-10-LT held-out residual-ranking gates. The fresh v3 zero-fit scaled-JVP score then passes the CIFAR-10 alternate partition but reverses on the fresh ResNet50 architecture split. V4 then freezes a two-axis amplitude-minus-direction score and passes the WideResNet50-2 final architecture split, but fails the CIFAR-10 mixed final data split. The v4 failure audit localizes this data-partition reversal mechanism problem to amplitude/depth scalar aggregation rather than the direction threshold. The proof-obligation register now separates theorem claims, assumptions, and blocked predictive-condition wording. V5 has a frozen transport-normalized validation score, a pre-registered final evaluator, a pre-output interpretation lock, and a reviewer failure response; the remaining P0 condition-score test is to wait for the submitted unspent ResNeXt50-32x4d architecture final and CIFAR-10 cross-partition final outputs, then rerun `make e11-cifar-resnet-condition-score-v5-final-eval` and `make e11-cifar-resnet-condition-score-v5-reviewer-failure-response` under the locked outcome ladder.
 3. Extend the current fixed-checkpoint, short-trajectory, small practical-training, and negative ResNet final-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
-5. Let `make e11-natural-negative-search-phase1-results` finish the fresh metric outputs for the protocol registered in `discussion/e11_natural_negative_search_protocol.md`, then rerun `make e11-natural-negative-search-phase1-eval` to refresh Holm-adjusted primary decisions and full reporting of null, component-only, secondary, and quality-failure rows.
+5. Treat the current 26-setting natural-negative phase1 family as complete only within its registered scope; rerun `make e11-natural-negative-search-phase1-eval` and `make e11-natural-negative-search-phase1-interim-synthesis` after any new registered family, and preregister held-out architecture or larger-dataset searches before broadening the finite-null wording.
 6. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.

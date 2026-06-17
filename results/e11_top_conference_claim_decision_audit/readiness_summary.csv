@@ -1,6 +1,6 @@
 current_decision,claim_count
-blocked_partial_family,1
 blocked_protocol_pending,1
+finite_null_candidate_with_caveats,1
 registered_not_ready_wait_for_v5_finals,1
 supportable_diagnostic_only,1
 supportable_main_with_assumptions,1

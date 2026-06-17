@@ -53,12 +53,13 @@ CLAIM_ANCHORS: dict[str, dict[str, object]] = {
     "TCD-4-natural-counterexample-or-finite-null": {
         "main_tex_location": "limitations",
         "required_anchors": [
-            r"observed \(20/26\) settings",
+            r"observed \(26/26\) settings",
             r"\texttt{raw\_worse\_rows=0}",
-            "block finite-null wording",
-            "block a natural counterexample claim",
+            "finite registered phase1 null candidate",
+            "detectable-effect and tail-quality caveats",
+            "does not prove that no natural counterexample exists outside the registered phase1 space",
         ],
-        "trace_status": "present_as_blocked_partial_family",
+        "trace_status": "present_as_finite_null_candidate_with_caveats",
     },
     "TCD-5-optimizer-performance-benchmark": {
         "main_tex_location": "abstract, experiments, limitations, and appendix benchmark pilots",

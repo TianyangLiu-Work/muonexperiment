@@ -59,6 +59,11 @@ def build_proof_obligations(evidence: dict[str, object]) -> pd.DataFrame:
     natural_observed_count = int(evidence["natural_decisions"]["output_status"].eq("observed").sum())
     tuned_status = status_lookup(evidence["tuned_gates"], "gate_id")
     selected_score = str(evidence["v5_response_config"]["primary_score"])
+    natural_complete = (
+        natural_status.get("NNS-E2-phase1-output-completeness") == "pass"
+        and natural_status.get("NNS-E3-primary-multiplicity") == "pass"
+    )
+    natural_finite_null = natural_status.get("NNS-E4-natural-primary-claim") == "finite_null_candidate"
 
     positive = head_tail.loc["high_head_rank_low_tail_srank"]
     negative = head_tail.loc["low_head_rank_high_tail_srank"]
@@ -129,10 +134,18 @@ def build_proof_obligations(evidence: dict[str, object]) -> pd.DataFrame:
                 f"primary metric rows={natural_observed_count}/26; "
                 f"natural primary claim={natural_status['NNS-E4-natural-primary-claim']}"
             ),
-            "current_status": "partial_metric_outputs",
+            "current_status": (
+                "finite_registered_phase1_null_candidate"
+                if natural_complete and natural_finite_null
+                else "partial_metric_outputs"
+            ),
             "blocks_main_theory_claim": "no_but_blocks_falsification_upgrade",
-            "required_upgrade": "finish the remaining phase1 metric rows and rerun the multiplicity evaluator",
-            "forbidden_wording": "do not call any setting a natural counterexample before adjusted decisions are complete",
+            "required_upgrade": (
+                "replicate or extend the registered natural search before making broader natural-null claims"
+                if natural_complete and natural_finite_null
+                else "finish the remaining phase1 metric rows and rerun the multiplicity evaluator"
+            ),
+            "forbidden_wording": "do not call any setting a natural counterexample without an adjusted primary worse decision, and do not generalize the finite phase1 null outside its registered space",
         },
         {
             "obligation_id": "PTO-6-final-performance-separation",
@@ -193,8 +206,8 @@ def build_assumption_stress_tests() -> pd.DataFrame:
                 "assumption": "natural negative examples survive familywise adjustment",
                 "stress_test": "phase1 multiplicity evaluator with 26 declared settings",
                 "failure_mode": "selected anecdotal counterexamples would be statistically weak",
-                "paper_action": "wait for complete metric rows before using any natural negative claim",
-                "status": "partial_metric_outputs",
+                "paper_action": "report the finite registered phase1 result with detectable-effect and quality-gate caveats",
+                "status": "finite_null_candidate_with_caveats",
             },
         ]
     )
@@ -226,10 +239,10 @@ def build_claim_scope_boundaries() -> pd.DataFrame:
             },
             {
                 "claim_scope": "natural_counterexample",
-                "allowed_claim": "the natural negative-search protocol and power boundary are registered",
-                "blocked_claim": "a natural primary counterexample exists",
-                "decisive_gate": "complete phase1 metric outputs plus Holm-adjusted positive decision",
-                "current_status": "not_ready",
+                "allowed_claim": "the registered 26-setting phase1 search found no adjusted primary full-drift counterexample and is a finite-null candidate with caveats",
+                "blocked_claim": "a natural primary counterexample exists, or no natural counterexample exists outside the registered phase1 space",
+                "decisive_gate": "Holm-adjusted positive decision for a counterexample, or complete family plus finite-null caveats for null wording",
+                "current_status": "finite_null_candidate_with_caveats",
             },
             {
                 "claim_scope": "optimizer_benchmark",
@@ -268,10 +281,10 @@ def build_theorem_to_experiment_queue() -> pd.DataFrame:
             },
             {
                 "priority": "P1",
-                "task": "complete the remaining natural negative-search phase1 metrics",
+                "task": "replicate or extend the finite phase1 natural negative-search result before broader natural-null wording",
                 "artifact_or_command": "make e11-natural-negative-search-phase1-eval",
-                "unblocks": "natural_counterexample or finite-null boundary wording",
-                "dependency": "phase1 Slurm outputs",
+                "unblocks": "broader natural-null or held-out natural boundary wording",
+                "dependency": "complete phase1 finite-null candidate",
             },
             {
                 "priority": "P1",

@@ -817,13 +817,13 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "stage": "Natural negative-search phase1 multiplicity evaluation",
         "command": "python3 scripts/e11_evaluate_natural_negative_search_phase1.py",
         "produces": "results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/* and discussion/e11_natural_negative_search_phase1_evaluation.md",
-        "paper_role": "Holm-adjusted primary decision boundary for the 26-setting phase1 family; current state remains not_ready until fresh metric outputs exist.",
+        "paper_role": "Holm-adjusted primary decision boundary for the 26-setting phase1 family; current complete state is a finite-null candidate with detectable-effect and quality caveats.",
     },
     {
         "stage": "Natural negative-search phase1 interim synthesis",
         "command": "python3 scripts/e11_write_natural_negative_phase1_interim_synthesis.py",
         "produces": "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/* and discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
-        "paper_role": "Claim-boundary synthesis for the partial 20/26 phase1 family, preserving no-counterexample and no-finite-null wording until tail-quality controls complete.",
+        "paper_role": "Claim-boundary synthesis for the complete 26/26 phase1 family, preserving finite registered null-candidate caveats and no-counterexample wording.",
     },
     {
         "stage": "Condition-score v5 ResNeXt50 architecture split",

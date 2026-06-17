@@ -109,8 +109,8 @@ def command_matrix() -> pd.DataFrame:
             "command": f"make PYTHON={PYTHON_CMD} e11-natural-negative-search-phase1-results",
             "purpose": "Submit the registered phase1 natural-negative search family.",
             "compute_mode": "GPU via Slurm",
-            "expected_state": "tail-quality controls remain pending until their metric files are complete",
-            "claim_boundary": "No natural-counterexample or finite-null wording until the 26-setting family is complete.",
+            "expected_state": "current 26-setting phase1 metric files are complete; rerun only for a new registered family",
+            "claim_boundary": "Finite registered phase1 null-candidate wording is allowed only with detectable-effect and tail-quality caveats.",
         },
     ]
     return pd.DataFrame(rows)
@@ -156,8 +156,12 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
     tool_available = status_lookup(toolchain, "tool", "available")
     gate_status = status_lookup(build_gates, "gate_id", "status")
     server_readme_state = "present_untracked_local_file" if Path("serverREADME.md").exists() else "absent"
-    final_arch_dir = Path("results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d")
-    final_data_dir = Path("results/e11_condition_score_v5_protocol/final_data_cifar10_cross")
+    final_arch_layer_summary = Path(
+        "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/layer_summary.csv"
+    )
+    final_data_layer_summary = Path(
+        "results/e11_condition_score_v5_protocol/final_data_cifar10_cross/layer_summary.csv"
+    )
     rows = [
         {
             "item": "serverREADME.md",
@@ -191,7 +195,11 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
         },
         {
             "item": "v5 final layer tables",
-            "state": "present" if final_arch_dir.exists() and final_data_dir.exists() else "pending_not_required_for_current_claims",
+            "state": (
+                "present"
+                if final_arch_layer_summary.exists() and final_data_layer_summary.exists()
+                else "pending_not_required_for_current_claims"
+            ),
             "evidence": "The frozen final evaluator remains not_run until both unspent final split layer tables exist.",
             "reviewer_instruction": "Do not upgrade the v5 predictive-condition claim until both Slurm jobs finish and the frozen evaluator passes.",
         },
@@ -233,9 +241,9 @@ def reviewer_response() -> pd.DataFrame:
         },
         {
             "objection": "Why are v5 final and natural-negative claims still limited?",
-            "answer": "The unspent v5 final splits and remaining natural-negative tail-quality controls are still pending, so the paper preserves registered-not-ready and blocked wording.",
+            "answer": "The unspent v5 final splits are still pending. The natural-negative phase1 family is complete and supports only a finite registered null candidate with detectable-effect and tail-quality caveats.",
             "status": "claim_boundary_preserved",
-            "forbidden_shortcut": "Do not use not_run, not_ready, or partial-family outputs as positive final evidence.",
+            "forbidden_shortcut": "Do not use not_run, not_ready, partial-family, or finite phase1 outputs as broader positive evidence.",
         },
         {
             "objection": "What scientific claim is actually reproducible now?",
@@ -265,13 +273,13 @@ def write_outputs(
         "git_branch": git_output("branch", "--show-current"),
         "python_command": PYTHON_CMD,
         "strongest_local_gate": f"make PYTHON={PYTHON_CMD} e11-full",
-        "claim_boundary": "current evidence bundle only; no v5 final, natural finite-null, or optimizer-performance upgrade",
+        "claim_boundary": "current evidence bundle only; finite phase1 natural-null candidate with caveats; no v5 final or optimizer-performance upgrade",
     }
     (OUTPUT_DIR / "config.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
 
     text = f"""# E11 Artifact Review Packet
 
-This generated packet converts the submission reproducibility audit into an artifact-review response plan. It is intentionally conservative: it supports the current evidence bundle, records the CPU reviewer path, and keeps preferred LaTeX clean-checkout, v5 final, natural finite-null, and optimizer-performance claims outside the current artifact boundary.
+This generated packet converts the submission reproducibility audit into an artifact-review response plan. It is intentionally conservative: it supports the current evidence bundle, records the CPU reviewer path, and keeps preferred LaTeX clean-checkout, v5 final, unqualified natural-null, and optimizer-performance claims outside the current artifact boundary.
 
 ## Reviewer Command Matrix
 
@@ -293,7 +301,7 @@ This generated packet converts the submission reproducibility audit into an arti
 
 Allowed now: artifact reviewers can reproduce the current bundle with `make PYTHON={PYTHON_CMD} e11-full`, or inspect the narrower steps `make PYTHON={PYTHON_CMD} e11-paper-assets`, `make PYTHON={PYTHON_CMD} e11-paper-pdf`, and `make PYTHON={PYTHON_CMD} e11-check`.
 
-Blocked now: preferred pdflatex/bibtex/xelatex clean-checkout reproducibility, any v5 predictive-condition upgrade, any natural finite-null or counterexample wording, and any broad optimizer-performance claim.
+Blocked now: preferred pdflatex/bibtex/xelatex clean-checkout reproducibility, any v5 predictive-condition upgrade, any unqualified natural-null or counterexample wording, and any broad optimizer-performance claim.
 
 Machine-readable tables:
 - [command_matrix.csv](../results/e11_artifact_review_packet/command_matrix.csv)

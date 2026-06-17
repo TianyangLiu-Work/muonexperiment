@@ -1,4 +1,4 @@
 search_id,expected_settings,observed_primary_rows,missing_primary_rows,coverage_fraction,output_status,claim_use
-NNS-P1-cifar100lt-resnet18-new-partitions,12,12,0,1.0,complete,interim_evidence_only
-NNS-P1-cifar10lt-resnet18-cross-partitions,8,8,0,1.0,complete,interim_evidence_only
-NNS-P1-tail-quality-controls,6,0,6,0.0,settings_only_no_metrics,missing_required_family_rows
+NNS-P1-cifar100lt-resnet18-new-partitions,12,12,0,1.0,complete,complete_family_evidence
+NNS-P1-cifar10lt-resnet18-cross-partitions,8,8,0,1.0,complete,complete_family_evidence
+NNS-P1-tail-quality-controls,6,6,0,1.0,complete,complete_family_evidence

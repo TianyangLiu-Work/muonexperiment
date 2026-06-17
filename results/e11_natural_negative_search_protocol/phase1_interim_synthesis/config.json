@@ -1,9 +1,9 @@
 {
-  "purpose": "interim synthesis for partial natural negative-search phase1 outputs",
+  "purpose": "synthesis for natural negative-search phase1 outputs",
   "analysis_scope": "claim-boundary synthesis; no new empirical computation beyond registered evaluator tables",
-  "observed_primary_rows": 20,
-  "missing_primary_rows": 6,
+  "observed_primary_rows": 26,
+  "missing_primary_rows": 0,
   "raw_worse_rows": 0,
-  "natural_claim_allowed": false,
+  "finite_null_candidate": true,
   "full_family_required_rows": 26
 }

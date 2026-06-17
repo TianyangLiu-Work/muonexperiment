@@ -301,7 +301,7 @@ def main() -> None:
                     "E11 Mechanism Referee Audit: "
                     + falsification_triggers.loc["FT-2-natural-family-incomplete", "current_status"]
                 ),
-                "required_manuscript_action": "Block natural-counterexample and finite-null wording",
+                "required_manuscript_action": "Use only finite registered phase1 null-candidate wording with detectable-effect and quality caveats",
                 "forbidden_wording": falsification_triggers.loc[
                     "FT-2-natural-family-incomplete", "claim_downgrade"
                 ],

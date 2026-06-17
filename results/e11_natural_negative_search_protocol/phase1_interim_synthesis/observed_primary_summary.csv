@@ -1,5 +1,5 @@
 scope,observed_primary_rows,missing_primary_rows,raw_worse_rows,quality_gate_pass_rows,quality_gate_fail_rows,estimate_min,estimate_max,raw_ci95_high_max,claim_statuses,interpretation
-all_observed,20,6,0,2,18,0.3463520676936099,0.8377805489836955,0.8967116990346538,not_ready,no_claim_until_full_family_complete
-NNS-P1-cifar100lt-resnet18-new-partitions,12,0,0,2,10,0.4681750952455857,0.8377805489836955,0.8967116990346538,not_ready,complete_family_ready_for_registered_decision
-NNS-P1-cifar10lt-resnet18-cross-partitions,8,0,0,0,8,0.3463520676936099,0.7143113347511576,0.7760841789587198,not_ready,complete_family_ready_for_registered_decision
-NNS-P1-tail-quality-controls,0,6,0,0,0,,,,not_ready,no_claim_until_full_family_complete
+all_observed,26,0,0,3,23,0.3463520676936099,0.8377805489836955,0.8967116990346538,no_primary_counterexample_for_setting,complete_family_ready_for_registered_decision
+NNS-P1-cifar100lt-resnet18-new-partitions,12,0,0,2,10,0.4681750952455857,0.8377805489836955,0.8967116990346538,no_primary_counterexample_for_setting,complete_family_ready_for_registered_decision
+NNS-P1-cifar10lt-resnet18-cross-partitions,8,0,0,0,8,0.3463520676936099,0.7143113347511576,0.7760841789587198,no_primary_counterexample_for_setting,complete_family_ready_for_registered_decision
+NNS-P1-tail-quality-controls,6,0,0,1,5,0.5215286486971717,0.8139096884662457,0.8671339083034957,no_primary_counterexample_for_setting,complete_family_ready_for_registered_decision

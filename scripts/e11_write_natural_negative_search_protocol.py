@@ -268,21 +268,37 @@ def build_acceptance_gates() -> pd.DataFrame:
     )
 
 
+def phase1_gate_status() -> dict[str, str]:
+    gate_path = RESULT_DIR / "phase1_multiplicity_evaluation" / "gate_report.csv"
+    if not gate_path.exists():
+        return {}
+    gates = pd.read_csv(gate_path)
+    return gates.set_index("gate_id")["status"].astype(str).to_dict()
+
+
 def build_claim_ladder() -> pd.DataFrame:
+    gate_status = phase1_gate_status()
+    finite_null_candidate = (
+        gate_status.get("NNS-E2-phase1-output-completeness") == "pass"
+        and gate_status.get("NNS-E3-primary-multiplicity") == "pass"
+        and gate_status.get("NNS-E4-natural-primary-claim") == "finite_null_candidate"
+    )
+    primary_counterexample_status = "not_found_in_phase1" if finite_null_candidate else "not_ready"
+    finite_null_status = "finite_null_candidate" if finite_null_candidate else "not_ready"
     return pd.DataFrame(
         [
             {
                 "claim_id": "fresh_natural_primary_counterexample",
-                "current_status": "not_ready",
+                "current_status": primary_counterexample_status,
                 "unlock_condition": "NNS-S3 passes on a fresh phase and NNS-1 through NNS-6 pass",
                 "blocked_if": "only component or secondary metrics reverse",
                 "paper_wording_if_unlocked": "a registered natural setting where spectral/polar increases full tail-output drift at matched head gain",
             },
             {
                 "claim_id": "finite_natural_null_search",
-                "current_status": "not_ready",
+                "current_status": finite_null_status,
                 "unlock_condition": "NNS-S4 passes after all declared fresh phase settings run",
-                "blocked_if": "fresh outputs are incomplete or selected post hoc",
+                "blocked_if": "fresh outputs are incomplete, selected post hoc, or used outside the registered phase1 space",
                 "paper_wording_if_unlocked": "a finite pre-registered natural search found no primary full-drift counterexample in the declared space",
             },
             {
@@ -350,6 +366,7 @@ def phase1_output_status(search_space: pd.DataFrame) -> pd.DataFrame:
 def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFrame) -> pd.DataFrame:
     primary = audit_baseline.set_index("baseline_id").loc["committed_natural_primary_full_drift_scan"]
     phase1_status = phase1_output_status(search_space)
+    gate_status = phase1_gate_status()
     expected_metric_rows = int(phase1_status["expected_settings"].sum())
     observed_metric_rows = int(phase1_status["primary_metric_rows"].sum())
     status_fragments = [
@@ -365,12 +382,23 @@ def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFra
         output_status = "metric_outputs_complete"
         output_evidence = "; ".join(status_fragments)
         evaluator_status = "implemented_complete_outputs"
-        claim_evidence = "fresh outputs are complete, but claims require the multiplicity evaluator decision table"
+        if gate_status.get("NNS-E4-natural-primary-claim") == "finite_null_candidate":
+            claim_status = "finite_null_candidate"
+            claim_evidence = (
+                f"{observed_metric_rows}/{expected_metric_rows} fresh metric rows exist; "
+                "NNS-E4-natural-primary-claim=finite_null_candidate with no adjusted primary worse row"
+            )
+        else:
+            claim_status = "pending_evaluator_decision"
+            claim_evidence = "fresh outputs are complete, but claims require the multiplicity evaluator decision table"
     else:
         output_status = "partial_metric_outputs"
         output_evidence = f"{observed_metric_rows}/{expected_metric_rows} phase1 settings have primary metric rows; " + "; ".join(status_fragments)
         evaluator_status = "implemented_partial_outputs"
+        claim_status = "not_ready"
         claim_evidence = f"{observed_metric_rows}/{expected_metric_rows} fresh metric rows exist, so natural claims remain blocked until the family is complete"
+    if observed_metric_rows == 0:
+        claim_status = "not_ready"
     return pd.DataFrame(
         [
             {
@@ -423,7 +451,7 @@ def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFra
             },
             {
                 "item": "natural negative claim",
-                "status": "not_ready",
+                "status": claim_status,
                 "evidence": claim_evidence,
                 "blocks_stronger_claim_if_missing": "yes",
             },
@@ -448,6 +476,38 @@ def write_outputs(
     gates.to_csv(RESULT_DIR / "acceptance_gates.csv", index=False)
     claim_ladder.to_csv(RESULT_DIR / "claim_ladder.csv", index=False)
     status.to_csv(RESULT_DIR / "protocol_status.csv", index=False)
+
+    natural_claim_status = status.set_index("item").loc["natural negative claim", "status"]
+    if natural_claim_status == "finite_null_candidate":
+        allowed_now = (
+            "cite the committed natural-boundary audit and report the registered 26-setting "
+            "phase1 primary family as a finite-null candidate with detectable-effect and "
+            "tail-quality caveats."
+        )
+        blocked_now = (
+            "claiming a fresh natural primary counterexample, claiming absence of natural "
+            "counterexamples outside the registered phase1 space, or using quality-failed rows "
+            "as mechanism validation."
+        )
+        phase1_boundary = (
+            "The phase1 Slurm outputs are complete and the multiplicity evaluator reports no "
+            "adjusted primary worse row. This unlocks only finite registered phase1 wording; "
+            "it does not prove a universal natural null."
+        )
+    else:
+        allowed_now = (
+            "cite the committed natural-boundary audit as a finite baseline null for primary "
+            "full-drift rows and as component/outcome claim-boundary evidence."
+        )
+        blocked_now = (
+            "claiming a fresh natural primary counterexample, a finite pre-registered null "
+            "search, or a practical optimizer-performance result from this protocol."
+        )
+        phase1_boundary = (
+            "The phase1 Slurm entrypoint and multiplicity evaluator are implemented, but "
+            "those claims still require complete fresh metric outputs and Holm-adjusted "
+            "decisions from paired per-seed log-ratio tests that satisfy the acceptance gates above."
+        )
 
     text = f"""# E11 Natural Negative Search Protocol
 
@@ -487,15 +547,11 @@ the primary full tail-output drift metric.
 
 ## Claim Boundary
 
-Allowed now: cite the committed natural-boundary audit as a finite baseline null
-for primary full-drift rows and as component/outcome claim-boundary evidence.
+Allowed now: {allowed_now}
 
-Blocked now: claiming a fresh natural primary counterexample, a finite
-pre-registered null search, or a practical optimizer-performance result from
-this protocol. The phase1 Slurm entrypoint and multiplicity evaluator are
-implemented, but those claims still require complete fresh metric outputs and
-Holm-adjusted decisions from paired per-seed log-ratio tests that satisfy the
-acceptance gates above.
+Blocked now: {blocked_now}
+
+Phase1 boundary: {phase1_boundary}
 
 Generated tables:
 

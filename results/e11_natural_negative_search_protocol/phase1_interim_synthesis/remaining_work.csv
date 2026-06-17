@@ -1,2 +1,1 @@
 search_id,missing_primary_rows,current_status,required_action,claim_unblocked_if_done
-NNS-P1-tail-quality-controls,6,settings_only_no_metrics,"wait for Slurm output, then rerun make e11-natural-negative-search-phase1-eval","fresh primary candidate or finite-null boundary, depending on adjusted decisions"

@@ -57,37 +57,33 @@ the primary full tail-output drift metric.
 
 ## Claim Ladder
 
-| claim_id                             | current_status               | unlock_condition                                                                                                    | blocked_if                                                                             |
-|:-------------------------------------|:-----------------------------|:--------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------|
-| fresh_natural_primary_counterexample | not_ready                    | NNS-S3 passes on a fresh phase and NNS-1 through NNS-6 pass                                                         | only component or secondary metrics reverse                                            |
-| finite_natural_null_search           | not_ready                    | NNS-S4 passes after all declared fresh phase settings run                                                           | fresh outputs are incomplete or selected post hoc                                      |
-| component_boundary_cases             | supported_by_committed_audit | already supported as claim-boundary evidence by results/e11_natural_head_tail_boundary/candidate_negative_cases.csv | used as a primary drift or final-performance counterexample                            |
-| local_primary_full_drift_mechanism   | unchanged                    | existing positive diagnostics plus current caveats                                                                  | paper claims final loss, accuracy, or universal optimizer superiority from local drift |
-| practical_optimizer_performance      | blocked                      | separate tuned benchmark with final metrics                                                                         | only local negative-search evidence exists                                             |
+| claim_id                             | current_status               | unlock_condition                                                                                                    | blocked_if                                                                                   |
+|:-------------------------------------|:-----------------------------|:--------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------|
+| fresh_natural_primary_counterexample | not_found_in_phase1          | NNS-S3 passes on a fresh phase and NNS-1 through NNS-6 pass                                                         | only component or secondary metrics reverse                                                  |
+| finite_natural_null_search           | finite_null_candidate        | NNS-S4 passes after all declared fresh phase settings run                                                           | fresh outputs are incomplete, selected post hoc, or used outside the registered phase1 space |
+| component_boundary_cases             | supported_by_committed_audit | already supported as claim-boundary evidence by results/e11_natural_head_tail_boundary/candidate_negative_cases.csv | used as a primary drift or final-performance counterexample                                  |
+| local_primary_full_drift_mechanism   | unchanged                    | existing positive diagnostics plus current caveats                                                                  | paper claims final loss, accuracy, or universal optimizer superiority from local drift       |
+| practical_optimizer_performance      | blocked                      | separate tuned benchmark with final metrics                                                                         | only local negative-search evidence exists                                                   |
 
 ## Protocol Status
 
-| item                                     | status                      | evidence                                                                                                                                                                                                                                          | blocks_stronger_claim_if_missing   |
-|:-----------------------------------------|:----------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------|
-| committed natural audit baseline         | loaded                      | 37 primary rows; strict worse count 0; max CI high 0.936                                                                                                                                                                                          | yes                                |
-| fresh natural search protocol            | generated                   | search space, metric contract, stopping rules, gates, and claim ladder written                                                                                                                                                                    | yes                                |
-| fresh natural search entrypoints         | implemented                 | scripts/e11_run_natural_negative_search_phase1.py and scripts/slurm/e11_natural_negative_search_phase1.sbatch are registered for phase1                                                                                                           | yes                                |
-| fresh natural search settings registries | locked                      | phase1_cifar100lt_resnet18, phase1_cifar10lt_resnet18, and phase1_tail_quality_controls settings_registry.csv files declare 26 total settings                                                                                                     | yes                                |
-| fresh natural search outputs             | partial_metric_outputs      | 20/26 phase1 settings have primary metric rows; NNS-P1-cifar100lt-resnet18-new-partitions=complete (12/12 rows); NNS-P1-cifar10lt-resnet18-cross-partitions=complete (8/8 rows); NNS-P1-tail-quality-controls=settings_only_no_metrics (0/6 rows) | yes                                |
-| multiplicity-adjusted evaluator          | implemented_partial_outputs | scripts/e11_evaluate_natural_negative_search_phase1.py writes per-seed log-ratio rows and Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation                                           | yes                                |
-| natural negative claim                   | not_ready                   | 20/26 fresh metric rows exist, so natural claims remain blocked until the family is complete                                                                                                                                                      | yes                                |
+| item                                     | status                       | evidence                                                                                                                                                                                                | blocks_stronger_claim_if_missing   |
+|:-----------------------------------------|:-----------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------|
+| committed natural audit baseline         | loaded                       | 37 primary rows; strict worse count 0; max CI high 0.936                                                                                                                                                | yes                                |
+| fresh natural search protocol            | generated                    | search space, metric contract, stopping rules, gates, and claim ladder written                                                                                                                          | yes                                |
+| fresh natural search entrypoints         | implemented                  | scripts/e11_run_natural_negative_search_phase1.py and scripts/slurm/e11_natural_negative_search_phase1.sbatch are registered for phase1                                                                 | yes                                |
+| fresh natural search settings registries | locked                       | phase1_cifar100lt_resnet18, phase1_cifar10lt_resnet18, and phase1_tail_quality_controls settings_registry.csv files declare 26 total settings                                                           | yes                                |
+| fresh natural search outputs             | metric_outputs_complete      | NNS-P1-cifar100lt-resnet18-new-partitions=complete (12/12 rows); NNS-P1-cifar10lt-resnet18-cross-partitions=complete (8/8 rows); NNS-P1-tail-quality-controls=complete (6/6 rows)                       | yes                                |
+| multiplicity-adjusted evaluator          | implemented_complete_outputs | scripts/e11_evaluate_natural_negative_search_phase1.py writes per-seed log-ratio rows and Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation | yes                                |
+| natural negative claim                   | finite_null_candidate        | 26/26 fresh metric rows exist; NNS-E4-natural-primary-claim=finite_null_candidate with no adjusted primary worse row                                                                                    | yes                                |
 
 ## Claim Boundary
 
-Allowed now: cite the committed natural-boundary audit as a finite baseline null
-for primary full-drift rows and as component/outcome claim-boundary evidence.
+Allowed now: cite the committed natural-boundary audit and report the registered 26-setting phase1 primary family as a finite-null candidate with detectable-effect and tail-quality caveats.
 
-Blocked now: claiming a fresh natural primary counterexample, a finite
-pre-registered null search, or a practical optimizer-performance result from
-this protocol. The phase1 Slurm entrypoint and multiplicity evaluator are
-implemented, but those claims still require complete fresh metric outputs and
-Holm-adjusted decisions from paired per-seed log-ratio tests that satisfy the
-acceptance gates above.
+Blocked now: claiming a fresh natural primary counterexample, claiming absence of natural counterexamples outside the registered phase1 space, or using quality-failed rows as mechanism validation.
+
+Phase1 boundary: The phase1 Slurm outputs are complete and the multiplicity evaluator reports no adjusted primary worse row. This unlocks only finite registered phase1 wording; it does not prove a universal natural null.
 
 Generated tables:
 

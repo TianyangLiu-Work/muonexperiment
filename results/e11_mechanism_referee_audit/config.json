@@ -3,5 +3,5 @@
   "alternative_explanations": 8,
   "theory_measurement_contracts": 5,
   "falsification_triggers": 5,
-  "claim_boundary": "local matched-head-gain mechanism; no final-performance, natural finite-null, or v5 predictive-condition upgrade"
+  "claim_boundary": "local matched-head-gain mechanism; finite registered phase1 natural-null candidate only; no final-performance or v5 predictive-condition upgrade"
 }
