@@ -957,6 +957,11 @@ def main() -> None:
         Path("results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18") / "decision_template.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18") / "config.json",
         Path("results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18") / "settings_registry.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18") / "step_metrics.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18") / "pair_summary.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18") / "layer_metrics.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18") / "decision_template.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18") / "config.json",
         Path("results/e11_natural_negative_search_protocol/phase1_tail_quality_controls") / "settings_registry.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "run_registry.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "seed_level_primary_ratios.csv",
@@ -966,6 +971,7 @@ def main() -> None:
         Path("discussion/e11_natural_negative_search_protocol.md"),
         Path("discussion/e11_natural_negative_search_phase1_power_audit.md"),
         Path("discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md"),
+        Path("discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md"),
         Path("discussion/e11_natural_negative_search_phase1_evaluation.md"),
         Path("scripts/e11_write_natural_negative_search_protocol.py"),
         Path("scripts/e11_write_natural_negative_power_audit.py"),
@@ -1429,7 +1435,7 @@ def main() -> None:
         "validation/final seed splits",
         "tuned AdamW/SGD/class-balanced baselines",
         "phase1 GPU entrypoint is now implemented",
-        "12/26 primary metric rows",
+        "20/26 primary metric rows",
         "discussion/e11_natural_negative_search_phase1_evaluation.md",
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-results",
@@ -4516,6 +4522,11 @@ def main() -> None:
     natural_phase1_cifar100_step = pd.read_csv(natural_phase1_cifar100_dir / "step_metrics.csv")
     natural_phase1_cifar100_layer = pd.read_csv(natural_phase1_cifar100_dir / "layer_metrics.csv")
     natural_phase1_cifar100_decision = pd.read_csv(natural_phase1_cifar100_dir / "decision_template.csv")
+    natural_phase1_cifar10_dir = natural_protocol_dir / "phase1_cifar10lt_resnet18"
+    natural_phase1_cifar10_pair = pd.read_csv(natural_phase1_cifar10_dir / "pair_summary.csv")
+    natural_phase1_cifar10_step = pd.read_csv(natural_phase1_cifar10_dir / "step_metrics.csv")
+    natural_phase1_cifar10_layer = pd.read_csv(natural_phase1_cifar10_dir / "layer_metrics.csv")
+    natural_phase1_cifar10_decision = pd.read_csv(natural_phase1_cifar10_dir / "decision_template.csv")
     natural_protocol_checks = {
         "entrypoint_columns": {"entrypoint", "entrypoint_status"}.issubset(natural_protocol_search.columns),
         "baseline_ids": set(natural_protocol_baseline["baseline_id"]) == expected_natural_protocol_baselines,
@@ -4553,11 +4564,15 @@ def main() -> None:
         "phase1_cifar100_step_rows": len(natural_phase1_cifar100_step) == 120,
         "phase1_cifar100_layer_rows": len(natural_phase1_cifar100_layer) > 0,
         "phase1_cifar100_decision_rows": len(natural_phase1_cifar100_decision) == 12,
+        "phase1_cifar10_metric_rows": len(natural_phase1_cifar10_pair) == 8,
+        "phase1_cifar10_step_rows": len(natural_phase1_cifar10_step) == 80,
+        "phase1_cifar10_layer_rows": len(natural_phase1_cifar10_layer) > 0,
+        "phase1_cifar10_decision_rows": len(natural_phase1_cifar10_decision) == 8,
         "phase2_prefixes_absent": phase2_prefixes_absent,
         "eval_decision_count": len(natural_eval_decisions) == 26,
-        "eval_observed_count": natural_eval_observed_count == 12,
-        "eval_not_run_count": natural_eval_not_run_count == 14,
-        "eval_seed_ratio_rows": len(natural_eval_seed_ratios) == 60,
+        "eval_observed_count": natural_eval_observed_count == 20,
+        "eval_not_run_count": natural_eval_not_run_count == 6,
+        "eval_seed_ratio_rows": len(natural_eval_seed_ratios) == 100,
         "eval_observed_inference_source": bool(
             natural_eval_observed["inference_source"].eq("paired_seed_log_ratio_t_test").all()
         ),
@@ -4569,13 +4584,13 @@ def main() -> None:
         "eval_run_status": natural_eval_run_status
         == {
             "NNS-P1-cifar100lt-resnet18-new-partitions": "complete",
-            "NNS-P1-cifar10lt-resnet18-cross-partitions": "settings_only_no_metrics",
+            "NNS-P1-cifar10lt-resnet18-cross-partitions": "complete",
             "NNS-P1-tail-quality-controls": "settings_only_no_metrics",
         },
         "eval_run_pair_rows": {key: int(value) for key, value in natural_eval_run_pair_rows.items()}
         == {
             "NNS-P1-cifar100lt-resnet18-new-partitions": 12,
-            "NNS-P1-cifar10lt-resnet18-cross-partitions": 0,
+            "NNS-P1-cifar10lt-resnet18-cross-partitions": 8,
             "NNS-P1-tail-quality-controls": 0,
         },
         "eval_gate_implemented": natural_eval_gate_lookup["NNS-E1-evaluator-implemented"] == "pass",
@@ -4616,7 +4631,7 @@ def main() -> None:
             "does not claim a new natural counterexample",
             "multiplicity procedure",
             "partial_metric_outputs",
-            "12/26 phase1 settings have primary metric rows",
+            "20/26 phase1 settings have primary metric rows",
             "phase1 Slurm entrypoint and multiplicity evaluator",
             "multiplicity evaluator",
             "complete fresh metric outputs",
@@ -4651,8 +4666,8 @@ def main() -> None:
             "all 26 declared settings",
             "Holm",
             "paired per-seed log-ratio tests",
-            "Current primary metric coverage: 12/26 settings",
-            "Current seed-level primary rows: 60",
+            "Current primary metric coverage: 20/26 settings",
+            "Current seed-level primary rows: 100",
             "NNS-E2-phase1-output-completeness",
             "not_ready",
         ],
@@ -5876,7 +5891,7 @@ def main() -> None:
         "discussion/e11_matrix_block_tightness_audit.md",
         "Deterministic exact-witness and ratio-identity audit",
         "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md",
-        "12/26 observed primary rows",
+        "20/26 observed primary rows",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -6524,7 +6539,8 @@ def main() -> None:
         "discussion/e11_natural_negative_search_protocol.md",
         "search-space registry, metric contract, multiplicity rule, stopping rule",
         "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md",
-        "12/26 primary metric rows",
+        "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md",
+        "20/26 primary metric rows",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",

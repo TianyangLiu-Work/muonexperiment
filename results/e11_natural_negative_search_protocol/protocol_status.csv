@@ -3,6 +3,6 @@ committed natural audit baseline,loaded,37 primary rows; strict worse count 0; m
 fresh natural search protocol,generated,"search space, metric contract, stopping rules, gates, and claim ladder written",yes
 fresh natural search entrypoints,implemented,scripts/e11_run_natural_negative_search_phase1.py and scripts/slurm/e11_natural_negative_search_phase1.sbatch are registered for phase1,yes
 fresh natural search settings registries,locked,"phase1_cifar100lt_resnet18, phase1_cifar10lt_resnet18, and phase1_tail_quality_controls settings_registry.csv files declare 26 total settings",yes
-fresh natural search outputs,partial_metric_outputs,12/26 phase1 settings have primary metric rows; NNS-P1-cifar100lt-resnet18-new-partitions=complete (12/12 rows); NNS-P1-cifar10lt-resnet18-cross-partitions=settings_only_no_metrics (0/8 rows); NNS-P1-tail-quality-controls=settings_only_no_metrics (0/6 rows),yes
+fresh natural search outputs,partial_metric_outputs,20/26 phase1 settings have primary metric rows; NNS-P1-cifar100lt-resnet18-new-partitions=complete (12/12 rows); NNS-P1-cifar10lt-resnet18-cross-partitions=complete (8/8 rows); NNS-P1-tail-quality-controls=settings_only_no_metrics (0/6 rows),yes
 multiplicity-adjusted evaluator,implemented_partial_outputs,scripts/e11_evaluate_natural_negative_search_phase1.py writes per-seed log-ratio rows and Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation,yes
-natural negative claim,not_ready,"12/26 fresh metric rows exist, so natural claims remain blocked until the family is complete",yes
+natural negative claim,not_ready,"20/26 fresh metric rows exist, so natural claims remain blocked until the family is complete",yes

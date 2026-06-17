@@ -167,19 +167,20 @@ Regenerate legacy condition-geometry guardrail notes separately with:
 make e11-guardrail-assets
 ```
 
-| artifact                                                                                   | role                                                                                                          |
-|:-------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------|
-| discussion/e11_main_paper_package.md                                                       | Smallest main figure/table package.                                                                           |
-| discussion/e11_quantitative_claim_ledger.md                                                | Allowed wording, forbidden wording, quantitative anchors, and evidence links.                                 |
-| paper/specgrad_activation_paper/tables/e11_paper_numbers.tex                               | LaTeX macros generated from the current result CSVs and included by the paper draft.                          |
-| discussion/e11_paper_skeleton.md                                                           | Current section-level paper skeleton and figure/table plan.                                                   |
-| discussion/e11_reviewer_risk_audit.md                                                      | Known reviewer risks and safe claim decisions.                                                                |
-| discussion/e11_matrix_block_theorem_proof.md                                               | Machine-checkable theorem statements, assumptions, proof steps, and claim implications.                       |
-| discussion/e11_matrix_block_tightness_audit.md                                             | Deterministic exact-witness and ratio-identity audit for the matrix-block theorem.                            |
-| discussion/e11_theory_proof_obligation_register.md                                         | Theory-facing proof obligations, assumptions, claim boundaries, and pending gates.                            |
-| discussion/e11_condition_score_v5_reviewer_failure_response.md                             | Pre-output v5 final failure-mode matrix for reviewer-safe claim downgrades.                                   |
-| discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md | Completed 12-setting CIFAR-100-LT phase1 readout for the registered natural-negative search.                  |
-| discussion/e11_natural_negative_search_phase1_evaluation.md                                | Holm-family evaluator preserving 12/26 observed primary rows and blocking claims until all settings complete. |
+| artifact                                                                                    | role                                                                                                          |
+|:--------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------|
+| discussion/e11_main_paper_package.md                                                        | Smallest main figure/table package.                                                                           |
+| discussion/e11_quantitative_claim_ledger.md                                                 | Allowed wording, forbidden wording, quantitative anchors, and evidence links.                                 |
+| paper/specgrad_activation_paper/tables/e11_paper_numbers.tex                                | LaTeX macros generated from the current result CSVs and included by the paper draft.                          |
+| discussion/e11_paper_skeleton.md                                                            | Current section-level paper skeleton and figure/table plan.                                                   |
+| discussion/e11_reviewer_risk_audit.md                                                       | Known reviewer risks and safe claim decisions.                                                                |
+| discussion/e11_matrix_block_theorem_proof.md                                                | Machine-checkable theorem statements, assumptions, proof steps, and claim implications.                       |
+| discussion/e11_matrix_block_tightness_audit.md                                              | Deterministic exact-witness and ratio-identity audit for the matrix-block theorem.                            |
+| discussion/e11_theory_proof_obligation_register.md                                          | Theory-facing proof obligations, assumptions, claim boundaries, and pending gates.                            |
+| discussion/e11_condition_score_v5_reviewer_failure_response.md                              | Pre-output v5 final failure-mode matrix for reviewer-safe claim downgrades.                                   |
+| discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md  | Completed 12-setting CIFAR-100-LT phase1 readout for the registered natural-negative search.                  |
+| discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md | Completed 8-setting CIFAR-10-LT cross-partition phase1 readout for the registered natural-negative search.    |
+| discussion/e11_natural_negative_search_phase1_evaluation.md                                 | Holm-family evaluator preserving 20/26 observed primary rows and blocking claims until all settings complete. |
 
 ## Batch / Activation Contract
 

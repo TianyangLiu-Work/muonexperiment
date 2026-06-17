@@ -96,8 +96,12 @@ def main() -> None:
                 "role": "Completed 12-setting CIFAR-100-LT phase1 readout for the registered natural-negative search.",
             },
             {
+                "artifact": "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md",
+                "role": "Completed 8-setting CIFAR-10-LT cross-partition phase1 readout for the registered natural-negative search.",
+            },
+            {
                 "artifact": "discussion/e11_natural_negative_search_phase1_evaluation.md",
-                "role": "Holm-family evaluator preserving 12/26 observed primary rows and blocking claims until all settings complete.",
+                "role": "Holm-family evaluator preserving 20/26 observed primary rows and blocking claims until all settings complete.",
             },
         ]
     )

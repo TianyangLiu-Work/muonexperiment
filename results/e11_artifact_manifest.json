@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 416712,
-      "size": "406.9 KB"
+      "size_bytes": 417197,
+      "size": "407.4 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2318474,
+      "size_bytes": 2320535,
       "size": "2.2 MB"
     },
     {
@@ -26,15 +26,15 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1287029,
+      "size_bytes": 1295822,
       "size": "1.2 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 283367410,
-      "size": "270.2 MB"
+      "size_bytes": 284077570,
+      "size": "270.9 MB"
     },
     {
       "path": "figures",
@@ -1041,6 +1041,26 @@
       "size": "4.7 KB"
     },
     {
+      "path": "results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/step_metrics.csv",
+      "rows": 80,
+      "size": "73.3 KB"
+    },
+    {
+      "path": "results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/pair_summary.csv",
+      "rows": 8,
+      "size": "18.9 KB"
+    },
+    {
+      "path": "results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/layer_metrics.csv",
+      "rows": 1680,
+      "size": "577.1 KB"
+    },
+    {
+      "path": "results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/decision_template.csv",
+      "rows": 8,
+      "size": "4.0 KB"
+    },
+    {
       "path": "results/e11_natural_negative_search_protocol/phase1_tail_quality_controls/settings_registry.csv",
       "rows": 6,
       "size": "4.9 KB"
@@ -1053,17 +1073,17 @@
     {
       "path": "results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv",
       "rows": 26,
-      "size": "10.5 KB"
+      "size": "11.8 KB"
     },
     {
       "path": "results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv",
       "rows": 5,
-      "size": "737 B"
+      "size": "721 B"
     },
     {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
       "rows": 7,
-      "size": "17.7 KB"
+      "size": "17.9 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv",
@@ -1479,7 +1499,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "78.8 KB"
+      "size": "79.5 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1503,7 +1523,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "50.1 KB"
+      "size": "50.3 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -1547,7 +1567,7 @@
     },
     {
       "path": "discussion/e11_natural_negative_search_protocol.md",
-      "size": "17.8 KB"
+      "size": "17.6 KB"
     },
     {
       "path": "discussion/e11_natural_negative_search_phase1_power_audit.md",
@@ -1558,8 +1578,12 @@
       "size": "11.1 KB"
     },
     {
+      "path": "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md",
+      "size": "7.8 KB"
+    },
+    {
       "path": "discussion/e11_natural_negative_search_phase1_evaluation.md",
-      "size": "7.3 KB"
+      "size": "7.2 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",

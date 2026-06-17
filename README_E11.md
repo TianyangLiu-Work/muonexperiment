@@ -458,14 +458,15 @@ The phase1 GPU entrypoint is now implemented in
 output prefixes currently contain a complete 12-setting CIFAR-100-LT ResNet18
 phase1 readout in
 `discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md`,
-while the CIFAR-10-LT cross-partitions and tail-quality-control families remain
-settings-only. The
+and a complete 8-setting CIFAR-10-LT ResNet18 cross-partition phase1 readout in
+`discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md`,
+while the tail-quality-control family remains settings-only. The
 multiplicity evaluator is `scripts/e11_evaluate_natural_negative_search_phase1.py`;
 its current generated artifact
 `discussion/e11_natural_negative_search_phase1_evaluation.md` preserves all 26
 phase1 settings, uses paired per-seed log-ratio tests for the primary
 tail-output drift ratio when `step_metrics.csv` is available, and remains
-`not_ready` at 12/26 primary metric rows until fresh metric outputs are complete.
+`not_ready` at 20/26 primary metric rows until fresh metric outputs are complete.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -591,6 +592,7 @@ Paper-facing synthesis:
 - `discussion/e11_natural_negative_search_protocol.md`
 - `discussion/e11_natural_negative_search_phase1_power_audit.md`
 - `discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md`
+- `discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md`
 - `discussion/e11_natural_negative_search_phase1_evaluation.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
@@ -753,6 +755,11 @@ Primary paper quantitative tables:
 - `results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/pair_summary.csv`
 - `results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/layer_metrics.csv`
 - `results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/decision_template.csv`
+- `results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/settings_registry.csv`
+- `results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/step_metrics.csv`
+- `results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/pair_summary.csv`
+- `results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/layer_metrics.csv`
+- `results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/decision_template.csv`
 - `results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/run_registry.csv`
 - `results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/seed_level_primary_ratios.csv`
 - `results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv`
