@@ -165,6 +165,7 @@ make e11-cifar-resnet-condition-score-v5-data-results # submit the v5 CIFAR-10 c
 make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm
 make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm
 make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm
+make e11-cifar-resnet-lt-tuned-benchmark-protocol # register validation/final splits, tuned baselines, Muon grids, and benchmark claim gates
 make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practical Muon/AdamW trajectory bridge via Slurm
 make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases
 make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates
@@ -211,6 +212,7 @@ make e11-cifar-resnet-condition-score-v5-data-results
 make e11-cifar-resnet-lt-standard-eval-results
 make e11-cifar-resnet-lt-recipe-benchmark-results
 make e11-cifar-resnet-lt-muon-final-benchmark-results
+make e11-cifar-resnet-lt-tuned-benchmark-protocol
 make e11-cifar-resnet-practical-muon-bridge-results
 make e11-natural-head-tail-boundary-audit
 make e11-natural-negative-search-protocol
@@ -417,6 +419,15 @@ The NS-Muon final-training benchmark target submits
 and two finite-Newton-Schulz Muon-style matrix-weight recipes. The current
 3-seed result is a negative final-performance boundary for the tested Muon
 recipes, not a proof that no Muon recipe can work.
+
+The tuned benchmark protocol target runs
+`scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py`, writing
+`discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md` and
+`results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/*`. It quarantines the
+standard, recipe, and NS-Muon pilots as context. It freezes validation/final seed splits,
+tuned AdamW/SGD/class-balanced baselines, finite-NS-Muon candidate grids,
+familywise final comparisons, and scope-control gates before any tuned
+final-performance result exists.
 
 The ResNet practical Muon bridge target submits
 `scripts/slurm/e11_cifar100_resnet_practical_muon_bridge.sbatch`, which runs
@@ -771,6 +782,7 @@ Do not claim:
 - `scripts/e11_write_submission_repro_audit.py`: submission reproducibility audit for LaTeX toolchain availability, rendered PDF hashes, paper source hashes, and clean-checkout gates.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.
+- `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py`: registered tuned-benchmark protocol that separates spent pilots from validation/final seeds, tuned baselines, candidate Muon grids, and final claim gates.
 - `scripts/e11_run_cifar100_resnet_practical_muon_bridge.py`: ResNet practical Muon/AdamW trajectory-state bridge from the tail-rich checkpoint.
 - `scripts/slurm/e11_cifar100_resnet_one_step.sbatch`: GPU/Slurm submission wrapper for the ResNet18 diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch`: GPU/Slurm submission wrapper for the smaller-head-gain ResNet18 check.
@@ -801,11 +813,11 @@ Do not claim:
 
 The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
 
-The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`, v5 theory-to-score map in `discussion/e11_condition_score_v5_theory_to_score_map.md`, v5 validation-freeze boundary in `discussion/e11_condition_score_v5_validation_freeze.md`, natural boundary audit in `discussion/e11_natural_head_tail_boundary.md`, fresh natural negative-search protocol in `discussion/e11_natural_negative_search_protocol.md`, and submission reproducibility audit in `discussion/e11_submission_repro_audit.md`.
+The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`, v5 theory-to-score map in `discussion/e11_condition_score_v5_theory_to_score_map.md`, v5 validation-freeze boundary in `discussion/e11_condition_score_v5_validation_freeze.md`, tuned benchmark protocol in `discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md`, natural boundary audit in `discussion/e11_natural_head_tail_boundary.md`, fresh natural negative-search protocol in `discussion/e11_natural_negative_search_protocol.md`, and submission reproducibility audit in `discussion/e11_submission_repro_audit.md`.
 
 Most important next steps:
 
-1. Extend the new standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline, augmented recipe pilot, negative NS-Muon final-training pilot, and local tail-count imbalance sweep into a tuned benchmark protocol with a wider grid, class-balanced samplers, better Muon schedules, and larger long-tail datasets; the current pilots are useful benchmark context, not a competitive optimizer result.
+1. Implement and run the registered tuned benchmark protocol in `discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md`: validation-only hyperparameter selection, final paired seeds, tuned AdamW/SGD/class-balanced baselines, better finite-NS-Muon schedules, and many/medium/few/all metrics. Larger long-tail datasets still require a separate preregistered protocol; the current pilots are useful benchmark context, not a competitive optimizer result.
 2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the frozen v2 condition score fails the registered ResNet34 and CIFAR-10-LT held-out residual-ranking gates. The fresh v3 zero-fit scaled-JVP score then passes the CIFAR-10 alternate partition but reverses on the fresh ResNet50 architecture split. V4 then freezes a two-axis amplitude-minus-direction score and passes the WideResNet50-2 final architecture split, but fails the CIFAR-10 mixed final data split. The v4 failure audit localizes this data-partition reversal mechanism problem to amplitude/depth scalar aggregation rather than the direction threshold. V5 now requires a transport-normalized score contract or a narrower fixed-partition claim before any new P0 attempt, with new unspent validation/final splits instead of retuning on the failed final split.
 3. Extend the current fixed-checkpoint, short-trajectory, small practical-training, and negative ResNet final-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.

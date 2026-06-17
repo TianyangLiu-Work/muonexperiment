@@ -1,0 +1,7 @@
+gate_id,claim_unblocked,pass_rule,failure_claim
+TB-1-complete-final-family,Any CIFAR-100-LT ResNet18 final-performance statement.,All selected recipes and tuned baselines have 10 paired final seeds with many/medium/few/all metrics.,not_ready
+TB-2-primary-few-accuracy,Practical Muon improves few-class long-tail performance.,Muon few balanced-accuracy paired CI lower endpoint exceeds both tuned AdamW and tuned SGD by more than zero with Holm-adjusted final comparisons.,no practical Muon performance advantage
+TB-3-no-all-class-collapse,Few-class gain is not bought by broad collapse.,Muon all-class balanced-accuracy paired CI lower endpoint is no worse than -0.01 against the best tuned baseline.,tradeoff only; no clean performance claim
+TB-4-full-reporting-surface,Benchmark table can enter the main paper.,"Report many, medium, few, all balanced accuracy, loss, margin, per-seed rows, and paired differences.",appendix-only pilot context
+TB-5-scope-control,CIFAR-100-LT ResNet18 benchmark claim.,Wording names CIFAR-100-LT ResNet18 only unless additional datasets and architectures are run under a separate preregistered protocol.,broad optimizer claim forbidden
+TB-6-local-drift-separation,Mechanism and final-performance evidence can coexist without contradiction.,"Paper separates matched-head-gain local drift from long-horizon final training, including negative tuned outcomes.",mechanism-only paper path remains

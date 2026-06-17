@@ -1,0 +1,6 @@
+rule_id,rule,forbidden_action
+SEL-1-validation-only-selection,Choose one recipe per family using validation_tuning seeds only.,Selecting hyperparameters from final_claim seeds or from the published pilot deltas.
+SEL-2-primary-metric,Primary validation objective is few balanced accuracy; ties break by all balanced accuracy.,Switching the primary metric after seeing final results.
+SEL-3-paired-final,Run final_claim seeds pairwise for every selected recipe and tuned baseline.,Reporting unpaired recipe seeds or dropping failed seeds.
+SEL-4-familywise-error,Treat final comparisons to tuned AdamW and tuned SGD as one family and report Holm-adjusted decisions.,Claiming the best-looking pair without multiplicity adjustment.
+SEL-5-negative-results,Publish the tuned result as a boundary if Muon fails tuned baselines.,Suppressing negative tuned Muon outcomes while keeping local-drift motivation.

@@ -98,6 +98,7 @@ make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResN
 make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split
 make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm
+make e11-cifar-resnet-lt-tuned-benchmark-protocol # register validation/final splits and benchmark claim gates
 make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practical Muon/AdamW trajectory bridge via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation

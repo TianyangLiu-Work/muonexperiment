@@ -241,6 +241,12 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_lt_muon_final_benchmark/group_metrics.csv",
     "results/e11_cifar100_resnet_lt_muon_final_benchmark/summary.csv",
     "results/e11_cifar100_resnet_lt_muon_final_benchmark/pair_summary.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/pilot_context.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/benchmark_scope.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/seed_split_contract.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/recipe_grid.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/selection_rules.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/acceptance_gates.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/paired_metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv",
@@ -358,6 +364,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_resnet_lt_standard_eval.md",
     "discussion/e11_cifar100_resnet_lt_recipe_benchmark.md",
     "discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md",
+    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md",
     "discussion/e11_cifar100_resnet_practical_muon_bridge.md",
 )
 
@@ -719,6 +726,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "paper_role": "Actual finite-Newton-Schulz Muon-style final-performance boundary check against augmented AdamW on CIFAR-100-LT ResNet18.",
     },
     {
+        "stage": "CIFAR-100-LT ResNet18 tuned benchmark protocol",
+        "command": "python3 scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py",
+        "produces": "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/* and discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md",
+        "paper_role": "Preregisters validation/final seed splits, tuned baselines, Muon candidate grid, and claim gates before any tuned final-performance result.",
+    },
+    {
         "stage": "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_practical_muon_bridge.sbatch",
         "produces": "results/e11_cifar100_resnet_practical_muon_bridge/* and figures/e11_cifar100_resnet_practical_muon_bridge/*",
@@ -882,6 +895,7 @@ PAPER_ASSET_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_write_natural_head_tail_boundary_audit.py",
     "scripts/e11_write_natural_negative_search_protocol.py",
     "scripts/e11_write_natural_negative_power_audit.py",
+    "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py",
     "scripts/e11_write_head_tail_paper_results.py",
     "scripts/e11_write_local_linearization_table.py",
     "scripts/e11_write_claim_audit.py",

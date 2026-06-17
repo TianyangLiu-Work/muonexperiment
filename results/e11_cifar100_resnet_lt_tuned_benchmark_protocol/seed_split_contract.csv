@@ -1,0 +1,5 @@
+split_id,seed_set,role,tuning_allowed,outputs
+spent_pilot_context,0..9,pilot_context,no for final claims,"standard, recipe, and NS-Muon pilot result directories"
+validation_tuning,10..14,hyperparameter_selection,yes before final unblinding,results/e11_cifar100_resnet_lt_tuned_benchmark/validation_*
+final_claim,20..29,primary_final_evaluation,no,results/e11_cifar100_resnet_lt_tuned_benchmark/final_cifar100lt_resnet18
+optional_stability_rerun,30..34,post_claim_stability_check,no,optional appendix only

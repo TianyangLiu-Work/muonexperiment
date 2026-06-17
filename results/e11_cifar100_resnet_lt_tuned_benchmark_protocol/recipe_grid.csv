@@ -1,0 +1,7 @@
+recipe_family,optimizer,matrix_update,lr_grid,weight_decay_grid,class_reweighting,sampler,scheduler,warmup_steps_grid,newton_schulz_steps_grid,claim_role
+adamw_ce_tuned,adamw,standard adaptive first order,1e-4;3e-4;1e-3,1e-4;5e-4,none,long-tail natural sampler,cosine with warmup grid,0;500,not_applicable,tuned AdamW baseline
+sgd_momentum_ce_tuned,sgd,momentum SGD,0.03;0.1;0.3,5e-4;1e-3,none,long-tail natural sampler,cosine with warmup grid,0;500,not_applicable,tuned SGD baseline
+adamw_cb_loss_tuned,adamw,standard adaptive first order,1e-4;3e-4;1e-3,1e-4;5e-4,effective-number class-balanced loss beta=0.999;0.9999,long-tail natural sampler,cosine with warmup grid,0;500,not_applicable,class-balanced AdamW baseline
+adamw_cb_sampler_tuned,adamw,standard adaptive first order,1e-4;3e-4,1e-4;5e-4,cross entropy,class-balanced sampler,cosine with warmup grid,0;500,not_applicable,sampler baseline required before any practical claim
+ns_muon_matrix_tuned,ns_muon,finite Newton-Schulz matrix direction on Conv/Linear weights,1e-5;3e-5;1e-4;3e-4,1e-4;5e-4,none,long-tail natural sampler,cosine with warmup grid,0;500;1000,3;5;7,candidate practical Muon recipe
+ns_muon_cb_tuned,ns_muon,finite Newton-Schulz matrix direction on Conv/Linear weights,1e-5;3e-5;1e-4,1e-4;5e-4,effective-number class-balanced loss beta=0.9999,long-tail natural sampler,cosine with warmup grid,500;1000,3;5;7,candidate practical Muon class-balanced recipe

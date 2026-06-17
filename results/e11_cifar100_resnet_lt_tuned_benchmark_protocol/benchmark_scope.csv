@@ -1,0 +1,3 @@
+scope_id,dataset,imbalance_factor,architecture,primary_metric,secondary_metrics,claim_scope,status
+primary_cifar100lt_resnet18_if100,CIFAR-100-LT,100,ResNet18,few balanced accuracy,all/many/medium balanced accuracy; loss; margin,CIFAR-100-LT ResNet18 final-performance claim only,protocol_registered
+broad_long_tail_optimizer_claim,multiple long-tail datasets,dataset-specific,multiple architectures,not covered,not covered,broad optimizer-performance claim remains forbidden,not_covered_by_this_protocol
