@@ -1,0 +1,7 @@
+gate_id,scope,requirement,pass_condition
+NNS-1-protocol-freeze,fresh natural negative search,Protocol tables and discussion are committed before fresh search outputs exist.,protocol_status.csv marks fresh_search_outputs as not_run and the planned phase output directories are absent or empty
+NNS-2-freshness-exclusion,search space,No committed-audit setting_id or spent condition-score final partition is reused for selection.,fresh evaluator writes an exclusion audit with no overlap against the baseline audit and spent-final registries
+NNS-3-multiplicity,statistical decision,Primary discovery uses simultaneous confidence intervals or Holm-adjusted one-sided bootstrap tests over the phase family.,"every primary decision row includes raw CI, adjusted CI or adjusted p-value, and phase family size"
+NNS-4-full-reporting,artifact reporting,"All declared settings are reported, including nulls, component-only reversals, quality failures, and infrastructure failures.",registry row count equals the declared search-space count minus logged infrastructure failures
+NNS-5-quality-controls,claim validity,Primary negative candidates pass matched head-gain and pre-update tail-quality controls.,candidate rows include head-gain relative error within the registered tolerance and nondegenerate pre-update tail metrics
+NNS-6-claim-boundary,paper claim,Component and secondary tradeoffs are not described as primary full-drift counterexamples.,"claim ledger separates primary, component, secondary, and final-performance claims"

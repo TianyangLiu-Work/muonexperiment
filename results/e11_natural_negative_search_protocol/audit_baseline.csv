@@ -1,0 +1,4 @@
+baseline_id,source_artifact,row_count,source_count,strict_worse_count,max_ci95_high,status,claim_use
+committed_natural_primary_full_drift_scan,results/e11_natural_head_tail_boundary/primary_drift_scan.csv,37,11,0,0.9359561196591354,no_strict_natural_primary_counterexample_in_committed_scan,baseline null scan only; not a fresh negative-search result
+committed_component_ratio_boundaries,results/e11_natural_head_tail_boundary/candidate_negative_cases.csv,132,10,17,14.454166867296143,component_boundary_candidates_found,"claim-boundary evidence for true-logit/margin components, not primary full-drift failures"
+committed_secondary_outcome_tradeoffs,results/e11_natural_head_tail_boundary/secondary_outcome_scan.csv,111,11,41,0.0137953949047658,secondary_outcome_tradeoffs_found,"claim-boundary evidence for loss, margin, and accuracy outcomes"

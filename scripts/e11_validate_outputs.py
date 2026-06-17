@@ -887,6 +887,15 @@ def main() -> None:
         Path("results/e11_natural_head_tail_boundary") / "candidate_negative_cases.csv",
         Path("discussion/e11_natural_head_tail_boundary.md"),
         Path("scripts/e11_write_natural_head_tail_boundary_audit.py"),
+        Path("results/e11_natural_negative_search_protocol") / "audit_baseline.csv",
+        Path("results/e11_natural_negative_search_protocol") / "search_space_registry.csv",
+        Path("results/e11_natural_negative_search_protocol") / "metric_contract.csv",
+        Path("results/e11_natural_negative_search_protocol") / "stopping_rules.csv",
+        Path("results/e11_natural_negative_search_protocol") / "acceptance_gates.csv",
+        Path("results/e11_natural_negative_search_protocol") / "claim_ladder.csv",
+        Path("results/e11_natural_negative_search_protocol") / "protocol_status.csv",
+        Path("discussion/e11_natural_negative_search_protocol.md"),
+        Path("scripts/e11_write_natural_negative_search_protocol.py"),
         Path("discussion/e11_condition_score_v4_protocol.md"),
         Path("discussion/e11_condition_score_v4_validation_cifar100_rotated.md"),
         Path("discussion/e11_condition_score_v4_validation_freeze.md"),
@@ -1034,6 +1043,7 @@ def main() -> None:
         Path("results/e11_submission_repro_audit") / "build_gate_summary.csv",
         Path("scripts/e11_write_submission_repro_audit.py"),
         Path("scripts/e11_write_natural_head_tail_boundary_audit.py"),
+        Path("scripts/e11_write_natural_negative_search_protocol.py"),
         Path("Makefile"),
         Path("README_E11.md"),
         config.discussion_path,
@@ -1050,6 +1060,8 @@ def main() -> None:
         "scripts/e11_write_all_discussion_artifacts.py",
         "e11-natural-head-tail-boundary-audit:",
         "scripts/e11_write_natural_head_tail_boundary_audit.py",
+        "e11-natural-negative-search-protocol:",
+        "scripts/e11_write_natural_negative_search_protocol.py",
         "e11-submission-repro-audit:",
         "scripts/e11_write_submission_repro_audit.py",
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
@@ -1178,6 +1190,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
         "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
+        "make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
         "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
         "A CIFAR-100-LT ResNet18 imbalance sweep over tail_train_per_class 10/30/100/300 keeps spectral/Frobenius squared drift ratio below 1 in every setting",
@@ -1254,6 +1267,11 @@ def main() -> None:
         "scripts/e11_write_natural_head_tail_boundary_audit.py",
         "no_strict_natural_primary_counterexample_in_committed_scan",
         "37 primary full tail-output drift rows",
+        "discussion/e11_natural_negative_search_protocol.md",
+        "results/e11_natural_negative_search_protocol/*",
+        "scripts/e11_write_natural_negative_search_protocol.py",
+        "multiplicity-adjusted decision rule",
+        "before any fresh search outputs exist",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
         "candidate condition-score audit",
@@ -1271,6 +1289,7 @@ def main() -> None:
         *MAIN_RESULT_SCRIPTS,
         *APPENDIX_RUNNER_SCRIPTS,
         "scripts/e11_write_natural_head_tail_boundary_audit.py",
+        "scripts/e11_write_natural_negative_search_protocol.py",
         "scripts/e11_write_submission_repro_audit.py",
     ]
     missing_readme_phrases = [phrase for phrase in required_readme_phrases if phrase not in readme_text]
@@ -3786,6 +3805,107 @@ def main() -> None:
             "pre-registered natural negative-search experiment",
         ],
     )
+    natural_protocol_dir = Path("results/e11_natural_negative_search_protocol")
+    natural_protocol_baseline = pd.read_csv(natural_protocol_dir / "audit_baseline.csv")
+    natural_protocol_search = pd.read_csv(natural_protocol_dir / "search_space_registry.csv")
+    natural_protocol_metrics = pd.read_csv(natural_protocol_dir / "metric_contract.csv")
+    natural_protocol_stopping = pd.read_csv(natural_protocol_dir / "stopping_rules.csv")
+    natural_protocol_gates = pd.read_csv(natural_protocol_dir / "acceptance_gates.csv")
+    natural_protocol_claims = pd.read_csv(natural_protocol_dir / "claim_ladder.csv")
+    natural_protocol_status = pd.read_csv(natural_protocol_dir / "protocol_status.csv")
+    expected_natural_protocol_baselines = {
+        "committed_natural_primary_full_drift_scan",
+        "committed_component_ratio_boundaries",
+        "committed_secondary_outcome_tradeoffs",
+    }
+    expected_natural_protocol_search_ids = {
+        "NNS-P1-cifar100lt-resnet18-new-partitions",
+        "NNS-P1-cifar10lt-resnet18-cross-partitions",
+        "NNS-P1-tail-quality-controls",
+        "NNS-P2-heldout-architecture-boundary",
+    }
+    expected_natural_protocol_metrics = {
+        "primary_tail_output_drift_ratio",
+        "centered_tail_output_drift_ratio",
+        "true_logit_and_margin_components",
+        "tail_loss_margin_accuracy_diffs",
+        "head_gain_and_quality_controls",
+    }
+    expected_natural_protocol_rules = {
+        "NNS-S1-freeze-before-fresh-runs",
+        "NNS-S2-complete-phase-before-discovery",
+        "NNS-S3-primary-success",
+        "NNS-S4-finite-null",
+        "NNS-S5-component-only",
+        "NNS-S6-phase2-trigger",
+    }
+    expected_natural_protocol_gates = {
+        "NNS-1-protocol-freeze",
+        "NNS-2-freshness-exclusion",
+        "NNS-3-multiplicity",
+        "NNS-4-full-reporting",
+        "NNS-5-quality-controls",
+        "NNS-6-claim-boundary",
+    }
+    expected_natural_protocol_claims = {
+        "fresh_natural_primary_counterexample",
+        "finite_natural_null_search",
+        "component_boundary_cases",
+        "local_primary_full_drift_mechanism",
+        "practical_optimizer_performance",
+    }
+    expected_natural_protocol_status_items = {
+        "committed natural audit baseline",
+        "fresh natural search protocol",
+        "fresh natural search outputs",
+        "multiplicity-adjusted evaluator",
+        "natural negative claim",
+    }
+    natural_protocol_status_lookup = natural_protocol_status.set_index("item")["status"].to_dict()
+    natural_protocol_claim_lookup = natural_protocol_claims.set_index("claim_id")["current_status"].to_dict()
+    natural_primary_metric = natural_protocol_metrics.set_index("metric_id").loc[
+        "primary_tail_output_drift_ratio"
+    ]
+    planned_prefixes = [Path(path) for path in natural_protocol_search["planned_artifact_prefix"]]
+    if not (
+        set(natural_protocol_baseline["baseline_id"]) == expected_natural_protocol_baselines
+        and set(natural_protocol_search["search_id"]) == expected_natural_protocol_search_ids
+        and set(natural_protocol_metrics["metric_id"]) == expected_natural_protocol_metrics
+        and set(natural_protocol_stopping["rule_id"]) == expected_natural_protocol_rules
+        and set(natural_protocol_gates["gate_id"]) == expected_natural_protocol_gates
+        and set(natural_protocol_claims["claim_id"]) == expected_natural_protocol_claims
+        and set(natural_protocol_status["item"]) == expected_natural_protocol_status_items
+        and int(natural_protocol_baseline.set_index("baseline_id").loc[
+            "committed_natural_primary_full_drift_scan", "strict_worse_count"
+        ])
+        == 0
+        and natural_protocol_status_lookup["fresh natural search protocol"] == "generated"
+        and natural_protocol_status_lookup["fresh natural search outputs"] == "not_run"
+        and natural_protocol_status_lookup["multiplicity-adjusted evaluator"] == "registered_not_implemented"
+        and natural_protocol_status_lookup["natural negative claim"] == "not_ready"
+        and natural_protocol_claim_lookup["fresh_natural_primary_counterexample"] == "not_ready"
+        and "Holm-adjusted" in str(natural_primary_metric["worse_rule"])
+        and "full-drift counterexample" in str(natural_primary_metric["claim_boundary"])
+        and not any(prefix.exists() for prefix in planned_prefixes)
+    ):
+        raise AssertionError(
+            "natural negative-search protocol must preserve frozen search space, adjusted primary rule, not_run fresh outputs, and claim boundaries"
+        )
+    natural_protocol_text = Path("discussion/e11_natural_negative_search_protocol.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "natural negative-search protocol",
+        natural_protocol_text,
+        [
+            "E11 Natural Negative Search Protocol",
+            "pre-registered fresh search",
+            "does not claim a new natural counterexample",
+            "multiplicity procedure",
+            "fresh_search_outputs as not_run",
+            "Blocked now: claiming a fresh natural primary counterexample",
+        ],
+    )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -5402,6 +5522,9 @@ def main() -> None:
         "discussion/e11_natural_head_tail_boundary.md",
         "no strict natural primary full tail-output drift counterexample",
         "component true-logit and secondary loss/margin/accuracy tradeoff candidates",
+        "discussion/e11_natural_negative_search_protocol.md",
+        "search-space registry, metric contract, multiplicity rule, stopping rule",
+        "multiplicity-adjusted evaluator",
         "held-out architecture",
         "benchmark-level performance claim",
         "discussion/e11_submission_repro_audit.md",
@@ -5442,6 +5565,7 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-natural-head-tail-boundary-audit" not in readme
+        or "make e11-natural-negative-search-protocol" not in readme
         or "make e11-submission-repro-audit" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
@@ -5535,6 +5659,7 @@ def main() -> None:
             Path("discussion/e11_condition_score_fresh_evaluation.md"),
             Path("discussion/e11_top_conference_gap_register.md"),
             Path("discussion/e11_natural_head_tail_boundary.md"),
+            Path("discussion/e11_natural_negative_search_protocol.md"),
             Path("discussion/e11_paper_skeleton.md"),
             Path("discussion/e11_main_paper_package.md"),
             Path("discussion/e11_main_figure_captions.md"),

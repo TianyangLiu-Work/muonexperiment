@@ -1,0 +1,7 @@
+rule_id,phase,rule,decision
+NNS-S1-freeze-before-fresh-runs,all,"Search space, metric contract, multiplicity procedure, and exclusion list are committed before any fresh outputs are generated.",outputs generated before this protocol are audit baselines only and cannot support fresh natural-negative claims
+NNS-S2-complete-phase-before-discovery,phase1,"Run every declared phase1 setting, except for logged infrastructure failures, before declaring a natural primary counterexample.",no early stopping on the first negative-looking setting
+NNS-S3-primary-success,phase1_or_phase2,At least one fresh primary_tail_output_drift_ratio row has adjusted CI lower endpoint above 1 and passes head-gain and quality controls.,label as fresh natural primary boundary candidate; require replication or held-out architecture before broad claim
+NNS-S4-finite-null,phase1_or_phase2,"All declared settings run, no adjusted primary lower endpoint exceeds 1, and all rows are reported.",report finite null search; do not claim absence of natural counterexamples outside the registered search space
+NNS-S5-component-only,phase1_or_phase2,Component or secondary metrics are worse but primary full-drift metric does not pass NNS-S3.,report as claim-boundary evidence only
+NNS-S6-phase2-trigger,phase2,Phase2 architecture search is allowed only after phase1 results are archived without choosing architectures from phase1 outcomes.,"phase2 can support generality or replication, not retroactive phase1 selection"
