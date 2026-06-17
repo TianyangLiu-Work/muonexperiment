@@ -80,6 +80,10 @@ def main() -> None:
                 "role": "Machine-checkable theorem statements, assumptions, proof steps, and claim implications.",
             },
             {
+                "artifact": "discussion/e11_matrix_block_tightness_audit.md",
+                "role": "Deterministic exact-witness and ratio-identity audit for the matrix-block theorem.",
+            },
+            {
                 "artifact": "discussion/e11_theory_proof_obligation_register.md",
                 "role": "Theory-facing proof obligations, assumptions, claim boundaries, and pending gates.",
             },
@@ -118,6 +122,7 @@ make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResN
 make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split
 make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish
 make e11-matrix-block-theorem-proof # write the matched-gain theorem/proof contract and sandwich rank derivation
+make e11-matrix-block-tightness-audit # verify theorem tightness, ratio identity, equality boundary, and degeneracy caveats
 make e11-theory-proof-obligation-register # map theorem assumptions, proof obligations, claim scope, and blocked wording
 make e11-cifar-resnet-condition-score-v5-final-eval # evaluate frozen v5 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-condition-score-v5-final-interpretation-plan # lock the v5 final outcome-to-claim state machine before outputs exist

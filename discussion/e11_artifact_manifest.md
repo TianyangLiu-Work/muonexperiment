@@ -6,7 +6,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 406.1 KB |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 406.9 KB |
 | scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 2.2 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 64.8 KB  |
 | discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 1.2 MB   |
@@ -14,7 +14,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 31.7 MB  |
 | configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
 | paper                  | Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.   | commit source and selected rendered PDFs | 5.6 MB   |
-| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 15.6 KB  |
+| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 15.7 KB  |
 | .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.            | commit                                   | 479 B    |
 | .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.        | commit                                   | 667 B    |
 
@@ -152,10 +152,13 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_matrix_block_theorem_proof/proof_steps.csv                                                     |      6 | 1.8 KB    |
 | results/e11_matrix_block_theorem_proof/claim_implications.csv                                              |      4 | 1.2 KB    |
 | results/e11_matrix_block_theorem_proof/paper_cross_checks.csv                                              |      6 | 430 B     |
-| results/e11_theory_proof_obligation_register/proof_obligations.csv                                         |      6 | 4.1 KB    |
+| results/e11_matrix_block_tightness_audit/rank_boundary_cases.csv                                           |      4 | 884 B     |
+| results/e11_matrix_block_tightness_audit/formula_checks.csv                                                |      4 | 638 B     |
+| results/e11_matrix_block_tightness_audit/caveat_checks.csv                                                 |      3 | 764 B     |
+| results/e11_theory_proof_obligation_register/proof_obligations.csv                                         |      6 | 4.3 KB    |
 | results/e11_theory_proof_obligation_register/assumption_stress_tests.csv                                   |      5 | 1.6 KB    |
 | results/e11_theory_proof_obligation_register/claim_scope_boundaries.csv                                    |      5 | 1.1 KB    |
-| results/e11_theory_proof_obligation_register/theorem_to_experiment_queue.csv                               |      6 | 1.1 KB    |
+| results/e11_theory_proof_obligation_register/theorem_to_experiment_queue.csv                               |      6 | 1.2 KB    |
 | results/e11_condition_score_v5_theory_protocol/theory_term_register.csv                                    |      6 | 2.8 KB    |
 | results/e11_condition_score_v5_theory_protocol/score_contract.csv                                          |      6 | 1.8 KB    |
 | results/e11_condition_score_v5_theory_protocol/spent_evidence_policy.csv                                   |      6 | 1.9 KB    |
@@ -215,7 +218,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/run_registry.csv               |      3 | 1.1 KB    |
 | results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv          |     26 | 10.5 KB   |
 | results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv                |      5 | 737 B     |
-| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 17.4 KB   |
+| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 17.7 KB   |
 | results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv                                               |    110 | 5.7 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/class_metrics.csv                                             |   1000 | 58.6 KB   |
 | results/e11_cifar100_resnet_lt_standard_eval/group_metrics.csv                                             |     40 | 4.2 KB    |
@@ -303,13 +306,13 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                                                       | size    |
 |:-------------------------------------------------------------------------------------------|:--------|
-| README_E11.md                                                                              | 77.7 KB |
+| README_E11.md                                                                              | 78.8 KB |
 | discussion/e11_paper_skeleton.md                                                           | 10.9 KB |
 | discussion/e11_main_paper_package.md                                                       | 22.8 KB |
 | discussion/e11_main_figure_captions.md                                                     | 6.5 KB  |
 | discussion/e11_notation_glossary.md                                                        | 8.7 KB  |
 | discussion/e11_quantitative_claim_ledger.md                                                | 11.0 KB |
-| discussion/e11_reproduction_checklist.md                                                   | 49.2 KB |
+| discussion/e11_reproduction_checklist.md                                                   | 50.1 KB |
 | discussion/e11_reviewer_risk_audit.md                                                      | 24.1 KB |
 | discussion/e11_pasted_review_audit.md                                                      | 8.3 KB  |
 | discussion/e11_completion_audit.md                                                         | 4.8 KB  |
@@ -357,7 +360,8 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_condition_score_v4_final_evaluation.md                                      | 5.5 KB  |
 | discussion/e11_condition_score_v4_failure_mechanism_audit.md                               | 8.7 KB  |
 | discussion/e11_matrix_block_theorem_proof.md                                               | 13.3 KB |
-| discussion/e11_theory_proof_obligation_register.md                                         | 13.2 KB |
+| discussion/e11_matrix_block_tightness_audit.md                                             | 6.0 KB  |
+| discussion/e11_theory_proof_obligation_register.md                                         | 13.7 KB |
 | discussion/e11_condition_score_v5_theory_protocol.md                                       | 17.8 KB |
 | discussion/e11_condition_score_v5_theory_to_score_map.md                                   | 20.2 KB |
 | discussion/e11_condition_score_v5_validation_cifar100_mod4_partition.md                    | 8.2 KB  |

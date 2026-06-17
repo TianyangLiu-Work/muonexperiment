@@ -1,5 +1,5 @@
 priority,task,artifact_or_command,unblocks,dependency
-P0,keep the exact local matrix-block theorem/proof contract synchronized with the paper appendix,make e11-matrix-block-theorem-proof,main_theorem wording,none
+P0,keep the exact local matrix-block theorem/proof contract synchronized with the paper appendix,make e11-matrix-block-theorem-proof && make e11-matrix-block-tightness-audit,main_theorem wording,none
 P0,consume frozen v5 final splits without score edits,make e11-cifar-resnet-condition-score-v5-final-eval,predictive_condition if both finals pass,pending Slurm outputs
 P0,rerun v5 reviewer failure response after final outputs,make e11-cifar-resnet-condition-score-v5-reviewer-failure-response,claim downgrade wording for positive or negative finals,v5 final evaluator refreshed
 P1,complete the remaining natural negative-search phase1 metrics,make e11-natural-negative-search-phase1-eval,natural_counterexample or finite-null boundary wording,phase1 Slurm outputs

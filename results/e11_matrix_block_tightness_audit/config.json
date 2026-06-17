@@ -1,0 +1,8 @@
+{
+  "purpose": "deterministic tightness and degeneracy sanity audit for the matrix-block theorem",
+  "analysis_scope": "closed-form proof sanity checks; no new empirical results",
+  "case_count": 4,
+  "formula_check_count": 4,
+  "max_ratio_absolute_error": 0.0,
+  "all_identity_checks_pass": true
+}

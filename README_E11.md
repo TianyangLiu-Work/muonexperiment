@@ -53,6 +53,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.s
 python3 scripts/e11_evaluate_condition_score_v4_finals.py
 python3 scripts/e11_write_condition_score_v4_failure_mechanism_audit.py
 python3 scripts/e11_write_matrix_block_theorem_proof.py
+python3 scripts/e11_write_matrix_block_tightness_audit.py
 python3 scripts/e11_write_theory_proof_obligation_register.py
 python3 scripts/e11_write_condition_score_v5_theory_protocol.py
 python3 scripts/e11_write_condition_score_v5_theory_to_score_map.py
@@ -162,6 +163,7 @@ make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the
 make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-condition-score-v4-failure-audit # localize the frozen v4 CIFAR-10 mixed final failure mechanism
 make e11-matrix-block-theorem-proof # write the matched-gain theorem/proof contract and sandwich rank derivation
+make e11-matrix-block-tightness-audit # verify theorem tightness, ratio identity, equality boundary, and degeneracy caveats
 make e11-theory-proof-obligation-register # map theorem assumptions, claim scope, and proof obligations before broad claims
 make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract
 make e11-cifar-resnet-condition-score-v5-theory-to-score-map # map the v5 theorem terms to score features, leakage boundaries, and falsifiable gates
@@ -217,6 +219,7 @@ make e11-cifar-resnet-condition-score-v4-validation-freeze
 make e11-cifar-resnet-condition-score-v4-final-eval
 make e11-cifar-resnet-condition-score-v4-failure-audit
 make e11-matrix-block-theorem-proof
+make e11-matrix-block-tightness-audit
 make e11-theory-proof-obligation-register
 make e11-cifar-resnet-condition-score-v5-theory-protocol
 make e11-cifar-resnet-condition-score-v5-theory-to-score-map
@@ -372,6 +375,13 @@ artifact for the matched-head-gain bound, sandwich sensitivity lemma,
 Frobenius/spectral coefficient derivation, nondegenerate tail block condition,
 and `nrank(G_H) > ssrank(B_T,A_T)` claim boundary already written in the paper
 appendix.
+The companion tightness audit is
+`discussion/e11_matrix_block_tightness_audit.md`, backed by
+`results/e11_matrix_block_tightness_audit/*`. It checks exact diagonal
+singular-spectrum witnesses for the Frobenius numerator, the spectral sandwich
+numerator, the ratio identity
+`I_spectral / I_frobenius = ssrank(B_T,A_T) / nrank(G_H)`, the equality
+boundary, the Frobenius-favored boundary, and the degenerate-tail caveat.
 The theory proof-obligation register is
 `discussion/e11_theory_proof_obligation_register.md`, backed by
 `results/e11_theory_proof_obligation_register/*`. It is a top-conference claim
@@ -570,6 +580,7 @@ Paper-facing synthesis:
 - `discussion/e11_condition_score_v4_final_evaluation.md`
 - `discussion/e11_condition_score_v4_failure_mechanism_audit.md`
 - `discussion/e11_matrix_block_theorem_proof.md`
+- `discussion/e11_matrix_block_tightness_audit.md`
 - `discussion/e11_theory_proof_obligation_register.md`
 - `discussion/e11_condition_score_v5_theory_protocol.md`
 - `discussion/e11_condition_score_v5_theory_to_score_map.md`
@@ -685,6 +696,9 @@ Primary paper quantitative tables:
 - `results/e11_matrix_block_theorem_proof/proof_steps.csv`
 - `results/e11_matrix_block_theorem_proof/claim_implications.csv`
 - `results/e11_matrix_block_theorem_proof/paper_cross_checks.csv`
+- `results/e11_matrix_block_tightness_audit/rank_boundary_cases.csv`
+- `results/e11_matrix_block_tightness_audit/formula_checks.csv`
+- `results/e11_matrix_block_tightness_audit/caveat_checks.csv`
 - `results/e11_theory_proof_obligation_register/proof_obligations.csv`
 - `results/e11_theory_proof_obligation_register/assumption_stress_tests.csv`
 - `results/e11_theory_proof_obligation_register/claim_scope_boundaries.csv`
@@ -891,6 +905,7 @@ Do not claim:
 - `scripts/e11_evaluate_condition_score_v4_finals.py`: frozen-score evaluator for the unspent v4 WideResNet50-2 and CIFAR-10 mixed final splits.
 - `scripts/e11_write_condition_score_v4_failure_mechanism_audit.py`: diagnostic-only audit showing that the v4 CIFAR-10 mixed failure is an amplitude/depth scalar-aggregation reversal, not a direction-threshold failure.
 - `scripts/e11_write_matrix_block_theorem_proof.py`: machine-checkable theorem/proof contract for the matched-gain bound, sandwich sensitivity lemma, and `nrank`/`ssrank` boundary.
+- `scripts/e11_write_matrix_block_tightness_audit.py`: deterministic theorem sanity audit for exact diagonal witnesses, the coefficient-ratio identity, equality/Frobenius-favored cases, and degenerate-tail caveats.
 - `scripts/e11_write_theory_proof_obligation_register.py`: theory-facing top-conference checklist mapping theorem claims, assumptions, pending empirical gates, and forbidden wording.
 - `scripts/e11_write_condition_score_v5_theory_protocol.py`: theory-facing v5 score contract requiring transport-normalized amplitude or a narrower fixed-partition claim before any new P0 predictive-condition attempt.
 - `scripts/e11_write_condition_score_v5_theory_to_score_map.py`: v5 theorem-to-measurement bridge that maps sandwich-tail-drift terms to score features, transport contracts, ablations, and falsifiable validation/final gates.

@@ -865,6 +865,12 @@ def main() -> None:
         Path("results/e11_matrix_block_theorem_proof") / "config.json",
         Path("discussion/e11_matrix_block_theorem_proof.md"),
         Path("scripts/e11_write_matrix_block_theorem_proof.py"),
+        Path("results/e11_matrix_block_tightness_audit") / "rank_boundary_cases.csv",
+        Path("results/e11_matrix_block_tightness_audit") / "formula_checks.csv",
+        Path("results/e11_matrix_block_tightness_audit") / "caveat_checks.csv",
+        Path("results/e11_matrix_block_tightness_audit") / "config.json",
+        Path("discussion/e11_matrix_block_tightness_audit.md"),
+        Path("scripts/e11_write_matrix_block_tightness_audit.py"),
         Path("results/e11_theory_proof_obligation_register") / "proof_obligations.csv",
         Path("results/e11_theory_proof_obligation_register") / "assumption_stress_tests.csv",
         Path("results/e11_theory_proof_obligation_register") / "claim_scope_boundaries.csv",
@@ -1162,6 +1168,8 @@ def main() -> None:
         "e11-natural-negative-search-phase1-results:",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
+        "e11-matrix-block-tightness-audit:",
+        "scripts/e11_write_matrix_block_tightness_audit.py",
         "e11-natural-negative-search-phase1-eval:",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "e11-submission-repro-audit:",
@@ -1295,6 +1303,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split",
         "make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish",
         "make e11-matrix-block-theorem-proof # write the matched-gain theorem/proof contract and sandwich rank derivation",
+        "make e11-matrix-block-tightness-audit # verify theorem tightness, ratio identity, equality boundary, and degeneracy caveats",
         "make e11-theory-proof-obligation-register # map theorem assumptions, claim scope, and proof obligations before broad claims",
         "make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract",
         "make e11-cifar-resnet-condition-score-v5-theory-to-score-map # map the v5 theorem terms to score features, leakage boundaries, and falsifiable gates",
@@ -1392,6 +1401,8 @@ def main() -> None:
         "theorem-to-measurement bridge",
         "results/e11_condition_score_v5_protocol/validation_score_freeze/*",
         "transport-normalized residual score",
+        "discussion/e11_matrix_block_tightness_audit.md",
+        "I_spectral / I_frobenius = ssrank(B_T,A_T) / nrank(G_H)",
         "discussion/e11_natural_head_tail_boundary.md",
         "results/e11_natural_head_tail_boundary/*",
         "scripts/e11_write_natural_head_tail_boundary_audit.py",
@@ -3672,6 +3683,59 @@ def main() -> None:
             "worst-case bound",
         ],
     )
+    matrix_tightness_dir = Path("results/e11_matrix_block_tightness_audit")
+    matrix_tightness_cases = pd.read_csv(matrix_tightness_dir / "rank_boundary_cases.csv")
+    matrix_tightness_checks = pd.read_csv(matrix_tightness_dir / "formula_checks.csv")
+    matrix_tightness_caveats = pd.read_csv(matrix_tightness_dir / "caveat_checks.csv")
+    matrix_tightness_config = json.loads((matrix_tightness_dir / "config.json").read_text(encoding="utf-8"))
+    expected_tightness_cases = {
+        "MBTA-1-spectral-favored": "spectral_smaller_worst_case_bound",
+        "MBTA-2-equality-boundary": "equal_worst_case_bound",
+        "MBTA-3-frobenius-favored": "frobenius_smaller_worst_case_bound",
+        "MBTA-4-degenerate-tail": "degenerate_tail_boundary_not_applicable",
+    }
+    expected_tightness_caveats = {
+        "MBTC-1-nondegenerate-tail-required",
+        "MBTC-2-strict-inequality-required",
+        "MBTC-3-worst-case-not-realized",
+    }
+    tightness_relation_lookup = matrix_tightness_cases.set_index("case_id")["predicted_relation"].to_dict()
+    applicable_tightness_checks = matrix_tightness_checks[
+        matrix_tightness_checks["tightness_status"].eq("exact_for_diagonal_singular_witness")
+    ]
+    if not (
+        tightness_relation_lookup == expected_tightness_cases
+        and set(matrix_tightness_caveats["caveat_id"]) == expected_tightness_caveats
+        and len(applicable_tightness_checks) == 3
+        and applicable_tightness_checks["ratio_absolute_error"].fillna(1.0).le(1e-12).all()
+        and matrix_tightness_checks["tightness_status"].isin(
+            {"exact_for_diagonal_singular_witness", "not_applicable_degenerate_tail"}
+        ).all()
+        and matrix_tightness_config["all_identity_checks_pass"] is True
+        and float(matrix_tightness_config["max_ratio_absolute_error"]) <= 1e-12
+        and "no new empirical results" in str(matrix_tightness_config["analysis_scope"])
+    ):
+        raise AssertionError(
+            "matrix-block tightness audit must preserve exact witnesses, ratio identities, boundary cases, and caveats"
+        )
+    matrix_tightness_text = Path("discussion/e11_matrix_block_tightness_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "matrix-block tightness audit",
+        matrix_tightness_text,
+        [
+            "E11 Matrix-Block Tightness Audit",
+            "deterministic sanity audit",
+            "I_spectral / I_frobenius = ssrank(B_T,A_T) / nrank(G_H)",
+            "MBTA-1-spectral-favored",
+            "MBTA-2-equality-boundary",
+            "MBTA-3-frobenius-favored",
+            "MBTA-4-degenerate-tail",
+            "not_applicable_degenerate_tail",
+            "worst-case tail singular directions",
+        ],
+    )
     proof_dir = Path("results/e11_theory_proof_obligation_register")
     proof_obligations = pd.read_csv(proof_dir / "proof_obligations.csv")
     assumption_stress = pd.read_csv(proof_dir / "assumption_stress_tests.csv")
@@ -5782,6 +5846,7 @@ def main() -> None:
         "make e11-cifar-resnet-layer-jvp-tail-quality-results",
         "make e11-cifar-resnet-practical-muon-bridge-results",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results",
+        "make e11-matrix-block-tightness-audit",
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-results",
         "make e11-natural-negative-search-phase1-eval",
@@ -5808,6 +5873,8 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
         "CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot",
         "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
+        "discussion/e11_matrix_block_tightness_audit.md",
+        "Deterministic exact-witness and ratio-identity audit",
         "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md",
         "12/26 observed primary rows",
         "Long-tailed Muon-style compatibility diagnostic",
@@ -6394,8 +6461,9 @@ def main() -> None:
         "PTO-1-local-linearization",
         "PTO-2-matrix-block-boundary",
         "PTO-4-v5-transport-score",
-        "main_theorem_contract_generated",
+        "main_theorem_contract_and_tightness_audit_generated",
         "make e11-matrix-block-theorem-proof",
+        "make e11-matrix-block-tightness-audit",
         "partial_metric_outputs",
         "optimizer-performance",
     ]
@@ -6422,7 +6490,9 @@ def main() -> None:
         "discussion/e11_condition_score_v4_protocol.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
         "discussion/e11_matrix_block_theorem_proof.md",
+        "discussion/e11_matrix_block_tightness_audit.md",
         "matched-gain theorem statement",
+        "coefficient-ratio identity",
         "discussion/e11_theory_proof_obligation_register.md",
         "proof-obligation register",
         "discussion/e11_condition_score_v5_theory_protocol.md",
@@ -6504,6 +6574,8 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-fresh-architecture-results" not in readme
         or "make e11-cifar-resnet-condition-score-fresh-data-results" not in readme
         or "make e11-cifar-resnet-condition-score-fresh-eval" not in readme
+        or "make e11-matrix-block-theorem-proof" not in readme
+        or "make e11-matrix-block-tightness-audit" not in readme
         or "make e11-theory-proof-obligation-register" not in readme
         or "make e11-cifar-resnet-condition-score-v5-theory-protocol" not in readme
         or "make e11-cifar-resnet-condition-score-v5-theory-to-score-map" not in readme

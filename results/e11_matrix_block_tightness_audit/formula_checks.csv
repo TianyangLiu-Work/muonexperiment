@@ -1,0 +1,5 @@
+case_id,frobenius_tail_numerator_formula,frobenius_unit_witness_value,spectral_tail_numerator_formula,spectral_unit_witness_value,I_frobenius,I_spectral,direct_ratio_I_spectral_over_I_frobenius,rank_ratio_ssrank_over_nrank,ratio_absolute_error,tightness_status
+MBTA-1-spectral-favored,1.0,1.0,1.0,1.0,0.25,0.0625,0.25,0.25,0.0,exact_for_diagonal_singular_witness
+MBTA-2-equality-boundary,1.0,1.0,2.0,2.0,0.5,0.5,1.0,1.0,0.0,exact_for_diagonal_singular_witness
+MBTA-3-frobenius-favored,1.0,1.0,2.0,2.0,1.0,2.0,2.0,2.0,0.0,exact_for_diagonal_singular_witness
+MBTA-4-degenerate-tail,0.0,0.0,0.0,0.0,0.0,0.0,,,,not_applicable_degenerate_tail

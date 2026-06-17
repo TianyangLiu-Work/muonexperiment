@@ -1,0 +1,4 @@
+caveat_id,condition,mathematical_effect,paper_action
+MBTC-1-nondegenerate-tail-required,sigma_1(B_T) sigma_1(A_T) = 0,"both tail numerator formulas vanish and ssrank(B_T,A_T) is undefined",do not interpret the nrank-vs-ssrank rank boundary for a zero tail-sensitive block
+MBTC-2-strict-inequality-required,"nrank(G_H) = ssrank(B_T,A_T)","I_spectral/I_frobenius = 1, so the theorem gives no strict advantage","state strict spectral advantage only under nrank(G_H)>ssrank(B_T,A_T)"
+MBTC-3-worst-case-not-realized,the optimizer update is not aligned with the worst-case tail singular directions,the bound can be loose for a realized direction even when the coefficient ordering is strict,separate theorem-level bound ordering from empirical realized-drift prediction

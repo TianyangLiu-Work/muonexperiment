@@ -85,11 +85,12 @@ def build_proof_obligations(evidence: dict[str, object]) -> pd.DataFrame:
                 f"positive boundary ratio={fmt(positive['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                 f"{ci(positive, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
                 f"negative boundary ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
-                f"{ci(negative, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}"
+                f"{ci(negative, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}; "
+                "discussion/e11_matrix_block_tightness_audit.md checks exact diagonal witnesses, ratio identities, equality boundary, Frobenius-favored boundary, and degenerate-tail caveats"
             ),
-            "current_status": "main_theorem_contract_generated",
+            "current_status": "main_theorem_contract_and_tightness_audit_generated",
             "blocks_main_theory_claim": "yes",
-            "required_upgrade": "keep discussion/e11_matrix_block_theorem_proof.md synchronized with the paper theorem and appendix proof",
+            "required_upgrade": "keep discussion/e11_matrix_block_theorem_proof.md and discussion/e11_matrix_block_tightness_audit.md synchronized with the paper theorem and appendix proof",
             "forbidden_wording": "do not present the synthetic sign boundary as an out-of-sample natural predictor",
         },
         {
@@ -247,7 +248,7 @@ def build_theorem_to_experiment_queue() -> pd.DataFrame:
             {
                 "priority": "P0",
                 "task": "keep the exact local matrix-block theorem/proof contract synchronized with the paper appendix",
-                "artifact_or_command": "make e11-matrix-block-theorem-proof",
+                "artifact_or_command": "make e11-matrix-block-theorem-proof && make e11-matrix-block-tightness-audit",
                 "unblocks": "main_theorem wording",
                 "dependency": "none",
             },
