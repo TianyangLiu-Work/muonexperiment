@@ -808,8 +808,16 @@ def main() -> None:
         Path("results/e11_condition_score_v4_protocol") / "unspent_split_registry.csv",
         Path("results/e11_condition_score_v4_protocol") / "acceptance_gates.csv",
         Path("results/e11_condition_score_v4_protocol") / "protocol_status.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "score_formula_registry.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "freeze_status.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "validation_score_pairs.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "validation_score_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "validation_gate_report.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "config.json",
         Path("discussion/e11_condition_score_v4_protocol.md"),
+        Path("discussion/e11_condition_score_v4_validation_freeze.md"),
         Path("scripts/e11_write_condition_score_v4_protocol.py"),
+        Path("scripts/e11_freeze_condition_score_v4_validation.py"),
         Path("scripts/slurm/e11_cifar100_resnet_condition_score_v4_validation_cifar100_rotated.sbatch"),
         Path("scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch"),
         Path("scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch"),
@@ -972,6 +980,8 @@ def main() -> None:
         "scripts/e11_write_condition_score_v4_protocol.py",
         "e11-cifar-resnet-condition-score-v4-validation-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v4_validation_cifar100_rotated.sbatch",
+        "e11-cifar-resnet-condition-score-v4-validation-freeze:",
+        "scripts/e11_freeze_condition_score_v4_validation.py",
         "e11-cifar-resnet-condition-score-v4-architecture-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch",
         "e11-cifar-resnet-condition-score-v4-data-results:",
@@ -1048,6 +1058,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-fresh-architecture-results # submit the fresh ResNet50 condition-score architecture split via Slurm",
         "make e11-cifar-resnet-condition-score-fresh-data-results # submit the fresh CIFAR-10 alternate-partition condition-score data split via Slurm",
         "make e11-cifar-resnet-condition-score-fresh-eval # evaluate frozen fresh condition-score gates after fresh Slurm jobs finish",
+        "make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
@@ -1067,11 +1078,13 @@ def main() -> None:
         "discussion/e11_condition_score_fresh_evaluation.md",
         "discussion/e11_condition_score_failure_mechanism_audit.md",
         "discussion/e11_condition_score_v4_protocol.md",
+        "discussion/e11_condition_score_v4_validation_freeze.md",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
         "scripts/e11_write_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_failure_mechanism_audit.py",
         "scripts/e11_write_condition_score_v4_protocol.py",
+        "scripts/e11_freeze_condition_score_v4_validation.py",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch",
@@ -1084,6 +1097,8 @@ def main() -> None:
         "wide_resnet50_2",
         "V4 is not a positive result yet",
         "validation-frozen scalar",
+        "validation-freeze boundary",
+        "current freeze artifact remains `not_ready`",
         "aggregation before either unspent final split",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
@@ -2995,6 +3010,69 @@ def main() -> None:
         and v4_status_lookup.get("v4 score-axis registry") == "registered_pending_validation_commit"
     ):
         raise AssertionError("condition-score v4 protocol must keep v2/v3 final splits quarantined and v4 final evidence unrun")
+    v4_freeze_dir = v4_protocol_dir / "validation_score_freeze"
+    v4_freeze_formulas = pd.read_csv(v4_freeze_dir / "score_formula_registry.csv")
+    v4_freeze_status = pd.read_csv(v4_freeze_dir / "freeze_status.csv")
+    v4_freeze_pairs = pd.read_csv(v4_freeze_dir / "validation_score_pairs.csv")
+    v4_freeze_summary = pd.read_csv(v4_freeze_dir / "validation_score_summary.csv")
+    v4_freeze_gates = pd.read_csv(v4_freeze_dir / "validation_gate_report.csv")
+    v4_freeze_config = json.loads((v4_freeze_dir / "config.json").read_text(encoding="utf-8"))
+    expected_v4_freeze_scores = {
+        "condition_score_v4_direction_axis_scaled_jvp_ratio",
+        "condition_score_v4_fro_amplitude_axis",
+        "condition_score_v4_two_axis_positive",
+        "condition_score_v4_two_axis_amplitude_minus_direction",
+        "condition_score_v4_two_axis_transport",
+        "early_layer_prior",
+        "source_observed_drift_positive_control",
+        "condition_score_v4_validation_selected",
+    }
+    expected_v4_freeze_items = {
+        "v4 validation split output",
+        "v4 candidate pool",
+        "v4 selected residual score",
+        "v4 final split outputs",
+    }
+    expected_v4_freeze_gates = {
+        "V4F-1-validation-output",
+        "V4F-2-no-final-before-freeze",
+        "V4F-3-residual-score-freeze",
+        "V4F-4-direction-threshold-guardrail",
+        "V4F-5-selected-score-residual-spearman",
+        "V4F-6-final-claim-readiness",
+    }
+    if not (
+        expected_v4_freeze_scores.issubset(set(v4_freeze_formulas["score_id"]))
+        and set(v4_freeze_status["item"]) == expected_v4_freeze_items
+        and set(v4_freeze_gates["gate_id"]) == expected_v4_freeze_gates
+        and "log_scaled_jvp_fro_amplitude" in set(v4_freeze_config["axis_features"])
+        and "CI lower endpoint >= 0.8" in v4_freeze_config["direction_gate"]
+    ):
+        raise AssertionError("condition-score v4 validation freeze must preserve candidate formulas, status rows, gates, and Frobenius amplitude axis")
+    v4_freeze_status_lookup = v4_freeze_status.set_index("item")["status"].to_dict()
+    v4_freeze_gate_lookup = v4_freeze_gates.set_index("gate_id")["status"].to_dict()
+    if not bool(v4_freeze_config["validation_generated"]):
+        if not (
+            v4_freeze_pairs.empty
+            and v4_freeze_summary.empty
+            and v4_freeze_status_lookup.get("v4 validation split output") == "not_run"
+            and v4_freeze_status_lookup.get("v4 candidate pool") == "registered"
+            and v4_freeze_status_lookup.get("v4 selected residual score") == "not_ready"
+            and v4_freeze_status_lookup.get("v4 final split outputs") == "not_run"
+            and v4_freeze_gate_lookup.get("V4F-1-validation-output") == "not_run"
+            and v4_freeze_gate_lookup.get("V4F-2-no-final-before-freeze") == "pass"
+            and v4_freeze_gate_lookup.get("V4F-6-final-claim-readiness") == "not_ready"
+        ):
+            raise AssertionError("condition-score v4 validation freeze must keep final splits blocked while validation output is absent")
+    else:
+        selected_rows = v4_freeze_formulas[v4_freeze_formulas["selected_for_final_evaluation"].eq("yes")]
+        selected_status = v4_freeze_status_lookup.get("v4 selected residual score")
+        if v4_freeze_pairs.empty or v4_freeze_summary.empty or selected_status not in {"frozen", "validation_failed"}:
+            raise AssertionError("condition-score v4 validation freeze with generated validation data must include score rows and a selected-or-blocking status")
+        if selected_status == "frozen" and selected_rows.empty:
+            raise AssertionError("condition-score v4 validation freeze must mark the selected final score when validation passes")
+        if v4_freeze_status_lookup.get("v4 final split outputs") != "not_run":
+            raise AssertionError("condition-score v4 final split outputs must not exist before the validation freeze is committed")
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")

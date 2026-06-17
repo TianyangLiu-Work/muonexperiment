@@ -1,0 +1,23 @@
+{
+  "source_layer_summary": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/layer_summary.csv",
+  "source_metrics": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/metrics.csv",
+  "validation_layer_summary": "results/e11_condition_score_v4_protocol/validation_cifar100_rotated/layer_summary.csv",
+  "validation_metrics": "results/e11_condition_score_v4_protocol/validation_cifar100_rotated/metrics.csv",
+  "validation_generated": false,
+  "final_layer_summaries": [
+    "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/layer_summary.csv",
+    "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/layer_summary.csv"
+  ],
+  "axis_features": [
+    "log_scaled_jvp_ratio",
+    "log_scaled_jvp_fro_amplitude",
+    "log_gradient_nuclear_rank",
+    "log_alignment_ratio",
+    "log_step_size_ratio",
+    "log_early_layer_prior",
+    "transport_is_downsample",
+    "transport_is_classifier"
+  ],
+  "selection_rule": "among residual candidates, require validation Spearman CI lower endpoint above zero; select highest lower endpoint, then highest mean Spearman",
+  "direction_gate": "condition_score_v4_direction_axis_scaled_jvp_ratio threshold accuracy CI lower endpoint >= 0.8"
+}

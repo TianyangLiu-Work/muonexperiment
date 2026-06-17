@@ -1,0 +1,7 @@
+gate_id,scope,status,evidence
+V4F-1-validation-output,validation-only split,not_run,results/e11_condition_score_v4_protocol/validation_cifar100_rotated/layer_summary.csv
+V4F-2-no-final-before-freeze,unspent final splits,pass,no v4 final layer_summary.csv exists before a frozen validation score
+V4F-3-residual-score-freeze,primary residual-ranking score,not_ready,pending_validation_output
+V4F-4-direction-threshold-guardrail,direction axis,not_run,validation score rows missing
+V4F-5-selected-score-residual-spearman,validation residual ranking,not_run,no selected validation summary row
+V4F-6-final-claim-readiness,P0 predictive-condition claim,not_ready,final splits remain blocked until this gate is pass in a committed artifact

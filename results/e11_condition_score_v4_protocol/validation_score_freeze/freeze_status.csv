@@ -1,0 +1,5 @@
+item,status,evidence
+v4 validation split output,not_run,results/e11_condition_score_v4_protocol/validation_cifar100_rotated/layer_summary.csv
+v4 candidate pool,registered,candidate formulas are fixed in scripts/e11_freeze_condition_score_v4_validation.py
+v4 selected residual score,not_ready,pending_validation_output
+v4 final split outputs,not_run,results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/layer_summary.csv; results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/layer_summary.csv
