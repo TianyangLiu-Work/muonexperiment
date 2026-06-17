@@ -1,0 +1,7 @@
+recipe_family,final_status,selected_setting_id,selected_recipe_name,final_seed_set,planned_output_dir,tuning_allowed
+adamw_cb_loss_tuned,not_ready,,,,,no
+adamw_cb_sampler_tuned,not_ready,,,,,no
+adamw_ce_tuned,not_ready,,,,,no
+ns_muon_cb_tuned,not_ready,,,,,no
+ns_muon_matrix_tuned,not_ready,,,,,no
+sgd_momentum_ce_tuned,not_ready,,,,,no

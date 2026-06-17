@@ -317,6 +317,30 @@ def build_ablation_matrix(axis_pairs: pd.DataFrame, obstructions: pd.DataFrame) 
 def build_readiness_ledger(freeze_status: pd.DataFrame, freeze_gates: pd.DataFrame) -> pd.DataFrame:
     status = freeze_status.set_index("item")["status"].to_dict()
     gates = freeze_gates.set_index("gate_id")["status"].to_dict()
+    validation_status = status["v5 validation split output"]
+    residual_status = status["v5 transport-normalized residual score"]
+    final_status = status["v5 final split outputs"]
+    final_unblocked = (
+        validation_status == "generated"
+        and residual_status == "frozen"
+        and final_status == "not_run"
+        and gates["V5F-6-final-claim-readiness"] == "pass"
+    )
+    validation_failed = validation_status == "generated" and residual_status == "validation_failed"
+    if final_unblocked:
+        predictive_evidence = (
+            "frozen validation-selected score is eligible for final evaluation runs; "
+            "final split outputs are still absent, so the P0 predictive-condition claim remains not_ready"
+        )
+    elif validation_failed:
+        predictive_evidence = (
+            "validation output exists but the residual score failed its freeze gate, "
+            "so final evaluation is not claim-eligible"
+        )
+    else:
+        predictive_evidence = (
+            "validation freeze is pending and final split outputs are not claim-eligible yet"
+        )
     return pd.DataFrame(
         [
             {
@@ -346,11 +370,32 @@ def build_readiness_ledger(freeze_status: pd.DataFrame, freeze_gates: pd.DataFra
             {
                 "item": "predictive-condition claim",
                 "status": "not_ready",
-                "evidence": "validation is not frozen and final split outputs are not claim-eligible yet",
+                "evidence": predictive_evidence,
                 "blocks_p0_if_missing": "yes",
             },
         ]
     )
+
+
+def build_boundary_text(readiness: pd.DataFrame) -> str:
+    readiness_lookup = readiness.set_index("item")["evidence"].to_dict()
+    predictive_evidence = str(readiness_lookup["predictive-condition claim"])
+    if predictive_evidence.startswith("frozen validation-selected score"):
+        return """Allowed now: cite this map as the pre-final theory-to-score bridge, use spent
+v4 evidence only as diagnostic motivation, and run the v5 final splits with the
+frozen validation-selected residual score.
+
+Blocked now: fitting, selecting, or reweighting any v5 score on v2/v3/v4 final
+rows; claiming that the transport-normalized residual score predicts held-out
+layer risk before both v5 final gates pass."""
+    return """Allowed now: cite this map as the pre-final theory-to-score bridge, use spent
+v4 evidence only as diagnostic motivation, and keep the v5 final splits blocked
+until the validation-freeze artifact reports a frozen residual score and a
+passing direction guardrail.
+
+Blocked now: fitting, selecting, or reweighting any v5 score on v2/v3/v4 final
+rows; claiming that the transport-normalized residual score predicts held-out
+layer risk before the v5 validation and final gates exist."""
 
 
 def write_discussion(
@@ -360,6 +405,7 @@ def write_discussion(
     predictions: pd.DataFrame,
     ablations: pd.DataFrame,
     readiness: pd.DataFrame,
+    boundary: str,
 ) -> None:
     text = f"""# E11 Condition-Score V5 Theory-to-Score Map
 
@@ -416,14 +462,7 @@ frozen transport correction and a separate direction guardrail.
 
 ## Boundary
 
-Allowed now: cite this map as the pre-final theory-to-score bridge, use spent
-v4 evidence only as diagnostic motivation, and keep the v5 final splits blocked
-until the validation-freeze artifact reports a frozen residual score and a
-passing direction guardrail.
-
-Blocked now: fitting, selecting, or reweighting any v5 score on v2/v3/v4 final
-rows; claiming that the transport-normalized residual score predicts held-out
-layer risk before the v5 validation and final gates exist.
+{boundary}
 
 Artifacts:
 - [theorem_proxy_map.csv](../results/e11_condition_score_v5_theory_to_score_map/theorem_proxy_map.csv)
@@ -445,6 +484,7 @@ def main() -> None:
     predictions = build_falsifiable_predictions()
     ablations = build_ablation_matrix(inputs["axis_pairs"], inputs["obstructions"])
     readiness = build_readiness_ledger(inputs["freeze_status"], inputs["freeze_gates"])
+    boundary = build_boundary_text(readiness)
 
     theorem_proxy_map.to_csv(OUTPUT_DIR / "theorem_proxy_map.csv", index=False)
     score_lineage.to_csv(OUTPUT_DIR / "score_lineage.csv", index=False)
@@ -459,6 +499,7 @@ def main() -> None:
         predictions,
         ablations,
         readiness,
+        boundary,
     )
     print(f"saved condition-score v5 theory-to-score map to {OUTPUT_DIR} and {DISCUSSION_PATH}")
     print(readiness.to_string(index=False))

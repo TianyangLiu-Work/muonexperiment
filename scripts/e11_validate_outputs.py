@@ -872,6 +872,16 @@ def main() -> None:
         Path("results/e11_condition_score_v5_theory_to_score_map") / "claim_readiness_ledger.csv",
         Path("discussion/e11_condition_score_v5_theory_to_score_map.md"),
         Path("scripts/e11_write_condition_score_v5_theory_to_score_map.py"),
+        Path("results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition") / "metrics.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition") / "paired_metrics.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition") / "layer_summary.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition") / "checkpoint_summary.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition") / "prediction_summary.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition") / "residual_prediction_summary.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition") / "config.json",
+        Path("figures/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition")
+        / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        Path("discussion/e11_condition_score_v5_validation_cifar100_mod4_partition.md"),
         Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "score_formula_registry.csv",
         Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "freeze_status.csv",
         Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "validation_score_pairs.csv",
@@ -962,8 +972,15 @@ def main() -> None:
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py"),
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark") / "settings_registry.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark") / "execution_status.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection") / "run_registry.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection") / "family_selection.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection") / "final_claim_plan.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection") / "gate_report.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection") / "config.json",
+        Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md"),
         Path("scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py"),
+        Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py"),
         Path("scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch"),
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv",
@@ -1113,6 +1130,8 @@ def main() -> None:
         "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py --settings-only",
         "e11-cifar-resnet-lt-tuned-benchmark-validation-results:",
         "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
+        "e11-cifar-resnet-lt-tuned-benchmark-selection:",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py",
         "e11-cifar-resnet-imbalance-sweep-results:",
         "e11-cifar-resnet-condition-score-heldout-architecture-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch",
@@ -1240,6 +1259,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-protocol # register validation/final splits, tuned baselines, Muon grids, and benchmark claim gates",
         "make e11-cifar-resnet-lt-tuned-benchmark-settings # write the executable 164-setting tuned validation grid registry",
         "make e11-cifar-resnet-lt-tuned-benchmark-validation-results # submit the tuned validation grid via Slurm array",
+        "make e11-cifar-resnet-lt-tuned-benchmark-selection # select final recipes from completed validation summaries without touching final seeds",
         "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
         "make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates",
         "make e11-natural-negative-search-phase1-power-audit # compute the phase1 detectable-effect and interpretation boundary",
@@ -1332,10 +1352,13 @@ def main() -> None:
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py",
         "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py",
         "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
         "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection",
         "validation/final seed splits",
         "tuned AdamW/SGD/class-balanced baselines",
         "phase1 GPU entrypoint is now implemented",
@@ -3683,6 +3706,7 @@ def main() -> None:
             "condition-score v5 theory-to-score map must preserve theorem maps, predictions, ablations, transport steps, readiness rows, and score lineage"
         )
     v5_readiness_lookup = v5_readiness.set_index("item")["status"].to_dict()
+    v5_readiness_evidence = v5_readiness.set_index("item")["evidence"].to_dict()
     if not (
         v5_theorem_proxy_map["claim_boundary"].astype(str).str.contains("claim", case=False).all()
         and v5_score_lineage["leakage_status"].eq("no spent final rows").all()
@@ -3690,10 +3714,14 @@ def main() -> None:
         and v5_predictions["pass_rule"].astype(str).str.contains("CI|threshold|beat", case=False, regex=True).all()
         and v5_ablations["required_v5_report"].astype(str).str.len().gt(20).all()
         and v5_readiness_lookup["theory-to-score map"] == "generated"
-        and v5_readiness_lookup["v5 validation output"] in {"not_run", "generated"}
-        and v5_readiness_lookup["v5 residual score freeze"] in {"not_ready", "frozen", "validation_failed"}
+        and v5_readiness_lookup["v5 validation output"] == "generated"
+        and v5_readiness_lookup["v5 residual score freeze"] == "frozen"
         and v5_readiness_lookup["no final before freeze"] == "pass"
         and v5_readiness_lookup["predictive-condition claim"] == "not_ready"
+        and "frozen validation-selected score"
+        in str(v5_readiness_evidence["predictive-condition claim"])
+        and "final split outputs are still absent"
+        in str(v5_readiness_evidence["predictive-condition claim"])
     ):
         raise AssertionError(
             "condition-score v5 theory-to-score map must keep leakage boundaries, quantitative gates, ablation reports, and not_ready P0 claim status"
@@ -3714,9 +3742,56 @@ def main() -> None:
             "Falsifiable Predictions",
             "Required Ablation Matrix",
             "Claim Readiness Ledger",
+            "frozen validation-selected score is eligible for final evaluation runs",
+            "run the v5 final splits with the",
             "Blocked now: fitting, selecting, or reweighting any v5 score on v2/v3/v4 final",
         ],
     )
+    if "validation is not frozen" in v5_map_text:
+        raise AssertionError("condition-score v5 theory-to-score map must not retain stale pre-freeze wording")
+    v5_validation_dir = Path("results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition")
+    v5_validation_metrics = pd.read_csv(v5_validation_dir / "metrics.csv")
+    v5_validation_paired = pd.read_csv(v5_validation_dir / "paired_metrics.csv")
+    v5_validation_layer = pd.read_csv(v5_validation_dir / "layer_summary.csv")
+    v5_validation_checkpoint = pd.read_csv(v5_validation_dir / "checkpoint_summary.csv")
+    v5_validation_prediction = pd.read_csv(v5_validation_dir / "prediction_summary.csv")
+    v5_validation_residual = pd.read_csv(v5_validation_dir / "residual_prediction_summary.csv")
+    v5_validation_config = json.loads((v5_validation_dir / "config.json").read_text(encoding="utf-8"))
+    if not (
+        len(v5_validation_metrics) == 1260
+        and len(v5_validation_paired) == 630
+        and len(v5_validation_layer) == 63
+        and len(v5_validation_checkpoint) == 3
+        and len(v5_validation_prediction) == 6
+        and len(v5_validation_residual) == 4
+        and len(v5_validation_config["base_config"]["seeds"]) == 10
+        and v5_validation_config["base_config"]["device"] == "cuda"
+        and not bool(v5_validation_config["base_config"]["download"])
+    ):
+        raise AssertionError("condition-score v5 validation split must contain the full 10-seed GPU validation output")
+    v5_validation_checkpoint_by_step = v5_validation_checkpoint.set_index("warmup_steps")
+    if set(v5_validation_checkpoint_by_step.index) != {2000, 5000, 10000}:
+        raise AssertionError("condition-score v5 validation split must cover warmup steps 2000/5000/10000")
+    if not (
+        0.22 <= float(
+            v5_validation_checkpoint_by_step.loc[10000, "geomean_observed_tail_drift_sq_ratio_spectral_over_fro"]
+        )
+        <= 0.25
+        and bool(v5_validation_layer["spectral_less_observed_tail_drift_fraction"].eq(1.0).all())
+        and float(
+            v5_validation_prediction.set_index("predictor").loc[
+                "source_observed_drift_ratio", "mean_top5_risk_overlap_fraction"
+            ]
+        )
+        == 1.0
+        and float(
+            v5_validation_residual.set_index("predictor").loc[
+                "source_observed_residual", "mean_spearman_residual_predictor_vs_residual_target_observed"
+            ]
+        )
+        > 0.9
+    ):
+        raise AssertionError("condition-score v5 validation split must preserve the positive validation drift/control readout")
     v5_freeze_dir = Path("results/e11_condition_score_v5_protocol/validation_score_freeze")
     v5_freeze_formulas = pd.read_csv(v5_freeze_dir / "score_formula_registry.csv")
     v5_freeze_status = pd.read_csv(v5_freeze_dir / "freeze_status.csv")
@@ -3783,6 +3858,7 @@ def main() -> None:
     else:
         selected_status = v5_freeze_status_lookup["v5 transport-normalized residual score"]
         selected_score = v5_freeze_evidence_lookup["v5 transport-normalized residual score"]
+        selected_summary = v5_freeze_summary[v5_freeze_summary["score"].eq(selected_score)]
         if not (
             not v5_freeze_pairs.empty
             and not v5_freeze_summary.empty
@@ -3790,6 +3866,11 @@ def main() -> None:
             and v5_freeze_status_lookup["v5 final split outputs"] == "not_run"
             and selected_status in {"frozen", "validation_failed"}
             and selected_score == "condition_score_v5_transport_normalized_amplitude_minus_direction"
+            and len(selected_summary) == 1
+            and 0.63
+            <= float(selected_summary.iloc[0]["mean_spearman_score_vs_target_residual"])
+            <= 0.66
+            and 0.58 <= float(selected_summary.iloc[0]["spearman_ci95_low"]) <= 0.60
             and v5_freeze_gate_lookup["V5F-1-validation-output"] == "pass"
             and v5_freeze_gate_lookup["V5F-2-no-final-before-freeze"] == "pass"
             and v5_freeze_gate_lookup["V5F-3-spent-final-quarantine"] == "pass"
@@ -3811,7 +3892,8 @@ def main() -> None:
             "Freeze Status",
             "transport-normalized residual score",
             "V5F-2-no-final-before-freeze",
-            "Blocked now: the v5 final architecture and data splits cannot support a P0",
+            "Final evaluation is now unblocked as a run",
+            "A P0 claim still requires both final splits",
         ],
     )
     natural_boundary_dir = Path("results/e11_natural_head_tail_boundary")
@@ -4372,6 +4454,52 @@ def main() -> None:
         and "not_ready" in tuned_execution_status["claim_status"].iloc[0]
     ):
         raise AssertionError("CIFAR-100-LT tuned benchmark execution status must remain not_ready after settings registration")
+    tuned_selection_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection")
+    tuned_selection_run_registry = pd.read_csv(tuned_selection_dir / "run_registry.csv")
+    tuned_family_selection = pd.read_csv(tuned_selection_dir / "family_selection.csv")
+    tuned_final_plan = pd.read_csv(tuned_selection_dir / "final_claim_plan.csv")
+    tuned_selection_gates = pd.read_csv(tuned_selection_dir / "gate_report.csv")
+    if (
+        len(tuned_selection_run_registry) != 164
+        or len(tuned_family_selection) != 6
+        or len(tuned_final_plan) != 6
+        or len(tuned_selection_gates) != 4
+    ):
+        raise AssertionError("CIFAR-100-LT tuned benchmark selection audit has the wrong row counts")
+    if set(tuned_selection_run_registry["validation_status"]) != {"missing_summary"}:
+        raise AssertionError("CIFAR-100-LT tuned benchmark selection should remain pending until validation summaries exist")
+    if set(tuned_family_selection["selection_status"]) != {"not_ready"}:
+        raise AssertionError("CIFAR-100-LT tuned benchmark family selection must be not_ready before validation completes")
+    if set(tuned_final_plan["final_status"]) != {"not_ready"} or not tuned_final_plan["final_seed_set"].isna().all():
+        raise AssertionError("CIFAR-100-LT tuned benchmark final plan must keep final seeds blank before selection")
+    if set(tuned_selection_gates["gate_id"]) != {
+        "TVS-1-validation-grid-complete",
+        "TVS-2-family-selection",
+        "TVS-3-final-seed-quarantine",
+        "TVS-4-final-run-plan",
+    }:
+        raise AssertionError("CIFAR-100-LT tuned benchmark selection gates changed unexpectedly")
+    if not (
+        tuned_selection_gates.set_index("gate_id").loc["TVS-3-final-seed-quarantine", "status"] == "pass"
+        and set(tuned_selection_gates["status"]) == {"not_ready", "pass"}
+    ):
+        raise AssertionError("CIFAR-100-LT tuned benchmark selection gates should pass quarantine and block final claim")
+    tuned_selection_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark selection",
+        tuned_selection_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Selection",
+            "no-peeking bridge",
+            "Current status: `not_ready`",
+            "0/164",
+            "final claim seed set is always `20..29`",
+            "TVS-3-final-seed-quarantine",
+            "The current result is not a final-performance benchmark result",
+        ],
+    )
     final_outputs = sorted(Path("results/e11_cifar100_resnet_lt_tuned_benchmark").glob("final*"))
     if final_outputs:
         raise AssertionError(f"CIFAR-100-LT tuned benchmark final outputs must stay absent before validation: {final_outputs}")
@@ -5768,7 +5896,8 @@ def main() -> None:
         "transport-normalized residual score",
         "V5F-1-validation-output",
         "V5F-4-residual-score-freeze",
-        "Blocked now: the v5 final architecture and data splits cannot support a P0",
+        "Final evaluation is now unblocked as a run",
+        "A P0 claim still requires both final splits",
     ]
     assert_required_phrases(
         "condition-score v5 validation freeze",
@@ -5789,7 +5918,7 @@ def main() -> None:
         "discussion/e11_cifar100_resnet_condition_score_next.md",
         "discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md",
         "discussion/e11_condition_score_fresh_protocol.md",
-        "new theory-linked score revision",
+        "v5 has frozen a transport-normalized validation score",
         "discussion/e11_condition_score_v4_protocol.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
         "discussion/e11_condition_score_v5_theory_protocol.md",
@@ -5800,6 +5929,8 @@ def main() -> None:
         "theorem terms to measurable score features",
         "validation-freeze boundary",
         "validation-only mod-4 CIFAR-100-LT split",
+        "condition_score_v5_transport_normalized_amplitude_minus_direction",
+        "0.645 [0.5898, 0.7002]",
         "not_ready",
         "ResNeXt50-32x4d",
         "CIFAR-10 mixed final data split fails",
@@ -5825,6 +5956,9 @@ def main() -> None:
         "familywise final comparisons",
         "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py",
         "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
+        "final seeds 20..29 quarantined",
+        "make e11-cifar-resnet-lt-tuned-benchmark-selection",
         "164-setting validation registry",
         "discussion/e11_submission_repro_audit.md",
         "preferred pdflatex/bibtex/xelatex clean-checkout gate remains not_ready",
@@ -5865,6 +5999,7 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-tuned-benchmark-protocol" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-settings" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-validation-results" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-selection" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-natural-head-tail-boundary-audit" not in readme
         or "make e11-natural-negative-search-protocol" not in readme

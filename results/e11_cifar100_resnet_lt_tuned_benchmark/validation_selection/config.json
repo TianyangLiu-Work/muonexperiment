@@ -1,0 +1,6 @@
+{
+  "final_seed_set": "20..29",
+  "selection_rule": "maximize few balanced accuracy, tie-break by all balanced accuracy then setting id",
+  "settings_registry": "results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv",
+  "validation_output_prefix": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning"
+}

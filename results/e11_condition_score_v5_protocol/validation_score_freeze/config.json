@@ -12,7 +12,7 @@
   ],
   "selection_rule": "freeze highest residual-candidate CI lower endpoint above zero after validation; direction guardrail must pass separately",
   "theory_protocol": "discussion/e11_condition_score_v5_theory_protocol.md",
-  "validation_generated": false,
+  "validation_generated": true,
   "validation_layer_summary": "results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv",
   "validation_metrics": "results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/metrics.csv"
 }

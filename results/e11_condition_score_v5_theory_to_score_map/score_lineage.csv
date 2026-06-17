@@ -1,8 +1,8 @@
 score_id,score_role,theory_terms_used,claim_role,leakage_status,current_validation_status,restriction
 condition_score_v5_direction_axis_scaled_jvp_ratio,direction_guardrail,direction_ratio_guardrail,direction guardrail,no spent final rows,no,not eligible as a residual-risk scalar
 condition_score_v5_raw_fro_amplitude_axis,diagnostic_residual_axis,raw_residual_amplitude,diagnostic residual axis,no spent final rows,no,spent v4 data evidence shows raw amplitude can reverse
-condition_score_v5_transport_normalized_amplitude_minus_direction,residual_candidate,raw_residual_amplitude; direction_ratio_guardrail; partition_transport_defect; architecture_transport_defect; early_depth_nuisance,primary residual candidate,no spent final rows,no,eligible only if validation residual Spearman CI lower endpoint is above zero
+condition_score_v5_transport_normalized_amplitude_minus_direction,residual_candidate,raw_residual_amplitude; direction_ratio_guardrail; partition_transport_defect; architecture_transport_defect; early_depth_nuisance,primary residual candidate,no spent final rows,yes,eligible only if validation residual Spearman CI lower endpoint is above zero
 condition_score_v5_transport_defect_penalty,diagnostic_transport_axis,partition_transport_defect; architecture_transport_defect,diagnostic transport axis,no spent final rows,no,"reported to localize transport failures, not a final residual score"
 early_layer_prior,baseline,early_depth_nuisance,baseline,no spent final rows,no,primary must beat this baseline
 source_observed_drift_positive_control,positive_control,sandwiched_tail_drift,upper-bound positive control,no spent final rows,no,uses observed source drift and is not claim-eligible
-condition_score_v5_validation_selected,primary_alias,validation-freeze alias,primary alias,no spent final rows,not_ready,not_ready / pending_validation_output
+condition_score_v5_validation_selected,primary_alias,validation-freeze alias,primary alias,no spent final rows,frozen,frozen / condition_score_v5_transport_normalized_amplitude_minus_direction

@@ -43,11 +43,11 @@ frozen transport correction and a separate direction guardrail.
 |:------------------------------------------------------------------|:--------------------------|:-----------------------------------------------------------------------------------------------------------------------------------|:-----------------------------|:--------------------|:----------------------------|:------------------------------------------------------------------------------|
 | condition_score_v5_direction_axis_scaled_jvp_ratio                | direction_guardrail       | direction_ratio_guardrail                                                                                                          | direction guardrail          | no spent final rows | no                          | not eligible as a residual-risk scalar                                        |
 | condition_score_v5_raw_fro_amplitude_axis                         | diagnostic_residual_axis  | raw_residual_amplitude                                                                                                             | diagnostic residual axis     | no spent final rows | no                          | spent v4 data evidence shows raw amplitude can reverse                        |
-| condition_score_v5_transport_normalized_amplitude_minus_direction | residual_candidate        | raw_residual_amplitude; direction_ratio_guardrail; partition_transport_defect; architecture_transport_defect; early_depth_nuisance | primary residual candidate   | no spent final rows | no                          | eligible only if validation residual Spearman CI lower endpoint is above zero |
+| condition_score_v5_transport_normalized_amplitude_minus_direction | residual_candidate        | raw_residual_amplitude; direction_ratio_guardrail; partition_transport_defect; architecture_transport_defect; early_depth_nuisance | primary residual candidate   | no spent final rows | yes                         | eligible only if validation residual Spearman CI lower endpoint is above zero |
 | condition_score_v5_transport_defect_penalty                       | diagnostic_transport_axis | partition_transport_defect; architecture_transport_defect                                                                          | diagnostic transport axis    | no spent final rows | no                          | reported to localize transport failures, not a final residual score           |
 | early_layer_prior                                                 | baseline                  | early_depth_nuisance                                                                                                               | baseline                     | no spent final rows | no                          | primary must beat this baseline                                               |
 | source_observed_drift_positive_control                            | positive_control          | sandwiched_tail_drift                                                                                                              | upper-bound positive control | no spent final rows | no                          | uses observed source drift and is not claim-eligible                          |
-| condition_score_v5_validation_selected                            | primary_alias             | validation-freeze alias                                                                                                            | primary alias                | no spent final rows | not_ready                   | not_ready / pending_validation_output                                         |
+| condition_score_v5_validation_selected                            | primary_alias             | validation-freeze alias                                                                                                            | primary alias                | no spent final rows | frozen                      | frozen / condition_score_v5_transport_normalized_amplitude_minus_direction    |
 
 ## Transport Normalization Contract
 
@@ -81,24 +81,23 @@ frozen transport correction and a separate direction guardrail.
 
 ## Claim Readiness Ledger
 
-| item                       | status    | evidence                                                                                     | blocks_p0_if_missing   |
-|:---------------------------|:----------|:---------------------------------------------------------------------------------------------|:-----------------------|
-| theory-to-score map        | generated | discussion/e11_condition_score_v5_theory_to_score_map.md                                     | yes                    |
-| v5 validation output       | not_run   | results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv | yes                    |
-| v5 residual score freeze   | not_ready | results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv            | yes                    |
-| no final before freeze     | pass      | results/e11_condition_score_v5_protocol/final_* directories absent before freeze             | yes                    |
-| predictive-condition claim | not_ready | validation is not frozen and final split outputs are not claim-eligible yet                  | yes                    |
+| item                       | status    | evidence                                                                                                                                                             | blocks_p0_if_missing   |
+|:---------------------------|:----------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------|
+| theory-to-score map        | generated | discussion/e11_condition_score_v5_theory_to_score_map.md                                                                                                             | yes                    |
+| v5 validation output       | generated | results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv                                                                         | yes                    |
+| v5 residual score freeze   | frozen    | results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv                                                                                    | yes                    |
+| no final before freeze     | pass      | results/e11_condition_score_v5_protocol/final_* directories absent before freeze                                                                                     | yes                    |
+| predictive-condition claim | not_ready | frozen validation-selected score is eligible for final evaluation runs; final split outputs are still absent, so the P0 predictive-condition claim remains not_ready | yes                    |
 
 ## Boundary
 
 Allowed now: cite this map as the pre-final theory-to-score bridge, use spent
-v4 evidence only as diagnostic motivation, and keep the v5 final splits blocked
-until the validation-freeze artifact reports a frozen residual score and a
-passing direction guardrail.
+v4 evidence only as diagnostic motivation, and run the v5 final splits with the
+frozen validation-selected residual score.
 
 Blocked now: fitting, selecting, or reweighting any v5 score on v2/v3/v4 final
 rows; claiming that the transport-normalized residual score predicts held-out
-layer risk before the v5 validation and final gates exist.
+layer risk before both v5 final gates pass.
 
 Artifacts:
 - [theorem_proxy_map.csv](../results/e11_condition_score_v5_theory_to_score_map/theorem_proxy_map.csv)

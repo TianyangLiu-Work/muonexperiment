@@ -101,6 +101,7 @@ make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT 
 make e11-cifar-resnet-lt-tuned-benchmark-protocol # register validation/final splits and benchmark claim gates
 make e11-cifar-resnet-lt-tuned-benchmark-settings # write the executable tuned validation grid registry
 make e11-cifar-resnet-lt-tuned-benchmark-validation-results # submit the tuned validation grid via Slurm array
+make e11-cifar-resnet-lt-tuned-benchmark-selection # select final recipes from completed validation summaries
 make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practical Muon/AdamW trajectory bridge via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation

@@ -527,6 +527,21 @@ def write_discussion(
         )
     else:
         selected_text = "Validation output is not present yet, so no v5 residual score is frozen."
+    gate_lookup = gates.set_index("gate_id")["status"].to_dict()
+    if gate_lookup.get("V5F-6-final-claim-readiness") == "pass":
+        boundary_text = (
+            "Final evaluation is now unblocked as a run, not as a claim: the "
+            "ResNeXt50-32x4d and CIFAR-10 cross-partition final splits may be "
+            "evaluated with the frozen validation-selected score. A P0 claim still "
+            "requires both final splits to pass their registered residual and "
+            "direction gates."
+        )
+    else:
+        boundary_text = (
+            "Blocked now: the v5 final architecture and data splits cannot support "
+            "a P0 claim until this artifact reports a frozen residual score, a "
+            "passing direction guardrail, and no generated final outputs before the freeze."
+        )
     text = f"""# E11 Condition-Score V5 Validation Freeze
 
 This generated artifact is the freeze boundary for the v5 theory protocol. It
@@ -556,9 +571,7 @@ only if the validation residual-ranking gate passes.
 
 {selected_text}
 
-Blocked now: the v5 final architecture and data splits cannot support a P0
-claim until this artifact reports a frozen residual score, a passing direction
-guardrail, and no generated final outputs before the freeze.
+{boundary_text}
 
 Artifacts:
 - [score_formula_registry.csv](../{(OUTPUT_DIR / 'score_formula_registry.csv').as_posix()})

@@ -59,6 +59,8 @@ The existing pilots are useful for risk assessment, but they cannot select final
 
 The validation grid is materialized by `scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py --settings-only`, which writes `results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv` and `execution_status.csv`. GPU validation cells are submitted with `scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch`; each Slurm array cell runs one registered validation setting on seeds `10..14`. The final claim split `20..29` remains untouched until validation selects recipes.
 
+The frozen selection rule is materialized by `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py`. It writes `results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/*` and `discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md`, selecting one recipe per family only after every registered validation setting in that family has a summary.
+
 ## Acceptance Gates
 
 | gate_id                     | claim_unblocked                                                             | pass_rule                                                                                                                                          | failure_claim                             |
