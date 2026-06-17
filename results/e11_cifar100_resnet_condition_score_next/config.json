@@ -13,5 +13,5 @@
   "score_registry_rows": 5,
   "split_registry_rows": 6,
   "acceptance_gate_rows": 6,
-  "analysis_scope": "locked retrospective ResNet18 checkpoint split; held-out architecture/data not generated"
+  "analysis_scope": "locked retrospective ResNet18 checkpoint split; registered held-out architecture/data evaluation available separately when heldout_score_evaluation exists"
 }

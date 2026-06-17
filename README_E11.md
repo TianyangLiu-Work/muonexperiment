@@ -219,13 +219,19 @@ and `scripts/slurm/e11_cifar100_resnet_condition_score_heldout_data.sbatch`.
 They run the same all-layer checkpoint-transfer probe on ResNet34/CIFAR-100-LT
 and ResNet18/CIFAR-10-LT, writing raw held-out layer tables under
 `results/e11_cifar100_resnet_condition_score_next/heldout_architecture` and
-`results/e11_cifar100_resnet_condition_score_next/heldout_data`. These jobs
-prepare the registered no-tuning held-out evidence; until the score gates are
-evaluated on those tables, the P0 predictive-condition claim remains open.
-After both Slurm jobs finish, `make e11-cifar-resnet-condition-score-heldout-eval`
+`results/e11_cifar100_resnet_condition_score_next/heldout_data`. ResNet34 and CIFAR-10-LT held-out Slurm entry points are now registered and have produced
+the current no-tuning boundary evidence. After both Slurm jobs finish,
+`make e11-cifar-resnet-condition-score-heldout-eval`
 applies the frozen `condition_score_v2_calibrated_residual` coefficients from
 `results/e11_cifar100_resnet_condition_score_next/calibration_coefficients.csv`
-to those held-out layer tables and writes the held-out gate report.
+to those held-out layer tables and writes the held-out gate report. The
+registered held-out condition-score evaluation now fails the P0
+residual-ranking gates: ResNet34 held-out architecture primary residual
+Spearman is `0.1992 [-0.07515, 0.4735]`, and CIFAR-10-LT held-out data primary
+residual Spearman is `-0.6771 [-0.7011, -0.653]`. The below-one threshold
+direction still passes on both splits, and the legacy scaled-JVP ratio on
+CIFAR-10-LT has residual Spearman `0.6219 [0.6013, 0.6425]`. This supports a
+narrower directional guardrail, not a held-out layer-risk ranking claim.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -295,6 +301,10 @@ Paper-facing synthesis:
 - `discussion/e11_cifar100_resnet_condition_score_audit.md`
 - `discussion/e11_cifar100_resnet_condition_score_protocol.md`
 - `discussion/e11_cifar100_resnet_condition_score_next.md`
+- `discussion/e11_cifar100_resnet_condition_score_next_heldout_architecture.md`
+- `discussion/e11_cifar100_resnet_condition_score_next_heldout_data.md`
+- `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`
+- `discussion/e11_condition_score_heldout_failure_theory_note.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
 - `discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md`
@@ -360,6 +370,10 @@ Primary paper quantitative tables:
 - `results/e11_cifar100_resnet_condition_score_next/score_summary.csv`
 - `results/e11_cifar100_resnet_condition_score_next/calibration_coefficients.csv`
 - `results/e11_cifar100_resnet_condition_score_next/gate_report.csv`
+- `results/e11_cifar100_resnet_condition_score_next/heldout_architecture/layer_summary.csv`
+- `results/e11_cifar100_resnet_condition_score_next/heldout_data/layer_summary.csv`
+- `results/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation/heldout_score_summary.csv`
+- `results/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation/heldout_gate_report.csv`
 - `results/e11_top_conference_gap_register/gap_register.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
@@ -397,6 +411,7 @@ Primary paper figures:
 - `figures/e11_cifar100_resnet_layer_jvp_tail_quality/cifar100_resnet_layer_jvp_tail_quality.png`
 - `figures/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/cifar100_resnet_layer_jvp_checkpoint_prediction.png`
 - `figures/e11_cifar100_resnet_condition_score_audit/cifar100_resnet_condition_score_audit.png`
+- `figures/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation/cifar100_resnet_condition_score_heldout_evaluation.png`
 - `figures/e11_cifar100_resnet_lt_standard_eval/cifar100_resnet_lt_standard_eval.png`
 - `figures/e11_cifar100_resnet_lt_recipe_benchmark/cifar100_resnet_lt_recipe_benchmark.png`
 - `figures/e11_cifar100_resnet_lt_muon_final_benchmark/cifar100_resnet_lt_recipe_benchmark.png`
@@ -436,6 +451,7 @@ Primary paper figures:
    - An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points; observed squared drift ratio is about `0.2011 [0.1845, 0.2192]`, scaled-JVP ratio is about `0.065 [0.06008, 0.07031]`, and every per-layer observed CI upper endpoint is below 1.
    - An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs; source-observed positive-control Spearman is about `0.981 [0.9739, 0.988]` and early-layer prior Spearman is about `0.9126 [0.9029, 0.9222]`, but the scaled-JVP predictor has below-one threshold accuracy `1` and held-out layer-risk Spearman about `-0.3203 [-0.3562, -0.2845]`. After source-fit early-layer residualization, observed residual Spearman is about `0.9403 [0.9216, 0.959]`, while scaled-JVP residual Spearman is about `-0.4872 [-0.5373, -0.4372]`, so the current score is not yet a positive layer-ranking predictor even beyond depth structure.
    - A candidate condition-score audit over the same checkpoint-transfer tables confirms this boundary: the best simple source-only composite, early-minus-scaled-JVP, has held-out Spearman about `0.8656 [0.8578, 0.8734]`, below the early-layer prior, and scaled-JVP remains inverted in the residual score audit.
+   - The registered held-out condition-score evaluation now fails the P0 residual-ranking gates. ResNet34 held-out architecture primary residual Spearman is `0.1992 [-0.07515, 0.4735]`, and CIFAR-10-LT held-out data primary residual Spearman is `-0.6771 [-0.7011, -0.653]`. The below-one threshold direction still passes (`0.991` and `0.9841`), while the legacy scaled-JVP ratio on CIFAR-10-LT has residual Spearman `0.6219 [0.6013, 0.6425]`. This turns v2 into a useful obstruction: the checkpoint-fit residual score is not invariant across architecture/data held-outs.
    - A standard CIFAR-100-LT ResNet18 reporting baseline (IF=100, 10 AdamW seeds, no augmentation/tuning) gives many/medium/few balanced accuracy `0.3665 [0.3489, 0.3841]`, `0.1036 [0.09138, 0.1158]`, and `0.0129 [0.009351, 0.01645]`. This supplies a standard classification reporting surface, not a tuned benchmark or Muon comparison.
    - An augmented CIFAR-100-LT ResNet18 recipe benchmark pilot (5 seeds, 5000 steps) gives SGD-momentum all/few balanced accuracy `0.4105 [0.4044, 0.4166]` and `0.1047 [0.09389, 0.1156]`; the few-group diff versus augmented AdamW is `0.0194 [0.005581, 0.03322]`. Class-balanced AdamW is worse in this pilot, with few-group diff `-0.0114 [-0.0215, -0.001304]`.
    - A CIFAR-100-LT ResNet18 NS-Muon final-training pilot (3 seeds, 5000 steps) is negative: lr=1e-4 all/few balanced accuracy `0.1265 [0.1218, 0.1312]` / `0.0008889 [-0.0006533, 0.002431]`; paired all/few diff vs AdamW-aug `-0.2348 [-0.2395, -0.23]` / `-0.08767 [-0.09948, -0.07585]`; lr=3e-5 is worse.
@@ -520,12 +536,12 @@ Do not claim:
 
 The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
 
-The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`.
+The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, and theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`.
 
 Most important next steps:
 
 1. Extend the new standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline, augmented recipe pilot, negative NS-Muon final-training pilot, and local tail-count imbalance sweep into a tuned benchmark protocol with a wider grid, class-balanced samplers, better Muon schedules, and larger long-tail datasets; the current pilots are useful benchmark context, not a competitive optimizer result.
-2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run now shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the current scaled-JVP score has negative raw and residual layer-risk ranking transfer. ResNet34 and CIFAR-10-LT held-out Slurm entry points are now registered, but the jobs and score gates still need to run before any P0 predictive-condition claim is defensible.
+2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the frozen v2 condition score fails the registered ResNet34 and CIFAR-10-LT held-out residual-ranking gates. The next version needs a new pre-registered, theory-derived score and fresh held-out splits; do not tune on these failed held-outs and then claim a P0 predictive-condition result.
 3. Extend the current fixed-checkpoint, short-trajectory, small practical-training, and negative ResNet final-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
 5. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.

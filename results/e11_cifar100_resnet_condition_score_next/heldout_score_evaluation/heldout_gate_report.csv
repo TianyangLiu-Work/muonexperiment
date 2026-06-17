@@ -1,0 +1,10 @@
+gate_id,scope,status,evidence
+primary_heldout_architecture_residual_spearman,ResNet34 CIFAR-100-LT held-out architecture,fail,"primary residual Spearman=0.1992 CI=[-0.07515, 0.4735]"
+primary_heldout_architecture_threshold_accuracy,ResNet34 CIFAR-100-LT held-out architecture,pass,primary below-one threshold accuracy=0.991
+primary_heldout_architecture_early_prior_comparison,ResNet34 CIFAR-100-LT held-out architecture,pass,primary Spearman=0.1992; early-layer prior Spearman=-0.1266
+primary_heldout_architecture_source_observed_control_reported,ResNet34 CIFAR-100-LT held-out architecture,reported,matched-parameter source-observed control points=21
+primary_heldout_data_residual_spearman,ResNet18 CIFAR-10-LT held-out data,fail,"primary residual Spearman=-0.6771 CI=[-0.7011, -0.653]"
+primary_heldout_data_threshold_accuracy,ResNet18 CIFAR-10-LT held-out data,pass,primary below-one threshold accuracy=0.9841
+primary_heldout_data_early_prior_comparison,ResNet18 CIFAR-10-LT held-out data,pass,primary Spearman=-0.6771; early-layer prior Spearman=-0.8696
+primary_heldout_data_source_observed_control_reported,ResNet18 CIFAR-10-LT held-out data,reported,matched-parameter source-observed control points=21
+p0_predictive_condition_heldout_claim,registered P0 condition-score held-out splits,not_ready,All generated primary held-out splits must pass residual Spearman and threshold gates.

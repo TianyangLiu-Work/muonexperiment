@@ -752,6 +752,35 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_condition_score_next") / "config.json",
         Path("figures/e11_cifar100_resnet_condition_score_next") / "cifar100_resnet_condition_score_next.png",
         Path("discussion/e11_cifar100_resnet_condition_score_next.md"),
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_architecture") / "metrics.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_architecture") / "paired_metrics.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_architecture") / "layer_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_architecture") / "checkpoint_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_architecture") / "prediction_pairs.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_architecture") / "prediction_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_architecture") / "residual_prediction_pairs.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_architecture") / "residual_prediction_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_architecture") / "config.json",
+        Path("figures/e11_cifar100_resnet_condition_score_next/heldout_architecture") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        Path("discussion/e11_cifar100_resnet_condition_score_next_heldout_architecture.md"),
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_data") / "metrics.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_data") / "paired_metrics.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_data") / "layer_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_data") / "checkpoint_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_data") / "prediction_pairs.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_data") / "prediction_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_data") / "residual_prediction_pairs.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_data") / "residual_prediction_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_data") / "config.json",
+        Path("figures/e11_cifar100_resnet_condition_score_next/heldout_data") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        Path("discussion/e11_cifar100_resnet_condition_score_next_heldout_data.md"),
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation") / "heldout_score_pairs.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation") / "heldout_score_summary.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation") / "heldout_gate_report.csv",
+        Path("results/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation") / "config.json",
+        Path("figures/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation") / "cifar100_resnet_condition_score_heldout_evaluation.png",
+        Path("discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md"),
+        Path("discussion/e11_condition_score_heldout_failure_theory_note.md"),
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "train_trace.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_metrics.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "group_metrics.csv",
@@ -977,6 +1006,11 @@ def main() -> None:
         "An all-layer ResNet finite-difference JVP tail-quality diagnostic covers 21 Conv/Linear weights and 210 paired layer/seed points",
         "An all-layer ResNet JVP checkpoint-transfer benchmark covers 3 tail-rich checkpoints and 6 directed checkpoint-transfer pairs",
         "ResNet34 and CIFAR-10-LT held-out Slurm entry points are now registered",
+        "registered held-out condition-score evaluation now fails the P0",
+        "ResNet34 held-out architecture primary residual Spearman is `0.1992 [-0.07515, 0.4735]`",
+        "CIFAR-10-LT held-out data primary residual Spearman is `-0.6771 [-0.7011, -0.653]`",
+        "legacy scaled-JVP ratio on CIFAR-10-LT has residual Spearman `0.6219 [0.6013, 0.6425]`",
+        "discussion/e11_condition_score_heldout_failure_theory_note.md",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
         "candidate condition-score audit",
@@ -2510,7 +2544,7 @@ def main() -> None:
         or len(score_next_gates) != 6
         or set(score_next_summary["score"]) != expected_next_scores
         or score_next_config.get("analysis_scope")
-        != "locked retrospective ResNet18 checkpoint split; held-out architecture/data not generated"
+        != "locked retrospective ResNet18 checkpoint split; registered held-out architecture/data evaluation available separately when heldout_score_evaluation exists"
     ):
         raise AssertionError("condition-score v2 retrospective analysis must preserve registered output shape")
     score_next_by_score = score_next_summary.set_index("score")
@@ -2525,12 +2559,91 @@ def main() -> None:
         > float(score_next_early["mean_spearman_score_vs_target_residual"])
         and float(score_next_legacy["mean_spearman_score_vs_target_residual"]) < 0.0
         and score_next_gate_status.get("legacy_checkpoint_residual_spearman") == "pass"
-        and score_next_gate_status.get("primary_heldout_architecture") == "not_run"
-        and score_next_gate_status.get("primary_heldout_data") == "not_run"
+        and score_next_gate_status.get("primary_heldout_architecture") == "fail"
+        and score_next_gate_status.get("primary_heldout_data") == "fail"
         and score_next_gate_status.get("p0_predictive_condition_claim") == "not_ready"
     ):
         raise AssertionError(
-            "condition-score v2 analysis must show a promising retrospective checkpoint result without claiming P0 completion"
+            "condition-score v2 analysis must show a promising retrospective checkpoint result and the failed held-out P0 boundary"
+        )
+    heldout_arch_dir = score_next_dir / "heldout_architecture"
+    heldout_data_dir = score_next_dir / "heldout_data"
+    heldout_eval_dir = score_next_dir / "heldout_score_evaluation"
+    heldout_arch_layer_summary = pd.read_csv(heldout_arch_dir / "layer_summary.csv")
+    heldout_data_layer_summary = pd.read_csv(heldout_data_dir / "layer_summary.csv")
+    heldout_arch_config = json.loads((heldout_arch_dir / "config.json").read_text())
+    heldout_data_config = json.loads((heldout_data_dir / "config.json").read_text())
+    heldout_score_pairs = pd.read_csv(heldout_eval_dir / "heldout_score_pairs.csv")
+    heldout_score_summary = pd.read_csv(heldout_eval_dir / "heldout_score_summary.csv")
+    heldout_gate_report = pd.read_csv(heldout_eval_dir / "heldout_gate_report.csv")
+    if (
+        len(heldout_arch_layer_summary) != 111
+        or len(heldout_data_layer_summary) != 63
+        or len(heldout_score_pairs) != 90
+        or len(heldout_score_summary) != 10
+        or len(heldout_gate_report) != 9
+        or set(heldout_score_summary["score"]) != expected_next_scores
+    ):
+        raise AssertionError(
+            "registered condition-score held-out evaluation must preserve architecture/data score coverage"
+        )
+    heldout_arch_base_config = heldout_arch_config["base_config"]
+    heldout_data_base_config = heldout_data_config["base_config"]
+    if not (
+        heldout_arch_base_config["dataset_name"] == "CIFAR100"
+        and heldout_arch_base_config["model_arch"] == "resnet34"
+        and heldout_arch_base_config["tail_train_per_class"] == 300
+        and heldout_arch_config["warmup_steps"] == [2000, 5000, 10000]
+        and len(heldout_arch_base_config["seeds"]) == 5
+        and heldout_data_base_config["dataset_name"] == "CIFAR10"
+        and heldout_data_base_config["model_arch"] == "resnet18"
+        and heldout_data_base_config["head_classes"] == [0, 1, 2, 3, 4]
+        and heldout_data_base_config["tail_classes"] == [5, 6, 7, 8, 9]
+        and heldout_data_base_config["tail_eval_per_class"] == 200
+        and heldout_data_config["warmup_steps"] == [2000, 5000, 10000]
+        and len(heldout_data_base_config["seeds"]) == 10
+    ):
+        raise AssertionError(
+            "registered condition-score held-out configs must preserve ResNet34 architecture and CIFAR-10-LT data split definitions"
+        )
+    heldout_summary_by_key = heldout_score_summary.set_index(["split_role", "score"])
+    heldout_arch_primary = heldout_summary_by_key.loc[
+        ("primary_heldout_architecture", "condition_score_v2_calibrated_residual")
+    ]
+    heldout_arch_source = heldout_summary_by_key.loc[
+        ("primary_heldout_architecture", "source_observed_drift_positive_control")
+    ]
+    heldout_data_primary = heldout_summary_by_key.loc[
+        ("primary_heldout_data", "condition_score_v2_calibrated_residual")
+    ]
+    heldout_data_legacy = heldout_summary_by_key.loc[
+        ("primary_heldout_data", "legacy_scaled_jvp_ratio")
+    ]
+    heldout_gate_status = heldout_gate_report.set_index("gate_id")["status"].to_dict()
+    if not (
+        heldout_gate_status.get("primary_heldout_architecture_residual_spearman") == "fail"
+        and heldout_gate_status.get("primary_heldout_architecture_threshold_accuracy") == "pass"
+        and heldout_gate_status.get("primary_heldout_architecture_early_prior_comparison") == "pass"
+        and heldout_gate_status.get("primary_heldout_data_residual_spearman") == "fail"
+        and heldout_gate_status.get("primary_heldout_data_threshold_accuracy") == "pass"
+        and heldout_gate_status.get("primary_heldout_data_early_prior_comparison") == "pass"
+        and heldout_gate_status.get("p0_predictive_condition_heldout_claim") == "not_ready"
+        and float(heldout_arch_primary["mean_spearman_score_vs_target_residual"]) > 0.15
+        and float(heldout_arch_primary["spearman_ci95_low"]) < 0.0
+        and float(heldout_arch_primary["spearman_ci95_high"]) > 0.0
+        and float(heldout_arch_primary["mean_threshold_below_one_accuracy"]) > 0.98
+        and float(heldout_arch_source["mean_spearman_score_vs_target_residual"]) > 0.5
+        and float(heldout_arch_source["spearman_ci95_low"]) > 0.45
+        and float(heldout_data_primary["mean_spearman_score_vs_target_residual"]) < -0.6
+        and float(heldout_data_primary["spearman_ci95_high"]) < -0.6
+        and float(heldout_data_primary["mean_threshold_below_one_accuracy"]) > 0.98
+        and float(heldout_data_legacy["mean_spearman_score_vs_target_residual"]) > 0.6
+        and float(heldout_data_legacy["spearman_ci95_low"]) > 0.59
+        and float(heldout_data_legacy["mean_top5_residual_risk_overlap_fraction"]) > 0.9
+        and float(heldout_data_legacy["mean_threshold_below_one_accuracy"]) == 1.0
+    ):
+        raise AssertionError(
+            "registered held-out condition-score evaluation must preserve the current failed residual-ranking boundary and passing threshold-direction readout"
         )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
@@ -3939,8 +4052,11 @@ def main() -> None:
         "Condition-Score v2 Retrospective Analysis",
         "condition_score_v2_calibrated_residual",
         "legacy scaled-JVP residual score remains negative",
-        "not yet the P0 predictive-condition result",
-        "held-out architecture and held-out data splits",
+        "Held-Out Evaluation",
+        "registered held-out condition-score evaluation now fails",
+        "primary_heldout_data_residual_spearman",
+        "This is not the P0 predictive-condition result",
+        "ResNet34 architecture split and the CIFAR-10-LT data split",
         "p0_predictive_condition_claim",
         "not_ready",
     ]
@@ -3951,6 +4067,22 @@ def main() -> None:
         raise AssertionError(
             f"condition-score v2 retrospective analysis missing required content: {missing_condition_score_next}"
         )
+    heldout_failure_theory_note = Path(
+        "discussion/e11_condition_score_heldout_failure_theory_note.md"
+    ).read_text(encoding="utf-8")
+    required_heldout_failure_note_phrases = [
+        "Held-Out Condition-Score Failure Theory Note",
+        "boundary condition for the theory",
+        "These held-out splits are now spent",
+        "A direction-threshold diagnostic",
+        "A residual-ranking diagnostic",
+        "does not support the claim that the current v2 condition score predicts held-out layer-risk ranking",
+    ]
+    assert_required_phrases(
+        "held-out condition-score failure theory note",
+        heldout_failure_theory_note,
+        required_heldout_failure_note_phrases,
+    )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -3963,7 +4095,8 @@ def main() -> None:
         "P0-StandardBenchmark",
         "discussion/e11_cifar100_resnet_condition_score_protocol.md",
         "discussion/e11_cifar100_resnet_condition_score_next.md",
-        "source-only calibrated residual condition score",
+        "discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md",
+        "new theory-linked score revision",
         "held-out architecture",
         "benchmark-level performance claim",
         "GPU via Slurm",
@@ -4018,6 +4151,8 @@ def main() -> None:
             Path("discussion/e11_paper_readiness_audit.md"),
             Path("discussion/e11_cifar100_resnet_condition_score_protocol.md"),
             Path("discussion/e11_cifar100_resnet_condition_score_next.md"),
+            Path("discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md"),
+            Path("discussion/e11_condition_score_heldout_failure_theory_note.md"),
             Path("discussion/e11_top_conference_gap_register.md"),
             Path("discussion/e11_paper_skeleton.md"),
             Path("discussion/e11_main_paper_package.md"),

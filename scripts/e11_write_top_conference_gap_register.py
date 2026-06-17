@@ -22,11 +22,11 @@ def gap_rows() -> list[dict[str, str]]:
             "gap_id": "P0-PredictiveCondition",
             "priority": "P0",
             "claim_unblocked": "A measured downstream-aware condition predicts when the matched-head-gain spectral/polar direction will lower tail-example drift beyond constructed settings.",
-            "current_state": "The checkpoint-transfer benchmark is a boundary result, the next condition-score protocol is pre-registered in discussion/e11_cifar100_resnet_condition_score_protocol.md, and the registered v2 score now has a locked retrospective ResNet18 checkpoint analysis in discussion/e11_cifar100_resnet_condition_score_next.md.",
-            "required_next_evidence": "Run the remaining registered protocol splits: fit the primary source-only calibrated residual condition score only on calibration splits, then evaluate it on a held-out architecture family and a held-out data split without target-checkpoint fitting.",
-            "acceptance_gate": "Report positive held-out residual Spearman with a CI lower endpoint above zero, threshold accuracy above 0.8, and an explicit comparison against the early-layer prior and source-observed positive control.",
+            "current_state": "The checkpoint-transfer benchmark is a boundary result, the condition-score protocol is pre-registered in discussion/e11_cifar100_resnet_condition_score_protocol.md, the locked ResNet18 retrospective v2 split passes in discussion/e11_cifar100_resnet_condition_score_next.md, and the registered held-out ResNet34/CIFAR-10-LT evaluation now fails the residual-ranking gates in discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md.",
+            "required_next_evidence": "Treat the frozen v2 held-out failure as an obstruction, not as a tuning target: derive or pre-register a new theory-linked score revision, then evaluate it on fresh held-out splits that were not used to diagnose this failure.",
+            "acceptance_gate": "For a future protocol revision, report positive held-out residual Spearman with a CI lower endpoint above zero on fresh architecture and data splits, threshold accuracy above 0.8, explicit early-layer and source-observed controls, and a statement that the failed v2 held-outs were not used for score fitting.",
             "compute_mode": "GPU via Slurm",
-            "planned_artifacts": "results/e11_cifar100_resnet_condition_score_protocol/*; results/e11_cifar100_resnet_condition_score_next/*; figures/e11_cifar100_resnet_condition_score_next/*; discussion/e11_cifar100_resnet_condition_score_next.md",
+            "planned_artifacts": "results/e11_cifar100_resnet_condition_score_protocol/*; results/e11_cifar100_resnet_condition_score_next/*; figures/e11_cifar100_resnet_condition_score_next/*; discussion/e11_cifar100_resnet_condition_score_next.md; discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md",
             "risk_if_missing": "The paper can still claim a local drift mechanism, but it cannot claim the current condition score is predictive on unseen real tasks.",
         },
         {
@@ -115,7 +115,7 @@ This generated register turns the current top-conference plan into concrete, che
 
 ## Minimum Viable Top-Tier Mechanism Paper
 
-The shortest credible route is to keep the paper as a mechanism paper and close `P0-PredictiveCondition`: improve the downstream-aware condition score, pre-register the held-out split protocol, and show positive residual prediction beyond the early-layer prior. `P0-StandardBenchmark` is only required if the paper wants a benchmark-level performance claim.
+The shortest credible route is to keep the paper as a mechanism paper. `P0-PredictiveCondition` is now a negative boundary rather than an open run: the frozen v2 score passed the retrospective checkpoint split but failed the registered held-out residual-ranking gates. A top-tier predictive-condition claim needs a new theory-linked score revision plus fresh held-out splits. `P0-StandardBenchmark` is only required if the paper wants a benchmark-level performance claim.
 
 ## Gap Counts
 

@@ -22,6 +22,10 @@ PROTOCOL_DIR = Path("results/e11_cifar100_resnet_condition_score_protocol")
 OUTPUT_DIR = Path("results/e11_cifar100_resnet_condition_score_next")
 FIGURE_DIR = Path("figures/e11_cifar100_resnet_condition_score_next")
 DISCUSSION_PATH = Path("discussion/e11_cifar100_resnet_condition_score_next.md")
+HELDOUT_EVAL_DIR = OUTPUT_DIR / "heldout_score_evaluation"
+HELDOUT_SCORE_SUMMARY = HELDOUT_EVAL_DIR / "heldout_score_summary.csv"
+HELDOUT_GATE_REPORT = HELDOUT_EVAL_DIR / "heldout_gate_report.csv"
+HELDOUT_DISCUSSION_PATH = Path("discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md")
 RIDGE_ALPHA = 1.0
 
 FEATURE_COLUMNS = {
@@ -330,26 +334,66 @@ def gate_report(summary: pd.DataFrame) -> pd.DataFrame:
                 f"early-layer prior Spearman={fmt(early['mean_spearman_score_vs_target_residual'])}"
             ),
         },
+    ]
+    rows.extend(heldout_protocol_rows())
+    return pd.DataFrame(rows)
+
+
+def _gate_status(gates: pd.DataFrame, gate_id: str) -> tuple[str, str]:
+    match = gates[gates["gate_id"].eq(gate_id)]
+    if match.empty:
+        return "not_run", f"{gate_id} is missing from the held-out gate report."
+    row = match.iloc[0]
+    return str(row["status"]), str(row["evidence"])
+
+
+def heldout_protocol_rows() -> list[dict[str, str]]:
+    if not HELDOUT_GATE_REPORT.exists():
+        return [
+            {
+                "gate_id": "primary_heldout_architecture",
+                "scope": "P0 protocol",
+                "status": "not_run",
+                "evidence": "ResNet34 held-out architecture split is registered but not generated.",
+            },
+            {
+                "gate_id": "primary_heldout_data",
+                "scope": "P0 protocol",
+                "status": "not_run",
+                "evidence": "CIFAR-10-LT held-out data split is registered but not generated.",
+            },
+            {
+                "gate_id": "p0_predictive_condition_claim",
+                "scope": "paper claim",
+                "status": "not_ready",
+                "evidence": "The retrospective checkpoint split is promising, but the registered architecture and data held-out splits are still missing.",
+            },
+        ]
+
+    gates = pd.read_csv(HELDOUT_GATE_REPORT)
+    arch_status, arch_evidence = _gate_status(gates, "primary_heldout_architecture_residual_spearman")
+    data_status, data_evidence = _gate_status(gates, "primary_heldout_data_residual_spearman")
+    p0_status, p0_evidence = _gate_status(gates, "p0_predictive_condition_heldout_claim")
+    return [
         {
             "gate_id": "primary_heldout_architecture",
             "scope": "P0 protocol",
-            "status": "not_run",
-            "evidence": "ResNet34 held-out architecture split is registered but not generated.",
+            "status": arch_status,
+            "evidence": f"held-out evaluation: {arch_evidence}",
         },
         {
             "gate_id": "primary_heldout_data",
             "scope": "P0 protocol",
-            "status": "not_run",
-            "evidence": "CIFAR-10-LT held-out data split is registered but not generated.",
+            "status": data_status,
+            "evidence": f"held-out evaluation: {data_evidence}",
         },
         {
             "gate_id": "p0_predictive_condition_claim",
             "scope": "paper claim",
-            "status": "not_ready",
-            "evidence": "The retrospective checkpoint split is promising, but the registered architecture and data held-out splits are still missing.",
+            "status": p0_status,
+            "evidence": f"{p0_evidence} See {HELDOUT_DISCUSSION_PATH.as_posix()}.",
         },
     ]
-    return pd.DataFrame(rows)
 
 
 def write_figure(summary: pd.DataFrame, figure_dir: Path) -> Path:
@@ -415,6 +459,44 @@ def write_discussion(
     primary = by_score.loc["condition_score_v2_calibrated_residual"]
     early = by_score.loc["early_layer_prior"]
     legacy = by_score.loc["legacy_scaled_jvp_ratio"]
+    heldout_text = ""
+    boundary_text = (
+        "This is not yet the P0 predictive-condition result. It is a locked ResNet18 "
+        "checkpoint-split analysis showing that the registered v2 score is worth running "
+        "on the protocol's held-out architecture and held-out data splits. The paper must "
+        "still call the P0 condition-score claim incomplete until those GPU/Slurm splits "
+        "exist and pass the registered gates."
+    )
+    if HELDOUT_SCORE_SUMMARY.exists() and HELDOUT_GATE_REPORT.exists():
+        heldout_summary = pd.read_csv(HELDOUT_SCORE_SUMMARY)
+        heldout_gates = pd.read_csv(HELDOUT_GATE_REPORT)
+        heldout_by_key = heldout_summary.set_index(["split_role", "score"])
+        arch_primary = heldout_by_key.loc[
+            ("primary_heldout_architecture", "condition_score_v2_calibrated_residual")
+        ]
+        data_primary = heldout_by_key.loc[
+            ("primary_heldout_data", "condition_score_v2_calibrated_residual")
+        ]
+        data_legacy = heldout_by_key.loc[
+            ("primary_heldout_data", "legacy_scaled_jvp_ratio")
+        ]
+        heldout_text = f"""
+## Held-Out Evaluation
+
+The registered held-out condition-score evaluation now fails the P0 residual-ranking gates. ResNet34 held-out architecture primary residual Spearman is {fmt(arch_primary['mean_spearman_score_vs_target_residual'])} [{fmt(arch_primary['spearman_ci95_low'])}, {fmt(arch_primary['spearman_ci95_high'])}], and CIFAR-10-LT held-out data primary residual Spearman is {fmt(data_primary['mean_spearman_score_vs_target_residual'])} [{fmt(data_primary['spearman_ci95_low'])}, {fmt(data_primary['spearman_ci95_high'])}]. The below-one threshold direction still passes ({fmt(arch_primary['mean_threshold_below_one_accuracy'])} and {fmt(data_primary['mean_threshold_below_one_accuracy'])}), while the CIFAR-10-LT legacy scaled-JVP ratio has residual Spearman {fmt(data_legacy['mean_spearman_score_vs_target_residual'])} [{fmt(data_legacy['spearman_ci95_low'])}, {fmt(data_legacy['spearman_ci95_high'])}].
+
+{markdown_table(heldout_gates, ["gate_id", "scope", "status", "evidence"])}
+
+Full held-out report: [{HELDOUT_DISCUSSION_PATH.name}](../{HELDOUT_DISCUSSION_PATH.as_posix()}).
+"""
+        boundary_text = (
+            "This is not the P0 predictive-condition result. The retrospective "
+            "checkpoint split passes, but the registered no-tuning held-out evaluation "
+            "fails the residual-ranking gates on both the ResNet34 architecture split "
+            "and the CIFAR-10-LT data split. The score still preserves the below-one "
+            "threshold direction, so the current evidence supports a narrower "
+            "directional guardrail rather than a held-out layer-risk ranking claim."
+        )
     text = f"""# E11 CIFAR-100-LT ResNet Condition-Score v2 Retrospective Analysis
 
 This generated analysis is the first executable step after the registered condition-score protocol. It uses the existing ResNet18 checkpoint-transfer `layer_summary.csv` as a locked retrospective split: each source checkpoint fits the calibrated residual score, then the frozen score predicts residual observed layer risk on the other checkpoints.
@@ -434,10 +516,11 @@ This generated analysis is the first executable step after the registered condit
 - Primary `condition_score_v2_calibrated_residual` residual Spearman is {fmt(primary['mean_spearman_score_vs_target_residual'])} [{fmt(primary['spearman_ci95_low'])}, {fmt(primary['spearman_ci95_high'])}] on the retrospective checkpoint split.
 - The early-layer prior residual Spearman is {fmt(early['mean_spearman_score_vs_target_residual'])} [{fmt(early['spearman_ci95_low'])}, {fmt(early['spearman_ci95_high'])}].
 - The legacy scaled-JVP residual score remains negative at {fmt(legacy['mean_spearman_score_vs_target_residual'])} [{fmt(legacy['spearman_ci95_low'])}, {fmt(legacy['spearman_ci95_high'])}].
+{heldout_text}
 
 ## Boundary
 
-This is not yet the P0 predictive-condition result. It is a locked ResNet18 checkpoint-split analysis showing that the registered v2 score is worth running on the protocol's held-out architecture and held-out data splits. The paper must still call the P0 condition-score claim incomplete until those GPU/Slurm splits exist and pass the registered gates.
+{boundary_text}
 
 Artifacts:
 - [score_pairs.csv](../{(OUTPUT_DIR / 'score_pairs.csv').as_posix()})
@@ -445,6 +528,8 @@ Artifacts:
 - [calibration_coefficients.csv](../{(OUTPUT_DIR / 'calibration_coefficients.csv').as_posix()})
 - [gate_report.csv](../{(OUTPUT_DIR / 'gate_report.csv').as_posix()})
 - [config.json](../{(OUTPUT_DIR / 'config.json').as_posix()})
+- [heldout_score_evaluation/heldout_score_summary.csv](../{HELDOUT_SCORE_SUMMARY.as_posix()})
+- [heldout_score_evaluation/heldout_gate_report.csv](../{HELDOUT_GATE_REPORT.as_posix()})
 """
     write_markdown(discussion_path, text)
 
@@ -473,7 +558,7 @@ def main() -> None:
                 "score_registry_rows": int(len(score_registry)),
                 "split_registry_rows": int(len(split_registry)),
                 "acceptance_gate_rows": int(len(acceptance_gates)),
-                "analysis_scope": "locked retrospective ResNet18 checkpoint split; held-out architecture/data not generated",
+                "analysis_scope": "locked retrospective ResNet18 checkpoint split; registered held-out architecture/data evaluation available separately when heldout_score_evaluation exists",
             },
             indent=2,
         )
