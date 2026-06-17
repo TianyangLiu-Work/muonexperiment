@@ -1282,6 +1282,12 @@ def main() -> None:
         Path("results/e11_top_conference_claim_decision_audit") / "config.json",
         Path("discussion/e11_top_conference_claim_decision_audit.md"),
         Path("scripts/e11_write_top_conference_claim_decision_audit.py"),
+        Path("discussion/e11_mechanism_referee_audit.md"),
+        Path("results/e11_mechanism_referee_audit") / "alternative_explanation_matrix.csv",
+        Path("results/e11_mechanism_referee_audit") / "theory_measurement_contract.csv",
+        Path("results/e11_mechanism_referee_audit") / "falsification_trigger_matrix.csv",
+        Path("results/e11_mechanism_referee_audit") / "config.json",
+        Path("scripts/e11_write_mechanism_referee_audit.py"),
         Path("scripts/e11_write_condition_score_ablation.py"),
         Path("discussion/e11_condition_score_ablation.md"),
         Path("results/e11_condition_score_ablation") / "score_ablation_summary.csv",
@@ -1357,6 +1363,8 @@ def main() -> None:
         "scripts/e11_write_artifact_review_packet.py",
         "e11-top-conference-claim-decision-audit:",
         "scripts/e11_write_top_conference_claim_decision_audit.py",
+        "e11-mechanism-referee-audit:",
+        "scripts/e11_write_mechanism_referee_audit.py",
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
         "e11-cifar-resnet-lt-tuned-benchmark-protocol:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py",
@@ -1634,6 +1642,7 @@ def main() -> None:
         "make e11-all-results",
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
         "make e11-top-conference-claim-decision-audit",
+        "make e11-mechanism-referee-audit # regenerate the adversarial mechanism/referee alternative-explanation audit",
         "make e11-condition-score-ablation",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
         "make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes",
@@ -1653,6 +1662,11 @@ def main() -> None:
         "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
         "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
         "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv",
+        "discussion/e11_mechanism_referee_audit.md",
+        "results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv",
+        "results/e11_mechanism_referee_audit/theory_measurement_contract.csv",
+        "results/e11_mechanism_referee_audit/falsification_trigger_matrix.csv",
+        "scripts/e11_write_mechanism_referee_audit.py",
         "discussion/e11_condition_score_ablation.md",
         "results/e11_condition_score_ablation/score_ablation_summary.csv",
         "results/e11_condition_score_ablation/term_failure_ladder.csv",
@@ -6234,6 +6248,7 @@ def main() -> None:
         "make e11-all-assets",
         "make e11-paper-pdf",
         "make e11-artifact-review-packet",
+        "make e11-mechanism-referee-audit",
         "legacy condition-geometry guardrail notes",
         "current paper assets plus legacy guardrail notes",
         "Current Head-to-Tail Paper Evidence",
@@ -6262,6 +6277,8 @@ def main() -> None:
         "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract",
         "discussion/e11_artifact_review_packet.md",
         "Artifact-review command, gate, local-state, and reviewer-response packet",
+        "discussion/e11_mechanism_referee_audit.md",
+        "Adversarial alternative-explanation, theory-measurement, and falsification-trigger audit",
         "make e11-top-conference-claim-decision-audit",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
@@ -6920,6 +6937,10 @@ def main() -> None:
         "transport-stable sandwich residual proposition",
         "theorem terms to measurable score features",
         "direction guardrail, raw amplitude, early-depth nuisance, and transport-normalized validation",
+        "discussion/e11_mechanism_referee_audit.md",
+        "adversarial alternative-explanation matrix",
+        "theory-to-measurement contract",
+        "falsification-trigger matrix",
         "validation-freeze boundary",
         "validation-only mod-4 CIFAR-100-LT split",
         "condition_score_v5_transport_normalized_amplitude_minus_direction",
@@ -7050,6 +7071,7 @@ def main() -> None:
         or "make e11-natural-negative-search-phase1-eval" not in readme
         or "make e11-natural-negative-search-phase1-interim-synthesis" not in readme
         or "make e11-top-conference-claim-decision-audit" not in readme
+        or "make e11-mechanism-referee-audit" not in readme
         or "make e11-submission-repro-audit" not in readme
         or "make e11-artifact-review-packet" not in readme
         or "make e11-guardrail-assets" not in readme
@@ -7064,6 +7086,7 @@ def main() -> None:
         "discussion/e11_reference_audit.md",
         "discussion/e11_submission_repro_audit.md",
         "discussion/e11_artifact_review_packet.md",
+        "discussion/e11_mechanism_referee_audit.md",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:
@@ -7204,6 +7227,93 @@ def main() -> None:
     )
     if artifact_config.get("strongest_local_gate") != "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full":
         raise AssertionError("artifact review config must record the strongest local gate")
+    mechanism_referee_dir = Path("results/e11_mechanism_referee_audit")
+    alternative_matrix = pd.read_csv(mechanism_referee_dir / "alternative_explanation_matrix.csv")
+    theory_contract = pd.read_csv(mechanism_referee_dir / "theory_measurement_contract.csv")
+    falsification_triggers = pd.read_csv(mechanism_referee_dir / "falsification_trigger_matrix.csv")
+    mechanism_config = json.loads((mechanism_referee_dir / "config.json").read_text(encoding="utf-8"))
+    expected_alternative_ids = {
+        "MEA-1-head-gain-mismatch",
+        "MEA-2-tail-unit-sensitivity",
+        "MEA-3-weak-tail-checkpoint",
+        "MEA-4-synthetic-only",
+        "MEA-5-rank-only-predictor",
+        "MEA-6-post-hoc-score-tuning",
+        "MEA-7-anecdotal-natural-negative",
+        "MEA-8-performance-proxy",
+    }
+    if set(alternative_matrix["audit_id"]) != expected_alternative_ids:
+        raise AssertionError("mechanism referee audit must preserve the fixed alternative-explanation set")
+    alternative_text = " ".join(alternative_matrix.astype(str).agg(" ".join, axis=1).tolist())
+    for phrase in [
+        "addressed_for_local_claim",
+        "rejected_as_primary_explanation",
+        "blocked_until_complete",
+        "not_claimed",
+        "the validator enforces matched-update/head-gain consistency",
+        "unit-JVP ratios",
+        "tail-rich control",
+        "v5 transport-normalized score is frozen",
+        "local drift improvements imply final long-tail optimizer superiority",
+    ]:
+        if phrase not in alternative_text:
+            raise AssertionError(f"mechanism referee alternative matrix missing phrase: {phrase}")
+    expected_contract_ids = {
+        "TMC-1-local-linearization",
+        "TMC-2-matched-head-gain",
+        "TMC-3-sandwich-rank-boundary",
+        "TMC-4-transport-normalized-score",
+        "TMC-5-term-ablation-lineage",
+    }
+    if set(theory_contract["contract_id"]) != expected_contract_ids:
+        raise AssertionError("mechanism referee audit must preserve the fixed theory-measurement contract set")
+    contract_text = " ".join(theory_contract.astype(str).agg(" ".join, axis=1).tolist())
+    for phrase in [
+        "first-order tail-logit response",
+        "head-gain-normalized comparison",
+        "nrank(G_H)>ssrank(B_T,A_T)",
+        "source-standardized transport residual",
+        "global trajectory or convergence theorem",
+    ]:
+        if phrase not in contract_text:
+            raise AssertionError(f"mechanism referee theory contract missing phrase: {phrase}")
+    expected_trigger_ids = {
+        "FT-1-v5-final-fails",
+        "FT-2-natural-family-incomplete",
+        "FT-3-unit-jvp-misread",
+        "FT-4-performance-overread",
+        "FT-5-clean-checkout-gap",
+    }
+    if set(falsification_triggers["trigger_id"]) != expected_trigger_ids:
+        raise AssertionError("mechanism referee audit must preserve the fixed falsification-trigger set")
+    trigger_text = " ".join(falsification_triggers.astype(str).agg(" ".join, axis=1).tolist())
+    for phrase in [
+        "Downgrade predictive-condition wording",
+        "Block natural-counterexample and finite-null wording",
+        "matched-head-gain local mechanism only",
+        "mechanism diagnostic, not benchmark claim",
+        "toolchain caveat",
+    ]:
+        if phrase not in trigger_text:
+            raise AssertionError(f"mechanism referee falsification matrix missing phrase: {phrase}")
+    mechanism_referee_text = Path("discussion/e11_mechanism_referee_audit.md").read_text(encoding="utf-8")
+    assert_required_phrases(
+        "mechanism referee audit",
+        mechanism_referee_text,
+        [
+            "E11 Mechanism Referee Audit",
+            "Alternative Explanation Matrix",
+            "Theory-To-Measurement Contract",
+            "Falsification Trigger Matrix",
+            "local matched-head-gain mechanism paper",
+            "Blocked now: broad optimizer-performance claims",
+            "alternative_explanation_matrix.csv",
+            "theory_measurement_contract.csv",
+            "falsification_trigger_matrix.csv",
+        ],
+    )
+    if mechanism_config.get("alternative_explanations") != 8:
+        raise AssertionError("mechanism referee config must record eight alternative explanations")
     assert_no_unguarded_overclaims(
         [
             Path("README_E11.md"),
@@ -7219,6 +7329,7 @@ def main() -> None:
             Path("discussion/e11_condition_score_fresh_protocol.md"),
             Path("discussion/e11_condition_score_fresh_evaluation.md"),
             Path("discussion/e11_top_conference_gap_register.md"),
+            Path("discussion/e11_mechanism_referee_audit.md"),
             Path("discussion/e11_natural_head_tail_boundary.md"),
             Path("discussion/e11_natural_negative_search_protocol.md"),
             Path("discussion/e11_paper_skeleton.md"),

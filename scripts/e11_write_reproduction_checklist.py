@@ -115,6 +115,10 @@ def main() -> None:
                 "artifact": "discussion/e11_artifact_review_packet.md",
                 "role": "Artifact-review command, gate, local-state, and reviewer-response packet for reproducing the current bundle without expanding claims.",
             },
+            {
+                "artifact": "discussion/e11_mechanism_referee_audit.md",
+                "role": "Adversarial alternative-explanation, theory-measurement, and falsification-trigger audit for top-conference reviewer scrutiny.",
+            },
         ]
     )
 
@@ -157,6 +161,7 @@ make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets
 make e11-top-conference-claim-decision-audit # regenerate the supportable/blocked paper claim and rebuttal-readiness contract
+make e11-mechanism-referee-audit # regenerate the adversarial mechanism/referee alternative-explanation audit
 make e11-guardrail-assets  # legacy condition-geometry guardrail notes
 make e11-all-assets        # current paper assets plus legacy guardrail notes
 make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf

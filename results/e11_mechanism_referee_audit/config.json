@@ -1,0 +1,7 @@
+{
+  "purpose": "adversarial referee audit for the E11 mechanism paper",
+  "alternative_explanations": 8,
+  "theory_measurement_contracts": 5,
+  "falsification_triggers": 5,
+  "claim_boundary": "local matched-head-gain mechanism; no final-performance, natural finite-null, or v5 predictive-condition upgrade"
+}
