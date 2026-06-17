@@ -21,8 +21,8 @@ gate remains `not_ready` when those tools are absent on the server.
 
 | path                                         | exists   |   size_bytes | sha256                                                           | header_is_pdf   | audit_status   |
 |:---------------------------------------------|:---------|-------------:|:-----------------------------------------------------------------|:----------------|:---------------|
-| paper/specgrad_activation_paper/main.pdf     | yes      |      2593824 | 02af79bc681f451511c82654d18abf0f97325d95bc082016d67ddb607dab1f8f | yes             | pass           |
-| paper/specgrad_activation_paper/two_page.pdf | yes      |        62048 | 95bb6bd71c27a740e8b4338ccf753cae90f36adcff7e7fe429529877c061d201 | yes             | pass           |
+| paper/specgrad_activation_paper/main.pdf     | yes      |      2593824 | 36b1254227c272515c3a6f08651cc115f4c6a24e171fdfbfce4f496ab12aeb89 | yes             | pass           |
+| paper/specgrad_activation_paper/two_page.pdf | yes      |        62048 | 48510126bca02a76f2e3ccd175259910db4dc99d77abb480f26cf0df5034a93c | yes             | pass           |
 
 ## Source Package Manifest
 
@@ -36,8 +36,8 @@ gate remains `not_ready` when those tools are absent on the server.
 | paper/specgrad_activation_paper/tables/e11_paper_numbers.tex           | yes      |        55974 | 70b0130ae2d7fb538f3316745d01387f714464b53e1597ec6286032aa488f227 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex | yes      |         4934 | 1264d8923f3cfff52ae9af90f44b10bd29710c949ed93fc3d2eda5dff7b30471 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/local_linearization_errors.tex  | yes      |          961 | 12c108dd5bfdfd2d1ad219904a4f82f1d10e01ab6d6de4cd86a9252cb298a5ef | paper source or root reproduction entrypoint | pass           |
-| Makefile                                                               | yes      |        12541 | 85a79b8e7c8123ec01b62dca9f471c6e81d0466158d18f2cd10fd9ad9c5b9ac7 | paper source or root reproduction entrypoint | pass           |
-| README_E11.md                                                          | yes      |        61629 | 3f08e3642169507f24471a2ff5913ebd0a6ba720b9552e5cbaad54608547b2d0 | paper source or root reproduction entrypoint | pass           |
+| Makefile                                                               | yes      |        12736 | f0257da86598a72c5210f20942693475429bebc8a84bb843d83224daabbe2ef3 | paper source or root reproduction entrypoint | pass           |
+| README_E11.md                                                          | yes      |        63089 | 312634e8352da6138ea9fcc9ec79aee1c14e0b0c3588d532ee642ee30393ff3c | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/figures                                | yes      |      2923280 | 21 png files                                                     | paper-local figure bundle                    | pass           |
 
 ## Build Gate Summary
@@ -49,7 +49,7 @@ gate remains `not_ready` when those tools are absent on the server.
 | R3-preferred-latex-toolchain   | not_ready | pdflatex/bibtex/xelatex not all available                                                        | run a clean checkout with pdflatex/bibtex/xelatex before claiming full venue-toolchain reproducibility |
 | R4-tectonic-fallback-toolchain | pass      | tectonic available                                                                               | use make e11-paper-pdf or paper/specgrad_activation_paper make tectonic on this server                 |
 | R5-rendered-pdfs               | pass      | main.pdf and two_page.pdf have PDF headers and expected sizes                                    | rebuild paper PDFs if either rendered artifact fails                                                   |
-| R6-full-artifact-validation    | pass      | make e11-full passed in this Codex run after Tectonic PDF rebuild and 69 pytest checks           | record the make e11-full result in the commit/push summary                                             |
+| R6-full-artifact-validation    | pass      | run make e11-full after regenerating this audit                                                  | record the make e11-full result in the commit/push summary                                             |
 
 ## Boundary
 

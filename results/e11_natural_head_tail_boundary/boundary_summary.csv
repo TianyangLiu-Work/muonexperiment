@@ -1,0 +1,5 @@
+summary_id,row_count,source_count,metric_count,min_estimate,max_estimate,max_ci95_high,min_ci95_low,spectral_better_count,spectral_worse_count,mixed_or_uncertain_count,missing_ci_count,claim_status
+primary_tail_output_drift,37,11,1,0.1524948656113609,0.7761051364134519,0.9359561196591354,0.1377819431947636,37,0,0,0,no_strict_natural_primary_counterexample_in_committed_scan
+all_ratio_metrics,169,11,5,0.1524448568735869,7.276138788316541,14.454166867296143,0.1377413176828084,148,17,4,0,ratio_metric_boundary_candidates_found
+component_ratio_metrics,132,10,4,0.1524448568735869,7.276138788316541,14.454166867296143,0.1377413176828084,111,17,4,0,component_boundary_candidates_found
+secondary_tail_outcomes,111,11,3,-0.0033427855186749,0.0080724717894796,0.0137953949047658,-0.0050754219411462,20,41,50,0,secondary_outcome_tradeoffs_found

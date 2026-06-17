@@ -880,6 +880,13 @@ def main() -> None:
         Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "config.json",
         Path("discussion/e11_condition_score_v5_validation_freeze.md"),
         Path("scripts/e11_freeze_condition_score_v5_validation.py"),
+        Path("results/e11_natural_head_tail_boundary") / "search_registry.csv",
+        Path("results/e11_natural_head_tail_boundary") / "primary_drift_scan.csv",
+        Path("results/e11_natural_head_tail_boundary") / "secondary_outcome_scan.csv",
+        Path("results/e11_natural_head_tail_boundary") / "boundary_summary.csv",
+        Path("results/e11_natural_head_tail_boundary") / "candidate_negative_cases.csv",
+        Path("discussion/e11_natural_head_tail_boundary.md"),
+        Path("scripts/e11_write_natural_head_tail_boundary_audit.py"),
         Path("discussion/e11_condition_score_v4_protocol.md"),
         Path("discussion/e11_condition_score_v4_validation_cifar100_rotated.md"),
         Path("discussion/e11_condition_score_v4_validation_freeze.md"),
@@ -1026,6 +1033,7 @@ def main() -> None:
         Path("results/e11_submission_repro_audit") / "source_package_manifest.csv",
         Path("results/e11_submission_repro_audit") / "build_gate_summary.csv",
         Path("scripts/e11_write_submission_repro_audit.py"),
+        Path("scripts/e11_write_natural_head_tail_boundary_audit.py"),
         Path("Makefile"),
         Path("README_E11.md"),
         config.discussion_path,
@@ -1040,6 +1048,8 @@ def main() -> None:
         "$(MAKE) -C paper/specgrad_activation_paper",
         "e11-paper-assets:",
         "scripts/e11_write_all_discussion_artifacts.py",
+        "e11-natural-head-tail-boundary-audit:",
+        "scripts/e11_write_natural_head_tail_boundary_audit.py",
         "e11-submission-repro-audit:",
         "scripts/e11_write_submission_repro_audit.py",
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
@@ -1167,6 +1177,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
+        "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
         "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
         "A CIFAR-100-LT ResNet18 imbalance sweep over tail_train_per_class 10/30/100/300 keeps spectral/Frobenius squared drift ratio below 1 in every setting",
@@ -1238,6 +1249,11 @@ def main() -> None:
         "theorem-to-measurement bridge",
         "results/e11_condition_score_v5_protocol/validation_score_freeze/*",
         "transport-normalized residual score",
+        "discussion/e11_natural_head_tail_boundary.md",
+        "results/e11_natural_head_tail_boundary/*",
+        "scripts/e11_write_natural_head_tail_boundary_audit.py",
+        "no_strict_natural_primary_counterexample_in_committed_scan",
+        "37 primary full tail-output drift rows",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
         "candidate condition-score audit",
@@ -1254,6 +1270,7 @@ def main() -> None:
         "`diagnostic_A_definition == full_layer_input_activation`",
         *MAIN_RESULT_SCRIPTS,
         *APPENDIX_RUNNER_SCRIPTS,
+        "scripts/e11_write_natural_head_tail_boundary_audit.py",
         "scripts/e11_write_submission_repro_audit.py",
     ]
     missing_readme_phrases = [phrase for phrase in required_readme_phrases if phrase not in readme_text]
@@ -3701,6 +3718,74 @@ def main() -> None:
             "Blocked now: the v5 final architecture and data splits cannot support a P0",
         ],
     )
+    natural_boundary_dir = Path("results/e11_natural_head_tail_boundary")
+    natural_registry = pd.read_csv(natural_boundary_dir / "search_registry.csv")
+    natural_primary = pd.read_csv(natural_boundary_dir / "primary_drift_scan.csv")
+    natural_secondary = pd.read_csv(natural_boundary_dir / "secondary_outcome_scan.csv")
+    natural_summary = pd.read_csv(natural_boundary_dir / "boundary_summary.csv")
+    natural_candidates = pd.read_csv(natural_boundary_dir / "candidate_negative_cases.csv")
+    expected_natural_sources = {
+        "digits_one_step",
+        "digits_imbalance_ablation",
+        "digits_checkpoint_sweep",
+        "digits_class_partition_sweep",
+        "digits_rho_sweep",
+        "cifar100_resnet_one_step_rho005",
+        "cifar100_resnet_one_step_rho002",
+        "cifar100_resnet_checkpoint_sweep",
+        "cifar100_resnet_tail_quality_control",
+        "cifar100_resnet_imbalance_sweep",
+        "cifar100_resnet_fc_condition_scatter",
+    }
+    expected_natural_summary_ids = {
+        "primary_tail_output_drift",
+        "all_ratio_metrics",
+        "component_ratio_metrics",
+        "secondary_tail_outcomes",
+    }
+    natural_primary_tail = natural_primary[natural_primary["metric_id"].eq("tail_output_drift")]
+    natural_component_candidates = natural_candidates[
+        natural_candidates["claim_boundary"].eq("component_metric_boundary")
+    ]
+    natural_outcome_candidates = natural_candidates[
+        natural_candidates["claim_boundary"].eq("secondary_outcome_tradeoff")
+    ]
+    natural_summary_lookup = natural_summary.set_index("summary_id")
+    if not (
+        set(natural_registry["source_id"]) == expected_natural_sources
+        and natural_registry["status"].eq("included").all()
+        and natural_registry["primary_tail_drift_present"].eq("yes").all()
+        and set(natural_summary["summary_id"]) == expected_natural_summary_ids
+        and len(natural_primary_tail) == 37
+        and natural_primary_tail["source_id"].nunique() == 11
+        and natural_primary_tail["boundary_status"].eq("spectral_better").all()
+        and natural_primary_tail["ci95_high"].lt(1.0).all()
+        and natural_summary_lookup.loc[
+            "primary_tail_output_drift", "claim_status"
+        ]
+        == "no_strict_natural_primary_counterexample_in_committed_scan"
+        and int(natural_summary_lookup.loc["primary_tail_output_drift", "spectral_worse_count"]) == 0
+        and not natural_component_candidates.empty
+        and not natural_outcome_candidates.empty
+        and "strict_primary_tail_drift" not in set(natural_candidates["claim_boundary"])
+    ):
+        raise AssertionError(
+            "natural head-to-tail boundary audit must preserve the committed null primary-drift scan while recording component/outcome boundary candidates"
+        )
+    natural_boundary_text = Path("discussion/e11_natural_head_tail_boundary.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "natural head-to-tail boundary audit",
+        natural_boundary_text,
+        [
+            "E11 Natural Head-to-Tail Boundary Audit",
+            "Primary natural counterexample",
+            "no_strict_natural_primary_counterexample_in_committed_scan",
+            "Component and outcome tradeoffs constrain stronger loss, margin",
+            "pre-registered natural negative-search experiment",
+        ],
+    )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -5314,6 +5399,9 @@ def main() -> None:
         "ResNeXt50-32x4d",
         "CIFAR-10 mixed final data split fails",
         "data-partition reversal mechanism",
+        "discussion/e11_natural_head_tail_boundary.md",
+        "no strict natural primary full tail-output drift counterexample",
+        "component true-logit and secondary loss/margin/accuracy tradeoff candidates",
         "held-out architecture",
         "benchmark-level performance claim",
         "discussion/e11_submission_repro_audit.md",
@@ -5353,6 +5441,7 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-v5-data-results" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
+        or "make e11-natural-head-tail-boundary-audit" not in readme
         or "make e11-submission-repro-audit" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
@@ -5445,6 +5534,7 @@ def main() -> None:
             Path("discussion/e11_condition_score_fresh_protocol.md"),
             Path("discussion/e11_condition_score_fresh_evaluation.md"),
             Path("discussion/e11_top_conference_gap_register.md"),
+            Path("discussion/e11_natural_head_tail_boundary.md"),
             Path("discussion/e11_paper_skeleton.md"),
             Path("discussion/e11_main_paper_package.md"),
             Path("discussion/e11_main_figure_captions.md"),
