@@ -1,0 +1,19 @@
+{
+  "purpose": "top-conference manuscript claim decision contract",
+  "source_files": {
+    "proof_obligations": "results/e11_theory_proof_obligation_register/proof_obligations.csv",
+    "claim_scope_boundaries": "results/e11_theory_proof_obligation_register/claim_scope_boundaries.csv",
+    "v5_final_gates": "results/e11_condition_score_v5_protocol/final_score_evaluation/final_gate_report.csv",
+    "natural_interim_claims": "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/claim_boundary.csv",
+    "natural_interim_summary": "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/observed_primary_summary.csv",
+    "tuned_benchmark_gates": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv",
+    "submission_build_gates": "results/e11_submission_repro_audit/build_gate_summary.csv"
+  },
+  "new_empirical_results": false,
+  "supportable_prefix": "supportable",
+  "blocked_decisions": [
+    "registered_not_ready_wait_for_v5_finals",
+    "blocked_partial_family",
+    "blocked_protocol_pending"
+  ]
+}

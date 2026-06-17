@@ -193,6 +193,7 @@ make e11-natural-negative-search-phase1-interim-synthesis # summarize partial ph
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
+make e11-top-conference-claim-decision-audit # generate the paper-level supportable/blocked claim contract
 make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes
 make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes
 make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf
@@ -546,6 +547,7 @@ Paper-facing synthesis:
 - `discussion/e11_paper_readiness_audit.md`
 - `discussion/e11_top_conference_plan.md`
 - `discussion/e11_top_conference_gap_register.md`
+- `discussion/e11_top_conference_claim_decision_audit.md`
 - `discussion/e11_natural_head_tail_boundary.md`
 - `discussion/e11_reviewer_risk_audit.md`
 - `discussion/e11_pasted_review_audit.md`
@@ -777,6 +779,10 @@ Primary paper quantitative tables:
 - `results/e11_natural_negative_search_protocol/phase1_interim_synthesis/claim_boundary.csv`
 - `results/e11_natural_negative_search_protocol/phase1_interim_synthesis/remaining_work.csv`
 - `results/e11_top_conference_gap_register/gap_register.csv`
+- `results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv`
+- `results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv`
+- `results/e11_top_conference_claim_decision_audit/paper_sequence.csv`
+- `results/e11_top_conference_claim_decision_audit/readiness_summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
 - `results/e11_cifar100_resnet_lt_recipe_benchmark/summary.csv`
@@ -945,6 +951,7 @@ Do not claim:
 - `scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py`: executable tuned-benchmark validation-grid registry and per-setting runner for the registered CIFAR-100-LT ResNet18 tuned benchmark.
 - `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py`: paper-asset-safe wrapper that regenerates the tuned validation-grid registry without launching GPU training.
 - `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py`: validation-only selection audit that chooses final recipes after completed validation summaries and keeps final seeds quarantined.
+- `scripts/e11_write_top_conference_claim_decision_audit.py`: paper-level claim decision contract that separates supportable theorem/diagnostic wording from registered-not-ready and blocked predictive, natural-negative, benchmark, and toolchain claims.
 - `scripts/e11_run_cifar100_resnet_practical_muon_bridge.py`: ResNet practical Muon/AdamW trajectory-state bridge from the tail-rich checkpoint.
 - `scripts/slurm/e11_cifar100_resnet_one_step.sbatch`: GPU/Slurm submission wrapper for the ResNet18 diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch`: GPU/Slurm submission wrapper for the smaller-head-gain ResNet18 check.
@@ -975,7 +982,7 @@ Do not claim:
 
 The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
 
-The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, theory proof-obligation register in `discussion/e11_theory_proof_obligation_register.md`, v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`, v5 theory-to-score map in `discussion/e11_condition_score_v5_theory_to_score_map.md`, v5 validation-freeze boundary in `discussion/e11_condition_score_v5_validation_freeze.md`, v5 final evaluator in `discussion/e11_condition_score_v5_final_evaluation.md`, v5 final interpretation lock in `discussion/e11_condition_score_v5_final_interpretation_plan.md`, v5 reviewer failure response in `discussion/e11_condition_score_v5_reviewer_failure_response.md`, tuned benchmark protocol in `discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md`, tuned benchmark selection audit in `discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md`, natural boundary audit in `discussion/e11_natural_head_tail_boundary.md`, fresh natural negative-search protocol in `discussion/e11_natural_negative_search_protocol.md`, and submission reproducibility audit in `discussion/e11_submission_repro_audit.md`.
+The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The paper-level claim contract is `discussion/e11_top_conference_claim_decision_audit.md`, backed by `results/e11_top_conference_claim_decision_audit/*`; it marks theorem and diagnostic wording as supportable, v5 predictive-condition wording as registered-not-ready, and natural-negative, benchmark-performance, and preferred-LaTeX claims as blocked or caveated until their named gates pass. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, theory proof-obligation register in `discussion/e11_theory_proof_obligation_register.md`, v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`, v5 theory-to-score map in `discussion/e11_condition_score_v5_theory_to_score_map.md`, v5 validation-freeze boundary in `discussion/e11_condition_score_v5_validation_freeze.md`, v5 final evaluator in `discussion/e11_condition_score_v5_final_evaluation.md`, v5 final interpretation lock in `discussion/e11_condition_score_v5_final_interpretation_plan.md`, v5 reviewer failure response in `discussion/e11_condition_score_v5_reviewer_failure_response.md`, tuned benchmark protocol in `discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md`, tuned benchmark selection audit in `discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md`, natural boundary audit in `discussion/e11_natural_head_tail_boundary.md`, fresh natural negative-search protocol in `discussion/e11_natural_negative_search_protocol.md`, and submission reproducibility audit in `discussion/e11_submission_repro_audit.md`.
 
 Most important next steps:
 

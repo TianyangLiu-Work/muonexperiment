@@ -413,6 +413,96 @@ def assert_top_conference_gap_register(frame: pd.DataFrame) -> None:
         )
 
 
+def assert_top_conference_claim_decision_audit(
+    claim_matrix: pd.DataFrame,
+    reviewer_objections: pd.DataFrame,
+    paper_sequence: pd.DataFrame,
+    readiness_summary: pd.DataFrame,
+) -> None:
+    required_claim_columns = {
+        "claim_id",
+        "paper_section",
+        "current_decision",
+        "evidence_status",
+        "author_allowed_wording",
+        "author_blocked_wording",
+        "decisive_gate",
+        "required_next_action",
+        "source_artifacts",
+    }
+    missing_claim_columns = required_claim_columns - set(claim_matrix.columns)
+    if missing_claim_columns:
+        raise AssertionError(f"top-conference claim decision matrix missing columns: {missing_claim_columns}")
+    expected_claim_ids = {
+        "TCD-1-main-mechanism-theorem",
+        "TCD-2-natural-drift-diagnostic",
+        "TCD-3-predictive-condition-generalization",
+        "TCD-4-natural-counterexample-or-finite-null",
+        "TCD-5-optimizer-performance-benchmark",
+        "TCD-6-artifact-reproducibility",
+    }
+    if set(claim_matrix["claim_id"]) != expected_claim_ids:
+        raise AssertionError(
+            "top-conference claim decision matrix claim ids changed: "
+            f"{sorted(set(claim_matrix['claim_id']))}"
+        )
+    decision_lookup = claim_matrix.set_index("claim_id")["current_decision"].to_dict()
+    expected_decisions = {
+        "TCD-1-main-mechanism-theorem": "supportable_main_with_assumptions",
+        "TCD-2-natural-drift-diagnostic": "supportable_diagnostic_only",
+        "TCD-3-predictive-condition-generalization": "registered_not_ready_wait_for_v5_finals",
+        "TCD-4-natural-counterexample-or-finite-null": "blocked_partial_family",
+        "TCD-5-optimizer-performance-benchmark": "blocked_protocol_pending",
+        "TCD-6-artifact-reproducibility": "supportable_with_toolchain_caveat",
+    }
+    if decision_lookup != expected_decisions:
+        raise AssertionError(f"top-conference claim decisions drifted: {decision_lookup}")
+    joined_blocked = " ".join(claim_matrix["author_blocked_wording"].astype(str))
+    for phrase in [
+        "global convergence or optimizer superiority",
+        "the v5 score predicts unseen real-task residual risk",
+        "fresh natural primary counterexample",
+        "finite null over the 26-setting phase1 family",
+        "Muon or spectral training is competitive on long-tail benchmarks",
+        "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server",
+    ]:
+        if phrase not in joined_blocked:
+            raise AssertionError(f"top-conference claim decision audit missing blocked wording: {phrase}")
+    evidence_text = " ".join(claim_matrix["evidence_status"].astype(str))
+    for phrase in [
+        "v5_p0_predictive_condition_claim=not_ready",
+        "observed=20/26",
+        "raw_worse_rows=0",
+        "TVS-1-validation-grid-complete=not_ready",
+        "R3-preferred-latex-toolchain=not_ready",
+    ]:
+        if phrase not in evidence_text:
+            raise AssertionError(f"top-conference claim decision audit missing evidence status: {phrase}")
+
+    expected_objections = {
+        "RO-1-toy-theorem",
+        "RO-2-score-cherry-picking",
+        "RO-3-no-natural-negative",
+        "RO-4-muon-overclaim",
+        "RO-5-artifact-reproducibility",
+    }
+    if set(reviewer_objections["objection_id"]) != expected_objections:
+        raise AssertionError("top-conference reviewer objection matrix must cover the fixed objection set")
+    forbidden_shortcuts = " ".join(reviewer_objections["forbidden_shortcut"].astype(str))
+    for phrase in [
+        "using any final row to refit or reselect the score",
+        "claiming a finite null or natural counterexample before all 26 settings finish",
+        "turning lower local drift into a final tail-accuracy claim",
+    ]:
+        if phrase not in forbidden_shortcuts:
+            raise AssertionError(f"top-conference reviewer objection matrix missing forbidden shortcut: {phrase}")
+    if list(paper_sequence["sequence_step"]) != [1, 2, 3, 4, 5, 6]:
+        raise AssertionError("top-conference paper sequence must preserve the six-step claim order")
+    summary_lookup = readiness_summary.set_index("current_decision")["claim_count"].astype(int).to_dict()
+    if summary_lookup != {value: 1 for value in expected_decisions.values()}:
+        raise AssertionError(f"top-conference readiness summary changed: {summary_lookup}")
+
+
 def assert_batch_activation_contract(path: Path, frame: pd.DataFrame) -> None:
     """Validate the training-vs-diagnostic batch contract for step metrics."""
 
@@ -1131,6 +1221,13 @@ def main() -> None:
         Path("discussion/e11_paper_readiness_audit.md"),
         Path("results/e11_top_conference_gap_register") / "gap_register.csv",
         Path("discussion/e11_top_conference_gap_register.md"),
+        Path("results/e11_top_conference_claim_decision_audit") / "claim_decision_matrix.csv",
+        Path("results/e11_top_conference_claim_decision_audit") / "reviewer_objection_matrix.csv",
+        Path("results/e11_top_conference_claim_decision_audit") / "paper_sequence.csv",
+        Path("results/e11_top_conference_claim_decision_audit") / "readiness_summary.csv",
+        Path("results/e11_top_conference_claim_decision_audit") / "config.json",
+        Path("discussion/e11_top_conference_claim_decision_audit.md"),
+        Path("scripts/e11_write_top_conference_claim_decision_audit.py"),
         Path("discussion/e11_paper_skeleton.md"),
         Path("discussion/e11_main_paper_package.md"),
         Path("discussion/e11_main_figure_captions.md"),
@@ -1189,6 +1286,8 @@ def main() -> None:
         "scripts/e11_write_natural_negative_phase1_interim_synthesis.py",
         "e11-submission-repro-audit:",
         "scripts/e11_write_submission_repro_audit.py",
+        "e11-top-conference-claim-decision-audit:",
+        "scripts/e11_write_top_conference_claim_decision_audit.py",
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
         "e11-cifar-resnet-lt-tuned-benchmark-protocol:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py",
@@ -1464,6 +1563,7 @@ def main() -> None:
         "A CIFAR-100-LT ResNet18 NS-Muon final-training pilot (3 seeds, 5000 steps) is negative: lr=1e-4 all/few balanced accuracy `0.1265 [0.1218, 0.1312]` / `0.0008889 [-0.0006533, 0.002431]`",
         "make e11-all-results",
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
+        "make e11-top-conference-claim-decision-audit",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
         "make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes",
         "make e11-submission-repro-audit # audit toolchain availability, PDF hashes, source hashes, and clean-checkout gates",
@@ -1476,6 +1576,11 @@ def main() -> None:
         "scripts/e11_write_natural_negative_power_audit.py",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
+        "scripts/e11_write_top_conference_claim_decision_audit.py",
+        "discussion/e11_top_conference_claim_decision_audit.md",
+        "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
+        "registered-not-ready",
+        "supportable theorem",
         "scripts/e11_write_submission_repro_audit.py",
     ]
     missing_readme_phrases = [phrase for phrase in required_readme_phrases if phrase not in readme_text]
@@ -5955,6 +6060,9 @@ def main() -> None:
         "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
         "Partial-family claim-boundary synthesis",
         "make e11-natural-negative-search-phase1-interim-synthesis",
+        "discussion/e11_top_conference_claim_decision_audit.md",
+        "Paper-level supportable/registered-not-ready/blocked claim contract",
+        "make e11-top-conference-claim-decision-audit",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -6552,6 +6660,24 @@ def main() -> None:
     )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
+    claim_decision_frame = pd.read_csv(
+        "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv"
+    )
+    reviewer_objection_frame = pd.read_csv(
+        "results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv"
+    )
+    paper_sequence_frame = pd.read_csv(
+        "results/e11_top_conference_claim_decision_audit/paper_sequence.csv"
+    )
+    readiness_summary_frame = pd.read_csv(
+        "results/e11_top_conference_claim_decision_audit/readiness_summary.csv"
+    )
+    assert_top_conference_claim_decision_audit(
+        claim_decision_frame,
+        reviewer_objection_frame,
+        paper_sequence_frame,
+        readiness_summary_frame,
+    )
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
         encoding="utf-8"
     )
@@ -6638,6 +6764,31 @@ def main() -> None:
     ]
     if missing_gap_register:
         raise AssertionError(f"top-conference gap register missing required content: {missing_gap_register}")
+    claim_decision_text = Path("discussion/e11_top_conference_claim_decision_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "top-conference claim decision audit",
+        claim_decision_text,
+        [
+            "E11 Top-Conference Claim Decision Audit",
+            "paper-level claim contract",
+            "does not add new empirical results",
+            "Claim Decision Matrix",
+            "Reviewer Objection Matrix",
+            "Paper Sequence",
+            "TCD-1-main-mechanism-theorem",
+            "supportable_main_with_assumptions",
+            "registered_not_ready_wait_for_v5_finals",
+            "blocked_partial_family",
+            "blocked_protocol_pending",
+            "v5_p0_predictive_condition_claim=not_ready",
+            "observed=20/26",
+            "raw_worse_rows=0",
+            "using any final row to refit or reselect the score",
+            "No finite-null wording until the 26-setting family is complete",
+        ],
+    )
     readme = Path("README_E11.md").read_text(encoding="utf-8")
     if "## Main Entry Points" not in readme or "## Current Publication Gaps" not in readme:
         raise AssertionError("README_E11.md must document entry points and publication gaps")
@@ -6682,6 +6833,7 @@ def main() -> None:
         or "make e11-natural-negative-search-phase1-results" not in readme
         or "make e11-natural-negative-search-phase1-eval" not in readme
         or "make e11-natural-negative-search-phase1-interim-synthesis" not in readme
+        or "make e11-top-conference-claim-decision-audit" not in readme
         or "make e11-submission-repro-audit" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme

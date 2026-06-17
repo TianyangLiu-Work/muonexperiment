@@ -107,6 +107,10 @@ def main() -> None:
                 "artifact": "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
                 "role": "Partial-family claim-boundary synthesis for raw-worse counts, quality gates, and remaining tail-quality controls.",
             },
+            {
+                "artifact": "discussion/e11_top_conference_claim_decision_audit.md",
+                "role": "Paper-level supportable/registered-not-ready/blocked claim contract for top-conference wording.",
+            },
         ]
     )
 
@@ -148,6 +152,7 @@ make e11-natural-negative-search-phase1-interim-synthesis # summarize partial ph
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets
+make e11-top-conference-claim-decision-audit # regenerate the supportable/blocked paper claim contract
 make e11-guardrail-assets  # legacy condition-geometry guardrail notes
 make e11-all-assets        # current paper assets plus legacy guardrail notes
 make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf
