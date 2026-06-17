@@ -335,7 +335,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_main_paper_package.md                                                        | 22.8 KB |
 | discussion/e11_main_figure_captions.md                                                      | 6.5 KB  |
 | discussion/e11_notation_glossary.md                                                         | 8.7 KB  |
-| discussion/e11_quantitative_claim_ledger.md                                                 | 11.0 KB |
+| discussion/e11_quantitative_claim_ledger.md                                                 | 17.6 KB |
 | discussion/e11_reproduction_checklist.md                                                    | 54.2 KB |
 | discussion/e11_reviewer_risk_audit.md                                                       | 24.1 KB |
 | discussion/e11_pasted_review_audit.md                                                       | 8.3 KB  |

@@ -40,6 +40,15 @@ def main() -> None:
     layerwise = pd.read_csv("results/e11_long_tail_layerwise/summary.csv")
     layer_one = layerwise[layerwise["layer"].eq(1)].iloc[0]
     layer_two = layerwise[layerwise["layer"].eq(2)].iloc[0]
+    mechanism_alternatives = pd.read_csv(
+        "results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv"
+    ).set_index("audit_id")
+    mechanism_contracts = pd.read_csv(
+        "results/e11_mechanism_referee_audit/theory_measurement_contract.csv"
+    ).set_index("contract_id")
+    falsification_triggers = pd.read_csv(
+        "results/e11_mechanism_referee_audit/falsification_trigger_matrix.csv"
+    ).set_index("trigger_id")
 
     positive = head_tail.loc["high_head_rank_low_tail_srank"]
     negative = head_tail.loc["low_head_rank_high_tail_srank"]
@@ -194,6 +203,127 @@ def main() -> None:
         ]
     )
 
+    referee_boundaries = pd.DataFrame(
+        [
+            {
+                "boundary_id": "R1",
+                "source": "MEA-1-head-gain-mismatch",
+                "referee_question": mechanism_alternatives.loc[
+                    "MEA-1-head-gain-mismatch", "alternative_explanation"
+                ],
+                "evidence_anchor": (
+                    "E11 Mechanism Referee Audit: "
+                    + mechanism_alternatives.loc["MEA-1-head-gain-mismatch", "decisive_evidence"]
+                ),
+                "required_manuscript_action": mechanism_alternatives.loc[
+                    "MEA-1-head-gain-mismatch", "manuscript_action"
+                ],
+                "forbidden_wording": mechanism_alternatives.loc[
+                    "MEA-1-head-gain-mismatch", "forbidden_wording"
+                ],
+            },
+            {
+                "boundary_id": "R2",
+                "source": "MEA-2-tail-unit-sensitivity",
+                "referee_question": mechanism_alternatives.loc[
+                    "MEA-2-tail-unit-sensitivity", "alternative_explanation"
+                ],
+                "evidence_anchor": (
+                    "E11 Mechanism Referee Audit: unit-JVP ratios are above one while "
+                    "matched-gain observed ratios are below one; "
+                    + mechanism_alternatives.loc["MEA-2-tail-unit-sensitivity", "decisive_evidence"]
+                ),
+                "required_manuscript_action": mechanism_alternatives.loc[
+                    "MEA-2-tail-unit-sensitivity", "manuscript_action"
+                ],
+                "forbidden_wording": mechanism_alternatives.loc[
+                    "MEA-2-tail-unit-sensitivity", "forbidden_wording"
+                ],
+            },
+            {
+                "boundary_id": "R3",
+                "source": "MEA-3-weak-tail-checkpoint",
+                "referee_question": mechanism_alternatives.loc[
+                    "MEA-3-weak-tail-checkpoint", "alternative_explanation"
+                ],
+                "evidence_anchor": (
+                    "E11 Mechanism Referee Audit: "
+                    + mechanism_alternatives.loc["MEA-3-weak-tail-checkpoint", "decisive_evidence"]
+                ),
+                "required_manuscript_action": mechanism_alternatives.loc[
+                    "MEA-3-weak-tail-checkpoint", "manuscript_action"
+                ],
+                "forbidden_wording": mechanism_alternatives.loc[
+                    "MEA-3-weak-tail-checkpoint", "forbidden_wording"
+                ],
+            },
+            {
+                "boundary_id": "R4",
+                "source": "TMC-4-transport-normalized-score",
+                "referee_question": mechanism_contracts.loc[
+                    "TMC-4-transport-normalized-score", "theory_object"
+                ],
+                "evidence_anchor": (
+                    "E11 Mechanism Referee Audit: v5 final split outputs=not_run; "
+                    + mechanism_contracts.loc["TMC-4-transport-normalized-score", "current_evidence"]
+                ),
+                "required_manuscript_action": mechanism_contracts.loc[
+                    "TMC-4-transport-normalized-score", "next_gate"
+                ],
+                "forbidden_wording": mechanism_contracts.loc[
+                    "TMC-4-transport-normalized-score", "does_not_support"
+                ],
+            },
+            {
+                "boundary_id": "R5",
+                "source": "MEA-6-post-hoc-score-tuning",
+                "referee_question": mechanism_alternatives.loc[
+                    "MEA-6-post-hoc-score-tuning", "alternative_explanation"
+                ],
+                "evidence_anchor": (
+                    "E11 Mechanism Referee Audit: "
+                    + mechanism_alternatives.loc["MEA-6-post-hoc-score-tuning", "decisive_evidence"]
+                ),
+                "required_manuscript_action": mechanism_alternatives.loc[
+                    "MEA-6-post-hoc-score-tuning", "manuscript_action"
+                ],
+                "forbidden_wording": mechanism_alternatives.loc[
+                    "MEA-6-post-hoc-score-tuning", "forbidden_wording"
+                ],
+            },
+            {
+                "boundary_id": "R6",
+                "source": "FT-2-natural-family-incomplete",
+                "referee_question": falsification_triggers.loc[
+                    "FT-2-natural-family-incomplete", "trigger_condition"
+                ],
+                "evidence_anchor": (
+                    "E11 Mechanism Referee Audit: "
+                    + falsification_triggers.loc["FT-2-natural-family-incomplete", "current_status"]
+                ),
+                "required_manuscript_action": "Block natural-counterexample and finite-null wording",
+                "forbidden_wording": falsification_triggers.loc[
+                    "FT-2-natural-family-incomplete", "claim_downgrade"
+                ],
+            },
+            {
+                "boundary_id": "R7",
+                "source": "MEA-8-performance-proxy",
+                "referee_question": mechanism_alternatives.loc[
+                    "MEA-8-performance-proxy", "alternative_explanation"
+                ],
+                "evidence_anchor": (
+                    "E11 Mechanism Referee Audit: "
+                    + mechanism_alternatives.loc["MEA-8-performance-proxy", "decisive_evidence"]
+                ),
+                "required_manuscript_action": mechanism_alternatives.loc[
+                    "MEA-8-performance-proxy", "manuscript_action"
+                ],
+                "forbidden_wording": "local drift improvements imply final long-tail optimizer superiority",
+            },
+        ]
+    )
+
     text = f"""# E11 Quantitative Claim Ledger
 
 This generated ledger is the paper-writing guardrail for the current head-to-tail interference paper. Each claim below must be stated with its quantitative anchor and caveat. Claims from the older condition-geometry project belong in appendix/guardrail discussion unless a current script adds them here.
@@ -206,9 +336,15 @@ This generated ledger is the paper-writing guardrail for the current head-to-tai
 
 {markdown_table(priority, ["priority", "claim_ids", "reason"])}
 
+## Referee-Falsification Boundaries
+
+This table imports the strongest alternative explanations and falsification triggers from [E11 Mechanism Referee Audit](e11_mechanism_referee_audit.md). Treat these rows as manuscript and rebuttal constraints, not as new empirical claims.
+
+{markdown_table(referee_boundaries, ["boundary_id", "source", "referee_question", "evidence_anchor", "required_manuscript_action", "forbidden_wording"])}
+
 ## Practical Rule
 
-Use `C1 -> C2 -> C6 -> C7 -> C4 -> C5` as the main paper sequence. Put `C3` next to every empirical drift claim and keep `C6`/`C7` scoped below broad final-performance claims.
+Use `C1 -> C2 -> C6 -> C7 -> C4 -> C5` as the main paper sequence. Put `C3` next to every empirical drift claim and keep `C6`/`C7` scoped below broad final-performance claims. Before writing limitations, rebuttals, or claim-upgrade language, check the Referee-Falsification Boundaries table against the current mechanism referee audit.
 """
     write_markdown(OUTPUT_PATH, text)
     print(f"saved quantitative claim ledger to {OUTPUT_PATH}")

@@ -5968,6 +5968,12 @@ def main() -> None:
         "Layer 1 unit/scaled/observed squared drift ratios=1.45/0.4766/0.4767",
         "smaller operator-norm step despite a larger Frobenius-norm step",
         "complete practical Muon training behavior",
+        "Referee-Falsification Boundaries",
+        "E11 Mechanism Referee Audit",
+        "unit-JVP ratios are above one while matched-gain observed ratios are below one",
+        "v5 final split outputs=not_run",
+        "Block natural-counterexample and finite-null wording",
+        "local drift improvements imply final long-tail optimizer superiority",
     ]
     missing_claim_ledger = [phrase for phrase in required_claim_ledger_phrases if phrase not in claim_ledger]
     if missing_claim_ledger:
