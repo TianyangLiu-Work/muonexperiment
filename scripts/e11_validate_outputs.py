@@ -784,6 +784,15 @@ def main() -> None:
         Path("results/e11_condition_score_theory_bridge") / "score_target_register.csv",
         Path("results/e11_condition_score_theory_bridge") / "fresh_protocol_requirements.csv",
         Path("discussion/e11_condition_score_theory_bridge.md"),
+        Path("results/e11_condition_score_fresh_protocol") / "quarantine_register.csv",
+        Path("results/e11_condition_score_fresh_protocol") / "score_freeze_registry.csv",
+        Path("results/e11_condition_score_fresh_protocol") / "fresh_split_registry.csv",
+        Path("results/e11_condition_score_fresh_protocol") / "acceptance_gates.csv",
+        Path("results/e11_condition_score_fresh_protocol") / "protocol_status.csv",
+        Path("discussion/e11_condition_score_fresh_protocol.md"),
+        Path("scripts/e11_write_condition_score_fresh_protocol.py"),
+        Path("scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch"),
+        Path("scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch"),
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "train_trace.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_metrics.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "group_metrics.csv",
@@ -931,6 +940,10 @@ def main() -> None:
         "scripts/slurm/e11_cifar100_resnet_condition_score_heldout_data.sbatch",
         "e11-cifar-resnet-condition-score-heldout-eval:",
         "scripts/e11_evaluate_cifar100_resnet_condition_score_heldouts.py",
+        "e11-cifar-resnet-condition-score-fresh-architecture-results:",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
+        "e11-cifar-resnet-condition-score-fresh-data-results:",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -1000,6 +1013,8 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-heldout-architecture-results # submit the registered ResNet34 held-out architecture condition-score split via Slurm",
         "make e11-cifar-resnet-condition-score-heldout-data-results # submit the registered CIFAR-10-LT held-out data condition-score split via Slurm",
         "make e11-cifar-resnet-condition-score-heldout-eval # evaluate frozen condition-score gates after both held-out Slurm jobs finish",
+        "make e11-cifar-resnet-condition-score-fresh-architecture-results # submit the fresh ResNet50 condition-score architecture split via Slurm",
+        "make e11-cifar-resnet-condition-score-fresh-data-results # submit the fresh CIFAR-10 alternate-partition condition-score data split via Slurm",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
@@ -1015,7 +1030,13 @@ def main() -> None:
         "legacy scaled-JVP ratio on CIFAR-10-LT has residual Spearman `0.6219 [0.6013, 0.6425]`",
         "discussion/e11_condition_score_heldout_failure_theory_note.md",
         "discussion/e11_condition_score_theory_bridge.md",
+        "discussion/e11_condition_score_fresh_protocol.md",
         "scripts/e11_write_condition_score_theory_bridge.py",
+        "scripts/e11_write_condition_score_fresh_protocol.py",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
+        "registers fresh final splits: ResNet50",
+        "CIFAR-100-LT and a CIFAR-10 alternate head/tail partition",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
         "candidate condition-score audit",
@@ -2693,6 +2714,65 @@ def main() -> None:
         raise AssertionError(
             "condition-score theory bridge must keep the failed held-outs quarantined and the next score/fresh-heldout work open"
         )
+    fresh_protocol_dir = Path("results/e11_condition_score_fresh_protocol")
+    quarantine_register = pd.read_csv(fresh_protocol_dir / "quarantine_register.csv")
+    score_freeze_registry = pd.read_csv(fresh_protocol_dir / "score_freeze_registry.csv")
+    fresh_split_registry = pd.read_csv(fresh_protocol_dir / "fresh_split_registry.csv")
+    fresh_acceptance_gates = pd.read_csv(fresh_protocol_dir / "acceptance_gates.csv")
+    fresh_protocol_status = pd.read_csv(fresh_protocol_dir / "protocol_status.csv")
+    expected_quarantine_ids = {
+        "spent_primary_heldout_architecture_resnet34",
+        "spent_primary_heldout_data_cifar10lt_resnet18",
+    }
+    expected_fresh_score_ids = {
+        "condition_score_v3_zero_fit_scaled_jvp",
+        "condition_score_v3_nested_jvp_residual",
+        "early_layer_prior",
+        "source_observed_drift_positive_control",
+    }
+    expected_fresh_split_roles = {
+        "calibration_only",
+        "validation_only",
+        "fresh_final_heldout_architecture",
+        "fresh_final_heldout_data_partition",
+    }
+    expected_fresh_gate_ids = {
+        "F1-quarantine-enforced",
+        "F2-score-freeze-before-final",
+        "F3-target-separation",
+        "F4-residual-ranking-success",
+        "F5-threshold-direction-success",
+        "F6-baselines-reported",
+    }
+    if (
+        set(quarantine_register["split_id"]) != expected_quarantine_ids
+        or set(score_freeze_registry["score_id"]) != expected_fresh_score_ids
+        or set(fresh_split_registry["role"]) != expected_fresh_split_roles
+        or set(fresh_acceptance_gates["gate_id"]) != expected_fresh_gate_ids
+        or len(fresh_protocol_status) != 4
+    ):
+        raise AssertionError(
+            "fresh condition-score protocol must preserve quarantine, score-freeze, split, gate, and status coverage"
+        )
+    if not (
+        quarantine_register["forbidden_use"].astype(str).str.contains("final P0 claim evidence").all()
+        and score_freeze_registry.set_index("score_id").loc[
+            "condition_score_v3_zero_fit_scaled_jvp", "coefficient_rule"
+        ].startswith("zero-fit")
+        and score_freeze_registry.set_index("score_id").loc[
+            "condition_score_v3_zero_fit_scaled_jvp", "uses_spent_heldouts"
+        ]
+        == "no"
+        and "ResNet50 CIFAR stem"
+        in set(fresh_split_registry["architecture"])
+        and "head=0,2,4,6,8; tail=1,3,5,7,9"
+        in set(fresh_split_registry["class_partition"])
+        and fresh_protocol_status.set_index("item").loc["fresh final held-out evidence", "status"]
+        == "missing"
+    ):
+        raise AssertionError(
+            "fresh condition-score protocol must quarantine spent held-outs, freeze the zero-fit scaled-JVP candidate, and keep fresh final evidence marked missing"
+        )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -4149,6 +4229,25 @@ def main() -> None:
         condition_score_theory_bridge,
         required_condition_score_theory_bridge_phrases,
     )
+    condition_score_fresh_protocol = Path("discussion/e11_condition_score_fresh_protocol.md").read_text(
+        encoding="utf-8"
+    )
+    required_condition_score_fresh_protocol_phrases = [
+        "Fresh Condition-Score Protocol",
+        "Quarantine Register",
+        "Score Freeze Registry",
+        "fresh_final_heldout_architecture",
+        "ResNet50 CIFAR stem",
+        "head=0,2,4,6,8; tail=1,3,5,7,9",
+        "condition_score_v3_zero_fit_scaled_jvp",
+        "spent ResNet34 and original CIFAR-10 held-outs",
+        "not a positive result until the fresh ResNet50 architecture split",
+    ]
+    assert_required_phrases(
+        "fresh condition-score protocol",
+        condition_score_fresh_protocol,
+        required_condition_score_fresh_protocol_phrases,
+    )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -4162,6 +4261,7 @@ def main() -> None:
         "discussion/e11_cifar100_resnet_condition_score_protocol.md",
         "discussion/e11_cifar100_resnet_condition_score_next.md",
         "discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md",
+        "discussion/e11_condition_score_fresh_protocol.md",
         "new theory-linked score revision",
         "held-out architecture",
         "benchmark-level performance claim",
@@ -4189,6 +4289,8 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-heldout-architecture-results" not in readme
         or "make e11-cifar-resnet-condition-score-heldout-data-results" not in readme
         or "make e11-cifar-resnet-condition-score-heldout-eval" not in readme
+        or "make e11-cifar-resnet-condition-score-fresh-architecture-results" not in readme
+        or "make e11-cifar-resnet-condition-score-fresh-data-results" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-guardrail-assets" not in readme
@@ -4220,6 +4322,7 @@ def main() -> None:
             Path("discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md"),
             Path("discussion/e11_condition_score_heldout_failure_theory_note.md"),
             Path("discussion/e11_condition_score_theory_bridge.md"),
+            Path("discussion/e11_condition_score_fresh_protocol.md"),
             Path("discussion/e11_top_conference_gap_register.md"),
             Path("discussion/e11_paper_skeleton.md"),
             Path("discussion/e11_main_paper_package.md"),

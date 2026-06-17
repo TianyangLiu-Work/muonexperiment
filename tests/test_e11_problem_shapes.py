@@ -182,6 +182,22 @@ def test_cifar_resnet_heldout_architecture_and_data_config_shapes():
     assert parse_class_list("0,1,2,3,4") == tuple(range(5))
 
 
+def test_cifar_resnet50_fresh_architecture_config_shape():
+    config = Cifar100ResNetOneStepConfig(
+        dataset_name="CIFAR100",
+        model_arch="resnet50",
+        head_classes=tuple(range(50)),
+        tail_classes=tuple(range(50, 100)),
+    )
+
+    model = build_cifar_resnet_model(config, device=torch.device("cpu"), dtype=torch.float32)
+
+    assert dataset_num_classes(config.dataset_name) == 100
+    assert model.fc.out_features == 100
+    assert model.conv1.kernel_size == (3, 3)
+    assert model.maxpool.__class__.__name__ == "Identity"
+
+
 def test_mnist_conv_training_batch_is_separate_from_full_activation_diagnostics():
     dtype = torch.float64
     device = torch.device("cpu")
