@@ -491,6 +491,6 @@ def run_cifar100_resnet_one_step(
     step_metrics = pd.DataFrame(rows)
     layer_metrics = pd.DataFrame(layer_rows)
     pair_summary = summarize_long_tail_one_step(step_metrics)
-    pair_summary.insert(0, "model", "resnet18_cifar_stem")
-    pair_summary.insert(0, "dataset", "CIFAR100")
+    pair_summary.insert(0, "model", f"{config.model_arch.lower()}_cifar_stem")
+    pair_summary.insert(0, "dataset", normalized_dataset_name(config.dataset_name))
     return step_metrics, pair_summary, layer_metrics

@@ -896,6 +896,8 @@ def main() -> None:
         Path("results/e11_natural_negative_search_protocol") / "protocol_status.csv",
         Path("discussion/e11_natural_negative_search_protocol.md"),
         Path("scripts/e11_write_natural_negative_search_protocol.py"),
+        Path("scripts/e11_run_natural_negative_search_phase1.py"),
+        Path("scripts/slurm/e11_natural_negative_search_phase1.sbatch"),
         Path("discussion/e11_condition_score_v4_protocol.md"),
         Path("discussion/e11_condition_score_v4_validation_cifar100_rotated.md"),
         Path("discussion/e11_condition_score_v4_validation_freeze.md"),
@@ -1044,6 +1046,8 @@ def main() -> None:
         Path("scripts/e11_write_submission_repro_audit.py"),
         Path("scripts/e11_write_natural_head_tail_boundary_audit.py"),
         Path("scripts/e11_write_natural_negative_search_protocol.py"),
+        Path("scripts/e11_run_natural_negative_search_phase1.py"),
+        Path("scripts/slurm/e11_natural_negative_search_phase1.sbatch"),
         Path("Makefile"),
         Path("README_E11.md"),
         config.discussion_path,
@@ -1062,6 +1066,9 @@ def main() -> None:
         "scripts/e11_write_natural_head_tail_boundary_audit.py",
         "e11-natural-negative-search-protocol:",
         "scripts/e11_write_natural_negative_search_protocol.py",
+        "e11-natural-negative-search-phase1-results:",
+        "scripts/e11_run_natural_negative_search_phase1.py",
+        "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "e11-submission-repro-audit:",
         "scripts/e11_write_submission_repro_audit.py",
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
@@ -1191,6 +1198,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
         "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
         "make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates",
+        "make e11-natural-negative-search-phase1-results # submit the registered phase1 natural negative-search settings via Slurm",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
         "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
         "A CIFAR-100-LT ResNet18 imbalance sweep over tail_train_per_class 10/30/100/300 keeps spectral/Frobenius squared drift ratio below 1 in every setting",
@@ -1270,6 +1278,10 @@ def main() -> None:
         "discussion/e11_natural_negative_search_protocol.md",
         "results/e11_natural_negative_search_protocol/*",
         "scripts/e11_write_natural_negative_search_protocol.py",
+        "scripts/e11_run_natural_negative_search_phase1.py",
+        "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
+        "phase1 GPU entrypoint is now implemented",
+        "make e11-natural-negative-search-phase1-results",
         "multiplicity-adjusted decision rule",
         "before any fresh search outputs exist",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
@@ -1290,6 +1302,7 @@ def main() -> None:
         *APPENDIX_RUNNER_SCRIPTS,
         "scripts/e11_write_natural_head_tail_boundary_audit.py",
         "scripts/e11_write_natural_negative_search_protocol.py",
+        "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/e11_write_submission_repro_audit.py",
     ]
     missing_readme_phrases = [phrase for phrase in required_readme_phrases if phrase not in readme_text]
@@ -3857,6 +3870,7 @@ def main() -> None:
     expected_natural_protocol_status_items = {
         "committed natural audit baseline",
         "fresh natural search protocol",
+        "fresh natural search entrypoints",
         "fresh natural search outputs",
         "multiplicity-adjusted evaluator",
         "natural negative claim",
@@ -3867,8 +3881,15 @@ def main() -> None:
         "primary_tail_output_drift_ratio"
     ]
     planned_prefixes = [Path(path) for path in natural_protocol_search["planned_artifact_prefix"]]
+    natural_phase1_search = natural_protocol_search[
+        natural_protocol_search["phase"] == "phase1_fresh_primary_search"
+    ]
+    natural_phase2_search = natural_protocol_search[
+        natural_protocol_search["phase"] == "phase2_fresh_generality_search"
+    ]
     if not (
-        set(natural_protocol_baseline["baseline_id"]) == expected_natural_protocol_baselines
+        {"entrypoint", "entrypoint_status"}.issubset(natural_protocol_search.columns)
+        and set(natural_protocol_baseline["baseline_id"]) == expected_natural_protocol_baselines
         and set(natural_protocol_search["search_id"]) == expected_natural_protocol_search_ids
         and set(natural_protocol_metrics["metric_id"]) == expected_natural_protocol_metrics
         and set(natural_protocol_stopping["rule_id"]) == expected_natural_protocol_rules
@@ -3880,9 +3901,15 @@ def main() -> None:
         ])
         == 0
         and natural_protocol_status_lookup["fresh natural search protocol"] == "generated"
+        and natural_protocol_status_lookup["fresh natural search entrypoints"] == "implemented"
         and natural_protocol_status_lookup["fresh natural search outputs"] == "not_run"
         and natural_protocol_status_lookup["multiplicity-adjusted evaluator"] == "registered_not_implemented"
         and natural_protocol_status_lookup["natural negative claim"] == "not_ready"
+        and set(natural_phase1_search["entrypoint"]) == {
+            "scripts/slurm/e11_natural_negative_search_phase1.sbatch"
+        }
+        and set(natural_phase1_search["entrypoint_status"]) == {"implemented_sbatch"}
+        and set(natural_phase2_search["entrypoint_status"]) == {"blocked_until_phase1_registry_commit"}
         and natural_protocol_claim_lookup["fresh_natural_primary_counterexample"] == "not_ready"
         and "Holm-adjusted" in str(natural_primary_metric["worse_rule"])
         and "full-drift counterexample" in str(natural_primary_metric["claim_boundary"])
@@ -3903,6 +3930,7 @@ def main() -> None:
             "does not claim a new natural counterexample",
             "multiplicity procedure",
             "fresh_search_outputs as not_run",
+            "phase1 Slurm entrypoint is implemented",
             "Blocked now: claiming a fresh natural primary counterexample",
         ],
     )
@@ -5524,6 +5552,9 @@ def main() -> None:
         "component true-logit and secondary loss/margin/accuracy tradeoff candidates",
         "discussion/e11_natural_negative_search_protocol.md",
         "search-space registry, metric contract, multiplicity rule, stopping rule",
+        "scripts/e11_run_natural_negative_search_phase1.py",
+        "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
+        "make e11-natural-negative-search-phase1-results",
         "multiplicity-adjusted evaluator",
         "held-out architecture",
         "benchmark-level performance claim",
@@ -5566,6 +5597,7 @@ def main() -> None:
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-natural-head-tail-boundary-audit" not in readme
         or "make e11-natural-negative-search-protocol" not in readme
+        or "make e11-natural-negative-search-phase1-results" not in readme
         or "make e11-submission-repro-audit" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme

@@ -648,6 +648,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "paper_role": "Pre-registers fresh natural negative-search space, metric contract, multiplicity rule, stopping rule, and claim ladder before any new search outputs exist.",
     },
     {
+        "stage": "Natural negative-search phase1 Slurm entrypoint",
+        "command": "sbatch scripts/slurm/e11_natural_negative_search_phase1.sbatch",
+        "produces": "results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/*, phase1_cifar10lt_resnet18/*, and phase1_tail_quality_controls/* after GPU submission",
+        "paper_role": "Executable phase1 search runner for the registered natural-negative protocol; outputs remain absent until the fresh GPU runs are intentionally submitted.",
+    },
+    {
         "stage": "Condition-score v5 ResNeXt50 architecture split",
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch",
         "produces": "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/* and figures/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/*",
