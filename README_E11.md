@@ -60,6 +60,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_data_cifar10_cross.sbatch
 python3 scripts/e11_evaluate_condition_score_v5_finals.py
 python3 scripts/e11_write_condition_score_v5_final_interpretation_plan.py
+python3 scripts/e11_write_condition_score_v5_reviewer_failure_response.py
 sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_muon_final_benchmark.sbatch
@@ -166,6 +167,7 @@ make e11-cifar-resnet-condition-score-v5-architecture-results # submit the v5 Re
 make e11-cifar-resnet-condition-score-v5-data-results # submit the v5 CIFAR-10 cross-partition final data split via Slurm
 make e11-cifar-resnet-condition-score-v5-final-eval # evaluate frozen v5 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-condition-score-v5-final-interpretation-plan # lock the v5 final outcome-to-claim state machine before outputs exist
+make e11-cifar-resnet-condition-score-v5-reviewer-failure-response # map v5 final pass/fail modes to reviewer-safe claim downgrades
 make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm
 make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm
 make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm
@@ -218,6 +220,7 @@ make e11-cifar-resnet-condition-score-v5-architecture-results
 make e11-cifar-resnet-condition-score-v5-data-results
 make e11-cifar-resnet-condition-score-v5-final-eval
 make e11-cifar-resnet-condition-score-v5-final-interpretation-plan
+make e11-cifar-resnet-condition-score-v5-reviewer-failure-response
 make e11-cifar-resnet-lt-standard-eval-results
 make e11-cifar-resnet-lt-recipe-benchmark-results
 make e11-cifar-resnet-lt-muon-final-benchmark-results
@@ -391,6 +394,13 @@ the outcome-to-claim state machine before the final layer tables exist, includin
 the allowed positive claim, architecture/data transport-boundary cases,
 direction-guardrail failures, baseline-dominance failures, and no-retuning
 leakage lock.
+The reviewer failure response is
+`discussion/e11_condition_score_v5_reviewer_failure_response.md`, backed by
+`results/e11_condition_score_v5_protocol/reviewer_failure_response/*`. It is a
+pre-output claim-downgrade plan for top-conference review: every registered v5
+final pass/fail mode maps to allowed wording, forbidden wording, blocking status,
+and next evidence without inspecting, refitting, reselecting, or retuning on
+final rows.
 
 The natural head-to-tail boundary audit is
 `discussion/e11_natural_head_tail_boundary.md`, backed by
@@ -541,6 +551,7 @@ Paper-facing synthesis:
 - `discussion/e11_condition_score_v5_validation_freeze.md`
 - `discussion/e11_condition_score_v5_final_evaluation.md`
 - `discussion/e11_condition_score_v5_final_interpretation_plan.md`
+- `discussion/e11_condition_score_v5_reviewer_failure_response.md`
 - `discussion/e11_natural_negative_search_protocol.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
@@ -666,6 +677,11 @@ Primary paper quantitative tables:
 - `results/e11_condition_score_v5_protocol/final_interpretation_plan/final_gate_contract.csv`
 - `results/e11_condition_score_v5_protocol/final_interpretation_plan/outcome_interpretation_ladder.csv`
 - `results/e11_condition_score_v5_protocol/final_interpretation_plan/leakage_lock.csv`
+- `results/e11_condition_score_v5_protocol/reviewer_failure_response/final_split_output_status.csv`
+- `results/e11_condition_score_v5_protocol/reviewer_failure_response/failure_mode_register.csv`
+- `results/e11_condition_score_v5_protocol/reviewer_failure_response/reviewer_objection_map.csv`
+- `results/e11_condition_score_v5_protocol/reviewer_failure_response/claim_downgrade_actions.csv`
+- `results/e11_condition_score_v5_protocol/reviewer_failure_response/next_evidence_queue.csv`
 - `results/e11_natural_head_tail_boundary/search_registry.csv`
 - `results/e11_natural_head_tail_boundary/primary_drift_scan.csv`
 - `results/e11_natural_head_tail_boundary/secondary_outcome_scan.csv`
@@ -831,6 +847,7 @@ Do not claim:
 - `scripts/e11_evaluate_condition_score_v5_finals.py`: validation-frozen v5 final evaluator for the submitted ResNeXt50-32x4d and CIFAR-10 cross-partition final splits; it reports `not_run` until final layer tables exist and never retunes on final rows.
 - `scripts/e11_write_condition_score_v5_final_evaluation.py`: paper-asset wrapper that refreshes the v5 final evaluator outputs without changing the registered scoring rule.
 - `scripts/e11_write_condition_score_v5_final_interpretation_plan.py`: pre-output v5 final interpretation lock that maps pass/fail patterns to allowed claims, boundary interpretations, and forbidden post-hoc retuning actions.
+- `scripts/e11_write_condition_score_v5_reviewer_failure_response.py`: pre-output v5 reviewer failure response that maps each final pass/fail mode to claim downgrades, forbidden wording, and next evidence.
 - `scripts/e11_write_natural_negative_search_protocol.py`: pre-registered fresh natural negative-search protocol with search space, metric contract, multiplicity rule, stopping rules, gates, and claim ladder.
 - `scripts/e11_write_natural_negative_power_audit.py`: phase1 natural-negative power/MDE audit for interpreting adjusted positive and finite-null outcomes.
 - `scripts/e11_run_natural_negative_search_phase1.py`: executable phase1 runner for the registered natural negative-search settings; supports `--list-settings` without launching training and writes fresh outputs only when submitted.
@@ -872,12 +889,12 @@ Do not claim:
 
 The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
 
-The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`, v5 theory-to-score map in `discussion/e11_condition_score_v5_theory_to_score_map.md`, v5 validation-freeze boundary in `discussion/e11_condition_score_v5_validation_freeze.md`, v5 final evaluator in `discussion/e11_condition_score_v5_final_evaluation.md`, v5 final interpretation lock in `discussion/e11_condition_score_v5_final_interpretation_plan.md`, tuned benchmark protocol in `discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md`, tuned benchmark selection audit in `discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md`, natural boundary audit in `discussion/e11_natural_head_tail_boundary.md`, fresh natural negative-search protocol in `discussion/e11_natural_negative_search_protocol.md`, and submission reproducibility audit in `discussion/e11_submission_repro_audit.md`.
+The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`, v5 theory-to-score map in `discussion/e11_condition_score_v5_theory_to_score_map.md`, v5 validation-freeze boundary in `discussion/e11_condition_score_v5_validation_freeze.md`, v5 final evaluator in `discussion/e11_condition_score_v5_final_evaluation.md`, v5 final interpretation lock in `discussion/e11_condition_score_v5_final_interpretation_plan.md`, v5 reviewer failure response in `discussion/e11_condition_score_v5_reviewer_failure_response.md`, tuned benchmark protocol in `discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md`, tuned benchmark selection audit in `discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md`, natural boundary audit in `discussion/e11_natural_head_tail_boundary.md`, fresh natural negative-search protocol in `discussion/e11_natural_negative_search_protocol.md`, and submission reproducibility audit in `discussion/e11_submission_repro_audit.md`.
 
 Most important next steps:
 
 1. Run the executable tuned benchmark validation grid from `results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv`, select recipes on validation seeds only, then run final paired seeds for tuned AdamW/SGD/class-balanced baselines and finite-NS-Muon candidates. Larger long-tail datasets still require a separate preregistered protocol; the current pilots are useful benchmark context, not a competitive optimizer result.
-2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the frozen v2 condition score fails the registered ResNet34 and CIFAR-10-LT held-out residual-ranking gates. The fresh v3 zero-fit scaled-JVP score then passes the CIFAR-10 alternate partition but reverses on the fresh ResNet50 architecture split. V4 then freezes a two-axis amplitude-minus-direction score and passes the WideResNet50-2 final architecture split, but fails the CIFAR-10 mixed final data split. The v4 failure audit localizes this data-partition reversal mechanism problem to amplitude/depth scalar aggregation rather than the direction threshold. V5 now has a frozen transport-normalized validation score, a pre-registered final evaluator, and a pre-output interpretation lock; the remaining P0 condition-score test is to wait for the submitted unspent ResNeXt50-32x4d architecture final and CIFAR-10 cross-partition final outputs, then rerun `make e11-cifar-resnet-condition-score-v5-final-eval` under the locked outcome ladder.
+2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the frozen v2 condition score fails the registered ResNet34 and CIFAR-10-LT held-out residual-ranking gates. The fresh v3 zero-fit scaled-JVP score then passes the CIFAR-10 alternate partition but reverses on the fresh ResNet50 architecture split. V4 then freezes a two-axis amplitude-minus-direction score and passes the WideResNet50-2 final architecture split, but fails the CIFAR-10 mixed final data split. The v4 failure audit localizes this data-partition reversal mechanism problem to amplitude/depth scalar aggregation rather than the direction threshold. V5 now has a frozen transport-normalized validation score, a pre-registered final evaluator, a pre-output interpretation lock, and a reviewer failure response; the remaining P0 condition-score test is to wait for the submitted unspent ResNeXt50-32x4d architecture final and CIFAR-10 cross-partition final outputs, then rerun `make e11-cifar-resnet-condition-score-v5-final-eval` and `make e11-cifar-resnet-condition-score-v5-reviewer-failure-response` under the locked outcome ladder.
 3. Extend the current fixed-checkpoint, short-trajectory, small practical-training, and negative ResNet final-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
 5. Let `make e11-natural-negative-search-phase1-results` finish the fresh metric outputs for the protocol registered in `discussion/e11_natural_negative_search_protocol.md`, then rerun `make e11-natural-negative-search-phase1-eval` to refresh Holm-adjusted primary decisions and full reporting of null, component-only, secondary, and quality-failure rows.

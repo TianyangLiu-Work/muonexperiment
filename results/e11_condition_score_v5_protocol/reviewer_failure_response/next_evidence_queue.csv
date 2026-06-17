@@ -1,0 +1,6 @@
+priority,evidence_item,resolves_failure_modes,command_or_protocol,claim_unlocked,depends_on_final_outputs
+P0,consume the two registered v5 final outputs,V5-RFR-0-pending-outputs,make e11-cifar-resnet-condition-score-v5-final-eval,narrow frozen-score P0 eligibility if both finals pass,yes
+P0,rerun the reviewer response asset after final evaluator output changes,V5-RFR-1 through V5-RFR-7,make e11-cifar-resnet-condition-score-v5-reviewer-failure-response,updated claim downgrade table without score retuning,yes
+P1,registered larger-dataset matched-head-gain diagnostic,data and architecture transport-boundary concerns,new preregistered protocol with unspent validation/final splits,broader mechanism generality,no
+P1,tuned long-horizon optimizer benchmark,mechanism-vs-performance objection,"run tuned benchmark validation grid, selection, then final paired seeds",optimizer-performance claim if positive,no
+P2,theory refinement for transport-normalized sandwich residual terms,baseline dominance and transport reversal failures,derive split-invariant normalization or prove narrower fixed-partition theorem,cleaner theorem-to-score alignment,no

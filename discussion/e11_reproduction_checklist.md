@@ -19,6 +19,7 @@ make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the
 make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-condition-score-v5-final-eval # evaluate frozen v5 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-condition-score-v5-final-interpretation-plan # lock the v5 final outcome-to-claim state machine before outputs exist
+make e11-cifar-resnet-condition-score-v5-reviewer-failure-response # map v5 final pass/fail modes to reviewer-safe claim downgrades
 make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm
 make e11-cifar-resnet-lt-tuned-benchmark-protocol # register validation/final splits and benchmark claim gates
 make e11-cifar-resnet-lt-tuned-benchmark-settings # write the executable tuned validation grid registry
@@ -95,6 +96,7 @@ claims. They are not the main evidence table for the current paper draft.
 | Condition-score v5 validation freeze                              | python3 scripts/e11_freeze_condition_score_v5_validation.py                                     | results/e11_condition_score_v5_protocol/validation_score_freeze/* and discussion/e11_condition_score_v5_validation_freeze.md                                    | Executable freeze boundary that now selects the v5 transport-normalized score before final splits, while keeping any P0 claim pending final held-out evaluation.                                |
 | Condition-score v5 final evaluation                               | python3 scripts/e11_evaluate_condition_score_v5_finals.py                                       | results/e11_condition_score_v5_protocol/final_score_evaluation/* and discussion/e11_condition_score_v5_final_evaluation.md                                      | Pre-registered frozen-score evaluator for the two unspent v5 final splits; current state is not_run until the submitted final Slurm jobs write layer tables.                                    |
 | Condition-score v5 final interpretation plan                      | python3 scripts/e11_write_condition_score_v5_final_interpretation_plan.py                       | results/e11_condition_score_v5_protocol/final_interpretation_plan/* and discussion/e11_condition_score_v5_final_interpretation_plan.md                          | Pre-output claim-state machine that locks how the pending v5 final results will be interpreted before their layer tables exist.                                                                 |
+| Condition-score v5 reviewer failure response                      | python3 scripts/e11_write_condition_score_v5_reviewer_failure_response.py                       | results/e11_condition_score_v5_protocol/reviewer_failure_response/* and discussion/e11_condition_score_v5_reviewer_failure_response.md                          | Pre-output top-conference reviewer response matrix that maps every pending v5 final pass/fail mode to claim downgrades and next evidence.                                                       |
 | Natural head-to-tail boundary audit                               | python3 scripts/e11_write_natural_head_tail_boundary_audit.py                                   | results/e11_natural_head_tail_boundary/* and discussion/e11_natural_head_tail_boundary.md                                                                       | Fixed-rule scan over committed natural matched-head-gain diagnostics; distinguishes the primary full-drift claim from component and secondary outcome tradeoffs.                                |
 | Natural negative-search protocol                                  | python3 scripts/e11_write_natural_negative_search_protocol.py                                   | results/e11_natural_negative_search_protocol/* and discussion/e11_natural_negative_search_protocol.md                                                           | Pre-registers fresh natural negative-search space, metric contract, multiplicity rule, stopping rule, and claim ladder before any new search outputs exist.                                     |
 | Natural negative-search phase1 Slurm entrypoint                   | sbatch scripts/slurm/e11_natural_negative_search_phase1.sbatch                                  | results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/*, phase1_cifar10lt_resnet18/*, and phase1_tail_quality_controls/* after GPU submission | Executable phase1 search runner for the registered natural-negative protocol; outputs remain absent until the fresh GPU runs are intentionally submitted.                                       |
@@ -156,13 +158,14 @@ Regenerate legacy condition-geometry guardrail notes separately with:
 make e11-guardrail-assets
 ```
 
-| artifact                                                     | role                                                                                 |
-|:-------------------------------------------------------------|:-------------------------------------------------------------------------------------|
-| discussion/e11_main_paper_package.md                         | Smallest main figure/table package.                                                  |
-| discussion/e11_quantitative_claim_ledger.md                  | Allowed wording, forbidden wording, quantitative anchors, and evidence links.        |
-| paper/specgrad_activation_paper/tables/e11_paper_numbers.tex | LaTeX macros generated from the current result CSVs and included by the paper draft. |
-| discussion/e11_paper_skeleton.md                             | Current section-level paper skeleton and figure/table plan.                          |
-| discussion/e11_reviewer_risk_audit.md                        | Known reviewer risks and safe claim decisions.                                       |
+| artifact                                                       | role                                                                                 |
+|:---------------------------------------------------------------|:-------------------------------------------------------------------------------------|
+| discussion/e11_main_paper_package.md                           | Smallest main figure/table package.                                                  |
+| discussion/e11_quantitative_claim_ledger.md                    | Allowed wording, forbidden wording, quantitative anchors, and evidence links.        |
+| paper/specgrad_activation_paper/tables/e11_paper_numbers.tex   | LaTeX macros generated from the current result CSVs and included by the paper draft. |
+| discussion/e11_paper_skeleton.md                               | Current section-level paper skeleton and figure/table plan.                          |
+| discussion/e11_reviewer_risk_audit.md                          | Known reviewer risks and safe claim decisions.                                       |
+| discussion/e11_condition_score_v5_reviewer_failure_response.md | Pre-output v5 final failure-mode matrix for reviewer-safe claim downgrades.          |
 
 ## Batch / Activation Contract
 

@@ -904,6 +904,14 @@ def main() -> None:
         Path("results/e11_condition_score_v5_protocol/final_interpretation_plan") / "config.json",
         Path("discussion/e11_condition_score_v5_final_interpretation_plan.md"),
         Path("scripts/e11_write_condition_score_v5_final_interpretation_plan.py"),
+        Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "final_split_output_status.csv",
+        Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "failure_mode_register.csv",
+        Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "reviewer_objection_map.csv",
+        Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "claim_downgrade_actions.csv",
+        Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "next_evidence_queue.csv",
+        Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "config.json",
+        Path("discussion/e11_condition_score_v5_reviewer_failure_response.md"),
+        Path("scripts/e11_write_condition_score_v5_reviewer_failure_response.py"),
         Path("results/e11_natural_head_tail_boundary") / "search_registry.csv",
         Path("results/e11_natural_head_tail_boundary") / "primary_drift_scan.csv",
         Path("results/e11_natural_head_tail_boundary") / "secondary_outcome_scan.csv",
@@ -1273,6 +1281,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-v5-data-results # submit the v5 CIFAR-10 cross-partition final data split via Slurm",
         "make e11-cifar-resnet-condition-score-v5-final-eval # evaluate frozen v5 final gates after both unspent final Slurm jobs finish",
         "make e11-cifar-resnet-condition-score-v5-final-interpretation-plan # lock the v5 final outcome-to-claim state machine before outputs exist",
+        "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response # map v5 final pass/fail modes to reviewer-safe claim downgrades",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
@@ -4064,6 +4073,65 @@ def main() -> None:
             "forbids changing",
         ],
     )
+    v5_response_dir = Path("results/e11_condition_score_v5_protocol/reviewer_failure_response")
+    v5_response_status = pd.read_csv(v5_response_dir / "final_split_output_status.csv")
+    v5_response_modes = pd.read_csv(v5_response_dir / "failure_mode_register.csv")
+    v5_response_objections = pd.read_csv(v5_response_dir / "reviewer_objection_map.csv")
+    v5_response_downgrades = pd.read_csv(v5_response_dir / "claim_downgrade_actions.csv")
+    v5_response_next = pd.read_csv(v5_response_dir / "next_evidence_queue.csv")
+    v5_response_config = json.loads((v5_response_dir / "config.json").read_text(encoding="utf-8"))
+    expected_v5_response_modes = {
+        "V5-RFR-0-pending-outputs",
+        "V5-RFR-1-both-final-splits-pass",
+        "V5-RFR-2-data-transport-boundary",
+        "V5-RFR-3-architecture-transport-boundary",
+        "V5-RFR-4-direction-guardrail-failure",
+        "V5-RFR-5-baseline-dominance-failure",
+        "V5-RFR-6-control-reporting-failure",
+        "V5-RFR-7-both-final-splits-fail",
+        "V5-RFR-8-post-final-leakage-pressure",
+    }
+    expected_v5_response_claim_states = {
+        "not_ready",
+        "p0_claim_eligible",
+        "single-axis-transport-boundary",
+        "direction_guardrail_failure",
+        "nuisance_proxy_boundary",
+        "local_mechanism_only",
+    }
+    if not (
+        set(v5_response_status["split_id"]) == expected_v5_final_split_ids
+        and v5_response_status["pre_output_policy"].eq("do_not_change_score_or_split").all()
+        and set(v5_response_modes["failure_mode_id"]) == expected_v5_response_modes
+        and v5_response_modes["reviewer_objection"].astype(str).str.len().gt(30).all()
+        and v5_response_modes["forbidden_claim"].astype(str).str.len().gt(25).all()
+        and set(v5_response_modes["blocks_p0"]) == {"yes", "no"}
+        and set(v5_response_downgrades["claim_state"]) == expected_v5_response_claim_states
+        and v5_response_objections["remaining_evidence"].astype(str).str.len().gt(25).all()
+        and set(v5_response_next["priority"]).issuperset({"P0", "P1"})
+        and v5_response_config["primary_score"]
+        == "condition_score_v5_transport_normalized_amplitude_minus_direction"
+        and "no final-row tuning" in str(v5_response_config["analysis_scope"])
+    ):
+        raise AssertionError("condition-score v5 reviewer failure response must preserve frozen score, split registry, and claim downgrades")
+    v5_response_text = Path("discussion/e11_condition_score_v5_reviewer_failure_response.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "condition-score v5 reviewer failure response",
+        v5_response_text,
+        [
+            "E11 Condition-Score V5 Reviewer Failure Response",
+            "top-conference reviewer failure response",
+            "claim-downgrade plan",
+            "does not inspect, refit, reselect, or retune on final rows",
+            "Failure Mode Register",
+            "Reviewer Objection Map",
+            "Claim Downgrade Actions",
+            "Next Evidence Queue",
+            "V5-RFR-8-post-final-leakage-pressure",
+        ],
+    )
     natural_boundary_dir = Path("results/e11_natural_head_tail_boundary")
     natural_registry = pd.read_csv(natural_boundary_dir / "search_registry.csv")
     natural_primary = pd.read_csv(natural_boundary_dir / "primary_drift_scan.csv")
@@ -6105,6 +6173,24 @@ def main() -> None:
         condition_score_v5_interpret,
         required_condition_score_v5_interpret_phrases,
     )
+    condition_score_v5_response = Path(
+        "discussion/e11_condition_score_v5_reviewer_failure_response.md"
+    ).read_text(encoding="utf-8")
+    required_condition_score_v5_response_phrases = [
+        "Condition-Score V5 Reviewer Failure Response",
+        "top-conference reviewer failure response",
+        "claim-downgrade plan",
+        "Failure Mode Register",
+        "Reviewer Objection Map",
+        "Claim Downgrade Actions",
+        "Next Evidence Queue",
+        "post-final-leakage-pressure",
+    ]
+    assert_required_phrases(
+        "condition-score v5 reviewer failure response",
+        condition_score_v5_response,
+        required_condition_score_v5_response_phrases,
+    )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -6129,6 +6215,8 @@ def main() -> None:
         "pre-registered final evaluator",
         "discussion/e11_condition_score_v5_final_interpretation_plan.md",
         "outcome-to-claim state machine",
+        "discussion/e11_condition_score_v5_reviewer_failure_response.md",
+        "claim-downgrade plan",
         "transport-normalized score contract",
         "transport-stable sandwich residual proposition",
         "theorem terms to measurable score features",
@@ -6140,6 +6228,7 @@ def main() -> None:
         "ResNeXt50-32x4d",
         "make e11-cifar-resnet-condition-score-v5-final-eval",
         "make e11-cifar-resnet-condition-score-v5-final-interpretation-plan",
+        "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response",
         "CIFAR-10 mixed final data split fails",
         "data-partition reversal mechanism",
         "discussion/e11_natural_head_tail_boundary.md",
@@ -6204,6 +6293,7 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-v5-data-results" not in readme
         or "make e11-cifar-resnet-condition-score-v5-final-eval" not in readme
         or "make e11-cifar-resnet-condition-score-v5-final-interpretation-plan" not in readme
+        or "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-protocol" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-settings" not in readme
