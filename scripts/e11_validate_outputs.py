@@ -848,6 +848,15 @@ def main() -> None:
         Path("results/e11_condition_score_v4_protocol/final_score_evaluation") / "final_score_summary.csv",
         Path("results/e11_condition_score_v4_protocol/final_score_evaluation") / "final_gate_report.csv",
         Path("results/e11_condition_score_v4_protocol/final_score_evaluation") / "config.json",
+        Path("results/e11_condition_score_v4_failure_mechanism_audit") / "final_outcome_matrix.csv",
+        Path("results/e11_condition_score_v4_failure_mechanism_audit") / "axis_all_layer_summary.csv",
+        Path("results/e11_condition_score_v4_failure_mechanism_audit") / "axis_transfer_pair_scores.csv",
+        Path("results/e11_condition_score_v4_failure_mechanism_audit") / "axis_pair_summary.csv",
+        Path("results/e11_condition_score_v4_failure_mechanism_audit") / "top5_stage_summary.csv",
+        Path("results/e11_condition_score_v4_failure_mechanism_audit") / "obstruction_summary.csv",
+        Path("figures/e11_condition_score_v4_failure_mechanism_audit") / "v4_cifar10_mixed_reversal_top5.png",
+        Path("discussion/e11_condition_score_v4_failure_mechanism_audit.md"),
+        Path("scripts/e11_write_condition_score_v4_failure_mechanism_audit.py"),
         Path("discussion/e11_condition_score_v4_protocol.md"),
         Path("discussion/e11_condition_score_v4_validation_cifar100_rotated.md"),
         Path("discussion/e11_condition_score_v4_validation_freeze.md"),
@@ -1027,6 +1036,8 @@ def main() -> None:
         "scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch",
         "e11-cifar-resnet-condition-score-v4-final-eval:",
         "scripts/e11_evaluate_condition_score_v4_finals.py",
+        "e11-cifar-resnet-condition-score-v4-failure-audit:",
+        "scripts/e11_write_condition_score_v4_failure_mechanism_audit.py",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -1125,6 +1136,7 @@ def main() -> None:
         "discussion/e11_condition_score_v4_architecture_wide_resnet50_2.md",
         "discussion/e11_condition_score_v4_data_cifar10_mixed.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
+        "discussion/e11_condition_score_v4_failure_mechanism_audit.md",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
         "scripts/e11_write_condition_score_fresh_protocol.py",
@@ -1132,6 +1144,7 @@ def main() -> None:
         "scripts/e11_write_condition_score_v4_protocol.py",
         "scripts/e11_freeze_condition_score_v4_validation.py",
         "scripts/e11_evaluate_condition_score_v4_finals.py",
+        "scripts/e11_write_condition_score_v4_failure_mechanism_audit.py",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch",
@@ -1155,6 +1168,9 @@ def main() -> None:
         "0.6449 [0.5122, 0.7776]",
         "CIFAR-10 mixed final data split fails",
         "-0.6937 [-0.7129, -0.6744]",
+        "V4-O2-data-partition-reversal",
+        "direction is not the failure",
+        "amplitude/depth",
         "data-partition reversal mechanism problem",
         "aggregation before either unspent final split",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
@@ -3236,6 +3252,92 @@ def main() -> None:
             < 0.0
         ):
             raise AssertionError("condition-score v4 final evaluator must preserve the WideResNet50-2 pass, CIFAR-10 mixed fail, and P0 not_ready state")
+        v4_failure_audit_dir = Path("results/e11_condition_score_v4_failure_mechanism_audit")
+        v4_failure_outcome = pd.read_csv(v4_failure_audit_dir / "final_outcome_matrix.csv")
+        v4_axis_all_layer_summary = pd.read_csv(v4_failure_audit_dir / "axis_all_layer_summary.csv")
+        v4_axis_transfer_pair_scores = pd.read_csv(v4_failure_audit_dir / "axis_transfer_pair_scores.csv")
+        v4_axis_pair_summary = pd.read_csv(v4_failure_audit_dir / "axis_pair_summary.csv")
+        v4_top5_stage_summary = pd.read_csv(v4_failure_audit_dir / "top5_stage_summary.csv")
+        v4_obstruction_summary = pd.read_csv(v4_failure_audit_dir / "obstruction_summary.csv")
+        expected_v4_obstruction_ids = {
+            "V4-O1-architecture-transfer-pass",
+            "V4-O2-data-partition-reversal",
+            "V4-O3-direction-is-not-the-failure",
+            "V4-O4-amplitude-depth-confound",
+        }
+        if not (
+            len(v4_failure_outcome) == 9
+            and len(v4_axis_all_layer_summary) == 8
+            and len(v4_axis_transfer_pair_scores) == 72
+            and len(v4_axis_pair_summary) == 8
+            and set(v4_obstruction_summary["obstruction_id"]) == expected_v4_obstruction_ids
+            and set(v4_axis_pair_summary["transfer_pairs"]) == {9}
+        ):
+            raise AssertionError(
+                "condition-score v4 failure mechanism audit must preserve final outcome, axis, transfer-pair, and obstruction coverage"
+            )
+        v4_failure_outcome_lookup = v4_failure_outcome.set_index(["split_role", "score"])
+        v4_arch_primary_outcome = v4_failure_outcome_lookup.loc[
+            ("fresh_final_heldout_architecture", "condition_score_v4_two_axis_amplitude_minus_direction")
+        ]
+        v4_data_primary_outcome = v4_failure_outcome_lookup.loc[
+            ("fresh_final_heldout_data_partition", "condition_score_v4_two_axis_amplitude_minus_direction")
+        ]
+        v4_data_direction_outcome = v4_failure_outcome_lookup.loc[
+            ("fresh_final_heldout_data_partition", "condition_score_v4_direction_axis_scaled_jvp_ratio")
+        ]
+        v4_final_gate_outcome = v4_failure_outcome_lookup.loc[
+            ("p0_predictive_condition", "condition_score_v4_two_axis_amplitude_minus_direction")
+        ]
+        v4_axis_lookup = v4_axis_pair_summary.set_index(["split_role", "score_id"])
+        v4_data_primary_axis = v4_axis_lookup.loc[
+            ("fresh_final_heldout_data_partition", "condition_score_v4_two_axis_amplitude_minus_direction")
+        ]
+        v4_data_direction_axis = v4_axis_lookup.loc[
+            ("fresh_final_heldout_data_partition", "v4_direction_axis_scaled_jvp_ratio")
+        ]
+        v4_data_amplitude_axis = v4_axis_lookup.loc[
+            ("fresh_final_heldout_data_partition", "v4_residual_amplitude_axis_scaled_jvp_fro")
+        ]
+        v4_data_early_axis = v4_axis_lookup.loc[
+            ("fresh_final_heldout_data_partition", "early_layer_prior")
+        ]
+        v4_failed_top5 = v4_top5_stage_summary[
+            v4_top5_stage_summary["split_id"].eq("v4_final_data_cifar10lt_mixed_partition")
+        ]
+        if not (
+            v4_arch_primary_outcome["residual_gate_status"] == "passes_residual_gate"
+            and v4_data_primary_outcome["residual_gate_status"] == "inverted_residual_ranking"
+            and v4_final_gate_outcome["residual_gate_status"] == "not_ready"
+            and float(v4_data_direction_outcome["mean_threshold_below_one_accuracy"]) == 1.0
+            and float(v4_data_primary_axis["mean_spearman_score_vs_target_residual"]) < -0.69
+            and float(v4_data_primary_axis["spearman_ci95_high"]) < 0.0
+            and float(v4_data_direction_axis["mean_spearman_score_vs_target_residual"]) > 0.60
+            and float(v4_data_direction_axis["spearman_ci95_low"]) > 0.58
+            and float(v4_data_amplitude_axis["mean_spearman_score_vs_target_residual"]) < -0.67
+            and float(v4_data_amplitude_axis["spearman_ci95_high"]) < 0.0
+            and float(v4_data_early_axis["mean_spearman_score_vs_target_residual"]) < -0.79
+            and not v4_failed_top5.empty
+            and int(v4_failed_top5["target_residual_top5_count"].sum()) > 0
+        ):
+            raise AssertionError(
+                "condition-score v4 failure mechanism audit must preserve the CIFAR-10 mixed direction-pass and amplitude/depth scalar-reversal diagnosis"
+            )
+        v4_failure_audit_text = Path("discussion/e11_condition_score_v4_failure_mechanism_audit.md").read_text(
+            encoding="utf-8"
+        )
+        assert_required_phrases(
+            "condition-score v4 failure mechanism audit",
+            v4_failure_audit_text,
+            [
+                "E11 Condition-Score V4 Failure Mechanism Audit",
+                "V4-O2-data-partition-reversal",
+                "V4-O3-direction-is-not-the-failure",
+                "The failure is not a direction-threshold failure",
+                "Frobenius-amplitude/depth",
+                "These final rows are now spent for score fitting.",
+            ],
+        )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
