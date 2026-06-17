@@ -37,7 +37,7 @@ gate remains `not_ready` when those tools are absent on the server.
 | paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex | yes      |         4934 | 1264d8923f3cfff52ae9af90f44b10bd29710c949ed93fc3d2eda5dff7b30471 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/local_linearization_errors.tex  | yes      |          961 | 12c108dd5bfdfd2d1ad219904a4f82f1d10e01ab6d6de4cd86a9252cb298a5ef | paper source or root reproduction entrypoint | pass           |
 | Makefile                                                               | yes      |        13609 | e5bf65aa241553fe9d406e3c8eb7643187cf1f0a37967a928b24bf014dd39472 | paper source or root reproduction entrypoint | pass           |
-| README_E11.md                                                          | yes      |        66476 | 8b463d75c73a083c8824b2786df8be70409ccbf448f1c2b04d388f882f936c6c | paper source or root reproduction entrypoint | pass           |
+| README_E11.md                                                          | yes      |        66649 | fa55a2a2cbb7ef8ba88ed1cbb762c8ece828aaa308f85d24db1e8db39eae2fa8 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/figures                                | yes      |      2923280 | 21 png files                                                     | paper-local figure bundle                    | pass           |
 
 ## Build Gate Summary

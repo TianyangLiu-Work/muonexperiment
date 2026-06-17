@@ -67,15 +67,15 @@ the primary full tail-output drift metric.
 
 ## Protocol Status
 
-| item                                     | status                      | evidence                                                                                                                                                                    | blocks_stronger_claim_if_missing   |
-|:-----------------------------------------|:----------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------|
-| committed natural audit baseline         | loaded                      | 37 primary rows; strict worse count 0; max CI high 0.936                                                                                                                    | yes                                |
-| fresh natural search protocol            | generated                   | search space, metric contract, stopping rules, gates, and claim ladder written                                                                                              | yes                                |
-| fresh natural search entrypoints         | implemented                 | scripts/e11_run_natural_negative_search_phase1.py and scripts/slurm/e11_natural_negative_search_phase1.sbatch are registered for phase1                                     | yes                                |
-| fresh natural search settings registries | locked                      | phase1_cifar100lt_resnet18, phase1_cifar10lt_resnet18, and phase1_tail_quality_controls settings_registry.csv files declare 26 total settings                               | yes                                |
-| fresh natural search outputs             | metric_outputs_not_run      | phase1 metric files are absent until the submitted GPU jobs finish                                                                                                          | yes                                |
-| multiplicity-adjusted evaluator          | implemented_pending_outputs | scripts/e11_evaluate_natural_negative_search_phase1.py writes Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation | yes                                |
-| natural negative claim                   | not_ready                   | no fresh search outputs exist under this protocol                                                                                                                           | yes                                |
+| item                                     | status                      | evidence                                                                                                                                                                                                | blocks_stronger_claim_if_missing   |
+|:-----------------------------------------|:----------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------|
+| committed natural audit baseline         | loaded                      | 37 primary rows; strict worse count 0; max CI high 0.936                                                                                                                                                | yes                                |
+| fresh natural search protocol            | generated                   | search space, metric contract, stopping rules, gates, and claim ladder written                                                                                                                          | yes                                |
+| fresh natural search entrypoints         | implemented                 | scripts/e11_run_natural_negative_search_phase1.py and scripts/slurm/e11_natural_negative_search_phase1.sbatch are registered for phase1                                                                 | yes                                |
+| fresh natural search settings registries | locked                      | phase1_cifar100lt_resnet18, phase1_cifar10lt_resnet18, and phase1_tail_quality_controls settings_registry.csv files declare 26 total settings                                                           | yes                                |
+| fresh natural search outputs             | metric_outputs_not_run      | phase1 metric files are absent until the submitted GPU jobs finish                                                                                                                                      | yes                                |
+| multiplicity-adjusted evaluator          | implemented_pending_outputs | scripts/e11_evaluate_natural_negative_search_phase1.py writes per-seed log-ratio rows and Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation | yes                                |
+| natural negative claim                   | not_ready                   | no fresh search outputs exist under this protocol                                                                                                                                                       | yes                                |
 
 ## Claim Boundary
 
@@ -86,7 +86,8 @@ Blocked now: claiming a fresh natural primary counterexample, a finite
 pre-registered null search, or a practical optimizer-performance result from
 this protocol. The phase1 Slurm entrypoint and multiplicity evaluator are
 implemented, but those claims still require complete fresh metric outputs and
-Holm-adjusted decisions that satisfy the acceptance gates above.
+Holm-adjusted decisions from paired per-seed log-ratio tests that satisfy the
+acceptance gates above.
 
 Generated tables:
 

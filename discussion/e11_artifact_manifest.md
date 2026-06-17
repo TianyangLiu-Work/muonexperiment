@@ -181,8 +181,8 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/settings_registry.csv               |      8 | 4.7 KB    |
 | results/e11_natural_negative_search_protocol/phase1_tail_quality_controls/settings_registry.csv            |      6 | 4.9 KB    |
 | results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/run_registry.csv               |      3 | 1.1 KB    |
-| results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv          |     26 | 8.1 KB    |
-| results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv                |      5 | 714 B     |
+| results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv          |     26 | 8.6 KB    |
+| results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv                |      5 | 751 B     |
 | results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 13.2 KB   |
 | results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv                                               |    110 | 5.7 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/class_metrics.csv                                             |   1000 | 58.6 KB   |
@@ -259,7 +259,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                                        | size    |
 |:----------------------------------------------------------------------------|:--------|
-| README_E11.md                                                               | 64.9 KB |
+| README_E11.md                                                               | 65.1 KB |
 | discussion/e11_paper_skeleton.md                                            | 10.9 KB |
 | discussion/e11_main_paper_package.md                                        | 22.8 KB |
 | discussion/e11_main_figure_captions.md                                      | 6.5 KB  |
@@ -276,8 +276,8 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_top_conference_plan.md                                       | 14.1 KB |
 | discussion/e11_top_conference_gap_register.md                               | 38.8 KB |
 | discussion/e11_natural_head_tail_boundary.md                                | 17.5 KB |
-| discussion/e11_natural_negative_search_protocol.md                          | 16.6 KB |
-| discussion/e11_natural_negative_search_phase1_evaluation.md                 | 6.8 KB  |
+| discussion/e11_natural_negative_search_protocol.md                          | 16.9 KB |
+| discussion/e11_natural_negative_search_phase1_evaluation.md                 | 7.3 KB  |
 | discussion/e11_evidence_index.md                                            | 29.3 KB |
 | discussion/e11_research_synthesis.md                                        | 7.8 KB  |
 | discussion/e11_research_direction_map.md                                    | 9.8 KB  |

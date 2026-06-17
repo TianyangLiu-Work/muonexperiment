@@ -898,6 +898,7 @@ def main() -> None:
         Path("results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18") / "settings_registry.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_tail_quality_controls") / "settings_registry.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "run_registry.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "seed_level_primary_ratios.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "primary_decisions.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "gate_report.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "config.json",
@@ -3921,6 +3922,7 @@ def main() -> None:
     phase2_prefixes_absent = all(not Path(row.planned_artifact_prefix).exists() for row in natural_phase2_search.itertuples())
     natural_eval_dir = natural_protocol_dir / "phase1_multiplicity_evaluation"
     natural_eval_run_registry = pd.read_csv(natural_eval_dir / "run_registry.csv")
+    natural_eval_seed_ratios = pd.read_csv(natural_eval_dir / "seed_level_primary_ratios.csv")
     natural_eval_decisions = pd.read_csv(natural_eval_dir / "primary_decisions.csv")
     natural_eval_gates = pd.read_csv(natural_eval_dir / "gate_report.csv")
     natural_eval_gate_lookup = natural_eval_gates.set_index("gate_id")["status"].to_dict()
@@ -3960,7 +3962,9 @@ def main() -> None:
         "phase1_prefixes_settings_only": phase1_prefixes_settings_only,
         "phase2_prefixes_absent": phase2_prefixes_absent,
         "eval_decision_count": len(natural_eval_decisions) == 26,
+        "eval_seed_ratio_empty_until_metrics": len(natural_eval_seed_ratios) == 0,
         "eval_decisions_not_run": bool(natural_eval_decisions["output_status"].eq("not_run").all()),
+        "eval_decisions_missing_source": bool(natural_eval_decisions["inference_source"].eq("missing_output").all()),
         "eval_claims_not_ready": bool(natural_eval_decisions["claim_status"].eq("not_ready").all()),
         "eval_run_status": set(natural_eval_run_registry["output_status"]) == {"settings_only_no_metrics"},
         "eval_gate_implemented": natural_eval_gate_lookup["NNS-E1-evaluator-implemented"] == "pass",
@@ -4006,7 +4010,9 @@ def main() -> None:
             "multiplicity boundary",
             "all 26 declared settings",
             "Holm",
+            "paired per-seed log-ratio tests",
             "Current primary metric coverage: 0/26 settings",
+            "Current seed-level primary rows: 0",
             "NNS-E2-phase1-output-completeness",
             "not_ready",
         ],

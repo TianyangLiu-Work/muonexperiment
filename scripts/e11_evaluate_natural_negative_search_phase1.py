@@ -48,9 +48,12 @@ DECISION_COLUMNS = [
     "seed_count",
     "observed_seeds",
     "metric_id",
+    "inference_source",
     "estimate",
     "raw_ci95_low",
     "raw_ci95_high",
+    "log_ratio_mean",
+    "log_ratio_se",
     "raw_one_sided_p",
     "holm_adjusted_one_sided_p",
     "bonferroni_simultaneous_ci95_low",
@@ -61,6 +64,24 @@ DECISION_COLUMNS = [
     "adjustment_scope_status",
     "adjusted_primary_decision",
     "claim_status",
+]
+
+SEED_RATIO_COLUMNS = [
+    "search_id",
+    "setting_id",
+    "phase",
+    "multiplicity_family",
+    "planned_family_size",
+    "dataset",
+    "model",
+    "partition_id",
+    "warmup_steps",
+    "target_head_gain_fraction_registered",
+    "seed",
+    "frobenius_tail_output_drift_fro",
+    "spectral_tail_output_drift_fro",
+    "tail_output_drift_sq_ratio_spectral_over_fro",
+    "log_tail_output_drift_sq_ratio_spectral_over_fro",
 ]
 
 
@@ -102,6 +123,66 @@ def infer_log_ratio_test(row: pd.Series, *, family_size: int) -> tuple[float, fl
     tcrit_bonferroni = t_ppf(1.0 - ALPHA / max(family_size, 1), df)
     simultaneous_low = math.exp(math.log(estimate) - tcrit_bonferroni * se)
     return raw_p, simultaneous_low, se
+
+
+def log_ratio_test_from_seed_rows(seed_rows: pd.DataFrame, *, family_size: int) -> dict[str, float]:
+    logs = (
+        seed_rows["log_tail_output_drift_sq_ratio_spectral_over_fro"]
+        .replace([np.inf, -np.inf], np.nan)
+        .dropna()
+        .to_numpy(dtype=float)
+    )
+    if logs.size == 0:
+        return {
+            "estimate": math.nan,
+            "raw_ci95_low": math.nan,
+            "raw_ci95_high": math.nan,
+            "raw_one_sided_p": math.nan,
+            "bonferroni_simultaneous_ci95_low": math.nan,
+            "log_ratio_mean": math.nan,
+            "log_ratio_se": math.nan,
+        }
+    mean = float(logs.mean())
+    estimate = math.exp(mean)
+    if logs.size == 1:
+        raw_p = 0.0 if mean > 0.0 else 1.0
+        return {
+            "estimate": estimate,
+            "raw_ci95_low": estimate,
+            "raw_ci95_high": estimate,
+            "raw_one_sided_p": raw_p,
+            "bonferroni_simultaneous_ci95_low": estimate,
+            "log_ratio_mean": mean,
+            "log_ratio_se": 0.0,
+        }
+    df = int(logs.size - 1)
+    se = float(logs.std(ddof=1)) / math.sqrt(float(logs.size))
+    if se <= 0.0 or not np.isfinite(se):
+        raw_p = 0.0 if mean > 0.0 else 1.0
+        return {
+            "estimate": estimate,
+            "raw_ci95_low": estimate,
+            "raw_ci95_high": estimate,
+            "raw_one_sided_p": raw_p,
+            "bonferroni_simultaneous_ci95_low": estimate,
+            "log_ratio_mean": mean,
+            "log_ratio_se": 0.0,
+        }
+    tcrit_raw = t_ppf(0.975, df)
+    raw_ci_low = math.exp(mean - tcrit_raw * se)
+    raw_ci_high = math.exp(mean + tcrit_raw * se)
+    raw_p = t_sf(mean / se, df)
+    tcrit_bonferroni = t_ppf(1.0 - ALPHA / max(family_size, 1), df)
+    simultaneous_low = math.exp(mean - tcrit_bonferroni * se)
+    return {
+        "estimate": estimate,
+        "raw_ci95_low": raw_ci_low,
+        "raw_ci95_high": raw_ci_high,
+        "raw_one_sided_p": raw_p,
+        "bonferroni_simultaneous_ci95_low": simultaneous_low,
+        "log_ratio_mean": mean,
+        "log_ratio_se": se,
+    }
 
 
 def holm_adjust(raw_p_values: pd.Series, *, family_size: int) -> pd.Series:
@@ -178,6 +259,66 @@ def load_observed_pair_summary() -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True)
 
 
+def load_observed_step_metrics() -> pd.DataFrame:
+    frames = []
+    for search_id, prefix in SEARCH_OUTPUT_PREFIXES.items():
+        path = prefix / "step_metrics.csv"
+        if not path.exists():
+            continue
+        frame = pd.read_csv(path)
+        if "search_id" not in frame.columns:
+            frame["search_id"] = search_id
+        frames.append(frame)
+    if not frames:
+        return pd.DataFrame(columns=SEED_RATIO_COLUMNS)
+    return pd.concat(frames, ignore_index=True)
+
+
+def seed_level_primary_ratios(step_metrics: pd.DataFrame) -> pd.DataFrame:
+    if step_metrics.empty:
+        return pd.DataFrame(columns=SEED_RATIO_COLUMNS)
+    required = {"search_id", "setting_id", "seed", "geometry", "tail_output_drift_fro"}
+    missing = required.difference(step_metrics.columns)
+    if missing:
+        raise ValueError(f"step_metrics missing required columns for seed-level natural evaluator: {sorted(missing)}")
+    rows = []
+    metadata_columns = [
+        "phase",
+        "multiplicity_family",
+        "planned_family_size",
+        "dataset",
+        "model",
+        "partition_id",
+        "warmup_steps",
+        "target_head_gain_fraction_registered",
+    ]
+    for (search_id, setting_id, seed), group in step_metrics.groupby(
+        ["search_id", "setting_id", "seed"],
+        observed=True,
+        sort=False,
+    ):
+        by_geometry = group.set_index("geometry")
+        if not {"frobenius", "spectral"}.issubset(by_geometry.index):
+            continue
+        fro = float(by_geometry.loc["frobenius", "tail_output_drift_fro"])
+        spectral = float(by_geometry.loc["spectral", "tail_output_drift_fro"])
+        ratio = spectral**2 / max(fro**2, 1e-300)
+        row = {
+            "search_id": search_id,
+            "setting_id": setting_id,
+            "seed": int(seed),
+            "frobenius_tail_output_drift_fro": fro,
+            "spectral_tail_output_drift_fro": spectral,
+            "tail_output_drift_sq_ratio_spectral_over_fro": ratio,
+            "log_tail_output_drift_sq_ratio_spectral_over_fro": math.log(ratio) if ratio > 0 else math.nan,
+        }
+        first = group.iloc[0]
+        for column in metadata_columns:
+            row[column] = first[column] if column in first.index else math.nan
+        rows.append(row)
+    return pd.DataFrame(rows, columns=SEED_RATIO_COLUMNS)
+
+
 def quality_gates(row: pd.Series) -> tuple[bool, bool, bool]:
     head_gain_ok = (
         float(row.get("mean_actual_head_gain_relative_error_frobenius", math.inf))
@@ -192,7 +333,12 @@ def quality_gates(row: pd.Series) -> tuple[bool, bool, bool]:
     return head_gain_ok, tail_quality_ok, head_gain_ok and tail_quality_ok
 
 
-def build_primary_decisions(expected: pd.DataFrame, observed: pd.DataFrame, run_registry: pd.DataFrame) -> pd.DataFrame:
+def build_primary_decisions(
+    expected: pd.DataFrame,
+    observed: pd.DataFrame,
+    seed_ratios: pd.DataFrame,
+    run_registry: pd.DataFrame,
+) -> pd.DataFrame:
     family_size = int(expected["planned_family_size"].max())
     observed_columns = [
         "search_id",
@@ -224,18 +370,42 @@ def build_primary_decisions(expected: pd.DataFrame, observed: pd.DataFrame, run_
         record["metric_id"] = "primary_tail_output_drift_ratio"
         record["observed_seeds"] = int(row["seeds_observed"] if "seeds_observed" in row and pd.notna(row["seeds_observed"]) else row.get("seeds", 0)) if has_output else 0
         if has_output:
-            raw_p, simultaneous_low, _se = infer_log_ratio_test(row, family_size=family_size)
+            setting_seed_ratios = seed_ratios[seed_ratios["setting_id"].eq(row["setting_id"])]
+            if len(setting_seed_ratios) >= 1:
+                test = log_ratio_test_from_seed_rows(setting_seed_ratios, family_size=family_size)
+                inference_source = "paired_seed_log_ratio_t_test"
+                raw_p = test["raw_one_sided_p"]
+                simultaneous_low = test["bonferroni_simultaneous_ci95_low"]
+                raw_low = test["raw_ci95_low"]
+                raw_high = test["raw_ci95_high"]
+                estimate = test["estimate"]
+                log_ratio_mean = test["log_ratio_mean"]
+                log_ratio_se = test["log_ratio_se"]
+                observed_seeds = int(setting_seed_ratios["seed"].nunique())
+            else:
+                raw_p, simultaneous_low, log_ratio_se = infer_log_ratio_test(row, family_size=family_size)
+                inference_source = "aggregate_ci_fallback"
+                raw_low = float(row["tail_output_drift_sq_ratio_ci95_low"])
+                raw_high = float(row["tail_output_drift_sq_ratio_ci95_high"])
+                estimate = float(row["geomean_tail_output_drift_sq_ratio_spectral_over_fro"])
+                log_ratio_mean = math.log(estimate) if estimate > 0 else math.nan
+                observed_seeds = int(
+                    row["seeds_observed"]
+                    if "seeds_observed" in row and pd.notna(row["seeds_observed"])
+                    else row.get("seeds", 0)
+                )
             head_gain_gate, tail_quality_gate, quality_gate = quality_gates(row)
-            raw_low = float(row["tail_output_drift_sq_ratio_ci95_low"])
-            raw_high = float(row["tail_output_drift_sq_ratio_ci95_high"])
-            estimate = float(row["geomean_tail_output_drift_sq_ratio_spectral_over_fro"])
             raw_ci_worse = bool(raw_low > 1.0)
             scope_status = "complete_family" if complete else "incomplete_provisional"
             decision_status = "pending_phase_completion" if not complete else "not_primary_worse_adjusted"
             claim_status = "not_ready" if not complete else "finite_null_or_no_primary_candidate"
         else:
+            inference_source = "missing_output"
             raw_p = math.nan
             simultaneous_low = math.nan
+            log_ratio_mean = math.nan
+            log_ratio_se = math.nan
+            observed_seeds = 0
             head_gain_gate = False
             tail_quality_gate = False
             quality_gate = False
@@ -249,9 +419,13 @@ def build_primary_decisions(expected: pd.DataFrame, observed: pd.DataFrame, run_
         record.update(
             {
                 "seed_count": row.get("seed_count", len(DEFAULT_SEEDS)),
+                "observed_seeds": observed_seeds,
+                "inference_source": inference_source,
                 "estimate": estimate,
                 "raw_ci95_low": raw_low,
                 "raw_ci95_high": raw_high,
+                "log_ratio_mean": log_ratio_mean,
+                "log_ratio_se": log_ratio_se,
                 "raw_one_sided_p": raw_p,
                 "bonferroni_simultaneous_ci95_low": simultaneous_low,
                 "raw_ci_worse": raw_ci_worse,
@@ -318,7 +492,7 @@ def build_gate_report(run_registry: pd.DataFrame, decisions: pd.DataFrame) -> pd
             {
                 "gate_id": "NNS-E3-primary-multiplicity",
                 "status": "pass" if complete else "not_ready",
-                "evidence": "Holm one-sided p-values use the registered 26-setting phase1 family",
+                "evidence": "Holm one-sided p-values use paired per-seed log-ratio tests over the registered 26-setting phase1 family",
             },
             {
                 "gate_id": "NNS-E4-natural-primary-claim",
@@ -334,7 +508,12 @@ def build_gate_report(run_registry: pd.DataFrame, decisions: pd.DataFrame) -> pd
     )
 
 
-def write_discussion(run_registry: pd.DataFrame, decisions: pd.DataFrame, gate_report: pd.DataFrame) -> None:
+def write_discussion(
+    run_registry: pd.DataFrame,
+    decisions: pd.DataFrame,
+    gate_report: pd.DataFrame,
+    seed_ratios: pd.DataFrame,
+) -> None:
     observed = int(decisions["output_status"].eq("observed").sum())
     total = len(decisions)
     lines = [
@@ -343,9 +522,11 @@ def write_discussion(run_registry: pd.DataFrame, decisions: pd.DataFrame, gate_r
         "This generated evaluator is the multiplicity boundary for the registered",
         "natural negative-search phase1 family. It does not claim a natural primary",
         "counterexample until all 26 declared settings have metric rows and the Holm",
-        "adjusted primary decision passes the quality gates.",
+        "adjusted primary decision from paired per-seed log-ratio tests passes the",
+        "quality gates.",
         "",
         f"Current primary metric coverage: {observed}/{total} settings.",
+        f"Current seed-level primary rows: {len(seed_ratios)}.",
         "",
         "## Run Registry",
         "",
@@ -373,6 +554,7 @@ def write_discussion(run_registry: pd.DataFrame, decisions: pd.DataFrame, gate_r
                 "search_id",
                 "setting_id",
                 "output_status",
+                "inference_source",
                 "raw_one_sided_p",
                 "holm_adjusted_one_sided_p",
                 "adjusted_primary_decision",
@@ -382,6 +564,7 @@ def write_discussion(run_registry: pd.DataFrame, decisions: pd.DataFrame, gate_r
         "",
         "Artifacts:",
         f"- [run_registry.csv](../{(OUTPUT_DIR / 'run_registry.csv').as_posix()})",
+        f"- [seed_level_primary_ratios.csv](../{(OUTPUT_DIR / 'seed_level_primary_ratios.csv').as_posix()})",
         f"- [primary_decisions.csv](../{(OUTPUT_DIR / 'primary_decisions.csv').as_posix()})",
         f"- [gate_report.csv](../{(OUTPUT_DIR / 'gate_report.csv').as_posix()})",
         f"- [config.json](../{(OUTPUT_DIR / 'config.json').as_posix()})",
@@ -394,9 +577,12 @@ def main() -> None:
     expected = expected_registry()
     run_registry = build_run_registry(expected)
     observed = load_observed_pair_summary()
-    decisions = build_primary_decisions(expected, observed, run_registry)
+    step_metrics = load_observed_step_metrics()
+    seed_ratios = seed_level_primary_ratios(step_metrics)
+    decisions = build_primary_decisions(expected, observed, seed_ratios, run_registry)
     gate_report = build_gate_report(run_registry, decisions)
     run_registry.to_csv(OUTPUT_DIR / "run_registry.csv", index=False)
+    seed_ratios.to_csv(OUTPUT_DIR / "seed_level_primary_ratios.csv", index=False)
     decisions.to_csv(OUTPUT_DIR / "primary_decisions.csv", index=False)
     gate_report.to_csv(OUTPUT_DIR / "gate_report.csv", index=False)
     (OUTPUT_DIR / "config.json").write_text(
@@ -407,13 +593,14 @@ def main() -> None:
                 "alpha": ALPHA,
                 "head_gain_relative_error_max": HEAD_GAIN_RELATIVE_ERROR_MAX,
                 "tail_accuracy_floor_by_dataset": TAIL_ACCURACY_FLOOR_BY_DATASET,
+                "primary_test": "paired per-seed log tail-output-drift ratio t-test with Holm one-sided phase-family adjustment",
             },
             indent=2,
         )
         + "\n",
         encoding="utf-8",
     )
-    write_discussion(run_registry, decisions, gate_report)
+    write_discussion(run_registry, decisions, gate_report, seed_ratios)
     print(f"saved natural negative-search phase1 evaluation to {OUTPUT_DIR}")
     print(f"observed primary rows={int(decisions['output_status'].eq('observed').sum())}/{len(decisions)}")
     print(gate_report.to_string(index=False))

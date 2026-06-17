@@ -386,7 +386,9 @@ until `make e11-natural-negative-search-phase1-results` finishes. The
 multiplicity evaluator is `scripts/e11_evaluate_natural_negative_search_phase1.py`;
 its current generated artifact
 `discussion/e11_natural_negative_search_phase1_evaluation.md` preserves all 26
-phase1 settings and remains `not_ready` until fresh metric outputs are complete.
+phase1 settings, uses paired per-seed log-ratio tests for the primary
+tail-output drift ratio when `step_metrics.csv` is available, and remains
+`not_ready` until fresh metric outputs are complete.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -758,7 +760,7 @@ Do not claim:
 - `scripts/e11_freeze_condition_score_v5_validation.py`: v5 validation-freeze evaluator; it writes not_run/not_ready rows until the validation split exists, then freezes or blocks a transport-normalized residual score before final splits.
 - `scripts/e11_write_natural_negative_search_protocol.py`: pre-registered fresh natural negative-search protocol with search space, metric contract, multiplicity rule, stopping rules, gates, and claim ladder.
 - `scripts/e11_run_natural_negative_search_phase1.py`: executable phase1 runner for the registered natural negative-search settings; supports `--list-settings` without launching training and writes fresh outputs only when submitted.
-- `scripts/e11_evaluate_natural_negative_search_phase1.py`: Holm-adjusted phase1 evaluator for the natural negative-search protocol; keeps every registered setting as pending until metric outputs are complete.
+- `scripts/e11_evaluate_natural_negative_search_phase1.py`: Holm-adjusted phase1 evaluator for the natural negative-search protocol; uses paired per-seed log-ratio tests when metric outputs exist and keeps every registered setting as pending until they are complete.
 - `scripts/e11_write_submission_repro_audit.py`: submission reproducibility audit for LaTeX toolchain availability, rendered PDF hashes, paper source hashes, and clean-checkout gates.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.

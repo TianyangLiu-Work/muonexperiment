@@ -12,7 +12,7 @@
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2076047,
+      "size_bytes": 2083867,
       "size": "2.0 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1149521,
+      "size_bytes": 1150321,
       "size": "1.1 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 280463909,
+      "size_bytes": 280464915,
       "size": "267.5 MB"
     },
     {
@@ -878,12 +878,12 @@
     {
       "path": "results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv",
       "rows": 26,
-      "size": "8.1 KB"
+      "size": "8.6 KB"
     },
     {
       "path": "results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv",
       "rows": 5,
-      "size": "714 B"
+      "size": "751 B"
     },
     {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
@@ -1244,7 +1244,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "64.9 KB"
+      "size": "65.1 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1312,11 +1312,11 @@
     },
     {
       "path": "discussion/e11_natural_negative_search_protocol.md",
-      "size": "16.6 KB"
+      "size": "16.9 KB"
     },
     {
       "path": "discussion/e11_natural_negative_search_phase1_evaluation.md",
-      "size": "6.8 KB"
+      "size": "7.3 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",

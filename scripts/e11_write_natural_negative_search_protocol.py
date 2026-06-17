@@ -139,7 +139,7 @@ def build_metric_contract() -> pd.DataFrame:
                 "estimator": "geomean_tail_output_drift_sq_ratio_spectral_over_fro",
                 "worse_rule": "simultaneous or Holm-adjusted 95% lower confidence endpoint is above 1",
                 "multiplicity_family": "all fresh primary settings within a phase",
-                "required_report": "estimate, raw CI, adjusted CI or adjusted one-sided p-value, pre-update tail quality, head-gain error",
+                "required_report": "per-seed paired log-ratio rows, estimate, raw CI, adjusted CI or adjusted one-sided p-value, pre-update tail quality, head-gain error",
                 "claim_boundary": "only this metric can support a natural primary full-drift counterexample",
             },
             {
@@ -357,8 +357,8 @@ def build_protocol_status(audit_baseline: pd.DataFrame) -> pd.DataFrame:
                 "item": "multiplicity-adjusted evaluator",
                 "status": "implemented_pending_outputs",
                 "evidence": (
-                    "scripts/e11_evaluate_natural_negative_search_phase1.py writes Holm-adjusted "
-                    "decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation"
+                    "scripts/e11_evaluate_natural_negative_search_phase1.py writes per-seed log-ratio rows "
+                    "and Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation"
                 ),
                 "blocks_stronger_claim_if_missing": "yes",
             },
@@ -435,7 +435,8 @@ Blocked now: claiming a fresh natural primary counterexample, a finite
 pre-registered null search, or a practical optimizer-performance result from
 this protocol. The phase1 Slurm entrypoint and multiplicity evaluator are
 implemented, but those claims still require complete fresh metric outputs and
-Holm-adjusted decisions that satisfy the acceptance gates above.
+Holm-adjusted decisions from paired per-seed log-ratio tests that satisfy the
+acceptance gates above.
 
 Generated tables:
 
