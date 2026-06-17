@@ -274,6 +274,13 @@ def build_theorem_to_experiment_queue() -> pd.DataFrame:
             },
             {
                 "priority": "P0",
+                "task": "classify v5 final positive/null/negative outcomes against the pre-output detectable-effect scale",
+                "artifact_or_command": "make e11-cifar-resnet-condition-score-v5-final-power-audit",
+                "unblocks": "underpowered-null versus negative-transport wording for final residual-Spearman gates",
+                "dependency": "v5 final evaluator refreshed",
+            },
+            {
+                "priority": "P0",
                 "task": "rerun v5 reviewer failure response after final outputs",
                 "artifact_or_command": "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response",
                 "unblocks": "claim downgrade wording for positive or negative finals",

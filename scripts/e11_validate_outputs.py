@@ -1431,6 +1431,8 @@ def main() -> None:
         "scripts/slurm/e11_cifar100_resnet_condition_score_v5_data_cifar10_cross.sbatch",
         "e11-cifar-resnet-condition-score-v5-final-eval:",
         "scripts/e11_evaluate_condition_score_v5_finals.py",
+        "e11-cifar-resnet-condition-score-v5-final-power-audit:",
+        "scripts/e11_write_condition_score_v5_final_power_audit.py",
         "e11-cifar-resnet-condition-score-v5-final-interpretation-plan:",
         "scripts/e11_write_condition_score_v5_final_interpretation_plan.py",
         "e11-guardrail-assets:",
@@ -1517,6 +1519,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-v5-architecture-results # submit the v5 ResNeXt50-32x4d final architecture split via Slurm",
         "make e11-cifar-resnet-condition-score-v5-data-results # submit the v5 CIFAR-10 cross-partition final data split via Slurm",
         "make e11-cifar-resnet-condition-score-v5-final-eval # evaluate frozen v5 final gates after both unspent final Slurm jobs finish",
+        "make e11-cifar-resnet-condition-score-v5-final-power-audit # pre-output detectable-effect audit for v5 final residual-Spearman gates",
         "make e11-cifar-resnet-condition-score-v5-final-interpretation-plan # lock the v5 final outcome-to-claim state machine before outputs exist",
         "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response # map v5 final pass/fail modes to reviewer-safe claim downgrades",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
@@ -4578,6 +4581,70 @@ def main() -> None:
             "`not_run` is the expected state",
         ],
     )
+    v5_power_dir = Path("results/e11_condition_score_v5_protocol/final_power_audit")
+    v5_power_design = pd.read_csv(v5_power_dir / "split_power_design.csv")
+    v5_power_fisher = pd.read_csv(v5_power_dir / "fisher_z_resolution.csv")
+    v5_power_mde = pd.read_csv(v5_power_dir / "mean_spearman_mde.csv")
+    v5_power_ladder = pd.read_csv(v5_power_dir / "interpretation_ladder.csv")
+    v5_power_states = pd.read_csv(v5_power_dir / "outcome_state_machine.csv")
+    v5_power_config = json.loads((v5_power_dir / "config.json").read_text(encoding="utf-8"))
+    expected_v5_power_cases = {
+        "V5-PWR-1-pending-outputs",
+        "V5-PWR-2-positive-above-zero-ci",
+        "V5-PWR-3-null-below-detectable-scale",
+        "V5-PWR-4-negative-above-detectable-scale",
+        "V5-PWR-5-high-heterogeneity",
+    }
+    expected_v5_power_states = {
+        "V5-PWR-S1-not-run",
+        "V5-PWR-S2-partial",
+        "V5-PWR-S3-complete-positive",
+        "V5-PWR-S4-complete-small-null",
+        "V5-PWR-S5-complete-negative",
+    }
+    fisher_reference = v5_power_fisher[
+        v5_power_fisher["points"].eq(int(v5_power_config["reference_points_per_transfer"]))
+    ].iloc[0]
+    mde_reference = v5_power_mde[
+        v5_power_mde["assumed_across_pair_spearman_sd"].eq(0.2)
+    ].iloc[0]
+    if not (
+        set(v5_power_design["split_id"]) == expected_v5_final_split_ids
+        and set(v5_power_design["split_role"]) == expected_v5_final_roles
+        and set(v5_power_design["primary_residual_gate"]) == {
+            "mean Spearman CI lower endpoint above zero"
+        }
+        and int(v5_power_config["reference_points_per_transfer"]) == 21
+        and int(v5_power_config["reference_transfer_pairs"]) == 9
+        and v5_power_config["primary_score"]
+        == "condition_score_v5_transport_normalized_amplitude_minus_direction"
+        and "no final-row tuning" in str(v5_power_config["analysis_scope"])
+        and set(v5_power_ladder["case_id"]) == expected_v5_power_cases
+        and set(v5_power_states["state_id"]) == expected_v5_power_states
+        and 0.42
+        < float(fisher_reference["minimum_observed_spearman_for_ci_low_above_zero"])
+        < 0.44
+        and 0.12
+        < float(mde_reference["minimum_mean_spearman_for_ci_low_above_zero"])
+        < 0.14
+    ):
+        raise AssertionError("condition-score v5 final power audit must lock split registry and detectable-effect scales")
+    v5_power_text = Path("discussion/e11_condition_score_v5_final_power_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "condition-score v5 final power audit",
+        v5_power_text,
+        [
+            "E11 Condition-Score V5 Final Power Audit",
+            "pre-output detectable-effect contract",
+            "Fisher-z resolution",
+            "mean-Spearman MDE",
+            "underpowered",
+            "negative transport",
+            "Outcome State Machine",
+        ],
+    )
     v5_interpret_dir = Path("results/e11_condition_score_v5_protocol/final_interpretation_plan")
     v5_interpret_status = pd.read_csv(v5_interpret_dir / "final_split_status.csv")
     v5_interpret_gate_contract = pd.read_csv(v5_interpret_dir / "final_gate_contract.csv")
@@ -7008,6 +7075,23 @@ def main() -> None:
         condition_score_v5_final,
         required_condition_score_v5_final_phrases,
     )
+    condition_score_v5_power = Path(
+        "discussion/e11_condition_score_v5_final_power_audit.md"
+    ).read_text(encoding="utf-8")
+    required_condition_score_v5_power_phrases = [
+        "Condition-Score V5 Final Power Audit",
+        "pre-output detectable-effect contract",
+        "Fisher-z resolution",
+        "mean-Spearman MDE",
+        "underpowered",
+        "negative transport",
+        "Outcome State Machine",
+    ]
+    assert_required_phrases(
+        "condition-score v5 final power audit",
+        condition_score_v5_power,
+        required_condition_score_v5_power_phrases,
+    )
     condition_score_v5_interpret = Path(
         "discussion/e11_condition_score_v5_final_interpretation_plan.md"
     ).read_text(encoding="utf-8")
@@ -7140,6 +7224,7 @@ def main() -> None:
         "not_ready",
         "ResNeXt50-32x4d",
         "make e11-cifar-resnet-condition-score-v5-final-eval",
+        "make e11-cifar-resnet-condition-score-v5-final-power-audit",
         "make e11-cifar-resnet-condition-score-v5-final-interpretation-plan",
         "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response",
         "CIFAR-10 mixed final data split fails",
@@ -7308,6 +7393,7 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-v5-architecture-results" not in readme
         or "make e11-cifar-resnet-condition-score-v5-data-results" not in readme
         or "make e11-cifar-resnet-condition-score-v5-final-eval" not in readme
+        or "make e11-cifar-resnet-condition-score-v5-final-power-audit" not in readme
         or "make e11-cifar-resnet-condition-score-v5-final-interpretation-plan" not in readme
         or "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme

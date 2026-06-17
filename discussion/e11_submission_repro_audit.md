@@ -21,8 +21,8 @@ gate remains `not_ready` when those tools are absent on the server.
 
 | path                                         | exists   |   size_bytes | sha256                                                           | header_is_pdf   | audit_status   |
 |:---------------------------------------------|:---------|-------------:|:-----------------------------------------------------------------|:----------------|:---------------|
-| paper/specgrad_activation_paper/main.pdf     | yes      |      2596716 | 4da48604fbf8335acadbc788ef1e84d0937a10d546a6d82ddd69fe1d9281f66b | yes             | pass           |
-| paper/specgrad_activation_paper/two_page.pdf | yes      |        62048 | 91d5b2b922da3243b1326bdc20b82d875a2f167e81755a8d9f49e50d81b2cb70 | yes             | pass           |
+| paper/specgrad_activation_paper/main.pdf     | yes      |      2596716 | 3a3cc804e8a1d75aee0624d811c335d1aeb09e4bd25e6866b3cf53eefe8d2aae | yes             | pass           |
+| paper/specgrad_activation_paper/two_page.pdf | yes      |        62047 | 7658ad0c8a7511850a7d13eae45edd53a0affeea446c06c7ddf4aa36ed09599d | yes             | pass           |
 
 ## Source Package Manifest
 
@@ -36,8 +36,8 @@ gate remains `not_ready` when those tools are absent on the server.
 | paper/specgrad_activation_paper/tables/e11_paper_numbers.tex           | yes      |        55974 | 70b0130ae2d7fb538f3316745d01387f714464b53e1597ec6286032aa488f227 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex | yes      |         4934 | 1264d8923f3cfff52ae9af90f44b10bd29710c949ed93fc3d2eda5dff7b30471 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/local_linearization_errors.tex  | yes      |          961 | 12c108dd5bfdfd2d1ad219904a4f82f1d10e01ab6d6de4cd86a9252cb298a5ef | paper source or root reproduction entrypoint | pass           |
-| Makefile                                                               | yes      |        18102 | aef799ec51f524463e3c366c1bf903be7850759953ccd67699811625b6f3f1bf | paper source or root reproduction entrypoint | pass           |
-| README_E11.md                                                          | yes      |        91341 | f5b6b18ea0f7dcded950552c4a6ee286f4e787816ba7b69f6f28f464f9638084 | paper source or root reproduction entrypoint | pass           |
+| Makefile                                                               | yes      |        18339 | ceea0ccc699d300f5305de75fac3def3801bc001fd3fbeca5e20131d0dd9db21 | paper source or root reproduction entrypoint | pass           |
+| README_E11.md                                                          | yes      |        92901 | f572885921eedc25bfab4a2301d20c4a5b1fd897d95e957ab440fdeee6d613ea | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/figures                                | yes      |      2923280 | 21 png files                                                     | paper-local figure bundle                    | pass           |
 
 ## Build Gate Summary

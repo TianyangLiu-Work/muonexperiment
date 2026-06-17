@@ -1,0 +1,5 @@
+points,two_sided_alpha,fisher_z_half_width,minimum_observed_spearman_for_ci_low_above_zero,validation_reference_spearman,validation_reference_ci_low_at_points,claim_interpretation
+15,0.05,0.5657928670380857,0.5122628439316086,0.645,0.19823632933115368,a generated final split needs an observed residual Spearman at least this large before a Fisher-z pairwise CI can exclude zero
+21,0.05,0.46196794144989256,0.43168677949069845,0.645,0.29562700427658595,a generated final split needs an observed residual Spearman at least this large before a Fisher-z pairwise CI can exclude zero
+30,0.05,0.3771952446920571,0.36026922259556426,0.645,0.3709236621118467,a generated final split needs an observed residual Spearman at least this large before a Fisher-z pairwise CI can exclude zero
+40,0.05,0.3222160942133578,0.31150934897669896,0.645,0.41734510222888926,a generated final split needs an observed residual Spearman at least this large before a Fisher-z pairwise CI can exclude zero

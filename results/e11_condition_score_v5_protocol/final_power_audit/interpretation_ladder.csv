@@ -1,0 +1,6 @@
+case_id,evidence_condition,allowed_wording,blocked_wording
+V5-PWR-1-pending-outputs,one or both registered final split layer tables are absent,registered final power audit only; P0 remains not_ready,positive or negative final predictive-condition result
+V5-PWR-2-positive-above-zero-ci,both splits generated; primary mean Spearman CI lower endpoint > 0; other final gates pass,narrow frozen-score residual-risk predictor on the registered final splits,optimizer-performance claim or broader architecture/data-family generality
+V5-PWR-3-null-below-detectable-scale,generated split has non-positive CI but mean effect is below audited MDE for observed variability,underpowered or small-effect final boundary,the frozen score is disproven for all natural tasks
+V5-PWR-4-negative-above-detectable-scale,generated split fails residual ranking with effect scale above audited detectable threshold,negative architecture/data transport boundary under the frozen protocol,post-hoc score repair under the same v5 final protocol
+V5-PWR-5-high-heterogeneity,across-pair Spearman SD is high enough that summary CI is dominated by transfer-pair heterogeneity,transport heterogeneity diagnostic requiring split-specific mechanism analysis,single scalar score success/failure without heterogeneity reporting

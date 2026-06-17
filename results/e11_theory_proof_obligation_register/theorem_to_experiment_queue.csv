@@ -1,6 +1,7 @@
 priority,task,artifact_or_command,unblocks,dependency
 P0,keep the exact local matrix-block theorem/proof contract synchronized with the paper appendix,make e11-matrix-block-theorem-proof && make e11-matrix-block-tightness-audit,main_theorem wording,none
 P0,consume frozen v5 final splits without score edits,make e11-cifar-resnet-condition-score-v5-final-eval,predictive_condition if both finals pass,pending Slurm outputs
+P0,classify v5 final positive/null/negative outcomes against the pre-output detectable-effect scale,make e11-cifar-resnet-condition-score-v5-final-power-audit,underpowered-null versus negative-transport wording for final residual-Spearman gates,v5 final evaluator refreshed
 P0,rerun v5 reviewer failure response after final outputs,make e11-cifar-resnet-condition-score-v5-reviewer-failure-response,claim downgrade wording for positive or negative finals,v5 final evaluator refreshed
 P1,replicate or extend the finite phase1 natural negative-search result before broader natural-null wording,make e11-natural-negative-search-phase1-eval,broader natural-null or held-out natural boundary wording,complete phase1 finite-null candidate
 P1,complete tuned benchmark validation selection and final seeds,make e11-cifar-resnet-lt-tuned-benchmark-selection plus final benchmark jobs,optimizer_benchmark wording,validation grid outputs

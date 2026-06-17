@@ -1,0 +1,7 @@
+transfer_pairs,two_sided_alpha,ci_multiplier_used_by_evaluator,assumed_across_pair_spearman_sd,minimum_mean_spearman_for_ci_low_above_zero,claim_interpretation
+9,0.05,1.96,0.05,0.03266666666666667,"if the final mean Spearman is below this row, a non-positive summary CI is not a strong negative result under the assumed across-pair variability"
+9,0.05,1.96,0.1,0.06533333333333334,"if the final mean Spearman is below this row, a non-positive summary CI is not a strong negative result under the assumed across-pair variability"
+9,0.05,1.96,0.15,0.09799999999999999,"if the final mean Spearman is below this row, a non-positive summary CI is not a strong negative result under the assumed across-pair variability"
+9,0.05,1.96,0.2,0.13066666666666668,"if the final mean Spearman is below this row, a non-positive summary CI is not a strong negative result under the assumed across-pair variability"
+9,0.05,1.96,0.25,0.16333333333333333,"if the final mean Spearman is below this row, a non-positive summary CI is not a strong negative result under the assumed across-pair variability"
+9,0.05,1.96,0.3,0.19599999999999998,"if the final mean Spearman is below this row, a non-positive summary CI is not a strong negative result under the assumed across-pair variability"

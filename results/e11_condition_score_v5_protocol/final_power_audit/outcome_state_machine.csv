@@ -1,0 +1,6 @@
+state_id,trigger,claim_state,required_action
+V5-PWR-S1-not-run,0/2 final split summaries generated,not_ready,wait for Slurm outputs; do not interpret missing rows as evidence
+V5-PWR-S2-partial,1/2 final split summaries generated,not_ready_partial_family,report the generated split as progress only; keep P0 closed
+V5-PWR-S3-complete-positive,"2/2 final split summaries generated and both pass residual, direction, baseline, and reporting gates",p0_claim_eligible_with_power_context,"report observed points, transfer-pair variability, controls, and no-retuning boundary"
+V5-PWR-S4-complete-small-null,2/2 generated; residual gate fails but observed scale is below audited MDE,underpowered_final_boundary,downgrade to small-effect/underpowered boundary and add a new preregistered larger final family
+V5-PWR-S5-complete-negative,2/2 generated; residual gate fails at or above audited detectable scale,negative_transport_boundary,preserve failed final as main evidence and do not retune on final rows
