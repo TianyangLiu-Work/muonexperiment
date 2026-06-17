@@ -4784,6 +4784,10 @@ def main() -> None:
     natural_power_grid = pd.read_csv(natural_protocol_dir / "phase1_power_audit" / "power_grid.csv")
     natural_mde = pd.read_csv(natural_protocol_dir / "phase1_power_audit" / "minimum_detectable_effect.csv")
     natural_power_ladder = pd.read_csv(natural_protocol_dir / "phase1_power_audit" / "interpretation_ladder.csv")
+    natural_phase2_power_grid = pd.read_csv(natural_protocol_dir / "phase2_power_audit" / "power_grid.csv")
+    natural_phase2_mde = pd.read_csv(natural_protocol_dir / "phase2_power_audit" / "minimum_detectable_effect.csv")
+    natural_phase2_power_ladder = pd.read_csv(natural_protocol_dir / "phase2_power_audit" / "interpretation_ladder.csv")
+    natural_phase2_outcome_state = pd.read_csv(natural_protocol_dir / "phase2_power_audit" / "outcome_state_machine.csv")
     expected_natural_protocol_baselines = {
         "committed_natural_primary_full_drift_scan",
         "committed_component_ratio_boundaries",
@@ -5037,6 +5041,30 @@ def main() -> None:
         "adjusted_mde_above_one": natural_mde[
             natural_mde["alpha_scope"].eq("holm_bonferroni_worst_case")
         ]["minimum_detectable_ratio"].gt(1.0).all(),
+        "phase2_power_grid_shape": len(natural_phase2_power_grid) == 72,
+        "phase2_mde_shape": len(natural_phase2_mde) == 36,
+        "phase2_power_family": set(natural_phase2_power_grid["seed_count"].astype(int)) == {3}
+        and set(natural_phase2_power_grid["family_size"].astype(int)) == {1, 8},
+        "phase2_power_ladder_shape": set(natural_phase2_power_ladder["case_id"])
+        == {
+            "P2-PWR-1-adjusted-positive",
+            "P2-PWR-2-complete-null-above-mde",
+            "P2-PWR-3-complete-null-below-mde",
+            "P2-PWR-4-phase1-null-phase2-positive",
+            "P2-PWR-5-incomplete-family",
+        },
+        "phase2_outcome_states": set(natural_phase2_outcome_state["state_id"])
+        == {
+            "P2-S1-not-run",
+            "P2-S2-partial",
+            "P2-S3-adjusted-positive",
+            "P2-S4-complete-null-above-mde",
+            "P2-S5-complete-null-below-mde",
+            "P2-S6-quality-failure",
+        },
+        "phase2_adjusted_mde_above_one": natural_phase2_mde[
+            natural_phase2_mde["alpha_scope"].eq("holm_bonferroni_worst_case")
+        ]["minimum_detectable_ratio"].gt(1.0).all(),
     }
     if not all(natural_protocol_checks.values()):
         failed_checks = [name for name, passed in natural_protocol_checks.items() if not passed]
@@ -5062,6 +5090,7 @@ def main() -> None:
             "ResNet34 CIFAR stem",
             "phase2_heldout_architecture/settings_registry.csv",
             "phase2_multiplicity_evaluation",
+            "phase2_power_audit",
             "scripts/e11_evaluate_natural_negative_search_phase2.py",
             "scripts/slurm/e11_natural_negative_search_phase2.sbatch",
             "no phase2 metric rows are used",
@@ -5084,6 +5113,23 @@ def main() -> None:
             "Adjusted Minimum Detectable Ratio",
             "Interpretation Ladder",
             "underpowered for small natural negative effects",
+        ],
+    )
+    natural_phase2_power_text = Path("discussion/e11_natural_negative_search_phase2_power_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "natural negative-search phase2 power audit",
+        natural_phase2_power_text,
+        [
+            "E11 Natural Negative Search Phase2 Power Audit",
+            "detectable-effect and interpretation boundary",
+            "8-setting ResNet34 held-out architecture phase2 family",
+            "3 seeds per setting",
+            "Adjusted Minimum Detectable Ratio",
+            "Outcome State Machine",
+            "underpowered",
+            "P2-S5-complete-null-below-mde",
         ],
     )
     natural_phase1_eval_text = Path("discussion/e11_natural_negative_search_phase1_evaluation.md").read_text(
@@ -6353,6 +6399,7 @@ def main() -> None:
         "make e11-natural-negative-search-phase2-settings",
         "make e11-natural-negative-search-phase2-results",
         "make e11-natural-negative-search-phase2-eval",
+        "make e11-natural-negative-search-phase2-power-audit",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -6388,6 +6435,8 @@ def main() -> None:
         "Settings-only ResNet34 held-out architecture registry",
         "discussion/e11_natural_negative_search_phase2_evaluation.md",
         "Pre-output Holm evaluator",
+        "discussion/e11_natural_negative_search_phase2_power_audit.md",
+        "Pre-output detectable-effect and outcome-state audit",
         "make e11-natural-negative-search-phase1-interim-synthesis",
         "discussion/e11_top_conference_claim_decision_audit.md",
         "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract",
@@ -7113,16 +7162,20 @@ def main() -> None:
         "scripts/e11_run_natural_negative_search_phase2.py",
         "scripts/slurm/e11_natural_negative_search_phase2.sbatch",
         "scripts/e11_evaluate_natural_negative_search_phase2.py",
+        "scripts/e11_write_natural_negative_phase2_power_audit.py",
         "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
         "discussion/e11_natural_negative_search_phase2_evaluation.md",
+        "discussion/e11_natural_negative_search_phase2_power_audit.md",
         "results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv",
         "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation",
+        "results/e11_natural_negative_search_protocol/phase2_power_audit",
         "no phase2 metric rows are used",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-eval",
         "make e11-natural-negative-search-phase2-settings",
         "make e11-natural-negative-search-phase2-eval",
+        "make e11-natural-negative-search-phase2-power-audit",
         "scripts/e11_write_natural_negative_phase1_interim_synthesis.py",
         "multiplicity evaluator",
         "NNS-E4 returning finite_null_candidate",
@@ -7273,6 +7326,7 @@ def main() -> None:
         or "make e11-natural-negative-search-phase2-settings" not in readme
         or "make e11-natural-negative-search-phase2-results" not in readme
         or "make e11-natural-negative-search-phase2-eval" not in readme
+        or "make e11-natural-negative-search-phase2-power-audit" not in readme
         or "make e11-top-conference-claim-decision-audit" not in readme
         or "make e11-manuscript-claim-trace" not in readme
         or "make e11-mechanism-referee-audit" not in readme
@@ -7293,8 +7347,10 @@ def main() -> None:
         "discussion/e11_mechanism_referee_audit.md",
         "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
         "discussion/e11_natural_negative_search_phase2_evaluation.md",
+        "discussion/e11_natural_negative_search_phase2_power_audit.md",
         "results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv",
         "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/primary_decisions.csv",
+        "results/e11_natural_negative_search_protocol/phase2_power_audit/minimum_detectable_effect.csv",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:

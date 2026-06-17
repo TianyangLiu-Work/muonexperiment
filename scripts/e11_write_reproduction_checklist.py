@@ -116,6 +116,10 @@ def main() -> None:
                 "role": "Pre-output Holm evaluator for the 8-setting phase2 held-out architecture family, currently not_ready until metric rows exist.",
             },
             {
+                "artifact": "discussion/e11_natural_negative_search_phase2_power_audit.md",
+                "role": "Pre-output detectable-effect and outcome-state audit for the 3-seed, 8-setting ResNet34 phase2 family.",
+            },
+            {
                 "artifact": "discussion/e11_top_conference_claim_decision_audit.md",
                 "role": "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract for top-conference wording.",
             },
@@ -172,6 +176,7 @@ make e11-natural-negative-search-phase1-interim-synthesis # summarize complete p
 make e11-natural-negative-search-phase2-settings # freeze the ResNet34 held-out architecture phase2 registry
 make e11-natural-negative-search-phase2-results # submit the registered ResNet34 phase2 jobs via Slurm
 make e11-natural-negative-search-phase2-eval # refresh the 8-setting phase2 Holm-adjusted primary decision table
+make e11-natural-negative-search-phase2-power-audit # keep the phase2 detectable-effect and outcome-state boundary current
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets

@@ -195,6 +195,7 @@ make e11-natural-negative-search-phase1-interim-synthesis # summarize complete p
 make e11-natural-negative-search-phase2-settings # freeze the ResNet34 held-out architecture phase2 settings registry
 make e11-natural-negative-search-phase2-results # submit the registered ResNet34 phase2 held-out architecture settings via Slurm
 make e11-natural-negative-search-phase2-eval # evaluate the fixed 8-setting phase2 family after metric outputs exist
+make e11-natural-negative-search-phase2-power-audit # compute the phase2 detectable-effect and outcome-state boundary
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
@@ -259,6 +260,7 @@ make e11-natural-negative-search-phase1-eval
 make e11-natural-negative-search-phase2-settings
 make e11-natural-negative-search-phase2-results
 make e11-natural-negative-search-phase2-eval
+make e11-natural-negative-search-phase2-power-audit
 ```
 
 This submits `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`, which
@@ -513,6 +515,12 @@ are used until that Slurm run completes. The pre-output phase2 evaluator is
 `results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/*`;
 it records 0/8 primary rows now and fixes the paired seed log-ratio plus Holm
 decision gate before phase2 metrics exist.
+The phase2 detectable-effect audit is
+`discussion/e11_natural_negative_search_phase2_power_audit.md`, backed by
+`results/e11_natural_negative_search_protocol/phase2_power_audit/*`. It records
+the 3-seed, 8-setting family MDE and a pre-output outcome state machine, so a
+complete phase2 null cannot be overstated when the audited effect scale is below
+the detectable boundary.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -649,6 +657,7 @@ Paper-facing synthesis:
 - `discussion/e11_natural_negative_search_phase1_interim_synthesis.md`
 - `discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md`
 - `discussion/e11_natural_negative_search_phase2_evaluation.md`
+- `discussion/e11_natural_negative_search_phase2_power_audit.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
 - `discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md`
@@ -835,6 +844,10 @@ Primary paper quantitative tables:
 - `results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/seed_level_primary_ratios.csv`
 - `results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/primary_decisions.csv`
 - `results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/gate_report.csv`
+- `results/e11_natural_negative_search_protocol/phase2_power_audit/power_grid.csv`
+- `results/e11_natural_negative_search_protocol/phase2_power_audit/minimum_detectable_effect.csv`
+- `results/e11_natural_negative_search_protocol/phase2_power_audit/interpretation_ladder.csv`
+- `results/e11_natural_negative_search_protocol/phase2_power_audit/outcome_state_machine.csv`
 - `results/e11_top_conference_gap_register/gap_register.csv`
 - `results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv`
 - `results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv`
@@ -1010,6 +1023,7 @@ Do not claim:
 - `scripts/e11_run_natural_negative_search_phase2.py`: executable ResNet34 held-out architecture runner for the registered phase2 natural negative-search settings; `--settings-only` freezes the 8-setting registry without metric rows.
 - `scripts/e11_evaluate_natural_negative_search_phase1.py`: Holm-adjusted phase1 evaluator for the natural negative-search protocol; uses paired per-seed log-ratio tests and keeps every registered setting in the complete 26-setting decision family.
 - `scripts/e11_evaluate_natural_negative_search_phase2.py`: pre-output Holm-adjusted evaluator for the registered 8-setting ResNet34 phase2 held-out architecture family; writes not-ready gates until metric rows exist.
+- `scripts/e11_write_natural_negative_phase2_power_audit.py`: pre-output phase2 detectable-effect and outcome-state audit for the 3-seed, 8-setting ResNet34 held-out architecture family.
 - `scripts/e11_write_natural_negative_phase1_interim_synthesis.py`: claim-boundary synthesis for complete phase1 coverage, raw-worse counts, quality gates, and finite registered phase1 null-candidate caveats.
 - `scripts/e11_write_submission_repro_audit.py`: submission reproducibility audit for LaTeX toolchain availability, rendered PDF hashes, paper source hashes, and clean-checkout gates.
 - `scripts/e11_write_artifact_review_packet.py`: artifact-review command, gate, local-state, and reviewer-response packet for reproducing the current bundle without expanding claims.

@@ -431,7 +431,8 @@ def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFra
                     "scripts/slurm/e11_natural_negative_search_phase1.sbatch, "
                     "scripts/e11_run_natural_negative_search_phase2.py, and "
                     "scripts/slurm/e11_natural_negative_search_phase2.sbatch are registered; "
-                    "scripts/e11_evaluate_natural_negative_search_phase2.py fixes the phase2 decision gate"
+                    "scripts/e11_evaluate_natural_negative_search_phase2.py fixes the phase2 decision gate; "
+                    "scripts/e11_write_natural_negative_phase2_power_audit.py fixes the phase2 detectable-effect boundary"
                 ),
                 "blocks_stronger_claim_if_missing": "yes",
             },
@@ -527,6 +528,8 @@ def write_outputs(
             "`results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv`; "
             "the phase2 evaluator is frozen at "
             "`results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/*`; "
+            "the phase2 detectable-effect audit is frozen at "
+            "`results/e11_natural_negative_search_protocol/phase2_power_audit/*`; "
             "no phase2 metric rows are used until the Slurm job completes."
         )
     else:

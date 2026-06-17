@@ -1,0 +1,6 @@
+case_id,evidence_condition,allowed_wording,blocked_wording
+P2-PWR-1-adjusted-positive,complete 8-setting ResNet34 family; Holm-adjusted primary p <= 0.05; quality gates pass,held-out architecture primary boundary candidate,broad natural counterexample claim or final optimizer-performance claim
+P2-PWR-2-complete-null-above-mde,complete 8-setting family; no adjusted primary row; observed SD makes target effect above the MDE,finite ResNet34 held-out architecture null for effects at or above the audited detectable scale,absence of smaller ResNet34 effects or absence of natural counterexamples in other architectures
+P2-PWR-3-complete-null-below-mde,complete 8-setting family; no adjusted primary row; target effect below MDE,underpowered phase2 null for small held-out architecture effects,convincing held-out architecture finite null
+P2-PWR-4-phase1-null-phase2-positive,phase1 finite-null candidate but phase2 has an adjusted primary worse row,architecture-transport boundary case requiring mechanism analysis,discarding phase2 as outlier or claiming phase1 generality
+P2-PWR-5-incomplete-family,any declared phase2 metric output missing,registered held-out architecture search in progress,"phase2 counterexample, phase2 finite null, or selected-subset claim"

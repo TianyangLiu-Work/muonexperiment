@@ -1,0 +1,7 @@
+state_id,trigger,claim_state,required_action
+P2-S1-not-run,0/8 phase2 primary metric rows,not_ready,wait for Slurm outputs; do not inspect partial settings for claims
+P2-S2-partial,1-7/8 phase2 primary metric rows,not_ready_partial_family,report partial rows only as progress; keep claim gate closed
+P2-S3-adjusted-positive,8/8 rows; at least one Holm-adjusted primary worse row passes quality gates,heldout_architecture_boundary_candidate,run mechanism analysis and forbid broad optimizer-performance wording
+P2-S4-complete-null-above-mde,8/8 rows; no adjusted positive; target effect is above phase2 MDE,finite_phase2_null_candidate_with_detectable_effect_caveat,state effect-size floor and keep claim within ResNet34 registered family
+P2-S5-complete-null-below-mde,8/8 rows; no adjusted positive; target effect is below phase2 MDE,underpowered_phase2_null,do not use as strong held-out null; add seeds or larger search family
+P2-S6-quality-failure,adjusted positive exists only in rows failing head-gain or tail-quality gates,quality_caveated_boundary,"treat as diagnostic failure mode, not as primary natural counterexample"
