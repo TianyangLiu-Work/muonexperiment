@@ -890,6 +890,13 @@ def main() -> None:
         Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "config.json",
         Path("discussion/e11_condition_score_v5_validation_freeze.md"),
         Path("scripts/e11_freeze_condition_score_v5_validation.py"),
+        Path("results/e11_condition_score_v5_protocol/final_score_evaluation") / "final_score_pairs.csv",
+        Path("results/e11_condition_score_v5_protocol/final_score_evaluation") / "final_score_summary.csv",
+        Path("results/e11_condition_score_v5_protocol/final_score_evaluation") / "final_gate_report.csv",
+        Path("results/e11_condition_score_v5_protocol/final_score_evaluation") / "config.json",
+        Path("discussion/e11_condition_score_v5_final_evaluation.md"),
+        Path("scripts/e11_evaluate_condition_score_v5_finals.py"),
+        Path("scripts/e11_write_condition_score_v5_final_evaluation.py"),
         Path("results/e11_natural_head_tail_boundary") / "search_registry.csv",
         Path("results/e11_natural_head_tail_boundary") / "primary_drift_scan.csv",
         Path("results/e11_natural_head_tail_boundary") / "secondary_outcome_scan.csv",
@@ -1173,6 +1180,8 @@ def main() -> None:
         "scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch",
         "e11-cifar-resnet-condition-score-v5-data-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v5_data_cifar10_cross.sbatch",
+        "e11-cifar-resnet-condition-score-v5-final-eval:",
+        "scripts/e11_evaluate_condition_score_v5_finals.py",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -1253,6 +1262,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-v5-validation-freeze # freeze or block the v5 transport-normalized score after validation",
         "make e11-cifar-resnet-condition-score-v5-architecture-results # submit the v5 ResNeXt50-32x4d final architecture split via Slurm",
         "make e11-cifar-resnet-condition-score-v5-data-results # submit the v5 CIFAR-10 cross-partition final data split via Slurm",
+        "make e11-cifar-resnet-condition-score-v5-final-eval # evaluate frozen v5 final gates after both unspent final Slurm jobs finish",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
@@ -1302,6 +1312,8 @@ def main() -> None:
         "scripts/e11_write_condition_score_v5_theory_protocol.py",
         "scripts/e11_write_condition_score_v5_theory_to_score_map.py",
         "scripts/e11_freeze_condition_score_v5_validation.py",
+        "scripts/e11_evaluate_condition_score_v5_finals.py",
+        "scripts/e11_write_condition_score_v5_final_evaluation.py",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch",
@@ -3896,6 +3908,83 @@ def main() -> None:
             "A P0 claim still requires both final splits",
         ],
     )
+    v5_final_dir = Path("results/e11_condition_score_v5_protocol/final_score_evaluation")
+    v5_final_pairs = pd.read_csv(v5_final_dir / "final_score_pairs.csv")
+    v5_final_summary = pd.read_csv(v5_final_dir / "final_score_summary.csv")
+    v5_final_gates = pd.read_csv(v5_final_dir / "final_gate_report.csv")
+    v5_final_config = json.loads((v5_final_dir / "config.json").read_text(encoding="utf-8"))
+    expected_v5_final_split_ids = {
+        "v5_final_architecture_resnext50_32x4d_cifar100lt",
+        "v5_final_data_cifar10lt_cross_partition",
+    }
+    expected_v5_final_roles = {
+        "v5_final_heldout_architecture",
+        "v5_final_heldout_data_partition",
+    }
+    expected_v5_final_scores = {
+        "condition_score_v5_transport_normalized_amplitude_minus_direction",
+        "condition_score_v5_direction_axis_scaled_jvp_ratio",
+        "early_layer_prior",
+        "source_observed_drift_positive_control",
+    }
+    v5_final_config_splits = v5_final_config["final_splits"]
+    v5_final_generated = {
+        str(split["split_id"]): bool(split["generated"]) for split in v5_final_config_splits
+    }
+    v5_final_gate_lookup = v5_final_gates.set_index("gate_id")["status"].to_dict()
+    if not (
+        v5_final_config["primary_score"]
+        == "condition_score_v5_transport_normalized_amplitude_minus_direction"
+        and set(split["split_id"] for split in v5_final_config_splits) == expected_v5_final_split_ids
+        and set(split["role"] for split in v5_final_config_splits) == expected_v5_final_roles
+        and set(v5_final_generated) == expected_v5_final_split_ids
+        and v5_final_gate_lookup["v5_p0_predictive_condition_claim"] in {"pass", "not_ready"}
+    ):
+        raise AssertionError("condition-score v5 final evaluator must preserve split registry, frozen score, and P0 gate")
+    if not any(v5_final_generated.values()):
+        expected_preoutput_gates = {
+            "v5_final_heldout_architecture_generated",
+            "v5_final_heldout_data_partition_generated",
+            "v5_p0_predictive_condition_claim",
+        }
+        if not (
+            v5_final_pairs.empty
+            and v5_final_summary.empty
+            and set(v5_final_gates["gate_id"]) == expected_preoutput_gates
+            and v5_final_gate_lookup["v5_final_heldout_architecture_generated"] == "not_run"
+            and v5_final_gate_lookup["v5_final_heldout_data_partition_generated"] == "not_run"
+            and v5_final_gate_lookup["v5_p0_predictive_condition_claim"] == "not_ready"
+        ):
+            raise AssertionError("condition-score v5 final evaluator must report clean not_run gates before final outputs exist")
+    else:
+        if not (
+            not v5_final_pairs.empty
+            and not v5_final_summary.empty
+            and set(v5_final_summary["split_id"]).issubset(expected_v5_final_split_ids)
+            and set(v5_final_summary["score"]).issubset(expected_v5_final_scores)
+            and v5_final_summary[
+                v5_final_summary["score"].eq(
+                    "condition_score_v5_transport_normalized_amplitude_minus_direction"
+                )
+            ]["score_role"].eq("primary_candidate").all()
+            and v5_final_gates["status"].isin({"pass", "fail", "not_ready", "not_run"}).all()
+        ):
+            raise AssertionError("condition-score v5 final evaluator must score generated final outputs with registered scores only")
+    v5_final_text = Path("discussion/e11_condition_score_v5_final_evaluation.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "condition-score v5 final evaluation",
+        v5_final_text,
+        [
+            "E11 Condition-Score V5 Final Evaluation",
+            "condition_score_v5_transport_normalized_amplitude_minus_direction",
+            "does not refit",
+            "does not reselect",
+            "baseline-dominance",
+            "`not_run` is the expected state",
+        ],
+    )
     natural_boundary_dir = Path("results/e11_natural_head_tail_boundary")
     natural_registry = pd.read_csv(natural_boundary_dir / "search_registry.csv")
     natural_primary = pd.read_csv(natural_boundary_dir / "primary_drift_scan.csv")
@@ -5904,6 +5993,22 @@ def main() -> None:
         condition_score_v5_freeze,
         required_condition_score_v5_freeze_phrases,
     )
+    condition_score_v5_final = Path("discussion/e11_condition_score_v5_final_evaluation.md").read_text(
+        encoding="utf-8"
+    )
+    required_condition_score_v5_final_phrases = [
+        "Condition-Score V5 Final Evaluation",
+        "condition_score_v5_transport_normalized_amplitude_minus_direction",
+        "does not refit",
+        "does not reselect",
+        "baseline-dominance",
+        "v5_p0_predictive_condition_claim",
+    ]
+    assert_required_phrases(
+        "condition-score v5 final evaluation",
+        condition_score_v5_final,
+        required_condition_score_v5_final_phrases,
+    )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -5924,6 +6029,8 @@ def main() -> None:
         "discussion/e11_condition_score_v5_theory_protocol.md",
         "discussion/e11_condition_score_v5_theory_to_score_map.md",
         "discussion/e11_condition_score_v5_validation_freeze.md",
+        "discussion/e11_condition_score_v5_final_evaluation.md",
+        "pre-registered final evaluator",
         "transport-normalized score contract",
         "transport-stable sandwich residual proposition",
         "theorem terms to measurable score features",
@@ -5933,6 +6040,7 @@ def main() -> None:
         "0.645 [0.5898, 0.7002]",
         "not_ready",
         "ResNeXt50-32x4d",
+        "make e11-cifar-resnet-condition-score-v5-final-eval",
         "CIFAR-10 mixed final data split fails",
         "data-partition reversal mechanism",
         "discussion/e11_natural_head_tail_boundary.md",
@@ -5995,6 +6103,7 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-v5-validation-freeze" not in readme
         or "make e11-cifar-resnet-condition-score-v5-architecture-results" not in readme
         or "make e11-cifar-resnet-condition-score-v5-data-results" not in readme
+        or "make e11-cifar-resnet-condition-score-v5-final-eval" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-protocol" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-settings" not in readme

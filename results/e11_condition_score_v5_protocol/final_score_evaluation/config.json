@@ -1,0 +1,33 @@
+{
+  "source_layer_summary": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/layer_summary.csv",
+  "source_metrics": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/metrics.csv",
+  "freeze_dir": "results/e11_condition_score_v5_protocol/validation_score_freeze",
+  "primary_score": "condition_score_v5_transport_normalized_amplitude_minus_direction",
+  "final_splits": [
+    {
+      "split_id": "v5_final_architecture_resnext50_32x4d_cifar100lt",
+      "role": "v5_final_heldout_architecture",
+      "display_name": "ResNeXt50-32x4d CIFAR-100-LT final architecture split",
+      "layer_summary_path": "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/layer_summary.csv",
+      "metrics_path": "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/metrics.csv",
+      "config_path": "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/config.json",
+      "generated": false
+    },
+    {
+      "split_id": "v5_final_data_cifar10lt_cross_partition",
+      "role": "v5_final_heldout_data_partition",
+      "display_name": "CIFAR-10-LT cross-partition final data split",
+      "layer_summary_path": "results/e11_condition_score_v5_protocol/final_data_cifar10_cross/layer_summary.csv",
+      "metrics_path": "results/e11_condition_score_v5_protocol/final_data_cifar10_cross/metrics.csv",
+      "config_path": "results/e11_condition_score_v5_protocol/final_data_cifar10_cross/config.json",
+      "generated": false
+    }
+  ],
+  "analysis_scope": "v5 final split evaluator; no post-final refit/reselection; not_ready unless both unspent final splits pass",
+  "final_claim_gates": [
+    "residual Spearman CI lower endpoint above zero",
+    "direction threshold accuracy and CI lower endpoint at least 0.8",
+    "primary residual score beats early_layer_prior on residual ranking and top-k overlap",
+    "direction, early-prior, and source-observed controls are reported"
+  ]
+}

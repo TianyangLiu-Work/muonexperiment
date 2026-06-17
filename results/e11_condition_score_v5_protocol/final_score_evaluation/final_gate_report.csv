@@ -1,0 +1,4 @@
+gate_id,scope,status,evidence
+v5_final_heldout_architecture_generated,ResNeXt50-32x4d CIFAR-100-LT final architecture split,not_run,missing final layer/metrics summary at results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/layer_summary.csv
+v5_final_heldout_data_partition_generated,CIFAR-10-LT cross-partition final data split,not_run,missing final layer/metrics summary at results/e11_condition_score_v5_protocol/final_data_cifar10_cross/layer_summary.csv
+v5_p0_predictive_condition_claim,v5 condition-score final evaluation,not_ready,"Both unspent v5 final splits must pass residual, direction, baseline-dominance, and reporting gates."
