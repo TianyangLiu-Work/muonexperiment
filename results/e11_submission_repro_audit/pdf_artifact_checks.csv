@@ -1,0 +1,3 @@
+path,exists,size_bytes,sha256,header_is_pdf,audit_status
+paper/specgrad_activation_paper/main.pdf,yes,2593824,02af79bc681f451511c82654d18abf0f97325d95bc082016d67ddb607dab1f8f,yes,pass
+paper/specgrad_activation_paper/two_page.pdf,yes,62048,95bb6bd71c27a740e8b4338ccf753cae90f36adcff7e7fe429529877c061d201,yes,pass

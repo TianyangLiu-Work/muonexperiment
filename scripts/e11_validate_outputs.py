@@ -1018,8 +1018,14 @@ def main() -> None:
         Path("discussion/e11_completion_audit.md"),
         Path("discussion/e11_end_of_draft_self_review.md"),
         Path("discussion/e11_reference_audit.md"),
+        Path("discussion/e11_submission_repro_audit.md"),
         Path("discussion/e11_artifact_manifest.md"),
         Path("results/e11_artifact_manifest.json"),
+        Path("results/e11_submission_repro_audit") / "toolchain_status.csv",
+        Path("results/e11_submission_repro_audit") / "pdf_artifact_checks.csv",
+        Path("results/e11_submission_repro_audit") / "source_package_manifest.csv",
+        Path("results/e11_submission_repro_audit") / "build_gate_summary.csv",
+        Path("scripts/e11_write_submission_repro_audit.py"),
         Path("Makefile"),
         Path("README_E11.md"),
         config.discussion_path,
@@ -1034,6 +1040,8 @@ def main() -> None:
         "$(MAKE) -C paper/specgrad_activation_paper",
         "e11-paper-assets:",
         "scripts/e11_write_all_discussion_artifacts.py",
+        "e11-submission-repro-audit:",
+        "scripts/e11_write_submission_repro_audit.py",
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
         "e11-cifar-resnet-imbalance-sweep-results:",
         "e11-cifar-resnet-condition-score-heldout-architecture-results:",
@@ -1241,10 +1249,12 @@ def main() -> None:
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
         "make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes",
+        "make e11-submission-repro-audit # audit toolchain availability, PDF hashes, source hashes, and clean-checkout gates",
         "make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf",
         "`diagnostic_A_definition == full_layer_input_activation`",
         *MAIN_RESULT_SCRIPTS,
         *APPENDIX_RUNNER_SCRIPTS,
+        "scripts/e11_write_submission_repro_audit.py",
     ]
     missing_readme_phrases = [phrase for phrase in required_readme_phrases if phrase not in readme_text]
     if missing_readme_phrases:
@@ -5306,6 +5316,8 @@ def main() -> None:
         "data-partition reversal mechanism",
         "held-out architecture",
         "benchmark-level performance claim",
+        "discussion/e11_submission_repro_audit.md",
+        "preferred pdflatex/bibtex/xelatex clean-checkout gate remains not_ready",
         "GPU via Slurm",
         "No row in this register authorizes a stronger paper claim by itself",
     ]
@@ -5341,6 +5353,7 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-v5-data-results" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
+        or "make e11-submission-repro-audit" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
     ):
@@ -5351,6 +5364,7 @@ def main() -> None:
         "Key Quantitative Tables",
         "Key Paper Documents",
         "discussion/e11_reference_audit.md",
+        "discussion/e11_submission_repro_audit.md",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:
@@ -5358,6 +5372,64 @@ def main() -> None:
             raise AssertionError(f"artifact manifest missing required section or reference: {phrase}")
     manifest_json = json.loads(Path("results/e11_artifact_manifest.json").read_text(encoding="utf-8"))
     assert_valid_artifact_manifest(manifest_json)
+    submission_repro_dir = Path("results/e11_submission_repro_audit")
+    submission_toolchain = pd.read_csv(submission_repro_dir / "toolchain_status.csv")
+    submission_pdf_checks = pd.read_csv(submission_repro_dir / "pdf_artifact_checks.csv")
+    submission_source_manifest = pd.read_csv(submission_repro_dir / "source_package_manifest.csv")
+    submission_build_gates = pd.read_csv(submission_repro_dir / "build_gate_summary.csv")
+    expected_submission_tools = {"pdflatex", "bibtex", "xelatex", "tectonic", "gs", "git", "python"}
+    expected_submission_gates = {
+        "R1-source-revision",
+        "R2-working-tree-scope",
+        "R3-preferred-latex-toolchain",
+        "R4-tectonic-fallback-toolchain",
+        "R5-rendered-pdfs",
+        "R6-full-artifact-validation",
+    }
+    if not (
+        set(submission_toolchain["tool"]) == expected_submission_tools
+        and set(submission_build_gates["gate_id"]) == expected_submission_gates
+        and set(submission_pdf_checks["path"]) == {
+            "paper/specgrad_activation_paper/main.pdf",
+            "paper/specgrad_activation_paper/two_page.pdf",
+        }
+        and submission_source_manifest["audit_status"].eq("pass").all()
+    ):
+        raise AssertionError(
+            "submission reproducibility audit must preserve toolchain rows, build gates, rendered PDF checks, and source package manifest"
+        )
+    submission_gate_lookup = submission_build_gates.set_index("gate_id")["status"].to_dict()
+    submission_tool_lookup = submission_toolchain.set_index("tool")["available"].to_dict()
+    if not (
+        submission_gate_lookup["R1-source-revision"] == "pass"
+        and submission_gate_lookup["R2-working-tree-scope"] == "info"
+        and submission_gate_lookup["R3-preferred-latex-toolchain"] in {"pass", "not_ready"}
+        and submission_gate_lookup["R4-tectonic-fallback-toolchain"] == "pass"
+        and submission_gate_lookup["R5-rendered-pdfs"] == "pass"
+        and submission_gate_lookup["R6-full-artifact-validation"] in {"pass", "external_check_required"}
+        and submission_tool_lookup["tectonic"] == "yes"
+        and submission_pdf_checks["audit_status"].eq("pass").all()
+        and submission_pdf_checks["header_is_pdf"].eq("yes").all()
+        and (submission_pdf_checks["size_bytes"].astype(int) >= 10_000).all()
+    ):
+        raise AssertionError(
+            "submission reproducibility audit must keep Tectonic and rendered-PDF gates passing while clean-checkout/full-validation gates remain explicit"
+        )
+    submission_repro_text = Path("discussion/e11_submission_repro_audit.md").read_text(encoding="utf-8")
+    assert_required_phrases(
+        "submission reproducibility audit",
+        submission_repro_text,
+        [
+            "E11 Submission Reproducibility Audit",
+            "Toolchain Status",
+            "Rendered PDF Checks",
+            "Source Package Manifest",
+            "Build Gate Summary",
+            "pdflatex/bibtex/xelatex",
+            "Tectonic-backed server evidence",
+            "Blocked now: claiming a preferred LaTeX clean-checkout reproduction",
+        ],
+    )
     assert_no_unguarded_overclaims(
         [
             Path("README_E11.md"),

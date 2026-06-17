@@ -172,6 +172,7 @@ make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX 
 make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes
 make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes
 make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf
+make e11-submission-repro-audit # audit toolchain availability, PDF hashes, source hashes, and clean-checkout gates
 make e11-check             # validate outputs, run tests, and check whitespace
 make e11-full              # regenerate paper artifacts, rebuild the PDF, then run e11-check
 ```
@@ -399,6 +400,7 @@ Paper-facing synthesis:
 - `discussion/e11_pasted_review_audit.md`
 - `discussion/e11_end_of_draft_self_review.md`
 - `discussion/e11_reference_audit.md`
+- `discussion/e11_submission_repro_audit.md`
 - `discussion/e11_research_synthesis.md`
 - `discussion/e11_evidence_index.md`
 - `discussion/e11_artifact_manifest.md`
@@ -546,6 +548,10 @@ Primary paper quantitative tables:
 - `results/e11_condition_score_v5_theory_to_score_map/transport_normalization_contract.csv`
 - `results/e11_condition_score_v5_theory_to_score_map/falsifiable_predictions.csv`
 - `results/e11_condition_score_v5_theory_to_score_map/ablation_matrix.csv`
+- `results/e11_submission_repro_audit/toolchain_status.csv`
+- `results/e11_submission_repro_audit/pdf_artifact_checks.csv`
+- `results/e11_submission_repro_audit/source_package_manifest.csv`
+- `results/e11_submission_repro_audit/build_gate_summary.csv`
 - `results/e11_condition_score_v5_theory_to_score_map/claim_readiness_ledger.csv`
 - `results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv`
 - `results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv`
@@ -700,6 +706,7 @@ Do not claim:
 - `scripts/e11_write_condition_score_v5_theory_protocol.py`: theory-facing v5 score contract requiring transport-normalized amplitude or a narrower fixed-partition claim before any new P0 predictive-condition attempt.
 - `scripts/e11_write_condition_score_v5_theory_to_score_map.py`: v5 theorem-to-measurement bridge that maps sandwich-tail-drift terms to score features, transport contracts, ablations, and falsifiable validation/final gates.
 - `scripts/e11_freeze_condition_score_v5_validation.py`: v5 validation-freeze evaluator; it writes not_run/not_ready rows until the validation split exists, then freezes or blocks a transport-normalized residual score before final splits.
+- `scripts/e11_write_submission_repro_audit.py`: submission reproducibility audit for LaTeX toolchain availability, rendered PDF hashes, paper source hashes, and clean-checkout gates.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.
 - `scripts/e11_run_cifar100_resnet_practical_muon_bridge.py`: ResNet practical Muon/AdamW trajectory-state bridge from the tail-rich checkpoint.
@@ -731,7 +738,7 @@ Do not claim:
 
 The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
 
-The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`, v5 theory-to-score map in `discussion/e11_condition_score_v5_theory_to_score_map.md`, and v5 validation-freeze boundary in `discussion/e11_condition_score_v5_validation_freeze.md`.
+The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`, v5 theory-to-score map in `discussion/e11_condition_score_v5_theory_to_score_map.md`, v5 validation-freeze boundary in `discussion/e11_condition_score_v5_validation_freeze.md`, and submission reproducibility audit in `discussion/e11_submission_repro_audit.md`.
 
 Most important next steps:
 

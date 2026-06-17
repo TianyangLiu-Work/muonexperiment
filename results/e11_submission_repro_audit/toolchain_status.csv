@@ -1,0 +1,8 @@
+tool,available,path,version,role,audit_status
+pdflatex,no,,,preferred main-paper LaTeX engine,missing
+bibtex,no,,,preferred bibliography pass for pdflatex build,missing
+xelatex,no,,,preferred two-page report LaTeX engine,missing
+tectonic,yes,/home/tyliu/.local/bin/tectonic,Tectonic 0.16.9,fallback reproducible LaTeX engine,available
+gs,no,,,optional PDF text-layer audit,missing
+git,yes,/usr/bin/git,git version 2.34.1,source revision and clean-tree audit,available
+python,yes,/data/conda_envs/SpatialQuantization/bin/python,Python 3.10.20,artifact-generation runtime,available

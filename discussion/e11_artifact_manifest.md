@@ -6,15 +6,15 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 391.2 KB |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 392.0 KB |
 | scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 1.9 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 64.8 KB  |
-| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 1.0 MB   |
+| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 1.1 MB   |
 | results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 267.3 MB |
 | figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 31.5 MB  |
 | configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
 | paper                  | Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.   | commit source and selected rendered PDFs | 5.6 MB   |
-| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 12.1 KB  |
+| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 12.2 KB  |
 | .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.            | commit                                   | 479 B    |
 | .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.        | commit                                   | 667 B    |
 
@@ -158,10 +158,14 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_condition_score_v5_theory_to_score_map/falsifiable_predictions.csv                             |      5 | 1.6 KB    |
 | results/e11_condition_score_v5_theory_to_score_map/ablation_matrix.csv                                     |      5 | 1.4 KB    |
 | results/e11_condition_score_v5_theory_to_score_map/claim_readiness_ledger.csv                              |      5 | 610 B     |
+| results/e11_submission_repro_audit/toolchain_status.csv                                                    |      7 | 580 B     |
+| results/e11_submission_repro_audit/pdf_artifact_checks.csv                                                 |      2 | 313 B     |
+| results/e11_submission_repro_audit/source_package_manifest.csv                                             |     11 | 1.8 KB    |
+| results/e11_submission_repro_audit/build_gate_summary.csv                                                  |      6 | 1014 B    |
 | results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv                 |      7 | 2.6 KB    |
 | results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv                          |      5 | 653 B     |
 | results/e11_condition_score_v5_protocol/validation_score_freeze/validation_gate_report.csv                 |      6 | 814 B     |
-| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 11.5 KB   |
+| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 11.8 KB   |
 | results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv                                               |    110 | 5.7 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/class_metrics.csv                                             |   1000 | 58.6 KB   |
 | results/e11_cifar100_resnet_lt_standard_eval/group_metrics.csv                                             |     40 | 4.2 KB    |
@@ -237,18 +241,19 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                                        | size    |
 |:----------------------------------------------------------------------------|:--------|
-| README_E11.md                                                               | 59.5 KB |
+| README_E11.md                                                               | 60.2 KB |
 | discussion/e11_paper_skeleton.md                                            | 10.9 KB |
 | discussion/e11_main_paper_package.md                                        | 22.8 KB |
 | discussion/e11_main_figure_captions.md                                      | 6.5 KB  |
 | discussion/e11_notation_glossary.md                                         | 8.7 KB  |
 | discussion/e11_quantitative_claim_ledger.md                                 | 11.0 KB |
-| discussion/e11_reproduction_checklist.md                                    | 36.2 KB |
+| discussion/e11_reproduction_checklist.md                                    | 36.7 KB |
 | discussion/e11_reviewer_risk_audit.md                                       | 24.1 KB |
 | discussion/e11_pasted_review_audit.md                                       | 8.3 KB  |
 | discussion/e11_completion_audit.md                                          | 4.8 KB  |
 | discussion/e11_end_of_draft_self_review.md                                  | 6.4 KB  |
 | discussion/e11_reference_audit.md                                           | 6.1 KB  |
+| discussion/e11_submission_repro_audit.md                                    | 8.2 KB  |
 | discussion/e11_paper_readiness_audit.md                                     | 34.9 KB |
 | discussion/e11_top_conference_plan.md                                       | 14.1 KB |
 | discussion/e11_top_conference_gap_register.md                               | 38.8 KB |
