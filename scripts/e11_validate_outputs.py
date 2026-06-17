@@ -857,6 +857,13 @@ def main() -> None:
         Path("figures/e11_condition_score_v4_failure_mechanism_audit") / "v4_cifar10_mixed_reversal_top5.png",
         Path("discussion/e11_condition_score_v4_failure_mechanism_audit.md"),
         Path("scripts/e11_write_condition_score_v4_failure_mechanism_audit.py"),
+        Path("results/e11_theory_proof_obligation_register") / "proof_obligations.csv",
+        Path("results/e11_theory_proof_obligation_register") / "assumption_stress_tests.csv",
+        Path("results/e11_theory_proof_obligation_register") / "claim_scope_boundaries.csv",
+        Path("results/e11_theory_proof_obligation_register") / "theorem_to_experiment_queue.csv",
+        Path("results/e11_theory_proof_obligation_register") / "config.json",
+        Path("discussion/e11_theory_proof_obligation_register.md"),
+        Path("scripts/e11_write_theory_proof_obligation_register.py"),
         Path("results/e11_condition_score_v5_theory_protocol") / "theory_term_register.csv",
         Path("results/e11_condition_score_v5_theory_protocol") / "score_contract.csv",
         Path("results/e11_condition_score_v5_theory_protocol") / "spent_evidence_policy.csv",
@@ -1273,6 +1280,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-fresh-eval # evaluate frozen fresh condition-score gates after fresh Slurm jobs finish",
         "make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split",
         "make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish",
+        "make e11-theory-proof-obligation-register # map theorem assumptions, claim scope, and proof obligations before broad claims",
         "make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract",
         "make e11-cifar-resnet-condition-score-v5-theory-to-score-map # map the v5 theorem terms to score features, leakage boundaries, and falsifiable gates",
         "make e11-cifar-resnet-condition-score-v5-validation-results # submit the v5 validation-only CIFAR-100-LT mod-4 partition via Slurm",
@@ -3573,6 +3581,64 @@ def main() -> None:
                 "These final rows are now spent for score fitting.",
             ],
         )
+    proof_dir = Path("results/e11_theory_proof_obligation_register")
+    proof_obligations = pd.read_csv(proof_dir / "proof_obligations.csv")
+    assumption_stress = pd.read_csv(proof_dir / "assumption_stress_tests.csv")
+    claim_scopes = pd.read_csv(proof_dir / "claim_scope_boundaries.csv")
+    theorem_queue = pd.read_csv(proof_dir / "theorem_to_experiment_queue.csv")
+    proof_config = json.loads((proof_dir / "config.json").read_text(encoding="utf-8"))
+    expected_proof_obligations = {
+        "PTO-1-local-linearization",
+        "PTO-2-matrix-block-boundary",
+        "PTO-3-muon-approximation-scope",
+        "PTO-4-v5-transport-score",
+        "PTO-5-natural-falsification",
+        "PTO-6-final-performance-separation",
+    }
+    expected_assumption_tests = {
+        "AST-1-local-step",
+        "AST-2-head-gain-matching",
+        "AST-3-tail-quality",
+        "AST-4-transport-stability",
+        "AST-5-multiplicity-integrity",
+    }
+    expected_claim_scopes = {
+        "main_theorem",
+        "natural_drift_diagnostic",
+        "predictive_condition",
+        "natural_counterexample",
+        "optimizer_benchmark",
+    }
+    if not (
+        set(proof_obligations["obligation_id"]) == expected_proof_obligations
+        and set(assumption_stress["assumption_id"]) == expected_assumption_tests
+        and set(claim_scopes["claim_scope"]) == expected_claim_scopes
+        and set(theorem_queue["priority"]).issuperset({"P0", "P1"})
+        and proof_obligations["formal_object"].astype(str).str.len().gt(30).all()
+        and proof_obligations["forbidden_wording"].astype(str).str.contains("do not", case=False).all()
+        and claim_scopes["blocked_claim"].astype(str).str.len().gt(25).all()
+        and theorem_queue["artifact_or_command"].astype(str).str.len().gt(20).all()
+        and proof_config["primary_score"] == "condition_score_v5_transport_normalized_amplitude_minus_direction"
+        and "no new empirical results" in str(proof_config["analysis_scope"])
+    ):
+        raise AssertionError("theory proof-obligation register must preserve obligations, assumptions, claim boundaries, and queue")
+    proof_text = Path("discussion/e11_theory_proof_obligation_register.md").read_text(encoding="utf-8")
+    assert_required_phrases(
+        "theory proof-obligation register",
+        proof_text,
+        [
+            "E11 Theory Proof-Obligation Register",
+            "theory-facing top-conference checklist",
+            "formal object",
+            "Proof Obligations",
+            "Assumption Stress Tests",
+            "Claim Scope Boundaries",
+            "Theorem-To-Experiment Queue",
+            "PTO-4-v5-transport-score",
+            "global training-dynamics theorem",
+            "optimizer-performance",
+        ],
+    )
     v5_protocol_dir = Path("results/e11_condition_score_v5_theory_protocol")
     v5_theory_terms = pd.read_csv(v5_protocol_dir / "theory_term_register.csv")
     v5_score_contract = pd.read_csv(v5_protocol_dir / "score_contract.csv")
@@ -6191,6 +6257,26 @@ def main() -> None:
         condition_score_v5_response,
         required_condition_score_v5_response_phrases,
     )
+    theory_proof_obligations = Path("discussion/e11_theory_proof_obligation_register.md").read_text(
+        encoding="utf-8"
+    )
+    required_theory_proof_phrases = [
+        "Theory Proof-Obligation Register",
+        "theory-facing top-conference checklist",
+        "Proof Obligations",
+        "Assumption Stress Tests",
+        "Claim Scope Boundaries",
+        "Theorem-To-Experiment Queue",
+        "PTO-1-local-linearization",
+        "PTO-2-matrix-block-boundary",
+        "PTO-4-v5-transport-score",
+        "optimizer-performance",
+    ]
+    assert_required_phrases(
+        "theory proof-obligation register",
+        theory_proof_obligations,
+        required_theory_proof_phrases,
+    )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -6208,6 +6294,8 @@ def main() -> None:
         "v5 has frozen a transport-normalized validation score",
         "discussion/e11_condition_score_v4_protocol.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
+        "discussion/e11_theory_proof_obligation_register.md",
+        "proof-obligation register",
         "discussion/e11_condition_score_v5_theory_protocol.md",
         "discussion/e11_condition_score_v5_theory_to_score_map.md",
         "discussion/e11_condition_score_v5_validation_freeze.md",
@@ -6285,6 +6373,7 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-fresh-architecture-results" not in readme
         or "make e11-cifar-resnet-condition-score-fresh-data-results" not in readme
         or "make e11-cifar-resnet-condition-score-fresh-eval" not in readme
+        or "make e11-theory-proof-obligation-register" not in readme
         or "make e11-cifar-resnet-condition-score-v5-theory-protocol" not in readme
         or "make e11-cifar-resnet-condition-score-v5-theory-to-score-map" not in readme
         or "make e11-cifar-resnet-condition-score-v5-validation-results" not in readme

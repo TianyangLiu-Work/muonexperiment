@@ -1,0 +1,7 @@
+{
+  "purpose": "theory-facing proof-obligation and claim-scope register",
+  "analysis_scope": "top-conference theorem checklist; no new empirical results",
+  "primary_score": "condition_score_v5_transport_normalized_amplitude_minus_direction",
+  "proof_obligation_count": 6,
+  "claim_scope_count": 5
+}

@@ -76,6 +76,10 @@ def main() -> None:
                 "role": "Known reviewer risks and safe claim decisions.",
             },
             {
+                "artifact": "discussion/e11_theory_proof_obligation_register.md",
+                "role": "Theory-facing proof obligations, assumptions, claim boundaries, and pending gates.",
+            },
+            {
                 "artifact": "discussion/e11_condition_score_v5_reviewer_failure_response.md",
                 "role": "Pre-output v5 final failure-mode matrix for reviewer-safe claim downgrades.",
             },
@@ -101,6 +105,7 @@ make e11-cifar-resnet-imbalance-sweep-results # submit the CIFAR-100-LT ResNet18
 make e11-cifar-resnet-layer-jvp-tail-quality-results # submit the all-layer ResNet finite-difference JVP tail-quality diagnostic via Slurm
 make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split
 make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish
+make e11-theory-proof-obligation-register # map theorem assumptions, proof obligations, claim scope, and blocked wording
 make e11-cifar-resnet-condition-score-v5-final-eval # evaluate frozen v5 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-condition-score-v5-final-interpretation-plan # lock the v5 final outcome-to-claim state machine before outputs exist
 make e11-cifar-resnet-condition-score-v5-reviewer-failure-response # map v5 final pass/fail modes to reviewer-safe claim downgrades
