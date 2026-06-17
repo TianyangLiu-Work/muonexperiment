@@ -430,7 +430,8 @@ def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFra
                     "scripts/e11_run_natural_negative_search_phase1.py, "
                     "scripts/slurm/e11_natural_negative_search_phase1.sbatch, "
                     "scripts/e11_run_natural_negative_search_phase2.py, and "
-                    "scripts/slurm/e11_natural_negative_search_phase2.sbatch are registered"
+                    "scripts/slurm/e11_natural_negative_search_phase2.sbatch are registered; "
+                    "scripts/e11_evaluate_natural_negative_search_phase2.py fixes the phase2 decision gate"
                 ),
                 "blocks_stronger_claim_if_missing": "yes",
             },
@@ -524,7 +525,9 @@ def write_outputs(
         phase2_boundary = (
             "The ResNet34 held-out architecture settings registry is frozen at "
             "`results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv`; "
-            "no phase2 metric rows are used until the Slurm job completes and a separate phase2 decision gate is added."
+            "the phase2 evaluator is frozen at "
+            "`results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/*`; "
+            "no phase2 metric rows are used until the Slurm job completes."
         )
     else:
         phase2_boundary = (

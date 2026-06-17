@@ -1,0 +1,6 @@
+gate_id,status,evidence
+NNS-P2-E1-evaluator-implemented,pass,scripts/e11_evaluate_natural_negative_search_phase2.py wrote evaluator artifacts
+NNS-P2-E2-phase2-output-completeness,not_ready,NNS-P2-heldout-architecture-boundary=settings_only_no_metrics (0/8 rows)
+NNS-P2-E3-primary-multiplicity,not_ready,Holm one-sided p-values use paired per-seed log-ratio tests over the registered 8-setting phase2 family
+NNS-P2-E4-heldout-architecture-claim,not_ready,0/8 phase2 settings have primary metric rows
+NNS-P2-E5-full-reporting-boundary,pass,"primary_decisions.csv keeps every registered phase2 setting, including not-run rows"

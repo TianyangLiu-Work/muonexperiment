@@ -262,7 +262,8 @@ def assert_valid_artifact_manifest(manifest_json: dict) -> None:
     if not required_manifest_tables.issubset(manifest_tables):
         raise AssertionError(f"artifact manifest missing key tables: {required_manifest_tables - manifest_tables}")
     zero_row_allowed_tables = {
-        "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/remaining_work.csv"
+        "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/remaining_work.csv",
+        "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/seed_level_primary_ratios.csv",
     }
     bad_manifest_tables = [
         item.get("path")
@@ -4886,6 +4887,13 @@ def main() -> None:
         natural_phase2_dir / "decision_template.csv",
         natural_phase2_dir / "config.json",
     ]
+    natural_phase2_eval_dir = natural_protocol_dir / "phase2_multiplicity_evaluation"
+    natural_phase2_eval_run_registry = pd.read_csv(natural_phase2_eval_dir / "run_registry.csv")
+    natural_phase2_eval_seed_ratios = pd.read_csv(natural_phase2_eval_dir / "seed_level_primary_ratios.csv")
+    natural_phase2_eval_decisions = pd.read_csv(natural_phase2_eval_dir / "primary_decisions.csv")
+    natural_phase2_eval_gates = pd.read_csv(natural_phase2_eval_dir / "gate_report.csv")
+    natural_phase2_eval_config = json.loads((natural_phase2_eval_dir / "config.json").read_text(encoding="utf-8"))
+    natural_phase2_eval_gate_lookup = natural_phase2_eval_gates.set_index("gate_id")["status"].to_dict()
     natural_interim_coverage_lookup = natural_interim_coverage.set_index("search_id")[
         "observed_primary_rows"
     ].to_dict()
@@ -4940,6 +4948,25 @@ def main() -> None:
         "phase2_architecture": set(natural_phase2_registry["architecture"]) == {"ResNet34 CIFAR stem"},
         "phase2_seed_count": set(natural_phase2_registry["seed_count"].astype(int)) == {3},
         "phase2_metric_files_absent": not any(path.exists() for path in natural_phase2_metric_paths),
+        "phase2_eval_run_registry": len(natural_phase2_eval_run_registry) == 1
+        and set(natural_phase2_eval_run_registry["output_status"]) == {"settings_only_no_metrics"}
+        and int(natural_phase2_eval_run_registry.iloc[0]["expected_settings"]) == 8
+        and int(natural_phase2_eval_run_registry.iloc[0]["pair_summary_rows"]) == 0,
+        "phase2_eval_decision_rows": len(natural_phase2_eval_decisions) == 8
+        and natural_phase2_eval_decisions["output_status"].eq("not_run").all()
+        and natural_phase2_eval_decisions["adjusted_primary_decision"].eq("pending_output").all(),
+        "phase2_eval_seed_rows": len(natural_phase2_eval_seed_ratios) == 0,
+        "phase2_eval_gate_status": natural_phase2_eval_gate_lookup
+        == {
+            "NNS-P2-E1-evaluator-implemented": "pass",
+            "NNS-P2-E2-phase2-output-completeness": "not_ready",
+            "NNS-P2-E3-primary-multiplicity": "not_ready",
+            "NNS-P2-E4-heldout-architecture-claim": "not_ready",
+            "NNS-P2-E5-full-reporting-boundary": "pass",
+        },
+        "phase2_eval_config": natural_phase2_eval_config["multiplicity_family"]
+        == "NNS-P2-heldout-architecture-family"
+        and int(natural_phase2_eval_config["planned_family_size"]) == 8,
         "eval_decision_count": len(natural_eval_decisions) == 26,
         "eval_observed_count": natural_eval_observed_count == 26,
         "eval_not_run_count": natural_eval_not_run_count == 0,
@@ -5034,6 +5061,8 @@ def main() -> None:
             "Phase2 boundary",
             "ResNet34 CIFAR stem",
             "phase2_heldout_architecture/settings_registry.csv",
+            "phase2_multiplicity_evaluation",
+            "scripts/e11_evaluate_natural_negative_search_phase2.py",
             "scripts/slurm/e11_natural_negative_search_phase2.sbatch",
             "no phase2 metric rows are used",
             "multiplicity evaluator",
@@ -5104,6 +5133,22 @@ def main() -> None:
             "ResNet34",
             "No phase2 metric rows are present in this settings-only freeze.",
             "settings_registry.csv",
+        ],
+    )
+    natural_phase2_eval_text = Path("discussion/e11_natural_negative_search_phase2_evaluation.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "natural negative-search phase2 evaluation",
+        natural_phase2_eval_text,
+        [
+            "E11 Natural Negative Search Phase2 Evaluation",
+            "8 declared settings",
+            "Current primary metric coverage: 0/8 settings",
+            "Current seed-level primary rows: 0",
+            "NNS-P2-E2-phase2-output-completeness",
+            "not_ready",
+            "paired per-seed log-ratio tests",
         ],
     )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
@@ -6307,6 +6352,7 @@ def main() -> None:
         "make e11-natural-negative-search-phase1-eval",
         "make e11-natural-negative-search-phase2-settings",
         "make e11-natural-negative-search-phase2-results",
+        "make e11-natural-negative-search-phase2-eval",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -6340,6 +6386,8 @@ def main() -> None:
         "Complete-family claim-boundary synthesis",
         "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
         "Settings-only ResNet34 held-out architecture registry",
+        "discussion/e11_natural_negative_search_phase2_evaluation.md",
+        "Pre-output Holm evaluator",
         "make e11-natural-negative-search-phase1-interim-synthesis",
         "discussion/e11_top_conference_claim_decision_audit.md",
         "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract",
@@ -7064,13 +7112,17 @@ def main() -> None:
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "scripts/e11_run_natural_negative_search_phase2.py",
         "scripts/slurm/e11_natural_negative_search_phase2.sbatch",
+        "scripts/e11_evaluate_natural_negative_search_phase2.py",
         "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
+        "discussion/e11_natural_negative_search_phase2_evaluation.md",
         "results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv",
+        "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation",
         "no phase2 metric rows are used",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-eval",
         "make e11-natural-negative-search-phase2-settings",
+        "make e11-natural-negative-search-phase2-eval",
         "scripts/e11_write_natural_negative_phase1_interim_synthesis.py",
         "multiplicity evaluator",
         "NNS-E4 returning finite_null_candidate",
@@ -7220,6 +7272,7 @@ def main() -> None:
         or "make e11-natural-negative-search-phase1-interim-synthesis" not in readme
         or "make e11-natural-negative-search-phase2-settings" not in readme
         or "make e11-natural-negative-search-phase2-results" not in readme
+        or "make e11-natural-negative-search-phase2-eval" not in readme
         or "make e11-top-conference-claim-decision-audit" not in readme
         or "make e11-manuscript-claim-trace" not in readme
         or "make e11-mechanism-referee-audit" not in readme
@@ -7239,7 +7292,9 @@ def main() -> None:
         "discussion/e11_artifact_review_packet.md",
         "discussion/e11_mechanism_referee_audit.md",
         "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
+        "discussion/e11_natural_negative_search_phase2_evaluation.md",
         "results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv",
+        "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/primary_decisions.csv",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:

@@ -36,8 +36,8 @@ gate remains `not_ready` when those tools are absent on the server.
 | paper/specgrad_activation_paper/tables/e11_paper_numbers.tex           | yes      |        55974 | 70b0130ae2d7fb538f3316745d01387f714464b53e1597ec6286032aa488f227 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex | yes      |         4934 | 1264d8923f3cfff52ae9af90f44b10bd29710c949ed93fc3d2eda5dff7b30471 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/local_linearization_errors.tex  | yes      |          961 | 12c108dd5bfdfd2d1ad219904a4f82f1d10e01ab6d6de4cd86a9252cb298a5ef | paper source or root reproduction entrypoint | pass           |
-| Makefile                                                               | yes      |        17678 | 62ce716c385b62717469290aeca5ceaec13cf29fb7e9ecb6c2034c47e229e6f0 | paper source or root reproduction entrypoint | pass           |
-| README_E11.md                                                          | yes      |        88986 | 4a67bf809a9bb1cfedb889c6f437406df2753d0c990c8071869c714b1188232b | paper source or root reproduction entrypoint | pass           |
+| Makefile                                                               | yes      |        17881 | b4396b8c20a685daed8c07a5a15c5e6105d2478c0159f304ff19dec76c9d1e84 | paper source or root reproduction entrypoint | pass           |
+| README_E11.md                                                          | yes      |        90174 | 3f97166a435a9c863b4e6f778eb3c542a8384c60951bd50483d48e60dfed6631 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/figures                                | yes      |      2923280 | 21 png files                                                     | paper-local figure bundle                    | pass           |
 
 ## Build Gate Summary

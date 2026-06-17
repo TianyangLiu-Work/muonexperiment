@@ -1,0 +1,14 @@
+{
+  "protocol_version": "nns_phase2_heldout_architecture_runner_v1",
+  "search_id": "NNS-P2-heldout-architecture-boundary",
+  "multiplicity_family": "NNS-P2-heldout-architecture-family",
+  "planned_family_size": 8,
+  "alpha": 0.05,
+  "head_gain_relative_error_max": 0.05,
+  "tail_accuracy_floor_by_dataset": {
+    "CIFAR100": 0.02,
+    "CIFAR10": 0.11
+  },
+  "primary_test": "paired per-seed log tail-output-drift ratio t-test with Holm one-sided phase-family adjustment",
+  "claim_boundary": "phase2 can support held-out architecture replication or a bounded phase2 null, not retroactive phase1 selection"
+}
