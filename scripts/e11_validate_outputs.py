@@ -781,6 +781,9 @@ def main() -> None:
         Path("figures/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation") / "cifar100_resnet_condition_score_heldout_evaluation.png",
         Path("discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md"),
         Path("discussion/e11_condition_score_heldout_failure_theory_note.md"),
+        Path("results/e11_condition_score_theory_bridge") / "score_target_register.csv",
+        Path("results/e11_condition_score_theory_bridge") / "fresh_protocol_requirements.csv",
+        Path("discussion/e11_condition_score_theory_bridge.md"),
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "train_trace.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_metrics.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "group_metrics.csv",
@@ -1011,6 +1014,8 @@ def main() -> None:
         "CIFAR-10-LT held-out data primary residual Spearman is `-0.6771 [-0.7011, -0.653]`",
         "legacy scaled-JVP ratio on CIFAR-10-LT has residual Spearman `0.6219 [0.6013, 0.6425]`",
         "discussion/e11_condition_score_heldout_failure_theory_note.md",
+        "discussion/e11_condition_score_theory_bridge.md",
+        "scripts/e11_write_condition_score_theory_bridge.py",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
         "candidate condition-score audit",
@@ -2645,6 +2650,49 @@ def main() -> None:
         raise AssertionError(
             "registered held-out condition-score evaluation must preserve the current failed residual-ranking boundary and passing threshold-direction readout"
         )
+    condition_score_bridge_dir = Path("results/e11_condition_score_theory_bridge")
+    score_target_register = pd.read_csv(condition_score_bridge_dir / "score_target_register.csv")
+    fresh_protocol_requirements = pd.read_csv(
+        condition_score_bridge_dir / "fresh_protocol_requirements.csv"
+    )
+    expected_target_ids = {
+        "direction_threshold",
+        "residual_layer_ranking",
+        "source_observed_transfer_control",
+        "legacy_jvp_counterexample",
+    }
+    expected_requirement_ids = {
+        "R1-target-separation",
+        "R2-heldout-quarantine",
+        "R3-theory-derived-score",
+        "R4-nested-calibration",
+        "R5-fresh-heldout-gates",
+        "R6-negative-outcome-reporting",
+    }
+    if (
+        len(score_target_register) != 4
+        or set(score_target_register["target_id"]) != expected_target_ids
+        or len(fresh_protocol_requirements) != 6
+        or set(fresh_protocol_requirements["requirement_id"]) != expected_requirement_ids
+    ):
+        raise AssertionError(
+            "condition-score theory bridge must preserve target separation and fresh-protocol requirements"
+        )
+    score_target_status = score_target_register.set_index("target_id")["status"].to_dict()
+    requirement_status = fresh_protocol_requirements.set_index("requirement_id")["current_status"].to_dict()
+    if not (
+        score_target_status.get("direction_threshold") == "supported_guardrail"
+        and score_target_status.get("residual_layer_ranking") == "blocked_by_heldout_failure"
+        and score_target_status.get("source_observed_transfer_control") == "architecture_transfer_only"
+        and score_target_status.get("legacy_jvp_counterexample") == "v2_not_uniformly_better"
+        and requirement_status.get("R2-heldout-quarantine") == "required_for_next_protocol"
+        and requirement_status.get("R3-theory-derived-score") == "missing"
+        and requirement_status.get("R4-nested-calibration") == "missing"
+        and requirement_status.get("R5-fresh-heldout-gates") == "missing"
+    ):
+        raise AssertionError(
+            "condition-score theory bridge must keep the failed held-outs quarantined and the next score/fresh-heldout work open"
+        )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -4083,6 +4131,24 @@ def main() -> None:
         heldout_failure_theory_note,
         required_heldout_failure_note_phrases,
     )
+    condition_score_theory_bridge = Path("discussion/e11_condition_score_theory_bridge.md").read_text(
+        encoding="utf-8"
+    )
+    required_condition_score_theory_bridge_phrases = [
+        "Condition-Score Theory Bridge",
+        "Score Target Register",
+        "direction_threshold",
+        "residual_layer_ranking",
+        "blocked_by_heldout_failure",
+        "These held-out splits are now spent",
+        "fresh P0 predictive-condition attempt",
+        "does not support a claim that `condition_score_v2_calibrated_residual` predicts held-out residual layer-risk ranking",
+    ]
+    assert_required_phrases(
+        "condition-score theory bridge",
+        condition_score_theory_bridge,
+        required_condition_score_theory_bridge_phrases,
+    )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -4153,6 +4219,7 @@ def main() -> None:
             Path("discussion/e11_cifar100_resnet_condition_score_next.md"),
             Path("discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md"),
             Path("discussion/e11_condition_score_heldout_failure_theory_note.md"),
+            Path("discussion/e11_condition_score_theory_bridge.md"),
             Path("discussion/e11_top_conference_gap_register.md"),
             Path("discussion/e11_paper_skeleton.md"),
             Path("discussion/e11_main_paper_package.md"),
