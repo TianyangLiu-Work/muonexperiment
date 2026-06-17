@@ -1,0 +1,7 @@
+{
+  "conjecture_rows": 5,
+  "stress_test_rows": 5,
+  "upgrade_ladder_rows": 4,
+  "positive_claim_boundary": "local matched-head-gain mechanism only",
+  "score_upgrade_boundary": "new unspent validation/final protocol required"
+}

@@ -1,0 +1,5 @@
+ladder_id,allowed_claim,required_gate_for_upgrade,blocked_upgrade
+BCL-1-current-submission,local matched-head-gain mechanism with ResNet18-supported diagnostics and explicit held-out boundaries,none for the scoped mechanism paper,broad architecture/data generality or optimizer-performance wording
+BCL-2-predictive-condition-upgrade,completed v5 negative boundary and endpoint-factorized transport conjecture,new preregistered validation/final splits where residual and direction endpoints both pass,reuse of spent v2/v3/v4/v5 final rows for score repair
+BCL-3-natural-boundary-upgrade,"finite registered phase1/phase2 null candidates with detectable-effect, head-gain, and quality caveats",larger or additional registered natural family with complete quality/head-gain gates,universal natural null or anecdotal counterexample wording
+BCL-4-optimizer-performance-upgrade,negative pilot plus local Muon-style trajectory compatibility,tuned validation selection and untouched final paired seeds with many/medium/few metrics,competitive Muon benchmark claim before final seed evidence

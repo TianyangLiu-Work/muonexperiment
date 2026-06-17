@@ -6,15 +6,15 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 419.1 KB |
-| scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 2.5 MB   |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 419.8 KB |
+| scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 2.6 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 65.0 KB  |
 | discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 1.5 MB   |
 | results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 274.4 MB |
 | figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 32.0 MB  |
 | configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
 | paper                  | Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.   | commit source and selected rendered PDFs | 5.6 MB   |
-| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 18.6 KB  |
+| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 18.8 KB  |
 | .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.            | commit                                   | 479 B    |
 | .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.        | commit                                   | 667 B    |
 
@@ -256,7 +256,10 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_natural_negative_search_protocol/phase2_power_audit/outcome_state_machine.csv                  |      6 | 1.1 KB    |
 | results/e11_heldout_generality_audit/generality_evidence_matrix.csv                                        |      7 | 5.3 KB    |
 | results/e11_heldout_generality_audit/generality_claim_gate.csv                                             |      5 | 1.1 KB    |
-| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 23.3 KB   |
+| results/e11_bold_conjecture_register/conjecture_register.csv                                               |      5 | 4.2 KB    |
+| results/e11_bold_conjecture_register/stress_test_matrix.csv                                                |      5 | 2.7 KB    |
+| results/e11_bold_conjecture_register/claim_upgrade_ladder.csv                                              |      4 | 1.1 KB    |
+| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 23.7 KB   |
 | results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv                                  |      6 | 4.8 KB    |
 | results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv                              |      5 | 2.1 KB    |
 | results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv                                 |      5 | 3.4 KB    |
@@ -361,26 +364,27 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                                                        | size    |
 |:--------------------------------------------------------------------------------------------|:--------|
-| README_E11.md                                                                               | 94.0 KB |
+| README_E11.md                                                                               | 94.9 KB |
 | discussion/e11_paper_skeleton.md                                                            | 10.9 KB |
 | discussion/e11_main_paper_package.md                                                        | 22.8 KB |
 | discussion/e11_main_figure_captions.md                                                      | 6.5 KB  |
 | discussion/e11_notation_glossary.md                                                         | 8.7 KB  |
 | discussion/e11_quantitative_claim_ledger.md                                                 | 21.7 KB |
-| discussion/e11_reproduction_checklist.md                                                    | 62.5 KB |
+| discussion/e11_reproduction_checklist.md                                                    | 63.1 KB |
 | discussion/e11_reviewer_risk_audit.md                                                       | 24.1 KB |
 | discussion/e11_pasted_review_audit.md                                                       | 8.3 KB  |
 | discussion/e11_completion_audit.md                                                          | 5.3 KB  |
 | discussion/e11_end_of_draft_self_review.md                                                  | 7.3 KB  |
 | discussion/e11_reference_audit.md                                                           | 6.1 KB  |
-| discussion/e11_submission_repro_audit.md                                                    | 8.5 KB  |
+| discussion/e11_submission_repro_audit.md                                                    | 8.4 KB  |
 | discussion/e11_artifact_review_packet.md                                                    | 14.8 KB |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB |
-| discussion/e11_top_conference_gap_register.md                                               | 55.2 KB |
+| discussion/e11_top_conference_gap_register.md                                               | 55.3 KB |
 | discussion/e11_top_conference_claim_decision_audit.md                                       | 32.0 KB |
 | discussion/e11_manuscript_claim_trace.md                                                    | 7.5 KB  |
 | discussion/e11_mechanism_referee_audit.md                                                   | 30.5 KB |
+| discussion/e11_bold_conjecture_register.md                                                  | 14.5 KB |
 | discussion/e11_natural_head_tail_boundary.md                                                | 17.5 KB |
 | discussion/e11_natural_negative_search_protocol.md                                          | 19.7 KB |
 | discussion/e11_natural_negative_search_phase1_power_audit.md                                | 5.1 KB  |

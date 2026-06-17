@@ -5,15 +5,15 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 429185,
-      "size": "419.1 KB"
+      "size_bytes": 429897,
+      "size": "419.8 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2672332,
-      "size": "2.5 MB"
+      "size_bytes": 2693259,
+      "size": "2.6 MB"
     },
     {
       "path": "tests",
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1574386,
+      "size_bytes": 1590418,
       "size": "1.5 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 287681906,
+      "size_bytes": 287691281,
       "size": "274.4 MB"
     },
     {
@@ -54,15 +54,15 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833091,
+      "size_bytes": 5833090,
       "size": "5.6 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 19048,
-      "size": "18.6 KB"
+      "size_bytes": 19211,
+      "size": "18.8 KB"
     },
     {
       "path": ".gitignore",
@@ -1251,9 +1251,24 @@
       "size": "1.1 KB"
     },
     {
+      "path": "results/e11_bold_conjecture_register/conjecture_register.csv",
+      "rows": 5,
+      "size": "4.2 KB"
+    },
+    {
+      "path": "results/e11_bold_conjecture_register/stress_test_matrix.csv",
+      "rows": 5,
+      "size": "2.7 KB"
+    },
+    {
+      "path": "results/e11_bold_conjecture_register/claim_upgrade_ladder.csv",
+      "rows": 4,
+      "size": "1.1 KB"
+    },
+    {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
       "rows": 7,
-      "size": "23.3 KB"
+      "size": "23.7 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
@@ -1754,7 +1769,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "94.0 KB"
+      "size": "94.9 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1778,7 +1793,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "62.5 KB"
+      "size": "63.1 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -1802,7 +1817,7 @@
     },
     {
       "path": "discussion/e11_submission_repro_audit.md",
-      "size": "8.5 KB"
+      "size": "8.4 KB"
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
@@ -1818,7 +1833,7 @@
     },
     {
       "path": "discussion/e11_top_conference_gap_register.md",
-      "size": "55.2 KB"
+      "size": "55.3 KB"
     },
     {
       "path": "discussion/e11_top_conference_claim_decision_audit.md",
@@ -1831,6 +1846,10 @@
     {
       "path": "discussion/e11_mechanism_referee_audit.md",
       "size": "30.5 KB"
+    },
+    {
+      "path": "discussion/e11_bold_conjecture_register.md",
+      "size": "14.5 KB"
     },
     {
       "path": "discussion/e11_natural_head_tail_boundary.md",

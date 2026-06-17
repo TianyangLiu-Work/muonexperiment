@@ -1323,6 +1323,12 @@ def main() -> None:
         Path("results/e11_mechanism_referee_audit") / "falsification_trigger_matrix.csv",
         Path("results/e11_mechanism_referee_audit") / "config.json",
         Path("scripts/e11_write_mechanism_referee_audit.py"),
+        Path("discussion/e11_bold_conjecture_register.md"),
+        Path("results/e11_bold_conjecture_register") / "conjecture_register.csv",
+        Path("results/e11_bold_conjecture_register") / "stress_test_matrix.csv",
+        Path("results/e11_bold_conjecture_register") / "claim_upgrade_ladder.csv",
+        Path("results/e11_bold_conjecture_register") / "config.json",
+        Path("scripts/e11_write_bold_conjecture_register.py"),
         Path("scripts/e11_write_condition_score_ablation.py"),
         Path("discussion/e11_condition_score_ablation.md"),
         Path("results/e11_condition_score_ablation") / "score_ablation_summary.csv",
@@ -1462,6 +1468,8 @@ def main() -> None:
         "scripts/e11_write_condition_score_v5_reviewer_failure_response.py",
         "e11-cifar-resnet-condition-score-v5-direction-guardrail-failure-audit:",
         "scripts/e11_write_condition_score_v5_direction_guardrail_failure_audit.py",
+        "e11-bold-conjecture-register:",
+        "scripts/e11_write_bold_conjecture_register.py",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -1541,6 +1549,7 @@ def main() -> None:
         "make e11-theory-proof-obligation-register # map theorem assumptions, claim scope, and proof obligations before broad claims",
         "make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract",
         "make e11-cifar-resnet-condition-score-v5-theory-to-score-map # map the v5 theorem terms to score features, leakage boundaries, and falsifiable gates",
+        "make e11-bold-conjecture-register # generate the bold-conjecture/careful-verification register",
         "make e11-cifar-resnet-condition-score-v5-validation-results # submit the v5 validation-only CIFAR-100-LT mod-4 partition via Slurm",
         "make e11-cifar-resnet-condition-score-v5-validation-freeze # freeze or block the v5 transport-normalized score after validation",
         "make e11-cifar-resnet-condition-score-v5-architecture-results # submit the v5 ResNeXt50-32x4d final architecture split via Slurm",
@@ -1590,6 +1599,10 @@ def main() -> None:
         "discussion/e11_condition_score_v5_theory_to_score_map.md",
         "discussion/e11_condition_score_ablation.md",
         "discussion/e11_condition_score_v5_validation_freeze.md",
+        "discussion/e11_bold_conjecture_register.md",
+        "results/e11_bold_conjecture_register/conjecture_register.csv",
+        "results/e11_bold_conjecture_register/stress_test_matrix.csv",
+        "bold-conjecture/careful-verification ledger",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
         "scripts/e11_write_condition_score_fresh_protocol.py",
@@ -1709,6 +1722,7 @@ def main() -> None:
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "scripts/e11_write_top_conference_claim_decision_audit.py",
+        "scripts/e11_write_bold_conjecture_register.py",
         "discussion/e11_top_conference_claim_decision_audit.md",
         "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
         "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
@@ -7465,6 +7479,10 @@ def main() -> None:
         "completed frozen final evaluator",
         "discussion/e11_condition_score_v5_final_interpretation_plan.md",
         "outcome-to-claim state machine",
+        "discussion/e11_bold_conjecture_register.md",
+        "bold-conjecture",
+        "careful-verification",
+        "BC-2-endpoint-factorized-transport",
         "discussion/e11_condition_score_v5_reviewer_failure_response.md",
         "claim-downgrade plan",
         "current_gate_snapshot.csv",
@@ -7711,6 +7729,64 @@ def main() -> None:
             "successful predictive condition",
         ],
     )
+    bold_conjecture_dir = Path("results/e11_bold_conjecture_register")
+    bold_conjectures = pd.read_csv(bold_conjecture_dir / "conjecture_register.csv")
+    bold_stress_tests = pd.read_csv(bold_conjecture_dir / "stress_test_matrix.csv")
+    bold_ladder = pd.read_csv(bold_conjecture_dir / "claim_upgrade_ladder.csv")
+    bold_config = json.loads((bold_conjecture_dir / "config.json").read_text(encoding="utf-8"))
+    if set(bold_conjectures["conjecture_id"]) != {
+        "BC-1-local-sandwich-drift",
+        "BC-2-endpoint-factorized-transport",
+        "BC-3-natural-counterexamples-are-structured",
+        "BC-4-muon-performance-needs-state-distribution-theory",
+        "BC-5-layer-risk-is-predictable-but-the-current-proxy-is-incomplete",
+    }:
+        raise AssertionError("bold conjecture register must preserve the fixed conjecture set")
+    if set(bold_stress_tests["stress_id"]) != {
+        "BST-1-local-theorem-scope",
+        "BST-2-score-transport-scope",
+        "BST-3-natural-family-scope",
+        "BST-4-optimizer-performance-scope",
+        "BST-5-heldout-predictor-scope",
+    }:
+        raise AssertionError("bold conjecture register must preserve the fixed stress-test set")
+    if set(bold_ladder["ladder_id"]) != {
+        "BCL-1-current-submission",
+        "BCL-2-predictive-condition-upgrade",
+        "BCL-3-natural-boundary-upgrade",
+        "BCL-4-optimizer-performance-upgrade",
+    }:
+        raise AssertionError("bold conjecture register must preserve the fixed claim-upgrade ladder")
+    if bold_config != {
+        "conjecture_rows": 5,
+        "stress_test_rows": 5,
+        "upgrade_ladder_rows": 4,
+        "positive_claim_boundary": "local matched-head-gain mechanism only",
+        "score_upgrade_boundary": "new unspent validation/final protocol required",
+    }:
+        raise AssertionError(f"bold conjecture config drifted: {bold_config}")
+    bold_register_text = " ".join(
+        [
+            Path("discussion/e11_bold_conjecture_register.md").read_text(encoding="utf-8"),
+            " ".join(bold_conjectures.astype(str).to_numpy().ravel()),
+            " ".join(bold_stress_tests.astype(str).to_numpy().ravel()),
+            " ".join(bold_ladder.astype(str).to_numpy().ravel()),
+        ]
+    )
+    assert_required_phrases(
+        "bold conjecture register",
+        bold_register_text,
+        [
+            "supportable_as_local_mechanism",
+            "conjecture_for_new_protocol_not_current_positive_claim",
+            "bounded_support_with_caveated_heldout_boundaries",
+            "benchmark_claim_blocked_until_tuned_validation_and_final_seeds",
+            "predictive_condition_failed_but_boundary_is_informative",
+            "new unspent validation/final protocol required",
+            "bold conjecture, careful verification",
+            "Current positive wording remains limited to the local matched-head-gain mechanism",
+        ],
+    )
     readme = Path("README_E11.md").read_text(encoding="utf-8")
     if "## Main Entry Points" not in readme or "## Current Publication Gaps" not in readme:
         raise AssertionError("README_E11.md must document entry points and publication gaps")
@@ -7763,6 +7839,7 @@ def main() -> None:
         or "make e11-natural-negative-search-phase2-eval" not in readme
         or "make e11-natural-negative-search-phase2-power-audit" not in readme
         or "make e11-heldout-generality-audit" not in readme
+        or "make e11-bold-conjecture-register" not in readme
         or "make e11-top-conference-claim-decision-audit" not in readme
         or "make e11-manuscript-claim-trace" not in readme
         or "make e11-mechanism-referee-audit" not in readme
@@ -7781,6 +7858,7 @@ def main() -> None:
         "discussion/e11_submission_repro_audit.md",
         "discussion/e11_artifact_review_packet.md",
         "discussion/e11_mechanism_referee_audit.md",
+        "discussion/e11_bold_conjecture_register.md",
         "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
         "discussion/e11_natural_negative_search_phase2_evaluation.md",
         "discussion/e11_natural_negative_search_phase2_power_audit.md",
@@ -7790,6 +7868,8 @@ def main() -> None:
         "results/e11_natural_negative_search_protocol/phase2_power_audit/minimum_detectable_effect.csv",
         "results/e11_heldout_generality_audit/generality_evidence_matrix.csv",
         "results/e11_heldout_generality_audit/generality_claim_gate.csv",
+        "results/e11_bold_conjecture_register/conjecture_register.csv",
+        "results/e11_bold_conjecture_register/stress_test_matrix.csv",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:
@@ -8048,6 +8128,7 @@ def main() -> None:
             Path("discussion/e11_top_conference_gap_register.md"),
             Path("discussion/e11_mechanism_referee_audit.md"),
             Path("discussion/e11_heldout_generality_audit.md"),
+            Path("discussion/e11_bold_conjecture_register.md"),
             Path("discussion/e11_natural_head_tail_boundary.md"),
             Path("discussion/e11_natural_negative_search_protocol.md"),
             Path("discussion/e11_paper_skeleton.md"),
