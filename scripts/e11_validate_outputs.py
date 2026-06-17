@@ -864,6 +864,14 @@ def main() -> None:
         Path("results/e11_condition_score_v5_theory_protocol") / "acceptance_gates.csv",
         Path("discussion/e11_condition_score_v5_theory_protocol.md"),
         Path("scripts/e11_write_condition_score_v5_theory_protocol.py"),
+        Path("results/e11_condition_score_v5_theory_to_score_map") / "theorem_proxy_map.csv",
+        Path("results/e11_condition_score_v5_theory_to_score_map") / "score_lineage.csv",
+        Path("results/e11_condition_score_v5_theory_to_score_map") / "transport_normalization_contract.csv",
+        Path("results/e11_condition_score_v5_theory_to_score_map") / "falsifiable_predictions.csv",
+        Path("results/e11_condition_score_v5_theory_to_score_map") / "ablation_matrix.csv",
+        Path("results/e11_condition_score_v5_theory_to_score_map") / "claim_readiness_ledger.csv",
+        Path("discussion/e11_condition_score_v5_theory_to_score_map.md"),
+        Path("scripts/e11_write_condition_score_v5_theory_to_score_map.py"),
         Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "score_formula_registry.csv",
         Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "freeze_status.csv",
         Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "validation_score_pairs.csv",
@@ -1058,6 +1066,8 @@ def main() -> None:
         "scripts/e11_write_condition_score_v4_failure_mechanism_audit.py",
         "e11-cifar-resnet-condition-score-v5-theory-protocol:",
         "scripts/e11_write_condition_score_v5_theory_protocol.py",
+        "e11-cifar-resnet-condition-score-v5-theory-to-score-map:",
+        "scripts/e11_write_condition_score_v5_theory_to_score_map.py",
         "e11-cifar-resnet-condition-score-v5-validation-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v5_validation_mod4_partition.sbatch",
         "e11-cifar-resnet-condition-score-v5-validation-freeze:",
@@ -1141,6 +1151,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split",
         "make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish",
         "make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract",
+        "make e11-cifar-resnet-condition-score-v5-theory-to-score-map # map the v5 theorem terms to score features, leakage boundaries, and falsifiable gates",
         "make e11-cifar-resnet-condition-score-v5-validation-results # submit the v5 validation-only CIFAR-100-LT mod-4 partition via Slurm",
         "make e11-cifar-resnet-condition-score-v5-validation-freeze # freeze or block the v5 transport-normalized score after validation",
         "make e11-cifar-resnet-condition-score-v5-architecture-results # submit the v5 ResNeXt50-32x4d final architecture split via Slurm",
@@ -1171,6 +1182,7 @@ def main() -> None:
         "discussion/e11_condition_score_v4_final_evaluation.md",
         "discussion/e11_condition_score_v4_failure_mechanism_audit.md",
         "discussion/e11_condition_score_v5_theory_protocol.md",
+        "discussion/e11_condition_score_v5_theory_to_score_map.md",
         "discussion/e11_condition_score_v5_validation_freeze.md",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
@@ -1181,6 +1193,7 @@ def main() -> None:
         "scripts/e11_evaluate_condition_score_v4_finals.py",
         "scripts/e11_write_condition_score_v4_failure_mechanism_audit.py",
         "scripts/e11_write_condition_score_v5_theory_protocol.py",
+        "scripts/e11_write_condition_score_v5_theory_to_score_map.py",
         "scripts/e11_freeze_condition_score_v5_validation.py",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
@@ -1213,6 +1226,8 @@ def main() -> None:
         "ResNeXt50-32x4d",
         "data-partition reversal mechanism problem",
         "aggregation before either unspent final split",
+        "transport-stable sandwich residual proposition",
+        "theorem-to-measurement bridge",
         "results/e11_condition_score_v5_protocol/validation_score_freeze/*",
         "transport-normalized residual score",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
@@ -3482,6 +3497,103 @@ def main() -> None:
             "Blocked now: fitting, selecting, or thresholding a v5 score on any v2/v3/v4 final row",
         ],
     )
+    v5_map_dir = Path("results/e11_condition_score_v5_theory_to_score_map")
+    v5_theorem_proxy_map = pd.read_csv(v5_map_dir / "theorem_proxy_map.csv")
+    v5_score_lineage = pd.read_csv(v5_map_dir / "score_lineage.csv")
+    v5_transport_contract = pd.read_csv(v5_map_dir / "transport_normalization_contract.csv")
+    v5_predictions = pd.read_csv(v5_map_dir / "falsifiable_predictions.csv")
+    v5_ablations = pd.read_csv(v5_map_dir / "ablation_matrix.csv")
+    v5_readiness = pd.read_csv(v5_map_dir / "claim_readiness_ledger.csv")
+    expected_v5_map_ids = {
+        "M1-sandwiched-tail-risk",
+        "M2-direction-ratio",
+        "M3-source-depth-residual",
+        "M4-partition-transport",
+        "M5-architecture-transport",
+    }
+    expected_v5_prediction_ids = {
+        "V5-P1-direction-guardrail",
+        "V5-P2-residual-validation",
+        "V5-P3-architecture-final",
+        "V5-P4-data-final",
+        "V5-P5-baseline-dominance",
+    }
+    expected_v5_ablation_ids = {
+        "A1-direction-only",
+        "A2-raw-amplitude-only",
+        "A3-early-depth-only",
+        "A4-v4-amplitude-minus-direction",
+        "A5-transport-normalized-candidate",
+    }
+    expected_v5_transport_steps = {
+        "T1-source-calibration",
+        "T2-transport-tags",
+        "T3-validation-freeze",
+        "T4-final-evaluation",
+        "T5-negative-path",
+    }
+    expected_v5_readiness_items = {
+        "theory-to-score map",
+        "v5 validation output",
+        "v5 residual score freeze",
+        "no final before freeze",
+        "predictive-condition claim",
+    }
+    expected_v5_score_ids = {
+        "condition_score_v5_direction_axis_scaled_jvp_ratio",
+        "condition_score_v5_raw_fro_amplitude_axis",
+        "condition_score_v5_transport_normalized_amplitude_minus_direction",
+        "condition_score_v5_transport_defect_penalty",
+        "early_layer_prior",
+        "source_observed_drift_positive_control",
+        "condition_score_v5_validation_selected",
+    }
+    if not (
+        set(v5_theorem_proxy_map["map_id"]) == expected_v5_map_ids
+        and set(v5_predictions["prediction_id"]) == expected_v5_prediction_ids
+        and set(v5_ablations["ablation_id"]) == expected_v5_ablation_ids
+        and set(v5_transport_contract["step_id"]) == expected_v5_transport_steps
+        and set(v5_readiness["item"]) == expected_v5_readiness_items
+        and set(v5_score_lineage["score_id"]) == expected_v5_score_ids
+    ):
+        raise AssertionError(
+            "condition-score v5 theory-to-score map must preserve theorem maps, predictions, ablations, transport steps, readiness rows, and score lineage"
+        )
+    v5_readiness_lookup = v5_readiness.set_index("item")["status"].to_dict()
+    if not (
+        v5_theorem_proxy_map["claim_boundary"].astype(str).str.contains("claim", case=False).all()
+        and v5_score_lineage["leakage_status"].eq("no spent final rows").all()
+        and v5_transport_contract["forbidden_inputs"].astype(str).str.contains("final", case=False).all()
+        and v5_predictions["pass_rule"].astype(str).str.contains("CI|threshold|beat", case=False, regex=True).all()
+        and v5_ablations["required_v5_report"].astype(str).str.len().gt(20).all()
+        and v5_readiness_lookup["theory-to-score map"] == "generated"
+        and v5_readiness_lookup["v5 validation output"] in {"not_run", "generated"}
+        and v5_readiness_lookup["v5 residual score freeze"] in {"not_ready", "frozen", "validation_failed"}
+        and v5_readiness_lookup["no final before freeze"] == "pass"
+        and v5_readiness_lookup["predictive-condition claim"] == "not_ready"
+    ):
+        raise AssertionError(
+            "condition-score v5 theory-to-score map must keep leakage boundaries, quantitative gates, ablation reports, and not_ready P0 claim status"
+        )
+    v5_map_text = Path("discussion/e11_condition_score_v5_theory_to_score_map.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "condition-score v5 theory-to-score map",
+        v5_map_text,
+        [
+            "E11 Condition-Score V5 Theory-to-Score Map",
+            "Transport-Stable Sandwich Residual",
+            "theory-to-measurement bridge",
+            "Theorem Proxy Map",
+            "Score Lineage",
+            "Transport Normalization Contract",
+            "Falsifiable Predictions",
+            "Required Ablation Matrix",
+            "Claim Readiness Ledger",
+            "Blocked now: fitting, selecting, or reweighting any v5 score on v2/v3/v4 final",
+        ],
+    )
     v5_freeze_dir = Path("results/e11_condition_score_v5_protocol/validation_score_freeze")
     v5_freeze_formulas = pd.read_csv(v5_freeze_dir / "score_formula_registry.csv")
     v5_freeze_status = pd.read_csv(v5_freeze_dir / "freeze_status.csv")
@@ -5125,6 +5237,27 @@ def main() -> None:
         condition_score_v5_protocol,
         required_condition_score_v5_phrases,
     )
+    condition_score_v5_theory_to_score = Path(
+        "discussion/e11_condition_score_v5_theory_to_score_map.md"
+    ).read_text(encoding="utf-8")
+    required_condition_score_v5_theory_to_score_phrases = [
+        "Condition-Score V5 Theory-to-Score Map",
+        "Transport-Stable Sandwich Residual",
+        "theory-to-measurement bridge",
+        "Theorem Proxy Map",
+        "Score Lineage",
+        "Transport Normalization Contract",
+        "Falsifiable Predictions",
+        "Required Ablation Matrix",
+        "Claim Readiness Ledger",
+        "not_ready",
+        "Blocked now: fitting, selecting, or reweighting any v5 score on v2/v3/v4 final",
+    ]
+    assert_required_phrases(
+        "condition-score v5 theory-to-score map",
+        condition_score_v5_theory_to_score,
+        required_condition_score_v5_theory_to_score_phrases,
+    )
     condition_score_v5_freeze = Path("discussion/e11_condition_score_v5_validation_freeze.md").read_text(
         encoding="utf-8"
     )
@@ -5160,8 +5293,11 @@ def main() -> None:
         "discussion/e11_condition_score_v4_protocol.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
         "discussion/e11_condition_score_v5_theory_protocol.md",
+        "discussion/e11_condition_score_v5_theory_to_score_map.md",
         "discussion/e11_condition_score_v5_validation_freeze.md",
         "transport-normalized score contract",
+        "transport-stable sandwich residual proposition",
+        "theorem terms to measurable score features",
         "validation-freeze boundary",
         "validation-only mod-4 CIFAR-100-LT split",
         "not_ready",
@@ -5198,6 +5334,7 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-fresh-data-results" not in readme
         or "make e11-cifar-resnet-condition-score-fresh-eval" not in readme
         or "make e11-cifar-resnet-condition-score-v5-theory-protocol" not in readme
+        or "make e11-cifar-resnet-condition-score-v5-theory-to-score-map" not in readme
         or "make e11-cifar-resnet-condition-score-v5-validation-results" not in readme
         or "make e11-cifar-resnet-condition-score-v5-validation-freeze" not in readme
         or "make e11-cifar-resnet-condition-score-v5-architecture-results" not in readme

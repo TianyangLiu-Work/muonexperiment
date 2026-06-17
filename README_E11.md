@@ -53,6 +53,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.s
 python3 scripts/e11_evaluate_condition_score_v4_finals.py
 python3 scripts/e11_write_condition_score_v4_failure_mechanism_audit.py
 python3 scripts/e11_write_condition_score_v5_theory_protocol.py
+python3 scripts/e11_write_condition_score_v5_theory_to_score_map.py
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_validation_mod4_partition.sbatch
 python3 scripts/e11_freeze_condition_score_v5_validation.py
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch
@@ -156,6 +157,7 @@ make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the
 make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-condition-score-v4-failure-audit # localize the frozen v4 CIFAR-10 mixed final failure mechanism
 make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract
+make e11-cifar-resnet-condition-score-v5-theory-to-score-map # map the v5 theorem terms to score features, leakage boundaries, and falsifiable gates
 make e11-cifar-resnet-condition-score-v5-validation-results # submit the v5 validation-only CIFAR-100-LT mod-4 partition via Slurm
 make e11-cifar-resnet-condition-score-v5-validation-freeze # freeze or block the v5 transport-normalized score after validation
 make e11-cifar-resnet-condition-score-v5-architecture-results # submit the v5 ResNeXt50-32x4d final architecture split via Slurm
@@ -194,6 +196,7 @@ make e11-cifar-resnet-condition-score-v4-validation-freeze
 make e11-cifar-resnet-condition-score-v4-final-eval
 make e11-cifar-resnet-condition-score-v4-failure-audit
 make e11-cifar-resnet-condition-score-v5-theory-protocol
+make e11-cifar-resnet-condition-score-v5-theory-to-score-map
 make e11-cifar-resnet-condition-score-v5-validation-results
 make e11-cifar-resnet-condition-score-v5-validation-freeze
 make e11-cifar-resnet-condition-score-v5-architecture-results
@@ -334,6 +337,12 @@ transport-normalized score contract, quarantines every v2/v3/v4 final row from
 score fitting and selection, and registers new unspent entrypoints for a
 validation-only CIFAR-100-LT mod-4 partition, a ResNeXt50-32x4d architecture
 final split, and a CIFAR-10 cross-partition final data split.
+The theorem-to-measurement bridge is
+`discussion/e11_condition_score_v5_theory_to_score_map.md`, backed by
+`results/e11_condition_score_v5_theory_to_score_map/*`. It states the
+transport-stable sandwich residual proposition, maps theorem terms to score
+features, and records the ablation and falsifiable prediction matrix that the
+v5 validation/final splits must satisfy before any predictive-condition claim.
 The executable freeze boundary is
 `discussion/e11_condition_score_v5_validation_freeze.md`, backed by
 `results/e11_condition_score_v5_protocol/validation_score_freeze/*`. It is
@@ -426,6 +435,7 @@ Paper-facing synthesis:
 - `discussion/e11_condition_score_v4_final_evaluation.md`
 - `discussion/e11_condition_score_v4_failure_mechanism_audit.md`
 - `discussion/e11_condition_score_v5_theory_protocol.md`
+- `discussion/e11_condition_score_v5_theory_to_score_map.md`
 - `discussion/e11_condition_score_v5_validation_freeze.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
@@ -531,6 +541,12 @@ Primary paper quantitative tables:
 - `results/e11_condition_score_v5_theory_protocol/spent_evidence_policy.csv`
 - `results/e11_condition_score_v5_theory_protocol/unspent_split_requirements.csv`
 - `results/e11_condition_score_v5_theory_protocol/acceptance_gates.csv`
+- `results/e11_condition_score_v5_theory_to_score_map/theorem_proxy_map.csv`
+- `results/e11_condition_score_v5_theory_to_score_map/score_lineage.csv`
+- `results/e11_condition_score_v5_theory_to_score_map/transport_normalization_contract.csv`
+- `results/e11_condition_score_v5_theory_to_score_map/falsifiable_predictions.csv`
+- `results/e11_condition_score_v5_theory_to_score_map/ablation_matrix.csv`
+- `results/e11_condition_score_v5_theory_to_score_map/claim_readiness_ledger.csv`
 - `results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv`
 - `results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv`
 - `results/e11_condition_score_v5_protocol/validation_score_freeze/validation_gate_report.csv`
@@ -682,6 +698,7 @@ Do not claim:
 - `scripts/e11_evaluate_condition_score_v4_finals.py`: frozen-score evaluator for the unspent v4 WideResNet50-2 and CIFAR-10 mixed final splits.
 - `scripts/e11_write_condition_score_v4_failure_mechanism_audit.py`: diagnostic-only audit showing that the v4 CIFAR-10 mixed failure is an amplitude/depth scalar-aggregation reversal, not a direction-threshold failure.
 - `scripts/e11_write_condition_score_v5_theory_protocol.py`: theory-facing v5 score contract requiring transport-normalized amplitude or a narrower fixed-partition claim before any new P0 predictive-condition attempt.
+- `scripts/e11_write_condition_score_v5_theory_to_score_map.py`: v5 theorem-to-measurement bridge that maps sandwich-tail-drift terms to score features, transport contracts, ablations, and falsifiable validation/final gates.
 - `scripts/e11_freeze_condition_score_v5_validation.py`: v5 validation-freeze evaluator; it writes not_run/not_ready rows until the validation split exists, then freezes or blocks a transport-normalized residual score before final splits.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.
@@ -714,7 +731,7 @@ Do not claim:
 
 The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
 
-The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`, and v5 validation-freeze boundary in `discussion/e11_condition_score_v5_validation_freeze.md`.
+The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`, v5 theory-to-score map in `discussion/e11_condition_score_v5_theory_to_score_map.md`, and v5 validation-freeze boundary in `discussion/e11_condition_score_v5_validation_freeze.md`.
 
 Most important next steps:
 
