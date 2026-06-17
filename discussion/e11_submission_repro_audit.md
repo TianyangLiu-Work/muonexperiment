@@ -21,8 +21,8 @@ gate remains `not_ready` when those tools are absent on the server.
 
 | path                                         | exists   |   size_bytes | sha256                                                           | header_is_pdf   | audit_status   |
 |:---------------------------------------------|:---------|-------------:|:-----------------------------------------------------------------|:----------------|:---------------|
-| paper/specgrad_activation_paper/main.pdf     | yes      |      2596716 | ea411f209917ac57dad768368cfb306255663ea1bf3538bb181cff37dffab222 | yes             | pass           |
-| paper/specgrad_activation_paper/two_page.pdf | yes      |        62047 | 90a3238519fdff0ed73b41604f590b4ca084d7458110e98c269d82147b8e3ad5 | yes             | pass           |
+| paper/specgrad_activation_paper/main.pdf     | yes      |      2596716 | e965738e7f78f7f8a350cae9a4067acdf0b00157cce79fa6b2f103e639134c6c | yes             | pass           |
+| paper/specgrad_activation_paper/two_page.pdf | yes      |        62048 | e72304ce74daf98123d64851623a8068fbf52c9812fbb333fb4e8f0eeb3242f1 | yes             | pass           |
 
 ## Source Package Manifest
 
@@ -42,14 +42,14 @@ gate remains `not_ready` when those tools are absent on the server.
 
 ## Build Gate Summary
 
-| gate_id                        | status                  | evidence                                                                                         | required_next_action                                                                                   |
-|:-------------------------------|:------------------------|:-------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------|
-| R1-source-revision             | pass                    | the commit containing this audit is the source revision                                          | record the pushed commit in the final run summary                                                      |
-| R2-working-tree-scope          | info                    | audit generated during an intentional evidence update; final git status is checked before commit | keep serverREADME.md untracked and stage only intentional evidence files                               |
-| R3-preferred-latex-toolchain   | not_ready               | pdflatex/bibtex/xelatex not all available                                                        | run a clean checkout with pdflatex/bibtex/xelatex before claiming full venue-toolchain reproducibility |
-| R4-tectonic-fallback-toolchain | pass                    | tectonic available                                                                               | use make e11-paper-pdf or paper/specgrad_activation_paper make tectonic on this server                 |
-| R5-rendered-pdfs               | pass                    | main.pdf and two_page.pdf have PDF headers and expected sizes                                    | rebuild paper PDFs if either rendered artifact fails                                                   |
-| R6-full-artifact-validation    | external_check_required | run make e11-full after regenerating this audit                                                  | record the make e11-full result in the commit/push summary                                             |
+| gate_id                        | status    | evidence                                                                                                                                                                                        | required_next_action                                                                                   |
+|:-------------------------------|:----------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------|
+| R1-source-revision             | pass      | the commit containing this audit is the source revision                                                                                                                                         | record the pushed commit in the final run summary                                                      |
+| R2-working-tree-scope          | info      | audit generated during an intentional evidence update; final git status is checked before commit                                                                                                | keep serverREADME.md untracked and stage only intentional evidence files                               |
+| R3-preferred-latex-toolchain   | not_ready | pdflatex/bibtex/xelatex not all available                                                                                                                                                       | run a clean checkout with pdflatex/bibtex/xelatex before claiming full venue-toolchain reproducibility |
+| R4-tectonic-fallback-toolchain | pass      | tectonic available                                                                                                                                                                              | use make e11-paper-pdf or paper/specgrad_activation_paper make tectonic on this server                 |
+| R5-rendered-pdfs               | pass      | main.pdf and two_page.pdf have PDF headers and expected sizes                                                                                                                                   | rebuild paper PDFs if either rendered artifact fails                                                   |
+| R6-full-artifact-validation    | pass      | make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full passed on 2026-06-17 with paper-assets, Tectonic PDF build, e11_validate_outputs.py, 69 pytest tests, and git diff --check | record the make e11-full result in the commit/push summary                                             |
 
 ## Boundary
 

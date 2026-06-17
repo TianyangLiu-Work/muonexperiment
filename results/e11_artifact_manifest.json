@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1445692,
+      "size_bytes": 1446988,
       "size": "1.4 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 284766958,
+      "size_bytes": 284767173,
       "size": "271.6 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5832420,
+      "size_bytes": 5832421,
       "size": "5.6 MB"
     },
     {
@@ -883,7 +883,7 @@
     {
       "path": "results/e11_submission_repro_audit/build_gate_summary.csv",
       "rows": 6,
-      "size": "994 B"
+      "size": "1.1 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/command_matrix.csv",
@@ -893,7 +893,7 @@
     {
       "path": "results/e11_artifact_review_packet/gate_matrix.csv",
       "rows": 6,
-      "size": "1.5 KB"
+      "size": "1.6 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/local_state_contract.csv",
@@ -1702,11 +1702,11 @@
     },
     {
       "path": "discussion/e11_submission_repro_audit.md",
-      "size": "8.3 KB"
+      "size": "8.9 KB"
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
-      "size": "14.1 KB"
+      "size": "14.8 KB"
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",

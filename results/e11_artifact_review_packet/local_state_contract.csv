@@ -3,6 +3,6 @@ serverREADME.md,present_untracked_local_file,"Local attachment required by the u
 Tectonic fallback,available,R4-tectonic-fallback-toolchain status is pass,Use make e11-paper-pdf on this server to rebuild PDFs.
 Preferred LaTeX toolchain,not_ready,pdflatex/bibtex/xelatex availability is tracked in toolchain_status.csv.,Do not claim preferred clean-checkout reproducibility until this gate passes in a fresh checkout.
 Rendered PDFs,pass,main.pdf and two_page.pdf PDF headers and sizes are recorded in pdf_artifact_checks.csv.,Rebuild with make e11-paper-pdf if the hashes need refreshing.
-Full artifact validation,external_check_required,"The strongest local gate is make e11-full; e11-check records validator, pytest, and whitespace status.",Use make e11-full for artifact-review reproduction of the current bundle.
+Full artifact validation,pass,"The strongest local gate is make e11-full; e11-check records validator, pytest, and whitespace status.",Use make e11-full for artifact-review reproduction of the current bundle.
 v5 final layer tables,pending_not_required_for_current_claims,The frozen final evaluator remains not_run until both unspent final split layer tables exist.,Do not upgrade the v5 predictive-condition claim until both Slurm jobs finish and the frozen evaluator passes.
 GPU dependence,not_required_for_current_artifact_review,"Current Markdown, TeX, PDF, manifest, and validation artifacts are CPU-regenerated from committed result files.","Use Slurm targets only for new evidence, not to reproduce the current submitted bundle."

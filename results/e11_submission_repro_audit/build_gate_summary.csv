@@ -4,4 +4,4 @@ R2-working-tree-scope,info,audit generated during an intentional evidence update
 R3-preferred-latex-toolchain,not_ready,pdflatex/bibtex/xelatex not all available,run a clean checkout with pdflatex/bibtex/xelatex before claiming full venue-toolchain reproducibility
 R4-tectonic-fallback-toolchain,pass,tectonic available,use make e11-paper-pdf or paper/specgrad_activation_paper make tectonic on this server
 R5-rendered-pdfs,pass,main.pdf and two_page.pdf have PDF headers and expected sizes,rebuild paper PDFs if either rendered artifact fails
-R6-full-artifact-validation,external_check_required,run make e11-full after regenerating this audit,record the make e11-full result in the commit/push summary
+R6-full-artifact-validation,pass,"make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full passed on 2026-06-17 with paper-assets, Tectonic PDF build, e11_validate_outputs.py, 69 pytest tests, and git diff --check",record the make e11-full result in the commit/push summary
