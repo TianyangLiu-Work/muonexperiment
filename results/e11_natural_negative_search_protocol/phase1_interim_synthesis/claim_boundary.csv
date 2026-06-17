@@ -1,0 +1,4 @@
+claim_id,current_status,evidence,allowed_wording,blocked_wording
+NNI-1-primary-natural-counterexample,blocked_partial_family,20/26 observed; raw_worse_rows=0; adjusted_worse_rows=0; NNS-E2=not_ready,partial phase1 readout only; no natural primary counterexample,fresh natural primary counterexample
+NNI-2-finite-null-search,blocked_partial_family,"6 declared settings are still missing, including tail-quality controls",20/26 observed rows are reported under the frozen family,finite null over the 26-setting phase1 family
+NNI-3-quality-gated-interpretation,blocked_until_quality_and_completeness_pass,NNS-E3=not_ready; NNS-E4=not_ready,quality and multiplicity gates remain the claim boundary,using low-tail-quality or incomplete rows as mechanism falsification

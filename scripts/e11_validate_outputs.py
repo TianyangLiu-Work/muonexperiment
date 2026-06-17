@@ -968,15 +968,22 @@ def main() -> None:
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "primary_decisions.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "gate_report.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "config.json",
+        Path("results/e11_natural_negative_search_protocol/phase1_interim_synthesis") / "family_coverage.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_interim_synthesis") / "observed_primary_summary.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_interim_synthesis") / "claim_boundary.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_interim_synthesis") / "remaining_work.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_interim_synthesis") / "config.json",
         Path("discussion/e11_natural_negative_search_protocol.md"),
         Path("discussion/e11_natural_negative_search_phase1_power_audit.md"),
         Path("discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md"),
         Path("discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md"),
         Path("discussion/e11_natural_negative_search_phase1_evaluation.md"),
+        Path("discussion/e11_natural_negative_search_phase1_interim_synthesis.md"),
         Path("scripts/e11_write_natural_negative_search_protocol.py"),
         Path("scripts/e11_write_natural_negative_power_audit.py"),
         Path("scripts/e11_run_natural_negative_search_phase1.py"),
         Path("scripts/e11_evaluate_natural_negative_search_phase1.py"),
+        Path("scripts/e11_write_natural_negative_phase1_interim_synthesis.py"),
         Path("scripts/slurm/e11_natural_negative_search_phase1.sbatch"),
         Path("discussion/e11_condition_score_v4_protocol.md"),
         Path("discussion/e11_condition_score_v4_validation_cifar100_rotated.md"),
@@ -1178,6 +1185,8 @@ def main() -> None:
         "scripts/e11_write_matrix_block_tightness_audit.py",
         "e11-natural-negative-search-phase1-eval:",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
+        "e11-natural-negative-search-phase1-interim-synthesis:",
+        "scripts/e11_write_natural_negative_phase1_interim_synthesis.py",
         "e11-submission-repro-audit:",
         "scripts/e11_write_submission_repro_audit.py",
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
@@ -1437,9 +1446,13 @@ def main() -> None:
         "phase1 GPU entrypoint is now implemented",
         "20/26 primary metric rows",
         "discussion/e11_natural_negative_search_phase1_evaluation.md",
+        "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
+        "raw_worse_rows=0",
+        "finite-null wording",
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-results",
         "make e11-natural-negative-search-phase1-eval",
+        "make e11-natural-negative-search-phase1-interim-synthesis",
         "multiplicity-adjusted decision rule",
         "before any fresh search outputs exist",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
@@ -4510,6 +4523,12 @@ def main() -> None:
     natural_eval_seed_ratios = pd.read_csv(natural_eval_dir / "seed_level_primary_ratios.csv")
     natural_eval_decisions = pd.read_csv(natural_eval_dir / "primary_decisions.csv")
     natural_eval_gates = pd.read_csv(natural_eval_dir / "gate_report.csv")
+    natural_interim_dir = natural_protocol_dir / "phase1_interim_synthesis"
+    natural_interim_coverage = pd.read_csv(natural_interim_dir / "family_coverage.csv")
+    natural_interim_summary = pd.read_csv(natural_interim_dir / "observed_primary_summary.csv")
+    natural_interim_claim_boundary = pd.read_csv(natural_interim_dir / "claim_boundary.csv")
+    natural_interim_remaining = pd.read_csv(natural_interim_dir / "remaining_work.csv")
+    natural_interim_config = json.loads((natural_interim_dir / "config.json").read_text(encoding="utf-8"))
     natural_eval_gate_lookup = natural_eval_gates.set_index("gate_id")["status"].to_dict()
     natural_eval_run_status = natural_eval_run_registry.set_index("search_id")["output_status"].to_dict()
     natural_eval_run_pair_rows = natural_eval_run_registry.set_index("search_id")["pair_summary_rows"].to_dict()
@@ -4527,6 +4546,12 @@ def main() -> None:
     natural_phase1_cifar10_step = pd.read_csv(natural_phase1_cifar10_dir / "step_metrics.csv")
     natural_phase1_cifar10_layer = pd.read_csv(natural_phase1_cifar10_dir / "layer_metrics.csv")
     natural_phase1_cifar10_decision = pd.read_csv(natural_phase1_cifar10_dir / "decision_template.csv")
+    natural_interim_coverage_lookup = natural_interim_coverage.set_index("search_id")[
+        "observed_primary_rows"
+    ].to_dict()
+    natural_interim_all_observed = natural_interim_summary[
+        natural_interim_summary["scope"].eq("all_observed")
+    ].iloc[0]
     natural_protocol_checks = {
         "entrypoint_columns": {"entrypoint", "entrypoint_status"}.issubset(natural_protocol_search.columns),
         "baseline_ids": set(natural_protocol_baseline["baseline_id"]) == expected_natural_protocol_baselines,
@@ -4597,6 +4622,23 @@ def main() -> None:
         "eval_gate_completeness": natural_eval_gate_lookup["NNS-E2-phase1-output-completeness"] == "not_ready",
         "eval_gate_multiplicity": natural_eval_gate_lookup["NNS-E3-primary-multiplicity"] == "not_ready",
         "eval_gate_reporting": natural_eval_gate_lookup["NNS-E5-full-reporting-boundary"] == "pass",
+        "interim_coverage_rows": {key: int(value) for key, value in natural_interim_coverage_lookup.items()}
+        == {
+            "NNS-P1-cifar100lt-resnet18-new-partitions": 12,
+            "NNS-P1-cifar10lt-resnet18-cross-partitions": 8,
+            "NNS-P1-tail-quality-controls": 0,
+        },
+        "interim_all_observed": int(natural_interim_all_observed["observed_primary_rows"]) == 20,
+        "interim_missing": int(natural_interim_all_observed["missing_primary_rows"]) == 6,
+        "interim_raw_worse_zero": int(natural_interim_all_observed["raw_worse_rows"]) == 0,
+        "interim_quality_failures_recorded": int(natural_interim_all_observed["quality_gate_fail_rows"]) == 18,
+        "interim_claim_boundary_blocked": set(natural_interim_claim_boundary["current_status"])
+        == {"blocked_partial_family", "blocked_until_quality_and_completeness_pass"},
+        "interim_remaining_tail_quality": set(natural_interim_remaining["search_id"])
+        == {"NNS-P1-tail-quality-controls"},
+        "interim_config_blocks_claim": natural_interim_config["natural_claim_allowed"] is False
+        and int(natural_interim_config["observed_primary_rows"]) == 20
+        and int(natural_interim_config["missing_primary_rows"]) == 6,
         "claim_ladder_not_ready": natural_protocol_claim_lookup["fresh_natural_primary_counterexample"] == "not_ready",
         "primary_rule_holm": "Holm-adjusted" in str(natural_primary_metric["worse_rule"]),
         "primary_boundary": "full-drift counterexample" in str(natural_primary_metric["claim_boundary"]),
@@ -4670,6 +4712,24 @@ def main() -> None:
             "Current seed-level primary rows: 100",
             "NNS-E2-phase1-output-completeness",
             "not_ready",
+        ],
+    )
+    natural_interim_text = Path("discussion/e11_natural_negative_search_phase1_interim_synthesis.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "natural negative-search phase1 interim synthesis",
+        natural_interim_text,
+        [
+            "E11 Natural Negative Search Phase1 Interim Synthesis",
+            "20/26 observed",
+            "raw_worse_rows=0",
+            "Natural claims remain",
+            "tail-quality controls",
+            "no adjusted primary decision is claimable",
+            "NNI-1-primary-natural-counterexample",
+            "blocked_partial_family",
+            "finite null over the 26-setting phase1 family",
         ],
     )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
@@ -5892,6 +5952,9 @@ def main() -> None:
         "Deterministic exact-witness and ratio-identity audit",
         "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md",
         "20/26 observed primary rows",
+        "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
+        "Partial-family claim-boundary synthesis",
+        "make e11-natural-negative-search-phase1-interim-synthesis",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -6541,12 +6604,16 @@ def main() -> None:
         "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md",
         "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md",
         "20/26 primary metric rows",
+        "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
+        "raw_worse_rows=0",
+        "finite-null wording",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-results",
         "make e11-natural-negative-search-phase1-eval",
+        "scripts/e11_write_natural_negative_phase1_interim_synthesis.py",
         "multiplicity evaluator",
         "Holm-adjusted decisions",
         "held-out architecture",
@@ -6614,6 +6681,7 @@ def main() -> None:
         or "make e11-natural-negative-search-phase1-settings" not in readme
         or "make e11-natural-negative-search-phase1-results" not in readme
         or "make e11-natural-negative-search-phase1-eval" not in readme
+        or "make e11-natural-negative-search-phase1-interim-synthesis" not in readme
         or "make e11-submission-repro-audit" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme

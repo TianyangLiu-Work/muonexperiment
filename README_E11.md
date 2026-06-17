@@ -64,6 +64,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_data_cifar10_cross.s
 python3 scripts/e11_evaluate_condition_score_v5_finals.py
 python3 scripts/e11_write_condition_score_v5_final_interpretation_plan.py
 python3 scripts/e11_write_condition_score_v5_reviewer_failure_response.py
+python3 scripts/e11_write_natural_negative_phase1_interim_synthesis.py
 sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_muon_final_benchmark.sbatch
@@ -188,6 +189,7 @@ make e11-natural-negative-search-phase1-power-audit # compute the phase1 detecta
 make e11-natural-negative-search-phase1-settings # write settings-only registries for all registered phase1 natural negative-search settings
 make e11-natural-negative-search-phase1-results # submit the registered phase1 natural negative-search settings via Slurm
 make e11-natural-negative-search-phase1-eval # evaluate Holm-adjusted phase1 decisions after fresh metric outputs exist
+make e11-natural-negative-search-phase1-interim-synthesis # summarize partial phase1 coverage and blocked claim boundaries
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
@@ -467,6 +469,11 @@ its current generated artifact
 phase1 settings, uses paired per-seed log-ratio tests for the primary
 tail-output drift ratio when `step_metrics.csv` is available, and remains
 `not_ready` at 20/26 primary metric rows until fresh metric outputs are complete.
+The interim synthesis
+`discussion/e11_natural_negative_search_phase1_interim_synthesis.md` records
+the partial 20/26 family coverage, `raw_worse_rows=0`, low-tail-quality gate
+failures, and the remaining tail-quality-control rows that block both fresh
+natural primary counterexample wording and finite-null wording.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -594,6 +601,7 @@ Paper-facing synthesis:
 - `discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md`
 - `discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md`
 - `discussion/e11_natural_negative_search_phase1_evaluation.md`
+- `discussion/e11_natural_negative_search_phase1_interim_synthesis.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
 - `discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md`
@@ -764,6 +772,10 @@ Primary paper quantitative tables:
 - `results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/seed_level_primary_ratios.csv`
 - `results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv`
 - `results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv`
+- `results/e11_natural_negative_search_protocol/phase1_interim_synthesis/family_coverage.csv`
+- `results/e11_natural_negative_search_protocol/phase1_interim_synthesis/observed_primary_summary.csv`
+- `results/e11_natural_negative_search_protocol/phase1_interim_synthesis/claim_boundary.csv`
+- `results/e11_natural_negative_search_protocol/phase1_interim_synthesis/remaining_work.csv`
 - `results/e11_top_conference_gap_register/gap_register.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
@@ -925,6 +937,7 @@ Do not claim:
 - `scripts/e11_write_natural_negative_power_audit.py`: phase1 natural-negative power/MDE audit for interpreting adjusted positive and finite-null outcomes.
 - `scripts/e11_run_natural_negative_search_phase1.py`: executable phase1 runner for the registered natural negative-search settings; supports `--list-settings` without launching training and writes fresh outputs only when submitted.
 - `scripts/e11_evaluate_natural_negative_search_phase1.py`: Holm-adjusted phase1 evaluator for the natural negative-search protocol; uses paired per-seed log-ratio tests when metric outputs exist and keeps every registered setting as pending until they are complete.
+- `scripts/e11_write_natural_negative_phase1_interim_synthesis.py`: claim-boundary synthesis for partial phase1 coverage, raw-worse counts, quality gates, and remaining tail-quality controls.
 - `scripts/e11_write_submission_repro_audit.py`: submission reproducibility audit for LaTeX toolchain availability, rendered PDF hashes, paper source hashes, and clean-checkout gates.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.

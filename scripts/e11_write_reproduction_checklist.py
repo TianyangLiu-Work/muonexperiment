@@ -103,6 +103,10 @@ def main() -> None:
                 "artifact": "discussion/e11_natural_negative_search_phase1_evaluation.md",
                 "role": "Holm-family evaluator preserving 20/26 observed primary rows and blocking claims until all settings complete.",
             },
+            {
+                "artifact": "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
+                "role": "Partial-family claim-boundary synthesis for raw-worse counts, quality gates, and remaining tail-quality controls.",
+            },
         ]
     )
 
@@ -140,6 +144,7 @@ make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practica
 make e11-natural-negative-search-phase1-power-audit # keep the 26-setting natural-negative detectable-effect boundary current
 make e11-natural-negative-search-phase1-results # submit the registered phase1 natural-negative GPU jobs via Slurm
 make e11-natural-negative-search-phase1-eval # refresh the 26-setting Holm-adjusted primary decision table
+make e11-natural-negative-search-phase1-interim-synthesis # summarize partial phase1 coverage and blocked claim boundaries
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets
