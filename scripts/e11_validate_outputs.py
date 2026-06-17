@@ -411,6 +411,21 @@ def assert_top_conference_gap_register(frame: pd.DataFrame) -> None:
             f"top-conference gap register rows must name planned artifacts: "
             f"{missing_result_artifacts['gap_id'].tolist()}"
         )
+    packaging_row = frame[frame["gap_id"].eq("P2-PackagingRepro")]
+    if packaging_row.empty:
+        raise AssertionError("top-conference gap register missing P2-PackagingRepro row")
+    packaging_text = " ".join(
+        str(packaging_row.iloc[0][column])
+        for column in ["current_state", "required_next_evidence", "planned_artifacts"]
+    )
+    for phrase in [
+        "discussion/e11_artifact_review_packet.md",
+        "results/e11_artifact_review_packet/*",
+        "serverREADME.md",
+        "GPU-pending boundary",
+    ]:
+        if phrase not in packaging_text:
+            raise AssertionError(f"P2-PackagingRepro missing artifact-review packet boundary: {phrase}")
 
 
 def assert_top_conference_claim_decision_audit(
@@ -1293,6 +1308,13 @@ def main() -> None:
         Path("results/e11_submission_repro_audit") / "source_package_manifest.csv",
         Path("results/e11_submission_repro_audit") / "build_gate_summary.csv",
         Path("scripts/e11_write_submission_repro_audit.py"),
+        Path("discussion/e11_artifact_review_packet.md"),
+        Path("results/e11_artifact_review_packet") / "command_matrix.csv",
+        Path("results/e11_artifact_review_packet") / "gate_matrix.csv",
+        Path("results/e11_artifact_review_packet") / "local_state_contract.csv",
+        Path("results/e11_artifact_review_packet") / "reviewer_response.csv",
+        Path("results/e11_artifact_review_packet") / "config.json",
+        Path("scripts/e11_write_artifact_review_packet.py"),
         Path("scripts/e11_write_natural_head_tail_boundary_audit.py"),
         Path("scripts/e11_write_natural_negative_search_protocol.py"),
         Path("scripts/e11_run_natural_negative_search_phase1.py"),
@@ -1331,6 +1353,8 @@ def main() -> None:
         "scripts/e11_write_natural_negative_phase1_interim_synthesis.py",
         "e11-submission-repro-audit:",
         "scripts/e11_write_submission_repro_audit.py",
+        "e11-artifact-review-packet:",
+        "scripts/e11_write_artifact_review_packet.py",
         "e11-top-conference-claim-decision-audit:",
         "scripts/e11_write_top_conference_claim_decision_audit.py",
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
@@ -1614,6 +1638,7 @@ def main() -> None:
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
         "make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes",
         "make e11-submission-repro-audit # audit toolchain availability, PDF hashes, source hashes, and clean-checkout gates",
+        "make e11-artifact-review-packet # regenerate the artifact-review command, gate, local-state, and reviewer-response packet",
         "make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf",
         "`diagnostic_A_definition == full_layer_input_activation`",
         *MAIN_RESULT_SCRIPTS,
@@ -1632,6 +1657,12 @@ def main() -> None:
         "results/e11_condition_score_ablation/score_ablation_summary.csv",
         "results/e11_condition_score_ablation/term_failure_ladder.csv",
         "results/e11_condition_score_ablation/leakage_and_claim_boundary.csv",
+        "discussion/e11_artifact_review_packet.md",
+        "results/e11_artifact_review_packet/command_matrix.csv",
+        "results/e11_artifact_review_packet/gate_matrix.csv",
+        "results/e11_artifact_review_packet/local_state_contract.csv",
+        "results/e11_artifact_review_packet/reviewer_response.csv",
+        "scripts/e11_write_artifact_review_packet.py",
         "registered-not-ready",
         "supportable theorem",
         "rebuttal-readiness contract",
@@ -6202,6 +6233,7 @@ def main() -> None:
         "make e11-guardrail-assets",
         "make e11-all-assets",
         "make e11-paper-pdf",
+        "make e11-artifact-review-packet",
         "legacy condition-geometry guardrail notes",
         "current paper assets plus legacy guardrail notes",
         "Current Head-to-Tail Paper Evidence",
@@ -6228,6 +6260,8 @@ def main() -> None:
         "make e11-natural-negative-search-phase1-interim-synthesis",
         "discussion/e11_top_conference_claim_decision_audit.md",
         "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract",
+        "discussion/e11_artifact_review_packet.md",
+        "Artifact-review command, gate, local-state, and reviewer-response packet",
         "make e11-top-conference-claim-decision-audit",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
@@ -6930,6 +6964,9 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-selection",
         "164-setting validation registry",
         "discussion/e11_submission_repro_audit.md",
+        "discussion/e11_artifact_review_packet.md",
+        "artifact-review packet",
+        "GPU-pending boundary",
         "preferred pdflatex/bibtex/xelatex clean-checkout gate remains not_ready",
         "GPU via Slurm",
         "No row in this register authorizes a stronger paper claim by itself",
@@ -7014,6 +7051,7 @@ def main() -> None:
         or "make e11-natural-negative-search-phase1-interim-synthesis" not in readme
         or "make e11-top-conference-claim-decision-audit" not in readme
         or "make e11-submission-repro-audit" not in readme
+        or "make e11-artifact-review-packet" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
     ):
@@ -7025,6 +7063,7 @@ def main() -> None:
         "Key Paper Documents",
         "discussion/e11_reference_audit.md",
         "discussion/e11_submission_repro_audit.md",
+        "discussion/e11_artifact_review_packet.md",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:
@@ -7090,6 +7129,81 @@ def main() -> None:
             "Blocked now: claiming a preferred LaTeX clean-checkout reproduction",
         ],
     )
+    artifact_review_dir = Path("results/e11_artifact_review_packet")
+    artifact_command_matrix = pd.read_csv(artifact_review_dir / "command_matrix.csv")
+    artifact_gate_matrix = pd.read_csv(artifact_review_dir / "gate_matrix.csv")
+    artifact_local_state = pd.read_csv(artifact_review_dir / "local_state_contract.csv")
+    artifact_reviewer_response = pd.read_csv(artifact_review_dir / "reviewer_response.csv")
+    artifact_config = json.loads((artifact_review_dir / "config.json").read_text(encoding="utf-8"))
+    expected_artifact_command_ids = {"AR-C1", "AR-C2", "AR-C3", "AR-C4", "AR-C5", "AR-G1", "AR-G2", "AR-G3"}
+    if not expected_artifact_command_ids.issubset(set(artifact_command_matrix["command_id"])):
+        raise AssertionError("artifact review packet command matrix missing CPU/GPU reviewer commands")
+    artifact_command_text = " ".join(artifact_command_matrix.astype(str).agg(" ".join, axis=1).tolist())
+    for phrase in [
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full",
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-paper-assets",
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-paper-pdf",
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-check",
+        "GPU via Slurm",
+        "Not required to reproduce current paper claims",
+    ]:
+        if phrase not in artifact_command_text:
+            raise AssertionError(f"artifact review command matrix missing phrase: {phrase}")
+    if set(artifact_gate_matrix["gate_id"]) != expected_submission_gates:
+        raise AssertionError("artifact review gate matrix must mirror submission reproducibility gates")
+    artifact_gate_text = " ".join(artifact_gate_matrix.astype(str).agg(" ".join, axis=1).tolist())
+    for phrase in ["external_toolchain_required", "local_scope_declared", "reproducible_now"]:
+        if phrase not in artifact_gate_text:
+            raise AssertionError(f"artifact review gate matrix missing reviewer status: {phrase}")
+    expected_local_items = {
+        "serverREADME.md",
+        "Tectonic fallback",
+        "Preferred LaTeX toolchain",
+        "Rendered PDFs",
+        "Full artifact validation",
+        "v5 final layer tables",
+        "GPU dependence",
+    }
+    if not expected_local_items.issubset(set(artifact_local_state["item"])):
+        raise AssertionError("artifact review local-state contract missing required items")
+    artifact_local_text = " ".join(artifact_local_state.astype(str).agg(" ".join, axis=1).tolist())
+    for phrase in [
+        "Do not stage or commit this file",
+        "pending_not_required_for_current_claims",
+        "not_required_for_current_artifact_review",
+    ]:
+        if phrase not in artifact_local_text:
+            raise AssertionError(f"artifact review local-state contract missing boundary: {phrase}")
+    artifact_response_text = " ".join(artifact_reviewer_response.astype(str).agg(" ".join, axis=1).tolist())
+    for phrase in [
+        "preferred venue-toolchain reproducibility",
+        "serverREADME.md",
+        "No. The current submitted evidence bundle is checked by CPU-side Make targets",
+        "Do not use not_run, not_ready, or partial-family outputs as positive final evidence",
+        "Do not infer broad optimizer-performance, accuracy, or general predictive-condition claims",
+    ]:
+        if phrase not in artifact_response_text:
+            raise AssertionError(f"artifact review response packet missing reviewer answer: {phrase}")
+    artifact_review_text = Path("discussion/e11_artifact_review_packet.md").read_text(encoding="utf-8")
+    assert_required_phrases(
+        "artifact review packet",
+        artifact_review_text,
+        [
+            "E11 Artifact Review Packet",
+            "Reviewer Command Matrix",
+            "Build Gate Matrix",
+            "Local State Contract",
+            "Reviewer Response Matrix",
+            "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full",
+            "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility",
+            "v5 predictive-condition upgrade",
+            "natural finite-null",
+            "broad optimizer-performance claim",
+            "Machine-readable tables",
+        ],
+    )
+    if artifact_config.get("strongest_local_gate") != "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full":
+        raise AssertionError("artifact review config must record the strongest local gate")
     assert_no_unguarded_overclaims(
         [
             Path("README_E11.md"),

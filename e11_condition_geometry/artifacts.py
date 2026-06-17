@@ -222,6 +222,10 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_submission_repro_audit/pdf_artifact_checks.csv",
     "results/e11_submission_repro_audit/source_package_manifest.csv",
     "results/e11_submission_repro_audit/build_gate_summary.csv",
+    "results/e11_artifact_review_packet/command_matrix.csv",
+    "results/e11_artifact_review_packet/gate_matrix.csv",
+    "results/e11_artifact_review_packet/local_state_contract.csv",
+    "results/e11_artifact_review_packet/reviewer_response.csv",
     "results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv",
     "results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv",
     "results/e11_condition_score_v5_protocol/validation_score_freeze/validation_gate_report.csv",
@@ -374,6 +378,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_end_of_draft_self_review.md",
     "discussion/e11_reference_audit.md",
     "discussion/e11_submission_repro_audit.md",
+    "discussion/e11_artifact_review_packet.md",
     "discussion/e11_paper_readiness_audit.md",
     "discussion/e11_top_conference_plan.md",
     "discussion/e11_top_conference_gap_register.md",
@@ -832,6 +837,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "paper_role": "Submission-package audit for toolchain availability, rendered PDF hashes, paper source bundle hashes, and remaining clean-checkout gates.",
     },
     {
+        "stage": "Artifact review packet",
+        "command": "python3 scripts/e11_write_artifact_review_packet.py",
+        "produces": "results/e11_artifact_review_packet/* and discussion/e11_artifact_review_packet.md",
+        "paper_role": "Reviewer-facing command, gate, local-state, and response matrix for reproducing the current submission bundle without expanding claims.",
+    },
+    {
         "stage": "CIFAR-100-LT ResNet18 standard many/medium/few reporting baseline",
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch",
         "produces": "results/e11_cifar100_resnet_lt_standard_eval/* and figures/e11_cifar100_resnet_lt_standard_eval/*",
@@ -1067,6 +1078,7 @@ PAPER_ASSET_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_write_reproduction_checklist.py",
     "scripts/e11_write_reviewer_risk_audit.py",
     "scripts/e11_write_submission_repro_audit.py",
+    "scripts/e11_write_artifact_review_packet.py",
     "scripts/e11_write_artifact_manifest.py",
 )
 

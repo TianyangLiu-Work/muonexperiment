@@ -111,6 +111,10 @@ def main() -> None:
                 "artifact": "discussion/e11_top_conference_claim_decision_audit.md",
                 "role": "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract for top-conference wording.",
             },
+            {
+                "artifact": "discussion/e11_artifact_review_packet.md",
+                "role": "Artifact-review command, gate, local-state, and reviewer-response packet for reproducing the current bundle without expanding claims.",
+            },
         ]
     )
 
@@ -158,6 +162,7 @@ make e11-all-assets        # current paper assets plus legacy guardrail notes
 make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf
 make e11-check             # validation, tests, and whitespace check
 make e11-full              # paper assets, PDF build, and e11-check
+make e11-artifact-review-packet # regenerate the artifact-review command, gate, local-state, and reviewer-response packet
 ```
 
 ## Current Head-to-Tail Paper Evidence
