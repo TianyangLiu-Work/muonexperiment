@@ -304,6 +304,12 @@ Table \ref{tab:claim-boundary} separates the current diagnostic claims from stro
 
 The detailed claim boundary is reported in Appendix Table \ref{tab:claim-boundary}. The main limitations are: lower squared logit drift on held-out tail examples does not imply lower tail cross-entropy or higher accuracy; fixed-checkpoint Muon-style directions are local compatibility checks rather than a theory of complete Muon training; the synthetic boundary validates a mechanism sign, not a natural-task predictor; and layerwise evidence shows that the lower observed drift comes from matched-head-gain scaling, not from uniformly lower unit-direction tail sensitivity.
 
+\subsection{Claim Scope and Rebuttal Discipline}
+
+The supported claim is local matched-head-gain tail-example logit drift: after equalizing first-order progress on a head batch, the tested spectral/polar directions can perturb held-out tail-example logits less than Frobenius/GD in the reported diagnostics. The theorem is a local worst-case comparison for a fixed linearization and a specified tail-sensitivity operator, not a global optimizer theorem, a convergence result, or a final-accuracy guarantee. Consequently, any claim about tail loss, margin, accuracy, or practical Muon training must be read as a separate empirical question.
+
+We also separate supported claims from registered-but-not-yet-supportive tests. The current v5 condition-score program is a registered pending test: the score family is frozen, but the unspent final architecture and data splits must pass before the paper can claim a successful natural-task predictor of layer risk. The natural negative-search readout is likewise incomplete as a null result: the interim audit has observed \(20/26\) settings and \(\texttt{raw\_worse\_rows=0}\), but the missing settings and tail-quality controls block finite-null wording and block a natural counterexample claim. The practical CIFAR-100-LT NS-Muon final-training pilot is a negative benchmark boundary, not evidence for an optimizer-performance advantage. Finally, the server validation and rendered-PDF fallback are current reproduction evidence, while preferred LaTeX clean-checkout reproduction remains an explicit gate.
+
 Additional discussion of the gap between ideal spectral gradients and practical Muon-style updates, the role of mini-batch noise, and the remaining experiments needed for optimizer-level claims is deferred to Appendix \ref{app:additional-discussion}.
 
 \section{Conclusion}
