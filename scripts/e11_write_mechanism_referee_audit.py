@@ -132,6 +132,12 @@ def build_alternative_explanations(e: dict[str, object]) -> pd.DataFrame:
         & phase2_mde["log_ratio_sd"].eq(0.2)
     ].iloc[0]
     phase2_output_counts = phase2_decisions["output_status"].value_counts().astype(int).to_dict()
+    phase2_observed_rows = int(phase2_decisions["output_status"].eq("observed").sum())
+    phase2_adjusted_worse_rows = int(
+        phase2_decisions["adjusted_primary_decision"].eq("primary_worse_adjusted").sum()
+    )
+    phase2_head_gain = phase2_decisions["head_gain_gate"].astype(str).str.lower().eq("true")
+    phase2_head_gain_fail_rows = int((~phase2_head_gain).sum())
     rows = [
         {
             "audit_id": "MEA-1-head-gain-mismatch",
@@ -225,36 +231,38 @@ def build_alternative_explanations(e: dict[str, object]) -> pd.DataFrame:
         {
             "audit_id": "MEA-7-anecdotal-natural-negative",
             "alternative_explanation": "Natural positive/negative claims are cherry-picked.",
-            "current_status": "finite_phase1_null_candidate_phase2_registered_not_ready",
+            "current_status": "finite_phase1_and_phase2_null_candidates_with_caveats",
             "decisive_evidence": (
                 f"Current phase1 coverage is {coverage} observed registered settings; "
                 f"raw_worse_rows={int(all_observed['raw_worse_rows'])}; "
                 f"adjusted primary gate={gate_status['NNS-E4-natural-primary-claim']}; "
                 f"quality_gate_pass_rows={int(all_observed['quality_gate_pass_rows'])} and "
                 f"quality_gate_fail_rows={int(all_observed['quality_gate_fail_rows'])}. "
-                f"Phase2 is frozen as an {len(phase2_registry)}-setting ResNet34 held-out architecture family, "
-                f"with output_status counts {phase2_output_counts} and "
+                f"Phase2 completed the {len(phase2_registry)}-setting ResNet34 held-out architecture family "
+                f"with observed rows={phase2_observed_rows}, adjusted_worse_rows={phase2_adjusted_worse_rows}, "
+                f"head_gain_gate_fail_rows={phase2_head_gain_fail_rows}, output_status counts {phase2_output_counts}, and "
                 f"NNS-P2-E4={phase2_gate_status['NNS-P2-E4-heldout-architecture-claim']}."
             ),
-            "remaining_risk": "The result is a finite registered phase1 null candidate plus a phase2 pre-output registry, not a universal absence claim or a phase2 held-out architecture result.",
-            "manuscript_action": "Report no adjusted primary phase1 counterexample with detectable-effect and tail-quality caveats; keep phase2 wording at registered-not-ready until 8/8 metric rows exist.",
+            "remaining_risk": "The result is finite registered phase1 and phase2 null-candidate evidence with power, head-gain, and tail-quality caveats, not a universal absence claim or mechanism validation.",
+            "manuscript_action": "Report no adjusted primary phase1/phase2 counterexample with detectable-effect, head-gain, and tail-quality caveats; do not call the phase2 rows quality-valid mechanism evidence.",
             "forbidden_wording": "no natural counterexample exists, or a natural counterexample has been found",
         },
         {
             "audit_id": "MEA-9-phase2-power-overread",
-            "alternative_explanation": "The held-out ResNet34 phase2 registry will be overread as evidence before it has metric rows or adequate power.",
-            "current_status": "pre_output_registered_not_ready_with_power_boundary",
+            "alternative_explanation": "The held-out ResNet34 phase2 finite-null readout will be overread despite limited power and failed head-gain gates.",
+            "current_status": "completed_phase2_finite_null_with_power_and_quality_caveats",
             "decisive_evidence": (
                 f"The phase2 evaluator reports NNS-P2-E2={phase2_gate_status['NNS-P2-E2-phase2-output-completeness']} "
                 f"and NNS-P2-E3={phase2_gate_status['NNS-P2-E3-primary-multiplicity']}; "
                 f"primary_decisions.csv keeps all {len(phase2_decisions)} registered rows as "
-                f"{phase2_output_counts}. The phase2 power audit fixes the Holm worst-case 80% MDE "
+                f"{phase2_output_counts}, with adjusted_worse_rows={phase2_adjusted_worse_rows} and "
+                f"head_gain_gate_fail_rows={phase2_head_gain_fail_rows}. The phase2 power audit fixes the Holm worst-case 80% MDE "
                 f"at log-ratio SD 0.2 to ratio {fmt(phase2_mde_80['minimum_detectable_ratio'])}, "
                 "so a complete null below that scale must be described as underpowered."
             ),
             "remaining_risk": "A three-seed, eight-setting held-out family can falsify large ResNet34 boundary cases, but it cannot exclude smaller effects or other architectures.",
-            "manuscript_action": "After the Slurm run, apply the pre-output Holm rule and outcome-state ladder before changing any natural-boundary wording.",
-            "forbidden_wording": "phase2 already confirms natural generality or rules out held-out architecture boundary cases",
+            "manuscript_action": "Present phase2 as a completed finite-null candidate only within the registered ResNet34 family, with explicit power and head-gain caveats.",
+            "forbidden_wording": "phase2 confirms natural generality, validates the mechanism, or rules out held-out architecture boundary cases",
         },
         {
             "audit_id": "MEA-8-performance-proxy",
@@ -359,9 +367,9 @@ def build_theory_measurement_contract(e: dict[str, object]) -> pd.DataFrame:
                 f"NNS-P2-E4={phase2_gate_status['NNS-P2-E4-heldout-architecture-claim']}; "
                 f"Holm worst-case 80% MDE at SD 0.2 is {fmt(phase2_mde_80['minimum_detectable_ratio'])}"
             ),
-            "supports": "registered finite-family falsification protocol and pre-output interpretation boundary",
-            "does_not_support": "universal natural-null wording or phase2 held-out architecture claim before complete metric rows",
-            "next_gate": "consume all eight ResNet34 phase2 settings, rerun the evaluator, and classify the outcome through the power ladder",
+            "supports": "registered finite-family falsification protocol and completed phase2 finite-null interpretation boundary",
+            "does_not_support": "universal natural-null wording outside registered phase1/phase2 families or mechanism validation from head-gain-failed rows",
+            "next_gate": "register larger-dataset or additional held-out-architecture families before broadening beyond the completed phase1/phase2 boundary",
         },
     ]
     return pd.DataFrame(rows)
@@ -401,7 +409,7 @@ def build_falsification_triggers(e: dict[str, object]) -> pd.DataFrame:
         },
         {
             "trigger_id": "FT-2-natural-family-incomplete",
-            "trigger_condition": "Any future registered natural-negative family is incomplete, or finite-null wording drops the detectable-effect and quality caveats.",
+            "trigger_condition": "Any future registered natural-negative family is incomplete, or finite-null wording drops the detectable-effect, head-gain, and quality caveats.",
             "current_status": (
                 f"{phase1_missing} registered primary rows missing in completed coverage table; "
                 f"NNS-E4={phase1_gate_status['NNS-E4-natural-primary-claim']}; "
@@ -409,8 +417,8 @@ def build_falsification_triggers(e: dict[str, object]) -> pd.DataFrame:
                 f"phase2 output_status counts={phase2_output_counts}; "
                 f"NNS-P2-E4={phase2_gate_status['NNS-P2-E4-heldout-architecture-claim']}"
             ),
-            "required_action": "Allow only finite registered phase1 null-candidate wording and registered-not-ready phase2 wording until phase2 is complete.",
-            "claim_downgrade": "finite phase1 null candidate with detectable-effect and quality caveats; phase2 in-progress",
+            "required_action": "Allow only finite registered phase1/phase2 null-candidate wording with detectable-effect, head-gain, and quality caveats.",
+            "claim_downgrade": "finite phase1/phase2 null candidates with detectable-effect, head-gain, and quality caveats",
         },
         {
             "trigger_id": "FT-3-unit-jvp-misread",
@@ -438,14 +446,14 @@ def build_falsification_triggers(e: dict[str, object]) -> pd.DataFrame:
         },
         {
             "trigger_id": "FT-6-phase2-power-overread",
-            "trigger_condition": "The ResNet34 phase2 family is interpreted as a held-out null despite missing rows or an observed effect scale below the audited detectable-effect floor.",
+            "trigger_condition": "The ResNet34 phase2 family is interpreted as a broad held-out null despite failed head-gain gates or an observed effect scale below the audited detectable-effect floor.",
             "current_status": (
                 f"P2-S1 claim_state={phase2_state_lookup['P2-S1-not-run']}; "
                 f"NNS-P2-E2={phase2_gate_status['NNS-P2-E2-phase2-output-completeness']}; "
                 f"Holm worst-case 80% MDE at SD 0.2 is {fmt(phase2_mde_80['minimum_detectable_ratio'])}"
             ),
             "required_action": "Use the phase2 outcome-state machine and MDE table before any ResNet34 held-out architecture claim; mark small-effect nulls as underpowered.",
-            "claim_downgrade": "registered-not-ready or underpowered phase2 null, not broad natural-boundary evidence",
+            "claim_downgrade": "caveated finite phase2 null candidate or underpowered phase2 null, not broad natural-boundary evidence",
         },
     ]
     return pd.DataFrame(rows)
@@ -465,7 +473,7 @@ def write_outputs(
         "alternative_explanations": int(len(alternatives)),
         "theory_measurement_contracts": int(len(contract)),
         "falsification_triggers": int(len(triggers)),
-        "claim_boundary": "local matched-head-gain mechanism; finite registered phase1 natural-null candidate; phase2 registered-not-ready until complete; no final-performance or v5 predictive-condition upgrade",
+        "claim_boundary": "local matched-head-gain mechanism; finite registered phase1/phase2 natural-null candidates with power, head-gain, and quality caveats; no final-performance or v5 predictive-condition upgrade",
     }
     (OUTPUT_DIR / "config.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
 
@@ -487,7 +495,7 @@ This generated audit takes an adversarial referee stance. It lists the strongest
 
 ## Claim Boundary
 
-Allowed now: a local matched-head-gain mechanism paper with explicit theorem assumptions, diagnostic natural evidence, phase2 registered-not-ready wording, artifact-review reproducibility, and locked pending gates.
+Allowed now: a local matched-head-gain mechanism paper with explicit theorem assumptions, diagnostic natural evidence, completed caveated phase2 finite-null-candidate wording, artifact-review reproducibility, and locked pending gates.
 
 Blocked now: broad optimizer-performance claims, unqualified natural-null or counterexample wording, and v5 predictive-condition generality before the registered final split gates pass.
 

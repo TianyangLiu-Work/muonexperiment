@@ -159,6 +159,12 @@ def write_discussion(
 ) -> None:
     observed = int(decisions["output_status"].eq("observed").sum())
     total = len(decisions)
+    head_gain_fail = 0
+    tail_quality_pass = 0
+    if "head_gain_gate" in decisions.columns:
+        head_gain_fail = int(decisions["head_gain_gate"].astype(str).str.lower().eq("false").sum())
+    if "tail_quality_gate" in decisions.columns:
+        tail_quality_pass = int(decisions["tail_quality_gate"].astype(str).str.lower().eq("true").sum())
     lines = [
         "# E11 Natural Negative Search Phase2 Evaluation",
         "",
@@ -170,6 +176,7 @@ def write_discussion(
         "",
         f"Current primary metric coverage: {observed}/{total} settings.",
         f"Current seed-level primary rows: {len(seed_ratios)}.",
+        f"Current phase2 caveat: head_gain_gate fails in {head_gain_fail}/{total} rows, while tail_quality_gate passes in {tail_quality_pass}/{total} rows.",
         "",
         "## Run Registry",
         "",

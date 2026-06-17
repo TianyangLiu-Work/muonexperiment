@@ -875,7 +875,7 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "stage": "Natural negative-search phase2 held-out architecture settings",
         "command": "python3 scripts/e11_run_natural_negative_search_phase2.py --settings-only",
         "produces": "results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv and discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
-        "paper_role": "Settings-only lock for the ResNet34 held-out architecture family after complete phase1, before any phase2 metric rows are used.",
+        "paper_role": "Settings-only lock for the ResNet34 held-out architecture family after complete phase1, before phase2 metrics are generated.",
     },
     {
         "stage": "Natural negative-search phase2 Slurm entrypoint",
@@ -887,13 +887,13 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "stage": "Natural negative-search phase2 multiplicity evaluation",
         "command": "python3 scripts/e11_evaluate_natural_negative_search_phase2.py",
         "produces": "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/* and discussion/e11_natural_negative_search_phase2_evaluation.md",
-        "paper_role": "Pre-output Holm-family evaluator for the 8-setting ResNet34 phase2 family; current state is not_ready until phase2 metric rows exist.",
+        "paper_role": "Holm-family evaluator for the completed 8-setting ResNet34 phase2 family; current state is a finite-null candidate with power, head-gain, and quality caveats.",
     },
     {
         "stage": "Natural negative-search phase2 power audit",
         "command": "python3 scripts/e11_write_natural_negative_phase2_power_audit.py",
         "produces": "results/e11_natural_negative_search_protocol/phase2_power_audit/* and discussion/e11_natural_negative_search_phase2_power_audit.md",
-        "paper_role": "Pre-output detectable-effect and outcome-state boundary for the 3-seed, 8-setting ResNet34 phase2 family.",
+        "paper_role": "Detectable-effect and outcome-state boundary for the 3-seed, 8-setting ResNet34 phase2 family.",
     },
     {
         "stage": "Condition-score v5 ResNeXt50 architecture split",

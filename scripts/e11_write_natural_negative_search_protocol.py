@@ -276,15 +276,31 @@ def phase1_gate_status() -> dict[str, str]:
     return gates.set_index("gate_id")["status"].astype(str).to_dict()
 
 
+def phase2_gate_status() -> dict[str, str]:
+    gate_path = RESULT_DIR / "phase2_multiplicity_evaluation" / "gate_report.csv"
+    if not gate_path.exists():
+        return {}
+    gates = pd.read_csv(gate_path)
+    return gates.set_index("gate_id")["status"].astype(str).to_dict()
+
+
 def build_claim_ladder() -> pd.DataFrame:
     gate_status = phase1_gate_status()
+    p2_gate_status = phase2_gate_status()
     finite_null_candidate = (
         gate_status.get("NNS-E2-phase1-output-completeness") == "pass"
         and gate_status.get("NNS-E3-primary-multiplicity") == "pass"
         and gate_status.get("NNS-E4-natural-primary-claim") == "finite_null_candidate"
     )
+    phase2_finite_null_candidate = (
+        p2_gate_status.get("NNS-P2-E2-phase2-output-completeness") == "pass"
+        and p2_gate_status.get("NNS-P2-E3-primary-multiplicity") == "pass"
+        and p2_gate_status.get("NNS-P2-E4-heldout-architecture-claim") == "finite_null_candidate"
+    )
     primary_counterexample_status = "not_found_in_phase1" if finite_null_candidate else "not_ready"
-    finite_null_status = "finite_null_candidate" if finite_null_candidate else "not_ready"
+    finite_null_status = (
+        "finite_null_candidate" if finite_null_candidate and phase2_finite_null_candidate else "not_ready"
+    )
     return pd.DataFrame(
         [
             {
@@ -297,9 +313,9 @@ def build_claim_ladder() -> pd.DataFrame:
             {
                 "claim_id": "finite_natural_null_search",
                 "current_status": finite_null_status,
-                "unlock_condition": "NNS-S4 passes after all declared fresh phase settings run",
-                "blocked_if": "fresh outputs are incomplete, selected post hoc, or used outside the registered phase1 space",
-                "paper_wording_if_unlocked": "a finite pre-registered natural search found no primary full-drift counterexample in the declared space",
+                "unlock_condition": "NNS-S4 passes after all declared phase1 and phase2 settings run",
+                "blocked_if": "fresh outputs are incomplete, selected post hoc, or used outside the registered phase1/phase2 spaces",
+                "paper_wording_if_unlocked": "a finite pre-registered natural search found no primary full-drift counterexample in the declared phase1 and phase2 spaces",
             },
             {
                 "claim_id": "component_boundary_cases",
@@ -368,12 +384,32 @@ def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFra
     phase1_status = phase1_output_status(search_space)
     phase2 = search_space[search_space["phase"].eq("phase2_fresh_generality_search")]
     phase2_settings_rows = 0
+    phase2_pair_rows = 0
+    phase2_output_status = "not_run"
     phase2_expected_rows = int(phase2["max_settings"].sum()) if not phase2.empty else 0
     for search in phase2.itertuples():
-        registry_path = Path(search.planned_artifact_prefix) / "settings_registry.csv"
+        prefix = Path(search.planned_artifact_prefix)
+        registry_path = prefix / "settings_registry.csv"
+        pair_path = prefix / "pair_summary.csv"
+        required_metric_paths = [
+            prefix / "step_metrics.csv",
+            prefix / "pair_summary.csv",
+            prefix / "layer_metrics.csv",
+            prefix / "decision_template.csv",
+            prefix / "config.json",
+        ]
         if registry_path.exists():
             phase2_settings_rows += len(pd.read_csv(registry_path))
+        if pair_path.exists():
+            phase2_pair_rows += len(pd.read_csv(pair_path))
+        if all(path.exists() for path in required_metric_paths) and phase2_pair_rows == phase2_expected_rows:
+            phase2_output_status = "complete"
+        elif registry_path.exists() and not any(path.exists() for path in required_metric_paths):
+            phase2_output_status = "settings_only_no_metrics"
+        elif any(path.exists() for path in [registry_path, *required_metric_paths]):
+            phase2_output_status = "incomplete_metrics"
     gate_status = phase1_gate_status()
+    p2_gate_status = phase2_gate_status()
     expected_metric_rows = int(phase1_status["expected_settings"].sum())
     observed_metric_rows = int(phase1_status["primary_metric_rows"].sum())
     status_fragments = [
@@ -387,13 +423,19 @@ def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFra
         claim_evidence = "no fresh search outputs exist under this protocol"
     elif observed_metric_rows == expected_metric_rows and phase1_status["output_status"].eq("complete").all():
         output_status = "metric_outputs_complete"
-        output_evidence = "; ".join(status_fragments)
+        output_evidence = "; ".join(status_fragments) + (
+            f"; NNS-P2-heldout-architecture-boundary={phase2_output_status} "
+            f"({phase2_pair_rows}/{phase2_expected_rows} rows)"
+        )
         evaluator_status = "implemented_complete_outputs"
         if gate_status.get("NNS-E4-natural-primary-claim") == "finite_null_candidate":
             claim_status = "finite_null_candidate"
+            p2_claim = p2_gate_status.get("NNS-P2-E4-heldout-architecture-claim", "not_ready")
             claim_evidence = (
                 f"{observed_metric_rows}/{expected_metric_rows} fresh metric rows exist; "
-                "NNS-E4-natural-primary-claim=finite_null_candidate with no adjusted primary worse row"
+                "NNS-E4-natural-primary-claim=finite_null_candidate with no adjusted primary worse row; "
+                f"phase2 observed rows={phase2_pair_rows}/{phase2_expected_rows}; "
+                f"NNS-P2-E4-heldout-architecture-claim={p2_claim}"
             )
         else:
             claim_status = "pending_evaluator_decision"
@@ -458,7 +500,8 @@ def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFra
                 "status": evaluator_status,
                 "evidence": (
                     "scripts/e11_evaluate_natural_negative_search_phase1.py writes per-seed log-ratio rows "
-                    "and Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation"
+                    "and Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation; "
+                    "scripts/e11_evaluate_natural_negative_search_phase2.py writes the completed ResNet34 held-out architecture decision table"
                 ),
                 "blocks_stronger_claim_if_missing": "yes",
             },
@@ -491,16 +534,18 @@ def write_outputs(
     status.to_csv(RESULT_DIR / "protocol_status.csv", index=False)
 
     natural_claim_status = status.set_index("item").loc["natural negative claim", "status"]
+    p2_gate_status = phase2_gate_status()
+    p2_claim_status = p2_gate_status.get("NNS-P2-E4-heldout-architecture-claim", "not_ready")
     if natural_claim_status == "finite_null_candidate":
         allowed_now = (
             "cite the committed natural-boundary audit and report the registered 26-setting "
-            "phase1 primary family as a finite-null candidate with detectable-effect and "
-            "tail-quality caveats."
+            "phase1 family plus the 8-setting ResNet34 phase2 family as finite-null candidates "
+            "with detectable-effect, head-gain, and tail-quality caveats."
         )
         blocked_now = (
             "claiming a fresh natural primary counterexample, claiming absence of natural "
-            "counterexamples outside the registered phase1 space, or using quality-failed rows "
-            "as mechanism validation."
+            "counterexamples outside the registered phase1/phase2 spaces, or using quality-failed "
+            "and head-gain-failed rows as mechanism validation."
         )
         phase1_boundary = (
             "The phase1 Slurm outputs are complete and the multiplicity evaluator reports no "
@@ -523,15 +568,26 @@ def write_outputs(
         )
     phase2_registry = RESULT_DIR / "phase2_heldout_architecture" / "settings_registry.csv"
     if phase2_registry.exists():
-        phase2_boundary = (
-            "The ResNet34 held-out architecture settings registry is frozen at "
-            "`results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv`; "
-            "the phase2 evaluator is frozen at "
-            "`results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/*`; "
-            "the phase2 detectable-effect audit is frozen at "
-            "`results/e11_natural_negative_search_protocol/phase2_power_audit/*`; "
-            "no phase2 metric rows are used until the Slurm job completes."
-        )
+        if p2_claim_status == "finite_null_candidate":
+            phase2_boundary = (
+                "The ResNet34 held-out architecture phase2 family has 8/8 metric rows and "
+                "keeps the frozen settings registry at "
+                "`results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv`; "
+                "`results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/*` "
+                "reports NNS-P2-E4-heldout-architecture-claim=finite_null_candidate with no "
+                "adjusted primary worse row. This is still bounded to the registered ResNet34 "
+                "family and must keep the phase2 power, head-gain, and tail-quality caveats."
+            )
+        else:
+            phase2_boundary = (
+                "The ResNet34 held-out architecture settings registry is frozen at "
+                "`results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv`; "
+                "the phase2 evaluator is frozen at "
+                "`results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/*`; "
+                "the phase2 detectable-effect audit is frozen at "
+                "`results/e11_natural_negative_search_protocol/phase2_power_audit/*`; "
+                "phase2 metric rows cannot change claims until the evaluator gate passes."
+            )
     else:
         phase2_boundary = (
             "The phase2 ResNet34 held-out architecture entrypoint is implemented, but the settings registry has not been written."

@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 428364,
+      "size_bytes": 428375,
       "size": "418.3 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2628161,
+      "size_bytes": 2635939,
       "size": "2.5 MB"
     },
     {
@@ -26,15 +26,15 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1541816,
+      "size_bytes": 1551983,
       "size": "1.5 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 286837370,
-      "size": "273.5 MB"
+      "size_bytes": 287669745,
+      "size": "274.3 MB"
     },
     {
       "path": "figures",
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5832963,
+      "size_bytes": 5833065,
       "size": "5.6 MB"
     },
     {
@@ -883,7 +883,7 @@
     {
       "path": "results/e11_submission_repro_audit/build_gate_summary.csv",
       "rows": 6,
-      "size": "1.1 KB"
+      "size": "994 B"
     },
     {
       "path": "results/e11_artifact_review_packet/command_matrix.csv",
@@ -893,12 +893,12 @@
     {
       "path": "results/e11_artifact_review_packet/gate_matrix.csv",
       "rows": 6,
-      "size": "1.6 KB"
+      "size": "1.5 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/local_state_contract.csv",
       "rows": 7,
-      "size": "1.4 KB"
+      "size": "1.5 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/reviewer_response.csv",
@@ -1083,7 +1083,7 @@
     {
       "path": "results/e11_natural_negative_search_protocol/protocol_status.csv",
       "rows": 7,
-      "size": "1.7 KB"
+      "size": "1.9 KB"
     },
     {
       "path": "results/e11_natural_negative_search_protocol/phase1_power_audit/power_grid.csv",
@@ -1198,22 +1198,22 @@
     {
       "path": "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/run_registry.csv",
       "rows": 1,
-      "size": "466 B"
+      "size": "450 B"
     },
     {
       "path": "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/seed_level_primary_ratios.csv",
-      "rows": 0,
-      "size": "306 B"
+      "rows": 24,
+      "size": "7.5 KB"
     },
     {
       "path": "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/primary_decisions.csv",
       "rows": 8,
-      "size": "3.1 KB"
+      "size": "4.6 KB"
     },
     {
       "path": "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/gate_report.csv",
       "rows": 5,
-      "size": "624 B"
+      "size": "630 B"
     },
     {
       "path": "results/e11_natural_negative_search_protocol/phase2_power_audit/power_grid.csv",
@@ -1238,32 +1238,32 @@
     {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
       "rows": 7,
-      "size": "22.7 KB"
+      "size": "22.4 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
       "rows": 6,
-      "size": "4.5 KB"
+      "size": "4.8 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv",
       "rows": 5,
-      "size": "2.0 KB"
+      "size": "2.1 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
       "rows": 5,
-      "size": "3.2 KB"
+      "size": "3.4 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv",
       "rows": 6,
-      "size": "2.8 KB"
+      "size": "2.9 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/paper_sequence.csv",
       "rows": 6,
-      "size": "1.5 KB"
+      "size": "1.6 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/readiness_summary.csv",
@@ -1273,22 +1273,22 @@
     {
       "path": "results/e11_manuscript_claim_trace/claim_trace.csv",
       "rows": 6,
-      "size": "2.4 KB"
+      "size": "2.5 KB"
     },
     {
       "path": "results/e11_manuscript_claim_trace/blocked_phrase_audit.csv",
       "rows": 8,
-      "size": "876 B"
+      "size": "904 B"
     },
     {
       "path": "results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv",
       "rows": 9,
-      "size": "5.7 KB"
+      "size": "5.8 KB"
     },
     {
       "path": "results/e11_mechanism_referee_audit/theory_measurement_contract.csv",
       "rows": 6,
-      "size": "3.3 KB"
+      "size": "3.4 KB"
     },
     {
       "path": "results/e11_mechanism_referee_audit/falsification_trigger_matrix.csv",
@@ -1739,7 +1739,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "93.7 KB"
+      "size": "93.9 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1759,11 +1759,11 @@
     },
     {
       "path": "discussion/e11_quantitative_claim_ledger.md",
-      "size": "21.4 KB"
+      "size": "21.7 KB"
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "61.5 KB"
+      "size": "61.9 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -1787,11 +1787,11 @@
     },
     {
       "path": "discussion/e11_submission_repro_audit.md",
-      "size": "8.9 KB"
+      "size": "8.3 KB"
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
-      "size": "15.3 KB"
+      "size": "14.7 KB"
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
@@ -1803,19 +1803,19 @@
     },
     {
       "path": "discussion/e11_top_conference_gap_register.md",
-      "size": "56.3 KB"
+      "size": "55.2 KB"
     },
     {
       "path": "discussion/e11_top_conference_claim_decision_audit.md",
-      "size": "29.2 KB"
+      "size": "31.9 KB"
     },
     {
       "path": "discussion/e11_manuscript_claim_trace.md",
-      "size": "7.2 KB"
+      "size": "7.5 KB"
     },
     {
       "path": "discussion/e11_mechanism_referee_audit.md",
-      "size": "28.4 KB"
+      "size": "30.5 KB"
     },
     {
       "path": "discussion/e11_natural_head_tail_boundary.md",
@@ -1823,7 +1823,7 @@
     },
     {
       "path": "discussion/e11_natural_negative_search_protocol.md",
-      "size": "19.5 KB"
+      "size": "19.7 KB"
     },
     {
       "path": "discussion/e11_natural_negative_search_phase1_power_audit.md",
@@ -1847,11 +1847,11 @@
     },
     {
       "path": "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
-      "size": "3.2 KB"
+      "size": "8.9 KB"
     },
     {
       "path": "discussion/e11_natural_negative_search_phase2_evaluation.md",
-      "size": "5.2 KB"
+      "size": "5.7 KB"
     },
     {
       "path": "discussion/e11_natural_negative_search_phase2_power_audit.md",

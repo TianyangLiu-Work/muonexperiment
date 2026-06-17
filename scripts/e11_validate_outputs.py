@@ -485,8 +485,8 @@ def assert_top_conference_claim_decision_audit(
         "global convergence or optimizer superiority",
         "the v5 score predicts unseen real-task residual risk",
         "fresh natural primary counterexample",
-        "unqualified absence of natural counterexamples outside the registered phase1 space",
-        "quality-failed rows validate the mechanism",
+        "unqualified absence of natural counterexamples outside the registered phase1/phase2 spaces",
+        "quality-failed or head-gain-failed rows validate the mechanism",
         "Muon or spectral training is competitive on long-tail benchmarks",
         "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server",
     ]:
@@ -498,6 +498,8 @@ def assert_top_conference_claim_decision_audit(
         "observed=26/26",
         "raw_worse_rows=0",
         "quality_gate_fail_rows=23",
+        "phase2_observed=8/8",
+        "phase2_head_gain_gate_fail_rows=8",
         "TVS-1-validation-grid-complete=not_ready",
         "R3-preferred-latex-toolchain=not_ready",
     ]:
@@ -529,8 +531,8 @@ def assert_top_conference_claim_decision_audit(
     for phrase in [
         "answer_now_with_scope_and_real-diagnostic_bridge",
         "do not use final rows for refit or score selection",
-        "26/26 observed, raw_worse_rows=0",
-        "finite-null-candidate wording only with detectable-effect and tail-quality caveats",
+        "26/26 phase1 observed, 8/8 phase2 observed",
+        "finite-null-candidate wording only with detectable-effect, head-gain, and quality caveats",
         "quarantine benchmark claims",
         "preferred-LaTeX clean-checkout completion",
     ]:
@@ -540,7 +542,7 @@ def assert_top_conference_claim_decision_audit(
         "MEQ-1-theory-frontload-scope",
         "MEQ-2-diagnostic-caveat-next-to-results",
         "MEQ-3-v5-completed-boundary-language",
-        "MEQ-4-natural-negative-incomplete-family",
+        "MEQ-4-natural-negative-complete-finite-family",
         "MEQ-5-performance-benchmark-quarantine",
         "MEQ-6-artifact-review-caveat",
     }
@@ -551,7 +553,7 @@ def assert_top_conference_claim_decision_audit(
         "worst-case-vs-realized distinction",
         "No result paragraph may convert matched-head-gain logit drift into tail-accuracy",
         "frozen completed negative boundary",
-        "finite registered phase1 null candidate with quality and detectable-effect caveats",
+        "finite registered null candidates with detectable-effect, head-gain, and quality caveats",
         "quarantine all competitive optimizer wording",
         "preferred-LaTeX clean-checkout gap",
     ]:
@@ -1679,7 +1681,7 @@ def main() -> None:
         "make e11-natural-negative-search-phase1-eval",
         "make e11-natural-negative-search-phase1-interim-synthesis",
         "multiplicity-adjusted decision rule",
-        "before any fresh search outputs exist",
+        "before fresh search outputs",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
         "candidate condition-score audit",
@@ -1884,10 +1886,11 @@ def main() -> None:
         "not a global optimizer theorem",
         "v5 condition-score program is a registered completed negative boundary",
         "observed \\(26/26\\) settings",
+        "observed \\(8/8\\) phase2 settings",
         "\\texttt{raw\\_worse\\_rows=0}",
-        "finite registered phase1 null candidate",
-        "detectable-effect and tail-quality caveats",
-        "does not prove that no natural counterexample exists outside the registered phase1 space",
+        "finite registered phase1 and phase2 null candidates",
+        "detectable-effect, head-gain, and quality caveats",
+        "do not prove that no natural counterexample exists outside the registered phase1/phase2 spaces",
         "negative benchmark boundary, not evidence for an optimizer-performance advantage",
         "preferred LaTeX clean-checkout reproduction remains an explicit gate",
         "\\label{tab:claim-boundary}",
@@ -5092,6 +5095,10 @@ def main() -> None:
         natural_phase2_dir / "decision_template.csv",
         natural_phase2_dir / "config.json",
     ]
+    natural_phase2_step = pd.read_csv(natural_phase2_dir / "step_metrics.csv")
+    natural_phase2_pair = pd.read_csv(natural_phase2_dir / "pair_summary.csv")
+    natural_phase2_layer = pd.read_csv(natural_phase2_dir / "layer_metrics.csv")
+    natural_phase2_decision = pd.read_csv(natural_phase2_dir / "decision_template.csv")
     natural_phase2_eval_dir = natural_protocol_dir / "phase2_multiplicity_evaluation"
     natural_phase2_eval_run_registry = pd.read_csv(natural_phase2_eval_dir / "run_registry.csv")
     natural_phase2_eval_seed_ratios = pd.read_csv(natural_phase2_eval_dir / "seed_level_primary_ratios.csv")
@@ -5152,21 +5159,30 @@ def main() -> None:
         "phase2_settings_rows": len(natural_phase2_registry) == 8,
         "phase2_architecture": set(natural_phase2_registry["architecture"]) == {"ResNet34 CIFAR stem"},
         "phase2_seed_count": set(natural_phase2_registry["seed_count"].astype(int)) == {3},
-        "phase2_metric_files_absent": not any(path.exists() for path in natural_phase2_metric_paths),
+        "phase2_metric_files_present": all(path.exists() for path in natural_phase2_metric_paths),
+        "phase2_metric_rows": len(natural_phase2_pair) == 8
+        and len(natural_phase2_step) == 48
+        and len(natural_phase2_layer) > 0
+        and len(natural_phase2_decision) == 8,
         "phase2_eval_run_registry": len(natural_phase2_eval_run_registry) == 1
-        and set(natural_phase2_eval_run_registry["output_status"]) == {"settings_only_no_metrics"}
+        and set(natural_phase2_eval_run_registry["output_status"]) == {"complete"}
         and int(natural_phase2_eval_run_registry.iloc[0]["expected_settings"]) == 8
-        and int(natural_phase2_eval_run_registry.iloc[0]["pair_summary_rows"]) == 0,
+        and int(natural_phase2_eval_run_registry.iloc[0]["pair_summary_rows"]) == 8,
         "phase2_eval_decision_rows": len(natural_phase2_eval_decisions) == 8
-        and natural_phase2_eval_decisions["output_status"].eq("not_run").all()
-        and natural_phase2_eval_decisions["adjusted_primary_decision"].eq("pending_output").all(),
-        "phase2_eval_seed_rows": len(natural_phase2_eval_seed_ratios) == 0,
+        and natural_phase2_eval_decisions["output_status"].eq("observed").all()
+        and natural_phase2_eval_decisions["adjusted_primary_decision"].eq("not_primary_worse_adjusted").all()
+        and natural_phase2_eval_decisions["inference_source"].eq("paired_seed_log_ratio_t_test").all()
+        and natural_phase2_eval_decisions["observed_seeds"].astype(int).eq(3).all()
+        and natural_phase2_eval_decisions["head_gain_gate"].astype(str).str.lower().eq("false").all()
+        and natural_phase2_eval_decisions["tail_quality_gate"].astype(str).str.lower().eq("true").all()
+        and natural_phase2_eval_decisions["quality_gate"].astype(str).str.lower().eq("false").all(),
+        "phase2_eval_seed_rows": len(natural_phase2_eval_seed_ratios) == 24,
         "phase2_eval_gate_status": natural_phase2_eval_gate_lookup
         == {
             "NNS-P2-E1-evaluator-implemented": "pass",
-            "NNS-P2-E2-phase2-output-completeness": "not_ready",
-            "NNS-P2-E3-primary-multiplicity": "not_ready",
-            "NNS-P2-E4-heldout-architecture-claim": "not_ready",
+            "NNS-P2-E2-phase2-output-completeness": "pass",
+            "NNS-P2-E3-primary-multiplicity": "pass",
+            "NNS-P2-E4-heldout-architecture-claim": "finite_null_candidate",
             "NNS-P2-E5-full-reporting-boundary": "pass",
         },
         "phase2_eval_config": natural_phase2_eval_config["multiplicity_family"]
@@ -5270,7 +5286,7 @@ def main() -> None:
     if not all(natural_protocol_checks.values()):
         failed_checks = [name for name, passed in natural_protocol_checks.items() if not passed]
         raise AssertionError(
-            "natural negative-search protocol must preserve frozen search space, complete phase1 outputs, phase2 settings-only freeze, implemented evaluator, adjusted primary rule, and claim boundaries; failed checks: "
+            "natural negative-search protocol must preserve frozen search space, complete phase1 and phase2 outputs, implemented evaluators, adjusted primary rules, and caveated claim boundaries; failed checks: "
             f"{failed_checks}"
         )
     natural_protocol_text = Path("discussion/e11_natural_negative_search_protocol.md").read_text(
@@ -5294,7 +5310,8 @@ def main() -> None:
             "phase2_power_audit",
             "scripts/e11_evaluate_natural_negative_search_phase2.py",
             "scripts/slurm/e11_natural_negative_search_phase2.sbatch",
-            "no phase2 metric rows are used",
+            "phase2 family has 8/8 metric rows",
+            "head-gain",
             "multiplicity evaluator",
             "finite_null_candidate",
             "Blocked now: claiming a fresh natural primary counterexample",
@@ -5378,8 +5395,10 @@ def main() -> None:
         [
             "E11 Natural Negative Search Phase2 Held-Out Architecture Outputs",
             "ResNet34",
-            "No phase2 metric rows are present in this settings-only freeze.",
+            "Raw Primary Readout",
+            "Decision Boundary",
             "settings_registry.csv",
+            "pair_summary.csv",
         ],
     )
     natural_phase2_eval_text = Path("discussion/e11_natural_negative_search_phase2_evaluation.md").read_text(
@@ -5391,10 +5410,12 @@ def main() -> None:
         [
             "E11 Natural Negative Search Phase2 Evaluation",
             "8 declared settings",
-            "Current primary metric coverage: 0/8 settings",
-            "Current seed-level primary rows: 0",
+            "Current primary metric coverage: 8/8 settings",
+            "Current seed-level primary rows: 24",
+            "head_gain_gate fails in 8/8 rows",
             "NNS-P2-E2-phase2-output-completeness",
-            "not_ready",
+            "finite_null_candidate",
+            "not_primary_worse_adjusted",
             "paired per-seed log-ratio tests",
         ],
     )
@@ -6400,7 +6421,7 @@ def main() -> None:
         "E11 Mechanism Referee Audit",
         "unit-JVP ratios are above one while matched-gain observed ratios are below one",
         "v5 final split outputs=not_run",
-        "Use only finite registered phase1 null-candidate wording with detectable-effect and quality caveats",
+        "Use only finite registered phase1/phase2 null-candidate wording with detectable-effect, head-gain, and quality caveats",
         "local drift improvements imply final long-tail optimizer superiority",
     ]
     missing_claim_ledger = [phrase for phrase in required_claim_ledger_phrases if phrase not in claim_ledger]
@@ -6711,11 +6732,11 @@ def main() -> None:
         "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
         "Complete-family claim-boundary synthesis",
         "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
-        "Settings-only ResNet34 held-out architecture registry",
+        "Completed ResNet34 held-out architecture phase2 raw readout",
         "discussion/e11_natural_negative_search_phase2_evaluation.md",
-        "Pre-output Holm evaluator",
+        "Completed Holm evaluator",
         "discussion/e11_natural_negative_search_phase2_power_audit.md",
-        "Pre-output detectable-effect and outcome-state audit",
+        "Detectable-effect and outcome-state audit",
         "make e11-natural-negative-search-phase1-interim-synthesis",
         "discussion/e11_top_conference_claim_decision_audit.md",
         "Paper-level supportable/completed-negative-boundary/blocked claim and rebuttal-readiness contract",
@@ -7478,7 +7499,8 @@ def main() -> None:
         "results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv",
         "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation",
         "results/e11_natural_negative_search_protocol/phase2_power_audit",
-        "no phase2 metric rows are used",
+        "8/8 observed rows",
+        "head-gain",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-eval",
@@ -7544,7 +7566,7 @@ def main() -> None:
             "using any final row to refit or reselect the score",
             "quarantine benchmark claims",
             "worst-case-vs-realized distinction",
-            "finite-null-candidate wording only with detectable-effect and tail-quality caveats",
+            "finite-null-candidate wording only with detectable-effect, head-gain, and quality caveats",
         ],
     )
     manuscript_trace = pd.read_csv("results/e11_manuscript_claim_trace/claim_trace.csv")
@@ -7828,8 +7850,8 @@ def main() -> None:
     for phrase in [
         "addressed_for_local_claim",
         "rejected_as_primary_explanation",
-        "finite_phase1_null_candidate_phase2_registered_not_ready",
-        "pre_output_registered_not_ready_with_power_boundary",
+        "finite_phase1_and_phase2_null_candidates_with_caveats",
+        "completed_phase2_finite_null_with_power_and_quality_caveats",
         "not_claimed",
         "the validator enforces matched-update/head-gain consistency",
         "unit-JVP ratios",
@@ -7858,7 +7880,7 @@ def main() -> None:
         "source-standardized transport residual",
         "finite natural boundary search",
         "global trajectory or convergence theorem",
-        "phase2 held-out architecture claim before complete metric rows",
+        "universal natural-null wording outside registered phase1/phase2 families",
     ]:
         if phrase not in contract_text:
             raise AssertionError(f"mechanism referee theory contract missing phrase: {phrase}")
@@ -7875,8 +7897,8 @@ def main() -> None:
     trigger_text = " ".join(falsification_triggers.astype(str).agg(" ".join, axis=1).tolist())
     for phrase in [
         "Downgrade predictive-condition wording",
-        "Allow only finite registered phase1 null-candidate wording and registered-not-ready phase2 wording",
-        "finite phase1 null candidate with detectable-effect and quality caveats; phase2 in-progress",
+        "Allow only finite registered phase1/phase2 null-candidate wording",
+        "finite phase1/phase2 null candidates with detectable-effect, head-gain, and quality caveats",
         "matched-head-gain local mechanism only",
         "mechanism diagnostic, not benchmark claim",
         "toolchain caveat",
@@ -7894,7 +7916,7 @@ def main() -> None:
             "Theory-To-Measurement Contract",
             "Falsification Trigger Matrix",
             "local matched-head-gain mechanism paper",
-            "phase2 registered-not-ready wording",
+            "completed caveated phase2 finite-null-candidate wording",
             "Blocked now: broad optimizer-performance claims",
             "alternative_explanation_matrix.csv",
             "theory_measurement_contract.csv",

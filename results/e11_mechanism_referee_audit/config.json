@@ -3,5 +3,5 @@
   "alternative_explanations": 9,
   "theory_measurement_contracts": 6,
   "falsification_triggers": 6,
-  "claim_boundary": "local matched-head-gain mechanism; finite registered phase1 natural-null candidate; phase2 registered-not-ready until complete; no final-performance or v5 predictive-condition upgrade"
+  "claim_boundary": "local matched-head-gain mechanism; finite registered phase1/phase2 natural-null candidates with power, head-gain, and quality caveats; no final-performance or v5 predictive-condition upgrade"
 }

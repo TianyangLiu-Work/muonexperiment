@@ -109,15 +109,15 @@ def main() -> None:
             },
             {
                 "artifact": "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
-                "role": "Settings-only ResNet34 held-out architecture registry for phase2, with no phase2 metric rows used before Slurm completion.",
+                "role": "Completed ResNet34 held-out architecture phase2 raw readout, preserving the registered settings and decision-template boundary.",
             },
             {
                 "artifact": "discussion/e11_natural_negative_search_phase2_evaluation.md",
-                "role": "Pre-output Holm evaluator for the 8-setting phase2 held-out architecture family, currently not_ready until metric rows exist.",
+                "role": "Completed Holm evaluator for the 8-setting phase2 held-out architecture family, reporting 8/8 observed rows and finite-null-candidate wording with head-gain and power caveats.",
             },
             {
                 "artifact": "discussion/e11_natural_negative_search_phase2_power_audit.md",
-                "role": "Pre-output detectable-effect and outcome-state audit for the 3-seed, 8-setting ResNet34 phase2 family.",
+                "role": "Detectable-effect and outcome-state audit for interpreting the 3-seed, 8-setting ResNet34 phase2 family.",
             },
             {
                 "artifact": "discussion/e11_top_conference_claim_decision_audit.md",

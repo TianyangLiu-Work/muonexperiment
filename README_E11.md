@@ -496,7 +496,8 @@ The fresh natural negative-search protocol is
 `scripts/e11_write_natural_negative_search_protocol.py`. It does not claim a
 new natural counterexample. It freezes phase1/phase2 search-space rows, the
 primary full-drift metric contract, multiplicity-adjusted decision rule,
-stopping rules, acceptance gates, and claim ladder before any fresh search outputs exist.
+stopping rules, acceptance gates, and claim ladder before fresh search outputs
+are interpreted.
 The phase1 detectable-effect audit is
 `discussion/e11_natural_negative_search_phase1_power_audit.md`; it records the
 minimum-detectable primary drift ratios for the 26-setting Holm family and
@@ -525,27 +526,29 @@ the complete 26/26 family coverage, `raw_worse_rows=0`,
 detectable-effect and tail-quality caveats; it still blocks any fresh natural
 primary counterexample wording or broad natural-null wording outside the
 registered phase1 space.
-The phase2 held-out architecture settings are now frozen in
+The phase2 held-out architecture family is now complete in
 `results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv`
 and documented in
 `discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md`.
-They use a ResNet34 CIFAR stem, the phase1-declared CIFAR-100-LT partitions,
+It uses a ResNet34 CIFAR stem, the phase1-declared CIFAR-100-LT partitions,
 2 checkpoint depths, 2 matched head-gain fractions, and 3 seeds per setting for
 8 registered settings. The executable GPU entrypoint is
 `scripts/e11_run_natural_negative_search_phase2.py` with
-`scripts/slurm/e11_natural_negative_search_phase2.sbatch`; no phase2 metric rows
-are used until that Slurm run completes. The pre-output phase2 evaluator is
+`scripts/slurm/e11_natural_negative_search_phase2.sbatch`. The phase2 evaluator is
 `scripts/e11_evaluate_natural_negative_search_phase2.py`, with current output in
 `discussion/e11_natural_negative_search_phase2_evaluation.md` and
 `results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/*`;
-it records 0/8 primary rows now and fixes the paired seed log-ratio plus Holm
-decision gate before phase2 metrics exist.
+it records 8/8 observed primary rows, 24 seed-level primary rows,
+`NNS-P2-E4-heldout-architecture-claim=finite_null_candidate`, and no adjusted
+primary worse row. This supports only finite registered phase2 null-candidate
+wording: every phase2 row has `head_gain_gate=False` while `tail_quality_gate=True`,
+so it does not validate the mechanism or prove a universal natural null.
 The phase2 detectable-effect audit is
 `discussion/e11_natural_negative_search_phase2_power_audit.md`, backed by
 `results/e11_natural_negative_search_protocol/phase2_power_audit/*`. It records
-the 3-seed, 8-setting family MDE and a pre-output outcome state machine, so a
-complete phase2 null cannot be overstated when the audited effect scale is below
-the detectable boundary.
+the 3-seed, 8-setting family MDE and outcome state machine, so a complete phase2
+null cannot be overstated when the audited effect scale is below the detectable
+boundary.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -1066,10 +1069,10 @@ Do not claim:
 - `scripts/e11_write_natural_negative_search_protocol.py`: pre-registered fresh natural negative-search protocol with search space, metric contract, multiplicity rule, stopping rules, gates, and claim ladder.
 - `scripts/e11_write_natural_negative_power_audit.py`: phase1 natural-negative power/MDE audit for interpreting adjusted positive and finite-null outcomes.
 - `scripts/e11_run_natural_negative_search_phase1.py`: executable phase1 runner for the registered natural negative-search settings; supports `--list-settings` without launching training and writes fresh outputs only when submitted.
-- `scripts/e11_run_natural_negative_search_phase2.py`: executable ResNet34 held-out architecture runner for the registered phase2 natural negative-search settings; `--settings-only` freezes the 8-setting registry without metric rows.
+- `scripts/e11_run_natural_negative_search_phase2.py`: executable ResNet34 held-out architecture runner for the registered phase2 natural negative-search settings; `--settings-only` freezes the 8-setting registry before metric rows are generated.
 - `scripts/e11_evaluate_natural_negative_search_phase1.py`: Holm-adjusted phase1 evaluator for the natural negative-search protocol; uses paired per-seed log-ratio tests and keeps every registered setting in the complete 26-setting decision family.
-- `scripts/e11_evaluate_natural_negative_search_phase2.py`: pre-output Holm-adjusted evaluator for the registered 8-setting ResNet34 phase2 held-out architecture family; writes not-ready gates until metric rows exist.
-- `scripts/e11_write_natural_negative_phase2_power_audit.py`: pre-output phase2 detectable-effect and outcome-state audit for the 3-seed, 8-setting ResNet34 held-out architecture family.
+- `scripts/e11_evaluate_natural_negative_search_phase2.py`: Holm-adjusted evaluator for the completed registered 8-setting ResNet34 phase2 held-out architecture family; reports finite-null-candidate wording with power, head-gain, and quality caveats.
+- `scripts/e11_write_natural_negative_phase2_power_audit.py`: phase2 detectable-effect and outcome-state audit for the 3-seed, 8-setting ResNet34 held-out architecture family.
 - `scripts/e11_write_natural_negative_phase1_interim_synthesis.py`: claim-boundary synthesis for complete phase1 coverage, raw-worse counts, quality gates, and finite registered phase1 null-candidate caveats.
 - `scripts/e11_write_submission_repro_audit.py`: submission reproducibility audit for LaTeX toolchain availability, rendered PDF hashes, paper source hashes, and clean-checkout gates.
 - `scripts/e11_write_artifact_review_packet.py`: artifact-review command, gate, local-state, and reviewer-response packet for reproducing the current bundle without expanding claims.
@@ -1122,5 +1125,5 @@ Most important next steps:
 2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the frozen v2 condition score fails the registered ResNet34 and CIFAR-10-LT held-out residual-ranking gates. The fresh v3 zero-fit scaled-JVP score then passes the CIFAR-10 alternate partition but reverses on the fresh ResNet50 architecture split. V4 then freezes a two-axis amplitude-minus-direction score and passes the WideResNet50-2 final architecture split, but fails the CIFAR-10 mixed final data split. The v4 failure audit localizes this data-partition reversal mechanism problem to amplitude/depth scalar aggregation rather than the direction threshold. The proof-obligation register now separates theorem claims, assumptions, and blocked predictive-condition wording. V5 has a frozen transport-normalized validation score, a pre-registered final evaluator, a pre-output power audit, a pre-output interpretation lock, a reviewer failure response, and a completed-final direction/boundary audit. The final result is negative for P0: ResNeXt50 residual ranking survives but direction threshold fails, while CIFAR-10 residual ranking reverses but direction threshold survives. Any next predictive-condition attempt needs new theory terms and a new unspent protocol rather than repair on these final rows.
 3. Extend the current fixed-checkpoint, short-trajectory, small practical-training, and negative ResNet final-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
-5. Treat the current 26-setting natural-negative phase1 family as complete only within its registered scope; rerun `make e11-natural-negative-search-phase1-eval` and `make e11-natural-negative-search-phase1-interim-synthesis` after any new registered family, and preregister held-out architecture or larger-dataset searches before broadening the finite-null wording.
+5. Treat the current 26-setting phase1 and 8-setting phase2 natural-negative families as complete only within their registered scope; rerun the phase1/phase2 evaluators after any new registered family, and preregister larger-dataset or additional held-out-architecture searches before broadening the finite-null wording.
 6. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.
