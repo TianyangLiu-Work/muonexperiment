@@ -4849,7 +4849,6 @@ def main() -> None:
         row.search_id: len(pd.read_csv(Path(row.planned_artifact_prefix) / "settings_registry.csv"))
         for row in natural_phase1_search.itertuples()
     }
-    phase2_prefixes_absent = all(not Path(row.planned_artifact_prefix).exists() for row in natural_phase2_search.itertuples())
     natural_eval_dir = natural_protocol_dir / "phase1_multiplicity_evaluation"
     natural_eval_run_registry = pd.read_csv(natural_eval_dir / "run_registry.csv")
     natural_eval_seed_ratios = pd.read_csv(natural_eval_dir / "seed_level_primary_ratios.csv")
@@ -4878,6 +4877,15 @@ def main() -> None:
     natural_phase1_cifar10_step = pd.read_csv(natural_phase1_cifar10_dir / "step_metrics.csv")
     natural_phase1_cifar10_layer = pd.read_csv(natural_phase1_cifar10_dir / "layer_metrics.csv")
     natural_phase1_cifar10_decision = pd.read_csv(natural_phase1_cifar10_dir / "decision_template.csv")
+    natural_phase2_dir = natural_protocol_dir / "phase2_heldout_architecture"
+    natural_phase2_registry = pd.read_csv(natural_phase2_dir / "settings_registry.csv")
+    natural_phase2_metric_paths = [
+        natural_phase2_dir / "step_metrics.csv",
+        natural_phase2_dir / "pair_summary.csv",
+        natural_phase2_dir / "layer_metrics.csv",
+        natural_phase2_dir / "decision_template.csv",
+        natural_phase2_dir / "config.json",
+    ]
     natural_interim_coverage_lookup = natural_interim_coverage.set_index("search_id")[
         "observed_primary_rows"
     ].to_dict()
@@ -4910,8 +4918,10 @@ def main() -> None:
         "phase1_entrypoint": set(natural_phase1_search["entrypoint"])
         == {"scripts/slurm/e11_natural_negative_search_phase1.sbatch"},
         "phase1_entrypoint_status": set(natural_phase1_search["entrypoint_status"]) == {"implemented_sbatch"},
+        "phase2_entrypoint": set(natural_phase2_search["entrypoint"])
+        == {"scripts/slurm/e11_natural_negative_search_phase2.sbatch"},
         "phase2_entrypoint_status": set(natural_phase2_search["entrypoint_status"])
-        == {"blocked_until_phase1_registry_commit"},
+        == {"implemented_sbatch"},
         "phase1_settings_counts": phase1_settings_counts
         == {
             "NNS-P1-cifar100lt-resnet18-new-partitions": 12,
@@ -4926,7 +4936,10 @@ def main() -> None:
         "phase1_cifar10_step_rows": len(natural_phase1_cifar10_step) == 80,
         "phase1_cifar10_layer_rows": len(natural_phase1_cifar10_layer) > 0,
         "phase1_cifar10_decision_rows": len(natural_phase1_cifar10_decision) == 8,
-        "phase2_prefixes_absent": phase2_prefixes_absent,
+        "phase2_settings_rows": len(natural_phase2_registry) == 8,
+        "phase2_architecture": set(natural_phase2_registry["architecture"]) == {"ResNet34 CIFAR stem"},
+        "phase2_seed_count": set(natural_phase2_registry["seed_count"].astype(int)) == {3},
+        "phase2_metric_files_absent": not any(path.exists() for path in natural_phase2_metric_paths),
         "eval_decision_count": len(natural_eval_decisions) == 26,
         "eval_observed_count": natural_eval_observed_count == 26,
         "eval_not_run_count": natural_eval_not_run_count == 0,
@@ -5001,7 +5014,7 @@ def main() -> None:
     if not all(natural_protocol_checks.values()):
         failed_checks = [name for name, passed in natural_protocol_checks.items() if not passed]
         raise AssertionError(
-            "natural negative-search protocol must preserve frozen search space, partial phase1 outputs, implemented evaluator, adjusted primary rule, and claim boundaries; failed checks: "
+            "natural negative-search protocol must preserve frozen search space, complete phase1 outputs, phase2 settings-only freeze, implemented evaluator, adjusted primary rule, and claim boundaries; failed checks: "
             f"{failed_checks}"
         )
     natural_protocol_text = Path("discussion/e11_natural_negative_search_protocol.md").read_text(
@@ -5018,6 +5031,11 @@ def main() -> None:
             "metric_outputs_complete",
             "26/26 fresh metric rows exist",
             "Phase1 boundary: The phase1 Slurm outputs are complete",
+            "Phase2 boundary",
+            "ResNet34 CIFAR stem",
+            "phase2_heldout_architecture/settings_registry.csv",
+            "scripts/slurm/e11_natural_negative_search_phase2.sbatch",
+            "no phase2 metric rows are used",
             "multiplicity evaluator",
             "finite_null_candidate",
             "Blocked now: claiming a fresh natural primary counterexample",
@@ -5073,6 +5091,19 @@ def main() -> None:
             "NNI-1-primary-natural-counterexample",
             "finite_null_candidate",
             "unqualified finite null over all natural settings",
+        ],
+    )
+    natural_phase2_text = Path(
+        "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md"
+    ).read_text(encoding="utf-8")
+    assert_required_phrases(
+        "natural negative-search phase2 held-out architecture settings",
+        natural_phase2_text,
+        [
+            "E11 Natural Negative Search Phase2 Held-Out Architecture Outputs",
+            "ResNet34",
+            "No phase2 metric rows are present in this settings-only freeze.",
+            "settings_registry.csv",
         ],
     )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
@@ -6274,6 +6305,8 @@ def main() -> None:
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-results",
         "make e11-natural-negative-search-phase1-eval",
+        "make e11-natural-negative-search-phase2-settings",
+        "make e11-natural-negative-search-phase2-results",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -6305,6 +6338,8 @@ def main() -> None:
         "26/26 observed primary rows",
         "discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
         "Complete-family claim-boundary synthesis",
+        "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
+        "Settings-only ResNet34 held-out architecture registry",
         "make e11-natural-negative-search-phase1-interim-synthesis",
         "discussion/e11_top_conference_claim_decision_audit.md",
         "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract",
@@ -7027,9 +7062,15 @@ def main() -> None:
         "quality_gate_fail_rows=23",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
+        "scripts/e11_run_natural_negative_search_phase2.py",
+        "scripts/slurm/e11_natural_negative_search_phase2.sbatch",
+        "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
+        "results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv",
+        "no phase2 metric rows are used",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-eval",
+        "make e11-natural-negative-search-phase2-settings",
         "scripts/e11_write_natural_negative_phase1_interim_synthesis.py",
         "multiplicity evaluator",
         "NNS-E4 returning finite_null_candidate",
@@ -7177,6 +7218,8 @@ def main() -> None:
         or "make e11-natural-negative-search-phase1-results" not in readme
         or "make e11-natural-negative-search-phase1-eval" not in readme
         or "make e11-natural-negative-search-phase1-interim-synthesis" not in readme
+        or "make e11-natural-negative-search-phase2-settings" not in readme
+        or "make e11-natural-negative-search-phase2-results" not in readme
         or "make e11-top-conference-claim-decision-audit" not in readme
         or "make e11-manuscript-claim-trace" not in readme
         or "make e11-mechanism-referee-audit" not in readme
@@ -7195,6 +7238,8 @@ def main() -> None:
         "discussion/e11_submission_repro_audit.md",
         "discussion/e11_artifact_review_packet.md",
         "discussion/e11_mechanism_referee_audit.md",
+        "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
+        "results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:

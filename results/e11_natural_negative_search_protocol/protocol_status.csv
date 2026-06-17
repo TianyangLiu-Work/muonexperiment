@@ -1,8 +1,8 @@
 item,status,evidence,blocks_stronger_claim_if_missing
 committed natural audit baseline,loaded,37 primary rows; strict worse count 0; max CI high 0.936,yes
 fresh natural search protocol,generated,"search space, metric contract, stopping rules, gates, and claim ladder written",yes
-fresh natural search entrypoints,implemented,scripts/e11_run_natural_negative_search_phase1.py and scripts/slurm/e11_natural_negative_search_phase1.sbatch are registered for phase1,yes
-fresh natural search settings registries,locked,"phase1_cifar100lt_resnet18, phase1_cifar10lt_resnet18, and phase1_tail_quality_controls settings_registry.csv files declare 26 total settings",yes
+fresh natural search entrypoints,implemented,"scripts/e11_run_natural_negative_search_phase1.py, scripts/slurm/e11_natural_negative_search_phase1.sbatch, scripts/e11_run_natural_negative_search_phase2.py, and scripts/slurm/e11_natural_negative_search_phase2.sbatch are registered",yes
+fresh natural search settings registries,locked,"phase1_cifar100lt_resnet18, phase1_cifar10lt_resnet18, and phase1_tail_quality_controls settings_registry.csv files declare 26 total settings; phase2_heldout_architecture settings_registry.csv declares 8/8 ResNet34 held-out architecture settings",yes
 fresh natural search outputs,metric_outputs_complete,NNS-P1-cifar100lt-resnet18-new-partitions=complete (12/12 rows); NNS-P1-cifar10lt-resnet18-cross-partitions=complete (8/8 rows); NNS-P1-tail-quality-controls=complete (6/6 rows),yes
 multiplicity-adjusted evaluator,implemented_complete_outputs,scripts/e11_evaluate_natural_negative_search_phase1.py writes per-seed log-ratio rows and Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation,yes
 natural negative claim,finite_null_candidate,26/26 fresh metric rows exist; NNS-E4-natural-primary-claim=finite_null_candidate with no adjusted primary worse row,yes

@@ -108,6 +108,10 @@ def main() -> None:
                 "role": "Complete-family claim-boundary synthesis for raw-worse counts, quality gates, and finite registered phase1 null-candidate caveats.",
             },
             {
+                "artifact": "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
+                "role": "Settings-only ResNet34 held-out architecture registry for phase2, with no phase2 metric rows used before Slurm completion.",
+            },
+            {
                 "artifact": "discussion/e11_top_conference_claim_decision_audit.md",
                 "role": "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract for top-conference wording.",
             },
@@ -161,6 +165,8 @@ make e11-natural-negative-search-phase1-power-audit # keep the 26-setting natura
 make e11-natural-negative-search-phase1-results # submit the registered phase1 natural-negative GPU jobs via Slurm
 make e11-natural-negative-search-phase1-eval # refresh the 26-setting Holm-adjusted primary decision table
 make e11-natural-negative-search-phase1-interim-synthesis # summarize complete phase1 coverage and caveated finite-null boundaries
+make e11-natural-negative-search-phase2-settings # freeze the ResNet34 held-out architecture phase2 registry
+make e11-natural-negative-search-phase2-results # submit the registered ResNet34 phase2 jobs via Slurm
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets

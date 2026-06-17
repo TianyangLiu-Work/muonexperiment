@@ -114,17 +114,17 @@ def build_search_space_registry() -> pd.DataFrame:
                 "search_id": "NNS-P2-heldout-architecture-boundary",
                 "phase": "phase2_fresh_generality_search",
                 "dataset": "CIFAR-100-LT",
-                "architecture": "ResNet34, WideResNet28-10, or ResNeXt50-32x4d CIFAR stem",
+                "architecture": "ResNet34 CIFAR stem",
                 "partition_family": "reuse only the phase1-declared class partitions, not outcome-selected partitions",
                 "checkpoint_steps": "2000/5000",
                 "target_head_gain_fraction": "0.002/0.005",
-                "seeds_per_setting": "at least 3",
+                "seeds_per_setting": "3",
                 "max_settings": 8,
                 "compute_mode": "GPU via Slurm",
-                "freshness_rule": "architecture choice must be declared before phase1 outcomes are inspected for selection",
+                "freshness_rule": "architecture fixed after complete phase1 archive; partitions are phase1-declared and not outcome-selected",
                 "planned_artifact_prefix": "results/e11_natural_negative_search_protocol/phase2_heldout_architecture",
-                "entrypoint": "not_registered_until_phase1_archive",
-                "entrypoint_status": "blocked_until_phase1_registry_commit",
+                "entrypoint": "scripts/slurm/e11_natural_negative_search_phase2.sbatch",
+                "entrypoint_status": "implemented_sbatch",
             },
         ]
     )
@@ -366,6 +366,13 @@ def phase1_output_status(search_space: pd.DataFrame) -> pd.DataFrame:
 def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFrame) -> pd.DataFrame:
     primary = audit_baseline.set_index("baseline_id").loc["committed_natural_primary_full_drift_scan"]
     phase1_status = phase1_output_status(search_space)
+    phase2 = search_space[search_space["phase"].eq("phase2_fresh_generality_search")]
+    phase2_settings_rows = 0
+    phase2_expected_rows = int(phase2["max_settings"].sum()) if not phase2.empty else 0
+    for search in phase2.itertuples():
+        registry_path = Path(search.planned_artifact_prefix) / "settings_registry.csv"
+        if registry_path.exists():
+            phase2_settings_rows += len(pd.read_csv(registry_path))
     gate_status = phase1_gate_status()
     expected_metric_rows = int(phase1_status["expected_settings"].sum())
     observed_metric_rows = int(phase1_status["primary_metric_rows"].sum())
@@ -420,8 +427,10 @@ def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFra
                 "item": "fresh natural search entrypoints",
                 "status": "implemented",
                 "evidence": (
-                    "scripts/e11_run_natural_negative_search_phase1.py and "
-                    "scripts/slurm/e11_natural_negative_search_phase1.sbatch are registered for phase1"
+                    "scripts/e11_run_natural_negative_search_phase1.py, "
+                    "scripts/slurm/e11_natural_negative_search_phase1.sbatch, "
+                    "scripts/e11_run_natural_negative_search_phase2.py, and "
+                    "scripts/slurm/e11_natural_negative_search_phase2.sbatch are registered"
                 ),
                 "blocks_stronger_claim_if_missing": "yes",
             },
@@ -430,7 +439,9 @@ def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFra
                 "status": "locked",
                 "evidence": (
                     "phase1_cifar100lt_resnet18, phase1_cifar10lt_resnet18, and "
-                    "phase1_tail_quality_controls settings_registry.csv files declare 26 total settings"
+                    "phase1_tail_quality_controls settings_registry.csv files declare 26 total settings; "
+                    f"phase2_heldout_architecture settings_registry.csv declares {phase2_settings_rows}/"
+                    f"{phase2_expected_rows} ResNet34 held-out architecture settings"
                 ),
                 "blocks_stronger_claim_if_missing": "yes",
             },
@@ -508,6 +519,17 @@ def write_outputs(
             "those claims still require complete fresh metric outputs and Holm-adjusted "
             "decisions from paired per-seed log-ratio tests that satisfy the acceptance gates above."
         )
+    phase2_registry = RESULT_DIR / "phase2_heldout_architecture" / "settings_registry.csv"
+    if phase2_registry.exists():
+        phase2_boundary = (
+            "The ResNet34 held-out architecture settings registry is frozen at "
+            "`results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv`; "
+            "no phase2 metric rows are used until the Slurm job completes and a separate phase2 decision gate is added."
+        )
+    else:
+        phase2_boundary = (
+            "The phase2 ResNet34 held-out architecture entrypoint is implemented, but the settings registry has not been written."
+        )
 
     text = f"""# E11 Natural Negative Search Protocol
 
@@ -552,6 +574,8 @@ Allowed now: {allowed_now}
 Blocked now: {blocked_now}
 
 Phase1 boundary: {phase1_boundary}
+
+Phase2 boundary: {phase2_boundary}
 
 Generated tables:
 
