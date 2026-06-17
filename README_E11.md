@@ -52,6 +52,10 @@ sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_re
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch
 python3 scripts/e11_evaluate_condition_score_v4_finals.py
 python3 scripts/e11_write_condition_score_v4_failure_mechanism_audit.py
+python3 scripts/e11_write_condition_score_v5_theory_protocol.py
+sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_validation_mod4_partition.sbatch
+sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch
+sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_data_cifar10_cross.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_muon_final_benchmark.sbatch
@@ -150,6 +154,10 @@ make e11-cifar-resnet-condition-score-fresh-eval # evaluate frozen fresh conditi
 make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split
 make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-condition-score-v4-failure-audit # localize the frozen v4 CIFAR-10 mixed final failure mechanism
+make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract
+make e11-cifar-resnet-condition-score-v5-validation-results # submit the v5 validation-only CIFAR-100-LT mod-4 partition via Slurm
+make e11-cifar-resnet-condition-score-v5-architecture-results # submit the v5 ResNeXt50-32x4d final architecture split via Slurm
+make e11-cifar-resnet-condition-score-v5-data-results # submit the v5 CIFAR-10 cross-partition final data split via Slurm
 make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm
 make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm
 make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm
@@ -183,6 +191,10 @@ make e11-cifar-resnet-condition-score-fresh-eval
 make e11-cifar-resnet-condition-score-v4-validation-freeze
 make e11-cifar-resnet-condition-score-v4-final-eval
 make e11-cifar-resnet-condition-score-v4-failure-audit
+make e11-cifar-resnet-condition-score-v5-theory-protocol
+make e11-cifar-resnet-condition-score-v5-validation-results
+make e11-cifar-resnet-condition-score-v5-architecture-results
+make e11-cifar-resnet-condition-score-v5-data-results
 make e11-cifar-resnet-lt-standard-eval-results
 make e11-cifar-resnet-lt-recipe-benchmark-results
 make e11-cifar-resnet-lt-muon-final-benchmark-results
@@ -311,6 +323,14 @@ It records `V4-O2-data-partition-reversal`: direction is not the failure on
 the CIFAR-10 mixed final split, because the direction axis remains positively
 ordered (`0.611 [0.5886, 0.6334]`) while the amplitude/depth side reverses
 (`-0.6766 [-0.6903, -0.663]`) and drives the frozen scalar aggregation negative.
+The next registered theory step is
+`discussion/e11_condition_score_v5_theory_protocol.md`, backed by
+`results/e11_condition_score_v5_theory_protocol/*`. It is not a positive P0
+result; it turns the v4 amplitude/depth data-partition reversal into a
+transport-normalized score contract, quarantines every v2/v3/v4 final row from
+score fitting and selection, and registers new unspent entrypoints for a
+validation-only CIFAR-100-LT mod-4 partition, a ResNeXt50-32x4d architecture
+final split, and a CIFAR-10 cross-partition final data split.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -395,6 +415,7 @@ Paper-facing synthesis:
 - `discussion/e11_condition_score_v4_data_cifar10_mixed.md`
 - `discussion/e11_condition_score_v4_final_evaluation.md`
 - `discussion/e11_condition_score_v4_failure_mechanism_audit.md`
+- `discussion/e11_condition_score_v5_theory_protocol.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
 - `discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md`
@@ -494,6 +515,11 @@ Primary paper quantitative tables:
 - `results/e11_condition_score_v4_failure_mechanism_audit/axis_pair_summary.csv`
 - `results/e11_condition_score_v4_failure_mechanism_audit/top5_stage_summary.csv`
 - `results/e11_condition_score_v4_failure_mechanism_audit/obstruction_summary.csv`
+- `results/e11_condition_score_v5_theory_protocol/theory_term_register.csv`
+- `results/e11_condition_score_v5_theory_protocol/score_contract.csv`
+- `results/e11_condition_score_v5_theory_protocol/spent_evidence_policy.csv`
+- `results/e11_condition_score_v5_theory_protocol/unspent_split_requirements.csv`
+- `results/e11_condition_score_v5_theory_protocol/acceptance_gates.csv`
 - `results/e11_top_conference_gap_register/gap_register.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
@@ -641,6 +667,7 @@ Do not claim:
 - `scripts/e11_freeze_condition_score_v4_validation.py`: validation-freeze boundary that aggregates the v4 Frobenius amplitude axis from `metrics.csv` and freezes the scalar score before final split evaluation.
 - `scripts/e11_evaluate_condition_score_v4_finals.py`: frozen-score evaluator for the unspent v4 WideResNet50-2 and CIFAR-10 mixed final splits.
 - `scripts/e11_write_condition_score_v4_failure_mechanism_audit.py`: diagnostic-only audit showing that the v4 CIFAR-10 mixed failure is an amplitude/depth scalar-aggregation reversal, not a direction-threshold failure.
+- `scripts/e11_write_condition_score_v5_theory_protocol.py`: theory-facing v5 score contract requiring transport-normalized amplitude or a narrower fixed-partition claim before any new P0 predictive-condition attempt.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.
 - `scripts/e11_run_cifar100_resnet_practical_muon_bridge.py`: ResNet practical Muon/AdamW trajectory-state bridge from the tail-rich checkpoint.
@@ -659,6 +686,9 @@ Do not claim:
 - `scripts/slurm/e11_cifar100_resnet_condition_score_v4_validation_cifar100_rotated.sbatch`: GPU/Slurm submission wrapper for the v4 validation-only CIFAR-100-LT rotated partition.
 - `scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch`: GPU/Slurm submission wrapper for the unspent v4 WideResNet50-2 architecture final split.
 - `scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch`: GPU/Slurm submission wrapper for the unspent v4 CIFAR-10 mixed-partition final split.
+- `scripts/slurm/e11_cifar100_resnet_condition_score_v5_validation_mod4_partition.sbatch`: GPU/Slurm submission wrapper for the v5 validation-only CIFAR-100-LT mod-4 partition.
+- `scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch`: GPU/Slurm submission wrapper for the v5 ResNeXt50-32x4d final architecture split.
+- `scripts/slurm/e11_cifar100_resnet_condition_score_v5_data_cifar10_cross.sbatch`: GPU/Slurm submission wrapper for the v5 CIFAR-10 cross-partition final data split.
 - `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`: GPU/Slurm submission wrapper for the standard CIFAR-100-LT ResNet18 reporting baseline.
 - `scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch`: GPU/Slurm submission wrapper for the augmented ResNet18 recipe benchmark pilot.
 - `scripts/slurm/e11_cifar100_resnet_lt_muon_final_benchmark.sbatch`: GPU/Slurm submission wrapper for the negative NS-Muon final-training benchmark pilot.
@@ -669,12 +699,12 @@ Do not claim:
 
 The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
 
-The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, and v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`.
+The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`, failure-mechanism audit in `discussion/e11_condition_score_failure_mechanism_audit.md`, v4 protocol in `discussion/e11_condition_score_v4_protocol.md`, v4 final evaluation in `discussion/e11_condition_score_v4_final_evaluation.md`, v4 failure mechanism audit in `discussion/e11_condition_score_v4_failure_mechanism_audit.md`, and v5 theory protocol in `discussion/e11_condition_score_v5_theory_protocol.md`.
 
 Most important next steps:
 
 1. Extend the new standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline, augmented recipe pilot, negative NS-Muon final-training pilot, and local tail-count imbalance sweep into a tuned benchmark protocol with a wider grid, class-balanced samplers, better Muon schedules, and larger long-tail datasets; the current pilots are useful benchmark context, not a competitive optimizer result.
-2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the frozen v2 condition score fails the registered ResNet34 and CIFAR-10-LT held-out residual-ranking gates. The fresh v3 zero-fit scaled-JVP score then passes the CIFAR-10 alternate partition but reverses on the fresh ResNet50 architecture split. V4 then freezes a two-axis amplitude-minus-direction score and passes the WideResNet50-2 final architecture split, but fails the CIFAR-10 mixed final data split. The v4 failure audit localizes this to amplitude/depth scalar aggregation rather than the direction threshold; the next evidence should treat it as a data-partition reversal mechanism problem, not as permission to retune on the failed final split.
+2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the frozen v2 condition score fails the registered ResNet34 and CIFAR-10-LT held-out residual-ranking gates. The fresh v3 zero-fit scaled-JVP score then passes the CIFAR-10 alternate partition but reverses on the fresh ResNet50 architecture split. V4 then freezes a two-axis amplitude-minus-direction score and passes the WideResNet50-2 final architecture split, but fails the CIFAR-10 mixed final data split. The v4 failure audit localizes this data-partition reversal mechanism problem to amplitude/depth scalar aggregation rather than the direction threshold. V5 now requires a transport-normalized score contract or a narrower fixed-partition claim before any new P0 attempt, with new unspent validation/final splits instead of retuning on the failed final split.
 3. Extend the current fixed-checkpoint, short-trajectory, small practical-training, and negative ResNet final-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
 5. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.

@@ -215,6 +215,23 @@ def test_cifar_wide_resnet50_2_v4_architecture_config_shape():
     assert model.maxpool.__class__.__name__ == "Identity"
 
 
+def test_cifar_resnext50_32x4d_v5_architecture_config_shape():
+    config = Cifar100ResNetOneStepConfig(
+        dataset_name="CIFAR100",
+        model_arch="resnext50_32x4d",
+        head_classes=tuple(range(50)),
+        tail_classes=tuple(range(50, 100)),
+    )
+
+    model = build_cifar_resnet_model(config, device=torch.device("cpu"), dtype=torch.float32)
+
+    assert dataset_num_classes(config.dataset_name) == 100
+    assert model.fc.out_features == 100
+    assert model.conv1.kernel_size == (3, 3)
+    assert model.layer1[0].conv2.groups == 32
+    assert model.maxpool.__class__.__name__ == "Identity"
+
+
 def test_mnist_conv_training_batch_is_separate_from_full_activation_diagnostics():
     dtype = torch.float64
     device = torch.device("cpu")

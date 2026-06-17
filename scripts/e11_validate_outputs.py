@@ -857,6 +857,13 @@ def main() -> None:
         Path("figures/e11_condition_score_v4_failure_mechanism_audit") / "v4_cifar10_mixed_reversal_top5.png",
         Path("discussion/e11_condition_score_v4_failure_mechanism_audit.md"),
         Path("scripts/e11_write_condition_score_v4_failure_mechanism_audit.py"),
+        Path("results/e11_condition_score_v5_theory_protocol") / "theory_term_register.csv",
+        Path("results/e11_condition_score_v5_theory_protocol") / "score_contract.csv",
+        Path("results/e11_condition_score_v5_theory_protocol") / "spent_evidence_policy.csv",
+        Path("results/e11_condition_score_v5_theory_protocol") / "unspent_split_requirements.csv",
+        Path("results/e11_condition_score_v5_theory_protocol") / "acceptance_gates.csv",
+        Path("discussion/e11_condition_score_v5_theory_protocol.md"),
+        Path("scripts/e11_write_condition_score_v5_theory_protocol.py"),
         Path("discussion/e11_condition_score_v4_protocol.md"),
         Path("discussion/e11_condition_score_v4_validation_cifar100_rotated.md"),
         Path("discussion/e11_condition_score_v4_validation_freeze.md"),
@@ -869,6 +876,9 @@ def main() -> None:
         Path("scripts/slurm/e11_cifar100_resnet_condition_score_v4_validation_cifar100_rotated.sbatch"),
         Path("scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch"),
         Path("scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch"),
+        Path("scripts/slurm/e11_cifar100_resnet_condition_score_v5_validation_mod4_partition.sbatch"),
+        Path("scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch"),
+        Path("scripts/slurm/e11_cifar100_resnet_condition_score_v5_data_cifar10_cross.sbatch"),
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "train_trace.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_metrics.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "group_metrics.csv",
@@ -1038,6 +1048,14 @@ def main() -> None:
         "scripts/e11_evaluate_condition_score_v4_finals.py",
         "e11-cifar-resnet-condition-score-v4-failure-audit:",
         "scripts/e11_write_condition_score_v4_failure_mechanism_audit.py",
+        "e11-cifar-resnet-condition-score-v5-theory-protocol:",
+        "scripts/e11_write_condition_score_v5_theory_protocol.py",
+        "e11-cifar-resnet-condition-score-v5-validation-results:",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_v5_validation_mod4_partition.sbatch",
+        "e11-cifar-resnet-condition-score-v5-architecture-results:",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch",
+        "e11-cifar-resnet-condition-score-v5-data-results:",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_v5_data_cifar10_cross.sbatch",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -1112,6 +1130,10 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-fresh-eval # evaluate frozen fresh condition-score gates after fresh Slurm jobs finish",
         "make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split",
         "make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish",
+        "make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract",
+        "make e11-cifar-resnet-condition-score-v5-validation-results # submit the v5 validation-only CIFAR-100-LT mod-4 partition via Slurm",
+        "make e11-cifar-resnet-condition-score-v5-architecture-results # submit the v5 ResNeXt50-32x4d final architecture split via Slurm",
+        "make e11-cifar-resnet-condition-score-v5-data-results # submit the v5 CIFAR-10 cross-partition final data split via Slurm",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
@@ -1137,6 +1159,7 @@ def main() -> None:
         "discussion/e11_condition_score_v4_data_cifar10_mixed.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
         "discussion/e11_condition_score_v4_failure_mechanism_audit.md",
+        "discussion/e11_condition_score_v5_theory_protocol.md",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
         "scripts/e11_write_condition_score_fresh_protocol.py",
@@ -1145,9 +1168,11 @@ def main() -> None:
         "scripts/e11_freeze_condition_score_v4_validation.py",
         "scripts/e11_evaluate_condition_score_v4_finals.py",
         "scripts/e11_write_condition_score_v4_failure_mechanism_audit.py",
+        "scripts/e11_write_condition_score_v5_theory_protocol.py",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch",
         "registers fresh final splits: ResNet50",
         "CIFAR-100-LT and a CIFAR-10 alternate head/tail partition",
         "current fresh v3 result is still `not_ready`",
@@ -1171,6 +1196,8 @@ def main() -> None:
         "V4-O2-data-partition-reversal",
         "direction is not the failure",
         "amplitude/depth",
+        "transport-normalized score contract",
+        "ResNeXt50-32x4d",
         "data-partition reversal mechanism problem",
         "aggregation before either unspent final split",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
@@ -3338,6 +3365,108 @@ def main() -> None:
                 "These final rows are now spent for score fitting.",
             ],
         )
+    v5_protocol_dir = Path("results/e11_condition_score_v5_theory_protocol")
+    v5_theory_terms = pd.read_csv(v5_protocol_dir / "theory_term_register.csv")
+    v5_score_contract = pd.read_csv(v5_protocol_dir / "score_contract.csv")
+    v5_spent_policy = pd.read_csv(v5_protocol_dir / "spent_evidence_policy.csv")
+    v5_split_requirements = pd.read_csv(v5_protocol_dir / "unspent_split_requirements.csv")
+    v5_gates = pd.read_csv(v5_protocol_dir / "acceptance_gates.csv")
+    expected_v5_term_ids = {
+        "sandwiched_tail_drift",
+        "direction_ratio_guardrail",
+        "raw_residual_amplitude",
+        "partition_transport_defect",
+        "architecture_transport_defect",
+        "early_depth_nuisance",
+    }
+    expected_v5_contract_ids = {
+        "V5-C1-theorem-reduction",
+        "V5-C2-target-separation",
+        "V5-C3-transport-normalized-amplitude",
+        "V5-C4-spent-final-quarantine",
+        "V5-C5-freeze-before-final",
+        "V5-C6-narrow-claim-fallback",
+    }
+    expected_v5_spent_ids = {
+        "spent_v2_architecture_resnet34",
+        "spent_v2_data_cifar10lt_original",
+        "spent_v3_architecture_resnet50",
+        "spent_v3_data_cifar10lt_alt",
+        "spent_v4_architecture_wide_resnet50_2",
+        "spent_v4_data_cifar10lt_mixed",
+    }
+    expected_v5_split_ids = {
+        "v5_validation_cifar100lt_mod4_partition",
+        "v5_final_architecture_resnext50_32x4d_cifar100lt",
+        "v5_final_data_cifar10lt_cross_partition",
+    }
+    expected_v5_gate_ids = {
+        "V5-1-theory-reduction",
+        "V5-2-spent-quarantine",
+        "V5-3-transport-before-scalar",
+        "V5-4-freeze-before-final",
+        "V5-5-final-residual-and-direction",
+        "V5-6-narrow-claim-if-not-ready",
+    }
+    if not (
+        set(v5_theory_terms["term_id"]) == expected_v5_term_ids
+        and set(v5_score_contract["contract_id"]) == expected_v5_contract_ids
+        and set(v5_spent_policy["split_id"]) == expected_v5_spent_ids
+        and set(v5_split_requirements["split_id"]) == expected_v5_split_ids
+        and set(v5_gates["gate_id"]) == expected_v5_gate_ids
+    ):
+        raise AssertionError(
+            "condition-score v5 theory protocol must preserve theory terms, score contract, spent policy, unspent split requirements, and gates"
+        )
+    v5_term_lookup = v5_theory_terms.set_index("term_id")
+    v5_contract_lookup = v5_score_contract.set_index("contract_id")
+    v5_split_lookup = v5_split_requirements.set_index("split_id")
+    if not (
+        "B_T,l D_l A_T,l" in v5_term_lookup.loc["sandwiched_tail_drift", "mathematical_object"]
+        and "positive" in v5_term_lookup.loc["direction_ratio_guardrail", "current_evidence"]
+        and "sign reversal" in v5_term_lookup.loc["raw_residual_amplitude", "v5_rule"]
+        and "partition-transport" in v5_term_lookup.loc["partition_transport_defect", "v5_rule"]
+        and "transport normalization" in v5_contract_lookup.loc[
+            "V5-C3-transport-normalized-amplitude", "requirement"
+        ]
+        and v5_spent_policy["forbidden_use"].astype(str).str.contains("score fitting").all()
+        and v5_spent_policy["forbidden_use"].astype(str).str.contains("final P0 evidence").all()
+        and set(v5_split_requirements["role"]) == {
+            "validation_only",
+            "fresh_final_heldout_architecture",
+            "fresh_final_heldout_data_partition",
+        }
+        and v5_split_lookup.loc[
+            "v5_final_architecture_resnext50_32x4d_cifar100lt", "architecture"
+        ]
+        == "ResNeXt50-32x4d CIFAR stem"
+        and v5_split_lookup.loc[
+            "v5_final_architecture_resnext50_32x4d_cifar100lt", "entrypoint"
+        ]
+        == "scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch"
+        and v5_split_lookup.loc[
+            "v5_final_data_cifar10lt_cross_partition", "class_partition"
+        ]
+        == "head=0,3,4,6,9; tail=1,2,5,7,8"
+    ):
+        raise AssertionError(
+            "condition-score v5 theory protocol must enforce transport-normalized amplitude, spent-final quarantine, and new unspent split entrypoints"
+        )
+    v5_protocol_text = Path("discussion/e11_condition_score_v5_theory_protocol.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "condition-score v5 theory protocol",
+        v5_protocol_text,
+        [
+            "E11 Condition-Score V5 Theory Protocol",
+            "not a positive P0 result",
+            "transport-normalized residual-amplitude",
+            "sandwiched tail-drift",
+            "ResNeXt50-32x4d",
+            "Blocked now: fitting, selecting, or thresholding a v5 score on any v2/v3/v4 final row",
+        ],
+    )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -4866,6 +4995,24 @@ def main() -> None:
         condition_score_v4_protocol,
         required_condition_score_v4_phrases,
     )
+    condition_score_v5_protocol = Path("discussion/e11_condition_score_v5_theory_protocol.md").read_text(
+        encoding="utf-8"
+    )
+    required_condition_score_v5_phrases = [
+        "Condition-Score V5 Theory Protocol",
+        "transport-normalized score contract",
+        "sandwiched tail-drift",
+        "partition/architecture transport normalization",
+        "ResNeXt50-32x4d",
+        "v5_validation_cifar100lt_mod4_partition",
+        "v5_final_data_cifar10lt_cross_partition",
+        "Blocked now: fitting, selecting, or thresholding a v5 score on any v2/v3/v4 final row",
+    ]
+    assert_required_phrases(
+        "condition-score v5 theory protocol",
+        condition_score_v5_protocol,
+        required_condition_score_v5_phrases,
+    )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -4883,6 +5030,9 @@ def main() -> None:
         "new theory-linked score revision",
         "discussion/e11_condition_score_v4_protocol.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
+        "discussion/e11_condition_score_v5_theory_protocol.md",
+        "transport-normalized score contract",
+        "ResNeXt50-32x4d",
         "CIFAR-10 mixed final data split fails",
         "data-partition reversal mechanism",
         "held-out architecture",
@@ -4914,6 +5064,10 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-fresh-architecture-results" not in readme
         or "make e11-cifar-resnet-condition-score-fresh-data-results" not in readme
         or "make e11-cifar-resnet-condition-score-fresh-eval" not in readme
+        or "make e11-cifar-resnet-condition-score-v5-theory-protocol" not in readme
+        or "make e11-cifar-resnet-condition-score-v5-validation-results" not in readme
+        or "make e11-cifar-resnet-condition-score-v5-architecture-results" not in readme
+        or "make e11-cifar-resnet-condition-score-v5-data-results" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-guardrail-assets" not in readme
