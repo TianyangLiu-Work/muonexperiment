@@ -960,6 +960,11 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark_protocol") / "acceptance_gates.csv",
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py"),
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark") / "settings_registry.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark") / "execution_status.csv",
+        Path("scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py"),
+        Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py"),
+        Path("scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch"),
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "summary.csv",
@@ -1104,6 +1109,10 @@ def main() -> None:
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
         "e11-cifar-resnet-lt-tuned-benchmark-protocol:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py",
+        "e11-cifar-resnet-lt-tuned-benchmark-settings:",
+        "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py --settings-only",
+        "e11-cifar-resnet-lt-tuned-benchmark-validation-results:",
+        "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
         "e11-cifar-resnet-imbalance-sweep-results:",
         "e11-cifar-resnet-condition-score-heldout-architecture-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch",
@@ -1229,6 +1238,8 @@ def main() -> None:
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-tuned-benchmark-protocol # register validation/final splits, tuned baselines, Muon grids, and benchmark claim gates",
+        "make e11-cifar-resnet-lt-tuned-benchmark-settings # write the executable 164-setting tuned validation grid registry",
+        "make e11-cifar-resnet-lt-tuned-benchmark-validation-results # submit the tuned validation grid via Slurm array",
         "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
         "make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates",
         "make e11-natural-negative-search-phase1-power-audit # compute the phase1 detectable-effect and interpretation boundary",
@@ -1320,8 +1331,11 @@ def main() -> None:
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py",
+        "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py",
+        "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md",
         "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv",
         "validation/final seed splits",
         "tuned AdamW/SGD/class-balanced baselines",
         "phase1 GPU entrypoint is now implemented",
@@ -4319,11 +4333,48 @@ def main() -> None:
             "Pilot Context Quarantine",
             "Seed And Split Contract",
             "Recipe Grid",
+            "Executable Validation Registry",
+            "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py --settings-only",
+            "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
             "Acceptance Gates",
             "not_ready",
             "broad long-tail optimizer claim remains forbidden",
         ],
     )
+    tuned_registry = pd.read_csv("results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv")
+    tuned_execution_status = pd.read_csv("results/e11_cifar100_resnet_lt_tuned_benchmark/execution_status.csv")
+    if len(tuned_registry) != 164:
+        raise AssertionError("CIFAR-100-LT tuned benchmark validation registry must contain 164 settings")
+    if sorted(tuned_registry["array_index"].astype(int).tolist()) != list(range(164)):
+        raise AssertionError("CIFAR-100-LT tuned benchmark validation registry must have contiguous Slurm array indices")
+    if set(tuned_registry["phase"]) != {"validation_tuning"} or set(tuned_registry["seed_set"]) != {"10..14"}:
+        raise AssertionError("CIFAR-100-LT tuned benchmark registry must use validation_tuning seeds 10..14")
+    if set(tuned_registry["recipe_family"]) != expected_recipe_families:
+        raise AssertionError("CIFAR-100-LT tuned benchmark registry missing expected recipe families")
+    family_counts = tuned_registry.groupby("recipe_family").size().to_dict()
+    expected_family_counts = {
+        "adamw_ce_tuned": 12,
+        "sgd_momentum_ce_tuned": 12,
+        "adamw_cb_loss_tuned": 24,
+        "adamw_cb_sampler_tuned": 8,
+        "ns_muon_matrix_tuned": 72,
+        "ns_muon_cb_tuned": 36,
+    }
+    if family_counts != expected_family_counts:
+        raise AssertionError(f"CIFAR-100-LT tuned benchmark family counts mismatch: {family_counts}")
+    if not tuned_registry["class_balanced_sampler"].astype(bool).any():
+        raise AssertionError("CIFAR-100-LT tuned benchmark registry must include class-balanced sampler settings")
+    if set(tuned_registry["optimizer"]) != {"adamw", "sgd", "ns_muon"}:
+        raise AssertionError("CIFAR-100-LT tuned benchmark registry must include AdamW, SGD, and NS-Muon settings")
+    if not (
+        len(tuned_execution_status) == 1
+        and tuned_execution_status["status"].iloc[0] == "settings_registered"
+        and "not_ready" in tuned_execution_status["claim_status"].iloc[0]
+    ):
+        raise AssertionError("CIFAR-100-LT tuned benchmark execution status must remain not_ready after settings registration")
+    final_outputs = sorted(Path("results/e11_cifar100_resnet_lt_tuned_benchmark").glob("final*"))
+    if final_outputs:
+        raise AssertionError(f"CIFAR-100-LT tuned benchmark final outputs must stay absent before validation: {final_outputs}")
     cifar_resnet_practical_metrics = pd.read_csv(
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv"
     )
@@ -5772,6 +5823,9 @@ def main() -> None:
         "validation/final seed splits",
         "finite-NS-Muon candidate grids",
         "familywise final comparisons",
+        "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py",
+        "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
+        "164-setting validation registry",
         "discussion/e11_submission_repro_audit.md",
         "preferred pdflatex/bibtex/xelatex clean-checkout gate remains not_ready",
         "GPU via Slurm",
@@ -5809,6 +5863,8 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-v5-data-results" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-protocol" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-settings" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-validation-results" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-natural-head-tail-boundary-audit" not in readme
         or "make e11-natural-negative-search-protocol" not in readme

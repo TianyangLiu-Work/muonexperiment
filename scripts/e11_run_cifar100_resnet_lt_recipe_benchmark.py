@@ -55,8 +55,11 @@ class Recipe:
     momentum: float = 0.0
     nesterov: bool = False
     class_balanced_loss: bool = False
+    class_balanced_sampler: bool = False
+    class_balance_beta: float | None = None
     augmentation: bool = True
     cosine_lr: bool = True
+    warmup_steps: int = 0
     newton_schulz_steps: int = 5
 
 
@@ -174,6 +177,42 @@ def make_train_indices(
     return torch.cat(sampled)
 
 
+def class_index_map(
+    labels: torch.Tensor,
+    train_indices: torch.Tensor,
+    counts: dict[int, int],
+) -> dict[int, torch.Tensor]:
+    return {
+        int(class_id): train_indices[labels[train_indices].eq(int(class_id))]
+        for class_id in counts
+    }
+
+
+def balanced_batch(
+    indices_by_class: dict[int, torch.Tensor],
+    batch_size: int,
+    *,
+    generator: torch.Generator,
+    device: torch.device,
+) -> torch.Tensor:
+    class_ids = sorted(indices_by_class)
+    if not class_ids:
+        raise ValueError("class-balanced sampler needs at least one class")
+    class_positions = torch.randint(len(class_ids), (int(batch_size),), generator=generator, device=device)
+    result = torch.empty(int(batch_size), dtype=torch.long, device=device)
+    for position, class_id in enumerate(class_ids):
+        mask = class_positions.eq(int(position))
+        count = int(mask.sum().detach().cpu())
+        if count == 0:
+            continue
+        pool = indices_by_class[int(class_id)]
+        if pool.numel() == 0:
+            raise ValueError(f"class-balanced sampler found no train indices for class {class_id}")
+        picks = torch.randint(pool.numel(), (count,), generator=generator, device=device)
+        result[mask] = pool[picks]
+    return result
+
+
 def class_balanced_weights(
     counts: dict[int, int],
     *,
@@ -242,16 +281,22 @@ def set_lr(optimizer: torch.optim.Optimizer, lr: float) -> None:
 
 
 def scheduled_lr(recipe: Recipe, *, step: int, total_steps: int) -> float:
+    warmup_steps = max(int(recipe.warmup_steps), 0)
+    if warmup_steps > 0 and int(step) <= warmup_steps:
+        return float(recipe.lr) * float(step) / float(warmup_steps)
     if not recipe.cosine_lr:
         return float(recipe.lr)
-    progress = min(max((int(step) - 1) / max(int(total_steps), 1), 0.0), 1.0)
+    progress = min(max((int(step) - warmup_steps - 1) / max(int(total_steps) - warmup_steps, 1), 0.0), 1.0)
     return float(recipe.lr) * 0.5 * (1.0 + math.cos(math.pi * progress))
 
 
 def scheduled_other_lr(recipe: Recipe, *, step: int, total_steps: int) -> float:
+    warmup_steps = max(int(recipe.warmup_steps), 0)
+    if warmup_steps > 0 and int(step) <= warmup_steps:
+        return float(recipe.other_lr) * float(step) / float(warmup_steps)
     if not recipe.cosine_lr:
         return float(recipe.other_lr)
-    progress = min(max((int(step) - 1) / max(int(total_steps), 1), 0.0), 1.0)
+    progress = min(max((int(step) - warmup_steps - 1) / max(int(total_steps) - warmup_steps, 1), 0.0), 1.0)
     return float(recipe.other_lr) * 0.5 * (1.0 + math.cos(math.pi * progress))
 
 
@@ -391,6 +436,24 @@ def summarize_over_seeds(group_metrics: pd.DataFrame) -> pd.DataFrame:
 def summarize_recipe_differences(group_metrics: pd.DataFrame, *, baseline_recipe: str) -> pd.DataFrame:
     baseline = group_metrics[group_metrics["recipe"].eq(baseline_recipe)].set_index(["seed", "frequency_group"])
     rows = []
+    columns = [
+        "recipe",
+        "baseline_recipe",
+        "frequency_group",
+        "seeds",
+        "mean_balanced_accuracy_diff",
+        "balanced_accuracy_diff_ci95_low",
+        "balanced_accuracy_diff_ci95_high",
+        "mean_accuracy_diff",
+        "accuracy_diff_ci95_low",
+        "accuracy_diff_ci95_high",
+        "mean_loss_diff",
+        "loss_diff_ci95_low",
+        "loss_diff_ci95_high",
+        "mean_margin_diff",
+        "margin_diff_ci95_low",
+        "margin_diff_ci95_high",
+    ]
     for (recipe_name, group_name), group in group_metrics.groupby(["recipe", "frequency_group"], observed=True, sort=False):
         if recipe_name == baseline_recipe:
             continue
@@ -440,8 +503,10 @@ def summarize_recipe_differences(group_metrics: pd.DataFrame, *, baseline_recipe
             }
         )
     order = {name: index for index, name in enumerate(GROUP_ORDER)}
+    if not rows:
+        return pd.DataFrame(columns=columns)
     return (
-        pd.DataFrame(rows)
+        pd.DataFrame(rows, columns=columns)
         .sort_values(["recipe", "frequency_group"], key=lambda s: s.map(order) if s.name == "frequency_group" else s)
         .reset_index(drop=True)
     )
@@ -475,16 +540,9 @@ def run_recipe_benchmark(
         dtype=dtype,
         download=config.download,
     )
-    loss_weight = class_balanced_weights(
-        counts,
-        beta=config.class_balance_beta,
-        num_outputs=100,
-        device=device,
-        dtype=dtype,
-    )
-
     for seed in config.seeds:
         train_indices = make_train_indices(train_y, counts, seed=seed, device=device)
+        train_indices_by_class = class_index_map(train_y, train_indices, counts)
         for recipe in recipes:
             if progress:
                 print(f"[resnet-lt-recipe] seed={seed} recipe={recipe.name}: training", flush=True)
@@ -495,11 +553,32 @@ def run_recipe_benchmark(
             optimizer = make_optimizer(model, recipe)
             muon_named_params = matrix_named_parameters(model) if recipe.optimizer == "ns_muon" else []
             muon_momentum: list[torch.Tensor] = []
+            recipe_loss_weight = (
+                class_balanced_weights(
+                    counts,
+                    beta=float(recipe.class_balance_beta)
+                    if recipe.class_balance_beta is not None
+                    else config.class_balance_beta,
+                    num_outputs=100,
+                    device=device,
+                    dtype=dtype,
+                )
+                if recipe.class_balanced_loss
+                else None
+            )
             model.train()
 
             for step in range(1, config.train_steps + 1):
                 generator = make_generator(seed + 63000 + step, device)
-                batch_indices = batch(train_indices, config.train_batch_size, generator=generator)
+                if recipe.class_balanced_sampler:
+                    batch_indices = balanced_batch(
+                        train_indices_by_class,
+                        config.train_batch_size,
+                        generator=generator,
+                        device=device,
+                    )
+                else:
+                    batch_indices = batch(train_indices, config.train_batch_size, generator=generator)
                 batch_x = train_x[batch_indices]
                 if recipe.augmentation:
                     batch_x = augment_batch(
@@ -517,7 +596,7 @@ def run_recipe_benchmark(
                 )
                 logits = model(batch_x)
                 batch_y = train_y[batch_indices]
-                loss = F.cross_entropy(logits, batch_y, weight=loss_weight if recipe.class_balanced_loss else None)
+                loss = F.cross_entropy(logits, batch_y, weight=recipe_loss_weight)
                 optimizer.zero_grad(set_to_none=True)
                 if recipe.optimizer == "ns_muon":
                     for _name, param in muon_named_params:

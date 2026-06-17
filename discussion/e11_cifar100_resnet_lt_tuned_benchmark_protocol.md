@@ -55,6 +55,10 @@ The existing pilots are useful for risk assessment, but they cannot select final
 | SEL-4-familywise-error          | Treat final comparisons to tuned AdamW and tuned SGD as one family and report Holm-adjusted decisions. | Claiming the best-looking pair without multiplicity adjustment.                      |
 | SEL-5-negative-results          | Publish the tuned result as a boundary if Muon fails tuned baselines.                                  | Suppressing negative tuned Muon outcomes while keeping local-drift motivation.       |
 
+## Executable Validation Registry
+
+The validation grid is materialized by `scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py --settings-only`, which writes `results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv` and `execution_status.csv`. GPU validation cells are submitted with `scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch`; each Slurm array cell runs one registered validation setting on seeds `10..14`. The final claim split `20..29` remains untouched until validation selects recipes.
+
 ## Acceptance Gates
 
 | gate_id                     | claim_unblocked                                                             | pass_rule                                                                                                                                          | failure_claim                             |

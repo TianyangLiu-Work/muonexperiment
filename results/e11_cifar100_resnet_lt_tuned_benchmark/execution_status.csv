@@ -1,0 +1,2 @@
+registry_id,settings,phase,status,claim_status
+cifar100lt_resnet18_tuned_validation_grid,164,validation_tuning,settings_registered,not_ready_until_validation_and_final_claim_seeds_complete

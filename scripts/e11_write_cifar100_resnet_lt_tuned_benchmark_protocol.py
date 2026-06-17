@@ -396,6 +396,10 @@ The existing pilots are useful for risk assessment, but they cannot select final
 
 {markdown_table(frames["selection_rules"], ["rule_id", "rule", "forbidden_action"])}
 
+## Executable Validation Registry
+
+The validation grid is materialized by `scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py --settings-only`, which writes `results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv` and `execution_status.csv`. GPU validation cells are submitted with `scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch`; each Slurm array cell runs one registered validation setting on seeds `10..14`. The final claim split `20..29` remains untouched until validation selects recipes.
+
 ## Acceptance Gates
 
 {markdown_table(frames["acceptance_gates"], ["gate_id", "claim_unblocked", "pass_rule", "failure_claim"])}
