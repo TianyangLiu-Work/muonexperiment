@@ -43,6 +43,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_layer_jvp_checkpoint_prediction.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_heldout_data.sbatch
 python3 scripts/e11_evaluate_cifar100_resnet_condition_score_heldouts.py
+python3 scripts/e11_evaluate_condition_score_fresh_protocol.py
 sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_muon_final_benchmark.sbatch
@@ -137,6 +138,7 @@ make e11-cifar-resnet-condition-score-heldout-data-results # submit the register
 make e11-cifar-resnet-condition-score-heldout-eval # evaluate frozen condition-score gates after both held-out Slurm jobs finish
 make e11-cifar-resnet-condition-score-fresh-architecture-results # submit the fresh ResNet50 condition-score architecture split via Slurm
 make e11-cifar-resnet-condition-score-fresh-data-results # submit the fresh CIFAR-10 alternate-partition condition-score data split via Slurm
+make e11-cifar-resnet-condition-score-fresh-eval # evaluate frozen fresh condition-score gates after fresh Slurm jobs finish
 make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm
 make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm
 make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm
@@ -166,6 +168,7 @@ make e11-cifar-resnet-condition-score-heldout-data-results
 make e11-cifar-resnet-condition-score-heldout-eval
 make e11-cifar-resnet-condition-score-fresh-architecture-results
 make e11-cifar-resnet-condition-score-fresh-data-results
+make e11-cifar-resnet-condition-score-fresh-eval
 make e11-cifar-resnet-lt-standard-eval-results
 make e11-cifar-resnet-lt-recipe-benchmark-results
 make e11-cifar-resnet-lt-muon-final-benchmark-results
@@ -247,6 +250,10 @@ entry points are
 `scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch`
 and
 `scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch`.
+The frozen evaluator is `scripts/e11_evaluate_condition_score_fresh_protocol.py`;
+before the fresh jobs finish it writes a `not_run`/`not_ready` gate report at
+`discussion/e11_condition_score_fresh_evaluation.md` and
+`results/e11_condition_score_fresh_protocol/fresh_score_evaluation`.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -322,6 +329,7 @@ Paper-facing synthesis:
 - `discussion/e11_condition_score_heldout_failure_theory_note.md`
 - `discussion/e11_condition_score_theory_bridge.md`
 - `discussion/e11_condition_score_fresh_protocol.md`
+- `discussion/e11_condition_score_fresh_evaluation.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
 - `discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md`
@@ -398,6 +406,7 @@ Primary paper quantitative tables:
 - `results/e11_condition_score_fresh_protocol/fresh_split_registry.csv`
 - `results/e11_condition_score_fresh_protocol/acceptance_gates.csv`
 - `results/e11_condition_score_fresh_protocol/protocol_status.csv`
+- `results/e11_condition_score_fresh_protocol/fresh_score_evaluation/fresh_gate_report.csv`
 - `results/e11_top_conference_gap_register/gap_register.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
@@ -537,6 +546,7 @@ Do not claim:
 - `scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py`: all-layer ResNet JVP checkpoint-transfer benchmark across tail-rich checkpoints.
 - `scripts/e11_write_cifar100_resnet_condition_score_audit.py`: offline candidate condition-score audit generated from checkpoint-transfer tables.
 - `scripts/e11_evaluate_cifar100_resnet_condition_score_heldouts.py`: frozen-coefficient condition-score evaluator for registered held-out architecture/data splits.
+- `scripts/e11_evaluate_condition_score_fresh_protocol.py`: frozen evaluator for the fresh condition-score protocol; reports `not_run` until the fresh final splits exist.
 - `scripts/e11_write_condition_score_theory_bridge.py`: generated theory/protocol bridge separating threshold-direction and residual-ranking targets after the held-out condition-score failure.
 - `scripts/e11_write_condition_score_fresh_protocol.py`: generated fresh condition-score protocol with spent-heldout quarantine, score-freeze registry, fresh split registry, and acceptance gates.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
@@ -564,7 +574,7 @@ Do not claim:
 
 The current evidence is consistent with a focused local-geometry paper. It is not yet enough for a broad optimizer-performance paper.
 
-The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, and fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`.
+The generated next-evidence matrix is `discussion/e11_top_conference_gap_register.md`, backed by `results/e11_top_conference_gap_register/gap_register.csv`. The P0 condition-score protocol is pre-registered in `discussion/e11_cifar100_resnet_condition_score_protocol.md`, with its locked ResNet18 checkpoint-split v2 analysis in `discussion/e11_cifar100_resnet_condition_score_next.md`, failed registered held-out evaluation in `discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md`, theory-boundary note in `discussion/e11_condition_score_heldout_failure_theory_note.md`, generated score/theory protocol bridge in `discussion/e11_condition_score_theory_bridge.md`, fresh protocol revision in `discussion/e11_condition_score_fresh_protocol.md`, and frozen fresh evaluator in `discussion/e11_condition_score_fresh_evaluation.md`.
 
 Most important next steps:
 

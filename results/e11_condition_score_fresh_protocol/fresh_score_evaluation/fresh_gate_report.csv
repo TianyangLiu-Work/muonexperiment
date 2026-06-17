@@ -1,0 +1,4 @@
+gate_id,scope,status,evidence
+fresh_final_heldout_architecture_generated,Fresh ResNet50 CIFAR-100-LT architecture split,not_run,missing fresh layer summary at results/e11_condition_score_fresh_protocol/fresh_architecture_resnet50/layer_summary.csv
+fresh_final_heldout_data_partition_generated,Fresh CIFAR-10-LT alternate-partition data split,not_run,missing fresh layer summary at results/e11_condition_score_fresh_protocol/fresh_data_cifar10_alt/layer_summary.csv
+fresh_p0_predictive_condition_claim,fresh condition-score protocol,not_ready,"All fresh final splits must pass residual, threshold, baseline-comparison, and reporting gates."
