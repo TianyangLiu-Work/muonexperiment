@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 392600,
-      "size": "383.4 KB"
+      "size_bytes": 394530,
+      "size": "385.3 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1808207,
+      "size_bytes": 1817434,
       "size": "1.7 MB"
     },
     {
@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 991144,
-      "size": "967.9 KB"
+      "size_bytes": 1016974,
+      "size": "993.1 KB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 278153770,
-      "size": "265.3 MB"
+      "size_bytes": 280180061,
+      "size": "267.2 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 32547756,
-      "size": "31.0 MB"
+      "size_bytes": 32910320,
+      "size": "31.4 MB"
     },
     {
       "path": "configs",
@@ -523,7 +523,7 @@
     {
       "path": "results/e11_condition_score_v4_protocol/protocol_status.csv",
       "rows": 4,
-      "size": "557 B"
+      "size": "567 B"
     },
     {
       "path": "results/e11_condition_score_v4_protocol/validation_cifar100_rotated/metrics.csv",
@@ -581,14 +581,104 @@
       "size": "870 B"
     },
     {
-      "path": "results/e11_condition_score_v4_protocol/final_score_evaluation/final_gate_report.csv",
+      "path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/metrics.csv",
+      "rows": 648,
+      "size": "632.6 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/paired_metrics.csv",
+      "rows": 324,
+      "size": "108.2 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/layer_summary.csv",
+      "rows": 162,
+      "size": "46.8 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/checkpoint_summary.csv",
       "rows": 3,
-      "size": "629 B"
+      "size": "1.2 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/prediction_pairs.csv",
+      "rows": 36,
+      "size": "7.2 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/prediction_summary.csv",
+      "rows": 6,
+      "size": "1.7 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/residual_prediction_pairs.csv",
+      "rows": 24,
+      "size": "5.5 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/residual_prediction_summary.csv",
+      "rows": 4,
+      "size": "1.2 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/metrics.csv",
+      "rows": 1260,
+      "size": "892.8 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/paired_metrics.csv",
+      "rows": 630,
+      "size": "208.3 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/layer_summary.csv",
+      "rows": 63,
+      "size": "18.3 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/checkpoint_summary.csv",
+      "rows": 3,
+      "size": "1.2 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/prediction_pairs.csv",
+      "rows": 36,
+      "size": "7.2 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/prediction_summary.csv",
+      "rows": 6,
+      "size": "1.6 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/residual_prediction_pairs.csv",
+      "rows": 24,
+      "size": "5.6 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/residual_prediction_summary.csv",
+      "rows": 4,
+      "size": "1.1 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_score_evaluation/final_score_pairs.csv",
+      "rows": 72,
+      "size": "26.3 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_score_evaluation/final_score_summary.csv",
+      "rows": 8,
+      "size": "3.2 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v4_protocol/final_score_evaluation/final_gate_report.csv",
+      "rows": 7,
+      "size": "1.2 KB"
     },
     {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
       "rows": 7,
-      "size": "8.9 KB"
+      "size": "9.3 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv",
@@ -944,7 +1034,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "51.4 KB"
+      "size": "52.2 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1000,7 +1090,7 @@
     },
     {
       "path": "discussion/e11_top_conference_gap_register.md",
-      "size": "25.0 KB"
+      "size": "27.0 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",
@@ -1115,8 +1205,16 @@
       "size": "8.5 KB"
     },
     {
+      "path": "discussion/e11_condition_score_v4_architecture_wide_resnet50_2.md",
+      "size": "8.3 KB"
+    },
+    {
+      "path": "discussion/e11_condition_score_v4_data_cifar10_mixed.md",
+      "size": "8.1 KB"
+    },
+    {
       "path": "discussion/e11_condition_score_v4_final_evaluation.md",
-      "size": "2.2 KB"
+      "size": "5.5 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_standard_eval.md",

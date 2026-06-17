@@ -14,6 +14,9 @@ from e11_condition_geometry.reporting import markdown_table, write_markdown
 
 RESULT_DIR = Path("results/e11_condition_score_v4_protocol")
 OUTPUT_PATH = Path("discussion/e11_condition_score_v4_protocol.md")
+FREEZE_STATUS_PATH = RESULT_DIR / "validation_score_freeze" / "freeze_status.csv"
+FINAL_GATE_REPORT_PATH = RESULT_DIR / "final_score_evaluation" / "final_gate_report.csv"
+FINAL_SCORE_SUMMARY_PATH = RESULT_DIR / "final_score_evaluation" / "final_score_summary.csv"
 
 
 def spent_split_rows() -> list[dict[str, str]]:
@@ -222,7 +225,62 @@ def gate_rows() -> list[dict[str, str]]:
     ]
 
 
+def frozen_score_status() -> tuple[str, str]:
+    if not FREEZE_STATUS_PATH.exists():
+        return (
+            "registered_pending_validation_commit",
+            "score_axis_registry.csv separates direction ratio, residual amplitude, and architecture transport tags",
+        )
+    freeze_status = pd.read_csv(FREEZE_STATUS_PATH).set_index("item")
+    selected_status = str(freeze_status.loc["v4 selected residual score", "status"])
+    selected_score = str(freeze_status.loc["v4 selected residual score", "evidence"])
+    if selected_status == "frozen":
+        return (
+            "validation_frozen",
+            f"validation freeze selected {selected_score} before final split evaluation",
+        )
+    return (
+        selected_status,
+        f"validation freeze has not selected a final score; evidence={selected_score}",
+    )
+
+
+def final_evidence_status() -> tuple[str, str]:
+    if not FINAL_GATE_REPORT_PATH.exists():
+        return (
+            "not_run",
+            "unspent WideResNet50-2 and CIFAR-10 mixed-partition final Slurm jobs have not been evaluated",
+        )
+    gates = pd.read_csv(FINAL_GATE_REPORT_PATH)
+    gate_status = gates.set_index("gate_id")["status"].to_dict()
+    p0_status = gate_status.get("v4_p0_predictive_condition_claim", "not_ready")
+    if p0_status == "pass":
+        return (
+            "evaluated_pass",
+            "both unspent v4 final splits passed residual-ranking, direction, and reporting gates",
+        )
+    if (
+        gate_status.get("fresh_final_heldout_architecture_residual_spearman") == "pass"
+        and gate_status.get("fresh_final_heldout_data_partition_residual_spearman") == "fail"
+    ):
+        return (
+            "evaluated_not_ready",
+            "WideResNet50-2 final architecture passed, but CIFAR-10 mixed final data residual ranking failed",
+        )
+    if any(status == "not_run" for status in gate_status.values()):
+        return (
+            "not_run",
+            "one or more unspent v4 final split outputs are still missing",
+        )
+    return (
+        "evaluated_not_ready",
+        "v4 final evaluator did not pass all P0 gates",
+    )
+
+
 def status_rows() -> list[dict[str, str]]:
+    score_status, score_evidence = frozen_score_status()
+    final_status, final_evidence = final_evidence_status()
     return [
         {
             "item": "v4 spent-final quarantine",
@@ -231,8 +289,8 @@ def status_rows() -> list[dict[str, str]]:
         },
         {
             "item": "v4 score-axis registry",
-            "status": "registered_pending_validation_commit",
-            "evidence": "score_axis_registry.csv separates direction ratio, residual amplitude, and architecture transport tags",
+            "status": score_status,
+            "evidence": score_evidence,
         },
         {
             "item": "WideResNet50-2 implementation path",
@@ -241,8 +299,8 @@ def status_rows() -> list[dict[str, str]]:
         },
         {
             "item": "v4 final held-out evidence",
-            "status": "not_run",
-            "evidence": "unspent WideResNet50-2 and CIFAR-10 mixed-partition final Slurm jobs have not been run",
+            "status": final_status,
+            "evidence": final_evidence,
         },
     ]
 
@@ -260,6 +318,20 @@ def main() -> None:
     splits.to_csv(RESULT_DIR / "unspent_split_registry.csv", index=False)
     gates.to_csv(RESULT_DIR / "acceptance_gates.csv", index=False)
     status.to_csv(RESULT_DIR / "protocol_status.csv", index=False)
+
+    final_status = status.set_index("item").loc["v4 final held-out evidence", "status"]
+    if final_status == "evaluated_not_ready":
+        allowed_text = "Allowed now: use the v4 final evaluation as negative boundary evidence and inspect the data-partition reversal mechanism."
+        blocked_text = "Blocked now: claiming a v4 predictive condition, because the CIFAR-10 mixed final data split failed residual ranking."
+    elif final_status == "evaluated_pass":
+        allowed_text = "Allowed now: cite the passed v4 final gates with the frozen score and all baseline controls."
+        blocked_text = "Blocked now: broad data-family claims beyond the registered CIFAR-10 mixed-partition evidence."
+    elif status.set_index("item").loc["v4 score-axis registry", "status"] == "validation_frozen":
+        allowed_text = "Allowed now: evaluate only the registered unspent final splits with the frozen v4 score."
+        blocked_text = "Blocked now: claiming a v4 predictive condition before final split evaluation."
+    else:
+        allowed_text = "Allowed now: v4 is a registered protocol and implementation path for the next predictive-condition attempt."
+        blocked_text = "Blocked now: claiming a v4 predictive condition, because no validation commit or unspent final split evaluation exists yet."
 
     text = f"""# E11 Condition-Score V4 Protocol
 
@@ -291,9 +363,9 @@ The v3 failure mechanism audit shows that a ratio-only score can pass the below-
 
 ## Claim Boundary
 
-Allowed now: v4 is a registered protocol and implementation path for the next predictive-condition attempt.
+{allowed_text}
 
-Blocked now: claiming a v4 predictive condition, because no validation commit or unspent final split evaluation exists yet.
+{blocked_text}
 
 Artifacts:
 - [spent_split_register.csv](../{(RESULT_DIR / 'spent_split_register.csv').as_posix()})

@@ -824,6 +824,26 @@ def main() -> None:
         Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "validation_score_summary.csv",
         Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "validation_gate_report.csv",
         Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "config.json",
+        Path("results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2") / "metrics.csv",
+        Path("results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2") / "paired_metrics.csv",
+        Path("results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2") / "layer_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2") / "checkpoint_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2") / "prediction_pairs.csv",
+        Path("results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2") / "prediction_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2") / "residual_prediction_pairs.csv",
+        Path("results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2") / "residual_prediction_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2") / "config.json",
+        Path("figures/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
+        Path("results/e11_condition_score_v4_protocol/final_data_cifar10_mixed") / "metrics.csv",
+        Path("results/e11_condition_score_v4_protocol/final_data_cifar10_mixed") / "paired_metrics.csv",
+        Path("results/e11_condition_score_v4_protocol/final_data_cifar10_mixed") / "layer_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/final_data_cifar10_mixed") / "checkpoint_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/final_data_cifar10_mixed") / "prediction_pairs.csv",
+        Path("results/e11_condition_score_v4_protocol/final_data_cifar10_mixed") / "prediction_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/final_data_cifar10_mixed") / "residual_prediction_pairs.csv",
+        Path("results/e11_condition_score_v4_protocol/final_data_cifar10_mixed") / "residual_prediction_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/final_data_cifar10_mixed") / "config.json",
+        Path("figures/e11_condition_score_v4_protocol/final_data_cifar10_mixed") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         Path("results/e11_condition_score_v4_protocol/final_score_evaluation") / "final_score_pairs.csv",
         Path("results/e11_condition_score_v4_protocol/final_score_evaluation") / "final_score_summary.csv",
         Path("results/e11_condition_score_v4_protocol/final_score_evaluation") / "final_gate_report.csv",
@@ -831,6 +851,8 @@ def main() -> None:
         Path("discussion/e11_condition_score_v4_protocol.md"),
         Path("discussion/e11_condition_score_v4_validation_cifar100_rotated.md"),
         Path("discussion/e11_condition_score_v4_validation_freeze.md"),
+        Path("discussion/e11_condition_score_v4_architecture_wide_resnet50_2.md"),
+        Path("discussion/e11_condition_score_v4_data_cifar10_mixed.md"),
         Path("discussion/e11_condition_score_v4_final_evaluation.md"),
         Path("scripts/e11_write_condition_score_v4_protocol.py"),
         Path("scripts/e11_freeze_condition_score_v4_validation.py"),
@@ -1100,6 +1122,8 @@ def main() -> None:
         "discussion/e11_condition_score_v4_protocol.md",
         "discussion/e11_condition_score_v4_validation_cifar100_rotated.md",
         "discussion/e11_condition_score_v4_validation_freeze.md",
+        "discussion/e11_condition_score_v4_architecture_wide_resnet50_2.md",
+        "discussion/e11_condition_score_v4_data_cifar10_mixed.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
@@ -1125,9 +1149,13 @@ def main() -> None:
         "condition_score_v4_two_axis_amplitude_minus_direction",
         "0.3758 [0.2759, 0.4756]",
         "committed validation-freeze boundary",
-        "run only the unspent WideResNet50-2",
         "final evaluator is `scripts/e11_evaluate_condition_score_v4_finals.py`",
         "current gate report is `not_ready`",
+        "WideResNet50-2 final architecture split passes residual ranking",
+        "0.6449 [0.5122, 0.7776]",
+        "CIFAR-10 mixed final data split fails",
+        "-0.6937 [-0.7129, -0.6744]",
+        "data-partition reversal mechanism problem",
         "aggregation before either unspent final split",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
@@ -3035,10 +3063,10 @@ def main() -> None:
             "class_partition",
         ]
         == "head=0,1,4,7,8; tail=2,3,5,6,9"
-        and v4_status_lookup.get("v4 final held-out evidence") == "not_run"
-        and v4_status_lookup.get("v4 score-axis registry") == "registered_pending_validation_commit"
+        and v4_status_lookup.get("v4 final held-out evidence") == "evaluated_not_ready"
+        and v4_status_lookup.get("v4 score-axis registry") == "validation_frozen"
     ):
-        raise AssertionError("condition-score v4 protocol must keep v2/v3 final splits quarantined and v4 final evidence unrun")
+        raise AssertionError("condition-score v4 protocol must keep v2/v3 final splits quarantined and record the evaluated-not-ready v4 final state")
     v4_freeze_dir = v4_protocol_dir / "validation_score_freeze"
     v4_freeze_formulas = pd.read_csv(v4_freeze_dir / "score_formula_registry.csv")
     v4_freeze_status = pd.read_csv(v4_freeze_dir / "freeze_status.csv")
@@ -3156,6 +3184,58 @@ def main() -> None:
             raise AssertionError("condition-score v4 final evaluator with generated final data must include score rows")
         if final_gate_lookup.get("v4_p0_predictive_condition_claim") not in {"pass", "not_ready"}:
             raise AssertionError("condition-score v4 final P0 gate must be pass or not_ready after final outputs exist")
+        expected_final_gate_status = {
+            "fresh_final_heldout_architecture_residual_spearman": "pass",
+            "fresh_final_heldout_architecture_direction_threshold_accuracy": "pass",
+            "fresh_final_heldout_architecture_baselines_reported": "pass",
+            "fresh_final_heldout_data_partition_residual_spearman": "fail",
+            "fresh_final_heldout_data_partition_direction_threshold_accuracy": "pass",
+            "fresh_final_heldout_data_partition_baselines_reported": "pass",
+            "v4_p0_predictive_condition_claim": "not_ready",
+        }
+        primary_summary = v4_final_summary[
+            v4_final_summary["score"].eq("condition_score_v4_two_axis_amplitude_minus_direction")
+        ].set_index("split_id")
+        if not (
+            final_gate_lookup == expected_final_gate_status
+            and "v4_final_architecture_wide_resnet50_2_cifar100lt" in primary_summary.index
+            and "v4_final_data_cifar10lt_mixed_partition" in primary_summary.index
+            and abs(
+                float(
+                    primary_summary.loc[
+                        "v4_final_architecture_wide_resnet50_2_cifar100lt",
+                        "mean_spearman_score_vs_target_residual",
+                    ]
+                )
+                - 0.644893
+            )
+            < 1e-5
+            and float(
+                primary_summary.loc[
+                    "v4_final_architecture_wide_resnet50_2_cifar100lt",
+                    "spearman_ci95_low",
+                ]
+            )
+            > 0.51
+            and abs(
+                float(
+                    primary_summary.loc[
+                        "v4_final_data_cifar10lt_mixed_partition",
+                        "mean_spearman_score_vs_target_residual",
+                    ]
+                )
+                + 0.693651
+            )
+            < 1e-5
+            and float(
+                primary_summary.loc[
+                    "v4_final_data_cifar10lt_mixed_partition",
+                    "spearman_ci95_high",
+                ]
+            )
+            < 0.0
+        ):
+            raise AssertionError("condition-score v4 final evaluator must preserve the WideResNet50-2 pass, CIFAR-10 mixed fail, and P0 not_ready state")
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -4674,7 +4754,9 @@ def main() -> None:
         "condition_score_v4_two_axis_transport_jvp",
         "WideResNet50-2 CIFAR stem",
         "head=0,1,4,7,8; tail=2,3,5,6,9",
-        "registered_pending_validation_commit",
+        "validation_frozen",
+        "evaluated_not_ready",
+        "CIFAR-10 mixed final data split failed residual ranking",
         "Blocked now: claiming a v4 predictive condition",
     ]
     assert_required_phrases(
@@ -4698,6 +4780,9 @@ def main() -> None:
         "discussion/e11_condition_score_fresh_protocol.md",
         "new theory-linked score revision",
         "discussion/e11_condition_score_v4_protocol.md",
+        "discussion/e11_condition_score_v4_final_evaluation.md",
+        "CIFAR-10 mixed final data split fails",
+        "data-partition reversal mechanism",
         "held-out architecture",
         "benchmark-level performance claim",
         "GPU via Slurm",

@@ -1,4 +1,8 @@
 gate_id,scope,status,evidence
-fresh_final_heldout_architecture_generated,WideResNet50-2 CIFAR-100-LT final architecture split,not_run,missing final layer summary at results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/layer_summary.csv
-fresh_final_heldout_data_partition_generated,CIFAR-10-LT mixed-partition final data split,not_run,missing final layer summary at results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/layer_summary.csv
+fresh_final_heldout_architecture_residual_spearman,WideResNet50-2 CIFAR-100-LT final architecture split,pass,"primary residual Spearman=0.6449 CI=[0.5122, 0.7776]"
+fresh_final_heldout_architecture_direction_threshold_accuracy,WideResNet50-2 CIFAR-100-LT final architecture split,pass,direction-axis below-one threshold accuracy=1
+fresh_final_heldout_architecture_baselines_reported,WideResNet50-2 CIFAR-100-LT final architecture split,pass,"direction-axis, early-prior, and source-observed controls reported"
+fresh_final_heldout_data_partition_residual_spearman,CIFAR-10-LT mixed-partition final data split,fail,"primary residual Spearman=-0.6937 CI=[-0.7129, -0.6744]"
+fresh_final_heldout_data_partition_direction_threshold_accuracy,CIFAR-10-LT mixed-partition final data split,pass,direction-axis below-one threshold accuracy=1
+fresh_final_heldout_data_partition_baselines_reported,CIFAR-10-LT mixed-partition final data split,pass,"direction-axis, early-prior, and source-observed controls reported"
 v4_p0_predictive_condition_claim,v4 condition-score final evaluation,not_ready,"Both unspent final splits must pass residual, direction, and reporting gates."

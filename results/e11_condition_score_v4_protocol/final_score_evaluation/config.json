@@ -10,7 +10,7 @@
       "display_name": "WideResNet50-2 CIFAR-100-LT final architecture split",
       "layer_summary_path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/layer_summary.csv",
       "metrics_path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/metrics.csv",
-      "generated": false
+      "generated": true
     },
     {
       "split_id": "v4_final_data_cifar10lt_mixed_partition",
@@ -18,7 +18,7 @@
       "display_name": "CIFAR-10-LT mixed-partition final data split",
       "layer_summary_path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/layer_summary.csv",
       "metrics_path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/metrics.csv",
-      "generated": false
+      "generated": true
     }
   ],
   "analysis_scope": "v4 final split evaluator; not_ready unless both unspent final splits pass"

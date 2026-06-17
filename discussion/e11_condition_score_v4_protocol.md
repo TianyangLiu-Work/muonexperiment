@@ -45,12 +45,12 @@ This generated v4 protocol starts after the v2 registered held-out failure and t
 
 ## Protocol Status
 
-| item                               | status                               | evidence                                                                                               |
-|:-----------------------------------|:-------------------------------------|:-------------------------------------------------------------------------------------------------------|
-| v4 spent-final quarantine          | registered                           | spent_split_register.csv lists v2 and v3 final splits with forbidden v4 uses                           |
-| v4 score-axis registry             | registered_pending_validation_commit | score_axis_registry.csv separates direction ratio, residual amplitude, and architecture transport tags |
-| WideResNet50-2 implementation path | registered                           | CIFAR ResNet builder and checkpoint-prediction parser support model_arch=wide_resnet50_2               |
-| v4 final held-out evidence         | not_run                              | unspent WideResNet50-2 and CIFAR-10 mixed-partition final Slurm jobs have not been run                 |
+| item                               | status              | evidence                                                                                                       |
+|:-----------------------------------|:--------------------|:---------------------------------------------------------------------------------------------------------------|
+| v4 spent-final quarantine          | registered          | spent_split_register.csv lists v2 and v3 final splits with forbidden v4 uses                                   |
+| v4 score-axis registry             | validation_frozen   | validation freeze selected condition_score_v4_two_axis_amplitude_minus_direction before final split evaluation |
+| WideResNet50-2 implementation path | registered          | CIFAR ResNet builder and checkpoint-prediction parser support model_arch=wide_resnet50_2                       |
+| v4 final held-out evidence         | evaluated_not_ready | WideResNet50-2 final architecture passed, but CIFAR-10 mixed final data residual ranking failed                |
 
 ## Theory Consequence
 
@@ -58,9 +58,9 @@ The v3 failure mechanism audit shows that a ratio-only score can pass the below-
 
 ## Claim Boundary
 
-Allowed now: v4 is a registered protocol and implementation path for the next predictive-condition attempt.
+Allowed now: use the v4 final evaluation as negative boundary evidence and inspect the data-partition reversal mechanism.
 
-Blocked now: claiming a v4 predictive condition, because no validation commit or unspent final split evaluation exists yet.
+Blocked now: claiming a v4 predictive condition, because the CIFAR-10 mixed final data split failed residual ranking.
 
 Artifacts:
 - [spent_split_register.csv](../results/e11_condition_score_v4_protocol/spent_split_register.csv)

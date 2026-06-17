@@ -1,5 +1,5 @@
 item,status,evidence
 v4 spent-final quarantine,registered,spent_split_register.csv lists v2 and v3 final splits with forbidden v4 uses
-v4 score-axis registry,registered_pending_validation_commit,"score_axis_registry.csv separates direction ratio, residual amplitude, and architecture transport tags"
+v4 score-axis registry,validation_frozen,validation freeze selected condition_score_v4_two_axis_amplitude_minus_direction before final split evaluation
 WideResNet50-2 implementation path,registered,CIFAR ResNet builder and checkpoint-prediction parser support model_arch=wide_resnet50_2
-v4 final held-out evidence,not_run,unspent WideResNet50-2 and CIFAR-10 mixed-partition final Slurm jobs have not been run
+v4 final held-out evidence,evaluated_not_ready,"WideResNet50-2 final architecture passed, but CIFAR-10 mixed final data residual ranking failed"
