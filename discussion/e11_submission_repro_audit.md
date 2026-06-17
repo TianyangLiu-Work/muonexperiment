@@ -21,14 +21,14 @@ gate remains `not_ready` when those tools are absent on the server.
 
 | path                                         | exists   |   size_bytes | sha256                                                           | header_is_pdf   | audit_status   |
 |:---------------------------------------------|:---------|-------------:|:-----------------------------------------------------------------|:----------------|:---------------|
-| paper/specgrad_activation_paper/main.pdf     | yes      |      2595684 | 1561625744edfabfe08de028e3068c1c1dac3f659297c879d397a41905c2aa0f | yes             | pass           |
-| paper/specgrad_activation_paper/two_page.pdf | yes      |        62047 | 4308a97e5b0c00ba52e9ba6b406737925bddb73191bec7157a6b3498659837f8 | yes             | pass           |
+| paper/specgrad_activation_paper/main.pdf     | yes      |      2596607 | b6595185218d69d72788a9f513602e179e8bbba6f1466c628b139c8ec068eb86 | yes             | pass           |
+| paper/specgrad_activation_paper/two_page.pdf | yes      |        62047 | 15b70c6e23af6d28f4e174c4af56030080d182e55836fedb4dbec81a2b7d9350 | yes             | pass           |
 
 ## Source Package Manifest
 
 | path                                                                   | exists   |   size_bytes | sha256                                                           | role                                         | audit_status   |
 |:-----------------------------------------------------------------------|:---------|-------------:|:-----------------------------------------------------------------|:---------------------------------------------|:---------------|
-| paper/specgrad_activation_paper/main.tex                               | yes      |       110716 | f998f357ce732079d23d4c18dd1c920563cb8cd405619d019a85f6de574c3086 | paper source or root reproduction entrypoint | pass           |
+| paper/specgrad_activation_paper/main.tex                               | yes      |       111525 | 620d022ebc4e4bf144aa505a97779c12fe399436e5ce211375fc31185ea85dc1 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/two_page.tex                           | yes      |        13228 | f1e3bff2a16a58c6b6ae373307149578e96633d46acf2c819beacb2e8302cca9 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/references.bib                         | yes      |         4906 | 64c7430cdd52637a545554f05e4e48575e0dd955877bc81db576b05fbcf52f48 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/Makefile                               | yes      |          817 | b19b4b3fdf5d4fec90db0de6af2d86b107956c8f9c9c7a5341d03c4f103996b2 | paper source or root reproduction entrypoint | pass           |
