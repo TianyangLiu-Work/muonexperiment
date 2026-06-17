@@ -79,12 +79,21 @@ def gap_rows() -> list[dict[str, str]]:
             "gap_id": "P1-HeldOutGenerality",
             "priority": "P1",
             "claim_unblocked": "The matched-head-gain drift mechanism is not an artifact of one ResNet18 checkpoint family.",
-            "current_state": "The current strongest visual evidence is CIFAR-100-LT ResNet18 with checkpoint, tail-quality, imbalance, all-layer JVP, and trajectory-state bridge diagnostics.",
-            "required_next_evidence": "Repeat the matched-head-gain diagnostic on at least one held-out architecture family and one held-out data family, keeping the same acceptance criteria fixed before looking at results.",
+            "current_state": (
+                "The current strongest positive evidence remains CIFAR-100-LT ResNet18 with checkpoint, tail-quality, "
+                "imbalance, all-layer JVP, and trajectory-state bridge diagnostics. The held-out generality audit in "
+                "discussion/e11_heldout_generality_audit.md now makes the scope explicit: results/e11_heldout_generality_audit/"
+                "generality_evidence_matrix.csv separates positive ResNet18 support rows from the registered CIFAR-10-LT "
+                "phase1 data-family finite-null boundary, the ResNet34 phase2 held-out architecture finite-null boundary, "
+                "and the completed negative v5 predictive-score boundary. Its gate HGG-5 is "
+                "bounded_support_with_caveated_heldout_boundaries, because ResNet34 phase2 has 8/8 observed rows and no adjusted "
+                "primary worse row but head_gain_gate_pass_rows=0, while the v5 score final gates fail as a predictor."
+            ),
+            "required_next_evidence": "For a stronger held-out mechanism claim, repeat the matched-head-gain diagnostic on at least one new held-out architecture family and one new held-out data family with acceptance criteria fixed before looking at results, and require head-gain and tail-quality gates to pass before calling the rows positive mechanism validation.",
             "acceptance_gate": "Every reported setting must include seed count, checkpoint quality, tail accuracy before update, drift ratio CI, tail-loss sign, and an explicit unsupported-final-accuracy caveat.",
             "compute_mode": "GPU via Slurm",
-            "planned_artifacts": "results/e11_heldout_arch_data_drift/*; figures/e11_heldout_arch_data_drift/*; discussion/e11_heldout_arch_data_drift.md",
-            "risk_if_missing": "The paper remains credible as a focused CIFAR-100-LT ResNet mechanism study, but generality will be a predictable reviewer concern.",
+            "planned_artifacts": "results/e11_heldout_generality_audit/*; discussion/e11_heldout_generality_audit.md; results/e11_heldout_arch_data_drift/*; figures/e11_heldout_arch_data_drift/*; discussion/e11_heldout_arch_data_drift.md",
+            "risk_if_missing": "The paper remains credible as a focused CIFAR-100-LT ResNet18 mechanism study, but broad held-out architecture/data generality must stay explicitly caveated.",
         },
         {
             "gap_id": "P1-TheoryToScore",

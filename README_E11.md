@@ -201,6 +201,7 @@ make e11-natural-negative-search-phase2-settings # freeze the ResNet34 held-out 
 make e11-natural-negative-search-phase2-results # submit the registered ResNet34 phase2 held-out architecture settings via Slurm
 make e11-natural-negative-search-phase2-eval # evaluate the fixed 8-setting phase2 family after metric outputs exist
 make e11-natural-negative-search-phase2-power-audit # compute the phase2 detectable-effect and outcome-state boundary
+make e11-heldout-generality-audit # separate positive ResNet18 support from caveated held-out architecture/data boundaries
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
@@ -268,6 +269,7 @@ make e11-natural-negative-search-phase2-settings
 make e11-natural-negative-search-phase2-results
 make e11-natural-negative-search-phase2-eval
 make e11-natural-negative-search-phase2-power-audit
+make e11-heldout-generality-audit
 ```
 
 This submits `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`, which

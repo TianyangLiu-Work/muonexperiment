@@ -1,0 +1,6 @@
+{
+  "evidence_rows": 7,
+  "gate_rows": 5,
+  "current_status": "bounded_support_with_caveated_heldout_boundaries",
+  "resnet34_head_gain_caveat": "all phase2 rows have head_gain_gate=False"
+}

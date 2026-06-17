@@ -7475,6 +7475,10 @@ def main() -> None:
         "gate_boundary_summary.csv",
         "mechanistic_diagnosis.csv",
         "next_protocol_requirements.csv",
+        "discussion/e11_heldout_generality_audit.md",
+        "generality_evidence_matrix.csv",
+        "bounded_support_with_caveated_heldout_boundaries",
+        "head_gain_gate_pass_rows=0",
         "scripts/e11_write_condition_score_v5_direction_guardrail_failure_audit.py",
         "V5-DGF-2-architecture-direction-threshold-fails",
         "V5-DGF-3-data-residual-ranking-reverses",
@@ -7638,6 +7642,75 @@ def main() -> None:
             "Every `supportable` decision must have a local scoped manuscript anchor",
         ],
     )
+    heldout_generality_dir = Path("results/e11_heldout_generality_audit")
+    heldout_generality_evidence = pd.read_csv(heldout_generality_dir / "generality_evidence_matrix.csv")
+    heldout_generality_gates = pd.read_csv(heldout_generality_dir / "generality_claim_gate.csv")
+    heldout_generality_config = json.loads(
+        (heldout_generality_dir / "config.json").read_text(encoding="utf-8")
+    )
+    expected_heldout_audit_ids = {
+        "HGA-1-resnet18-default-support",
+        "HGA-2-resnet18-checkpoint-support",
+        "HGA-3-resnet18-tail-quality-frequency-support",
+        "HGA-4-resnet18-all-layer-support",
+        "HGA-5-cifar10-data-family-boundary",
+        "HGA-6-resnet34-architecture-boundary",
+        "HGA-7-condition-score-heldout-boundary",
+    }
+    expected_heldout_gate_ids = {
+        "HGG-1-positive-resnet18-family",
+        "HGG-2-heldout-data-family",
+        "HGG-3-heldout-architecture-family",
+        "HGG-4-predictive-score-generality",
+        "HGG-5-paper-generality-claim",
+    }
+    if set(heldout_generality_evidence["audit_id"]) != expected_heldout_audit_ids:
+        raise AssertionError("held-out generality audit must preserve the fixed evidence matrix")
+    if set(heldout_generality_gates["gate_id"]) != expected_heldout_gate_ids:
+        raise AssertionError("held-out generality audit must preserve the fixed gate set")
+    heldout_gate_status = heldout_generality_gates.set_index("gate_id")["status"].to_dict()
+    if heldout_gate_status["HGG-5-paper-generality-claim"] != "bounded_support_with_caveated_heldout_boundaries":
+        raise AssertionError("held-out generality paper gate must remain bounded and caveated")
+    heldout_evidence_text = " ".join(heldout_generality_evidence.astype(str).agg(" ".join, axis=1).tolist())
+    for phrase in [
+        "primary_positive_mechanism_support",
+        "heldout_data_finite_null_boundary",
+        "heldout_architecture_finite_null_boundary",
+        "predictive_score_negative_boundary",
+        "head_gain_gate_pass_rows=0",
+        "not mechanism validation, not a universal natural null, and not final-performance evidence",
+        "does not support a successful held-out natural-task predictor",
+    ]:
+        if phrase not in heldout_evidence_text:
+            raise AssertionError(f"held-out generality evidence missing phrase: {phrase}")
+    if not (
+        heldout_generality_config.get("evidence_rows") == 7
+        and heldout_generality_config.get("gate_rows") == 5
+        and heldout_generality_config.get("current_status")
+        == "bounded_support_with_caveated_heldout_boundaries"
+        and heldout_generality_config.get("resnet34_head_gain_caveat")
+        == "all phase2 rows have head_gain_gate=False"
+    ):
+        raise AssertionError("held-out generality config must preserve bounded status and ResNet34 head-gain caveat")
+    heldout_generality_text = Path("discussion/e11_heldout_generality_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "held-out generality audit",
+        heldout_generality_text,
+        [
+            "E11 Held-Out Generality Audit",
+            "positive mechanism support from caveated held-out",
+            "Generality Evidence Matrix",
+            "Generality Claim Gate",
+            "HGG-5-paper-generality-claim",
+            "bounded_support_with_caveated_heldout_boundaries",
+            "ResNet34 phase2 finite-null result as mechanism validation",
+            "all phase2",
+            "head_gain_gate=False",
+            "successful predictive condition",
+        ],
+    )
     readme = Path("README_E11.md").read_text(encoding="utf-8")
     if "## Main Entry Points" not in readme or "## Current Publication Gaps" not in readme:
         raise AssertionError("README_E11.md must document entry points and publication gaps")
@@ -7689,6 +7762,7 @@ def main() -> None:
         or "make e11-natural-negative-search-phase2-results" not in readme
         or "make e11-natural-negative-search-phase2-eval" not in readme
         or "make e11-natural-negative-search-phase2-power-audit" not in readme
+        or "make e11-heldout-generality-audit" not in readme
         or "make e11-top-conference-claim-decision-audit" not in readme
         or "make e11-manuscript-claim-trace" not in readme
         or "make e11-mechanism-referee-audit" not in readme
@@ -7710,9 +7784,12 @@ def main() -> None:
         "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
         "discussion/e11_natural_negative_search_phase2_evaluation.md",
         "discussion/e11_natural_negative_search_phase2_power_audit.md",
+        "discussion/e11_heldout_generality_audit.md",
         "results/e11_natural_negative_search_protocol/phase2_heldout_architecture/settings_registry.csv",
         "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/primary_decisions.csv",
         "results/e11_natural_negative_search_protocol/phase2_power_audit/minimum_detectable_effect.csv",
+        "results/e11_heldout_generality_audit/generality_evidence_matrix.csv",
+        "results/e11_heldout_generality_audit/generality_claim_gate.csv",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:
@@ -7970,6 +8047,7 @@ def main() -> None:
             Path("discussion/e11_condition_score_fresh_evaluation.md"),
             Path("discussion/e11_top_conference_gap_register.md"),
             Path("discussion/e11_mechanism_referee_audit.md"),
+            Path("discussion/e11_heldout_generality_audit.md"),
             Path("discussion/e11_natural_head_tail_boundary.md"),
             Path("discussion/e11_natural_negative_search_protocol.md"),
             Path("discussion/e11_paper_skeleton.md"),

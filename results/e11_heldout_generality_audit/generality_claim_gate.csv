@@ -1,0 +1,6 @@
+gate_id,status,evidence,claim_effect
+HGG-1-positive-resnet18-family,pass,"4 ResNet18 support rows cover default, checkpoint, tail-quality, frequency, and all-layer diagnostics",supports a local ResNet18 mechanism claim under matched head gain
+HGG-2-heldout-data-family,finite_null_boundary,CIFAR-10-LT phase1 family has no adjusted primary worse rows but keeps quality/head-gain caveats,"data-family result is bounded falsification evidence, not broad data generality"
+HGG-3-heldout-architecture-family,caveated_finite_null_boundary,"ResNet34 phase2 has 8/8 observed rows and no adjusted primary worse row, but head_gain_gate_pass_rows=0","architecture result is a caveated held-out boundary, not mechanism validation"
+HGG-4-predictive-score-generality,failed_boundary,completed v5 final score gates fail orthogonally on architecture direction and data residual ranking,blocks a successful held-out layer-risk predictor claim
+HGG-5-paper-generality-claim,bounded_support_with_caveated_heldout_boundaries,support_rows=4; caveated_or_negative_boundary_rows=3,write a focused ResNet18-supported mechanism with explicit held-out architecture/data boundaries

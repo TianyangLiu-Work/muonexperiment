@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 428519,
-      "size": "418.5 KB"
+      "size_bytes": 429185,
+      "size": "419.1 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2647653,
+      "size_bytes": 2672332,
       "size": "2.5 MB"
     },
     {
@@ -26,15 +26,15 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1561841,
+      "size_bytes": 1574386,
       "size": "1.5 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 287673834,
-      "size": "274.3 MB"
+      "size_bytes": 287681906,
+      "size": "274.4 MB"
     },
     {
       "path": "figures",
@@ -61,8 +61,8 @@
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 18885,
-      "size": "18.4 KB"
+      "size_bytes": 19048,
+      "size": "18.6 KB"
     },
     {
       "path": ".gitignore",
@@ -888,7 +888,7 @@
     {
       "path": "results/e11_submission_repro_audit/build_gate_summary.csv",
       "rows": 6,
-      "size": "1017 B"
+      "size": "1.0 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/command_matrix.csv",
@@ -1241,9 +1241,19 @@
       "size": "1.1 KB"
     },
     {
+      "path": "results/e11_heldout_generality_audit/generality_evidence_matrix.csv",
+      "rows": 7,
+      "size": "5.3 KB"
+    },
+    {
+      "path": "results/e11_heldout_generality_audit/generality_claim_gate.csv",
+      "rows": 5,
+      "size": "1.1 KB"
+    },
+    {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
       "rows": 7,
-      "size": "22.4 KB"
+      "size": "23.3 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
@@ -1744,7 +1754,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "93.9 KB"
+      "size": "94.0 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1768,7 +1778,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "61.9 KB"
+      "size": "62.5 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -1792,11 +1802,11 @@
     },
     {
       "path": "discussion/e11_submission_repro_audit.md",
-      "size": "8.2 KB"
+      "size": "8.5 KB"
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
-      "size": "14.5 KB"
+      "size": "14.8 KB"
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
@@ -1861,6 +1871,10 @@
     {
       "path": "discussion/e11_natural_negative_search_phase2_power_audit.md",
       "size": "8.0 KB"
+    },
+    {
+      "path": "discussion/e11_heldout_generality_audit.md",
+      "size": "10.8 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",
