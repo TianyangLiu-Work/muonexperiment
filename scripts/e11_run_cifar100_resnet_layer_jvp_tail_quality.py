@@ -606,7 +606,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--device", default=None)
     parser.add_argument("--dataset-name", choices=["CIFAR100", "CIFAR10"], default=None)
-    parser.add_argument("--model-arch", choices=["resnet18", "resnet34", "resnet50"], default=None)
+    parser.add_argument("--model-arch", choices=["resnet18", "resnet34", "resnet50", "wide_resnet50_2"], default=None)
     parser.add_argument("--head-classes", default=None)
     parser.add_argument("--tail-classes", default=None)
     parser.add_argument("--seeds", type=int, default=10)

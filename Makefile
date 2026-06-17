@@ -1,4 +1,4 @@
-.PHONY: e11-main-results e11-cifar-results e11-cifar-resnet-results e11-cifar-resnet-rho002-results e11-cifar-resnet-checkpoint-sweep-results e11-cifar-resnet-condition-proxy-results e11-cifar-resnet-fc-condition-results e11-cifar-resnet-tail-quality-results e11-cifar-resnet-imbalance-sweep-results e11-cifar-resnet-layer-jvp-tail-quality-results e11-cifar-resnet-layer-jvp-checkpoint-prediction-results e11-cifar-resnet-condition-score-heldout-architecture-results e11-cifar-resnet-condition-score-heldout-data-results e11-cifar-resnet-condition-score-heldout-eval e11-cifar-resnet-condition-score-fresh-architecture-results e11-cifar-resnet-condition-score-fresh-data-results e11-cifar-resnet-condition-score-fresh-eval e11-cifar-resnet-condition-score-failure-audit e11-cifar-resnet-lt-standard-eval-results e11-cifar-resnet-lt-recipe-benchmark-results e11-cifar-resnet-lt-muon-final-benchmark-results e11-cifar-resnet-practical-muon-bridge-results e11-appendix-results e11-all-results e11-paper-assets e11-guardrail-assets e11-all-assets e11-paper-pdf e11-artifacts e11-validate e11-test e11-check e11-full
+.PHONY: e11-main-results e11-cifar-results e11-cifar-resnet-results e11-cifar-resnet-rho002-results e11-cifar-resnet-checkpoint-sweep-results e11-cifar-resnet-condition-proxy-results e11-cifar-resnet-fc-condition-results e11-cifar-resnet-tail-quality-results e11-cifar-resnet-imbalance-sweep-results e11-cifar-resnet-layer-jvp-tail-quality-results e11-cifar-resnet-layer-jvp-checkpoint-prediction-results e11-cifar-resnet-condition-score-heldout-architecture-results e11-cifar-resnet-condition-score-heldout-data-results e11-cifar-resnet-condition-score-heldout-eval e11-cifar-resnet-condition-score-fresh-architecture-results e11-cifar-resnet-condition-score-fresh-data-results e11-cifar-resnet-condition-score-fresh-eval e11-cifar-resnet-condition-score-failure-audit e11-cifar-resnet-condition-score-v4-protocol e11-cifar-resnet-condition-score-v4-validation-results e11-cifar-resnet-condition-score-v4-architecture-results e11-cifar-resnet-condition-score-v4-data-results e11-cifar-resnet-lt-standard-eval-results e11-cifar-resnet-lt-recipe-benchmark-results e11-cifar-resnet-lt-muon-final-benchmark-results e11-cifar-resnet-practical-muon-bridge-results e11-appendix-results e11-all-results e11-paper-assets e11-guardrail-assets e11-all-assets e11-paper-pdf e11-artifacts e11-validate e11-test e11-check e11-full
 
 DEFAULT_PYTHON := $(shell if [ -x /data/conda_envs/SpatialQuantization/bin/python ]; then echo /data/conda_envs/SpatialQuantization/bin/python; else command -v python3 || echo python3; fi)
 PYTHON ?= $(DEFAULT_PYTHON)
@@ -73,6 +73,18 @@ e11-cifar-resnet-condition-score-fresh-eval: scripts/e11_evaluate_condition_scor
 
 e11-cifar-resnet-condition-score-failure-audit: scripts/e11_write_condition_score_failure_mechanism_audit.py
 	$(PYTHON) scripts/e11_write_condition_score_failure_mechanism_audit.py
+
+e11-cifar-resnet-condition-score-v4-protocol: scripts/e11_write_condition_score_v4_protocol.py
+	$(PYTHON) scripts/e11_write_condition_score_v4_protocol.py
+
+e11-cifar-resnet-condition-score-v4-validation-results: scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py scripts/slurm/e11_cifar100_resnet_condition_score_v4_validation_cifar100_rotated.sbatch
+	sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_validation_cifar100_rotated.sbatch
+
+e11-cifar-resnet-condition-score-v4-architecture-results: scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch
+	sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch
+
+e11-cifar-resnet-condition-score-v4-data-results: scripts/e11_run_cifar100_resnet_layer_jvp_checkpoint_prediction.py scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch
+	sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch
 
 e11-cifar-resnet-lt-standard-eval-results: scripts/e11_run_cifar100_resnet_lt_standard_eval.py scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch
 	sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch

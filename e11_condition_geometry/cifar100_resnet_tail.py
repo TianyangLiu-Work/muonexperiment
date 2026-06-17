@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.datasets import CIFAR10
 from torchvision.datasets import CIFAR100
-from torchvision.models import resnet18, resnet34, resnet50
+from torchvision.models import resnet18, resnet34, resnet50, wide_resnet50_2
 
 from .diagnostics import matrix_effective_rank, matrix_view, singular_values
 from .long_tail_digits import make_generator, margins, sample_indices
@@ -77,6 +77,8 @@ def model_display_name(name: str) -> str:
         return "ResNet34"
     if normalized == "resnet50":
         return "ResNet50"
+    if normalized == "wide_resnet50_2":
+        return "WideResNet50-2"
     raise ValueError(f"unknown CIFAR ResNet architecture: {name}")
 
 
@@ -199,6 +201,8 @@ def build_cifar_resnet_model(config: Cifar100ResNetOneStepConfig, *, device: tor
         model = resnet34(weights=None, num_classes=dataset_num_classes(config.dataset_name))
     elif arch == "resnet50":
         model = resnet50(weights=None, num_classes=dataset_num_classes(config.dataset_name))
+    elif arch == "wide_resnet50_2":
+        model = wide_resnet50_2(weights=None, num_classes=dataset_num_classes(config.dataset_name))
     else:
         raise ValueError(f"unknown CIFAR ResNet architecture: {config.model_arch}")
     model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)

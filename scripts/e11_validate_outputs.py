@@ -803,6 +803,16 @@ def main() -> None:
         Path("figures/e11_condition_score_failure_mechanism_audit") / "resnet50_stage_reversal.png",
         Path("discussion/e11_condition_score_failure_mechanism_audit.md"),
         Path("scripts/e11_write_condition_score_failure_mechanism_audit.py"),
+        Path("results/e11_condition_score_v4_protocol") / "spent_split_register.csv",
+        Path("results/e11_condition_score_v4_protocol") / "score_axis_registry.csv",
+        Path("results/e11_condition_score_v4_protocol") / "unspent_split_registry.csv",
+        Path("results/e11_condition_score_v4_protocol") / "acceptance_gates.csv",
+        Path("results/e11_condition_score_v4_protocol") / "protocol_status.csv",
+        Path("discussion/e11_condition_score_v4_protocol.md"),
+        Path("scripts/e11_write_condition_score_v4_protocol.py"),
+        Path("scripts/slurm/e11_cifar100_resnet_condition_score_v4_validation_cifar100_rotated.sbatch"),
+        Path("scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch"),
+        Path("scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch"),
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "train_trace.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_metrics.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "group_metrics.csv",
@@ -958,6 +968,14 @@ def main() -> None:
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "e11-cifar-resnet-condition-score-failure-audit:",
         "scripts/e11_write_condition_score_failure_mechanism_audit.py",
+        "e11-cifar-resnet-condition-score-v4-protocol:",
+        "scripts/e11_write_condition_score_v4_protocol.py",
+        "e11-cifar-resnet-condition-score-v4-validation-results:",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_v4_validation_cifar100_rotated.sbatch",
+        "e11-cifar-resnet-condition-score-v4-architecture-results:",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch",
+        "e11-cifar-resnet-condition-score-v4-data-results:",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -1048,18 +1066,25 @@ def main() -> None:
         "discussion/e11_condition_score_fresh_protocol.md",
         "discussion/e11_condition_score_fresh_evaluation.md",
         "discussion/e11_condition_score_failure_mechanism_audit.md",
+        "discussion/e11_condition_score_v4_protocol.md",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
         "scripts/e11_write_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_failure_mechanism_audit.py",
+        "scripts/e11_write_condition_score_v4_protocol.py",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
+        "scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch",
         "registers fresh final splits: ResNet50",
         "CIFAR-100-LT and a CIFAR-10 alternate head/tail partition",
         "current fresh v3 result is still `not_ready`",
         "architecture split fails and reverses",
         "`-0.8157 [-0.8652, -0.7661]`",
         "results/e11_condition_score_failure_mechanism_audit/resnet50_stage_reversal.csv",
+        "wide_resnet50_2",
+        "V4 is not a positive result yet",
+        "validation-frozen scalar",
+        "aggregation before either unspent final split",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
         "candidate condition-score audit",
@@ -2900,6 +2925,76 @@ def main() -> None:
         and int(stage_lookup.loc[("classifier", "classifier"), "total_top5_primary_score_layers"]) > 0
     ):
         raise AssertionError("condition-score failure mechanism audit must expose the ResNet50 layer2/layer3 residual versus classifier/stem score mismatch")
+    v4_protocol_dir = Path("results/e11_condition_score_v4_protocol")
+    v4_spent = pd.read_csv(v4_protocol_dir / "spent_split_register.csv")
+    v4_scores = pd.read_csv(v4_protocol_dir / "score_axis_registry.csv")
+    v4_splits = pd.read_csv(v4_protocol_dir / "unspent_split_registry.csv")
+    v4_gates = pd.read_csv(v4_protocol_dir / "acceptance_gates.csv")
+    v4_status = pd.read_csv(v4_protocol_dir / "protocol_status.csv")
+    expected_v4_spent_ids = {
+        "spent_v2_primary_heldout_architecture_resnet34",
+        "spent_v2_primary_heldout_data_cifar10lt_resnet18",
+        "spent_v3_fresh_architecture_resnet50",
+        "spent_v3_fresh_data_cifar10lt_alt_partition",
+    }
+    expected_v4_score_ids = {
+        "condition_score_v4_two_axis_transport_jvp",
+        "v4_direction_axis_scaled_jvp_ratio",
+        "v4_residual_amplitude_axis_scaled_jvp_fro",
+        "v4_architecture_transport_tags",
+        "early_layer_prior",
+        "source_observed_drift_positive_control",
+    }
+    expected_v4_roles = {
+        "calibration_only",
+        "validation_only",
+        "fresh_final_heldout_architecture",
+        "fresh_final_heldout_data_partition",
+    }
+    expected_v4_gates = {
+        "V4-1-spent-final-quarantine",
+        "V4-2-score-axis-separation",
+        "V4-3-validation-freeze-before-final",
+        "V4-4-residual-ranking-success",
+        "V4-5-threshold-direction-guardrail",
+        "V4-6-baselines-and-negative-reporting",
+        "V4-7-claim-boundary",
+    }
+    if not (
+        set(v4_spent["split_id"]) == expected_v4_spent_ids
+        and set(v4_scores["score_id"]) == expected_v4_score_ids
+        and set(v4_splits["role"]) == expected_v4_roles
+        and set(v4_gates["gate_id"]) == expected_v4_gates
+        and len(v4_status) == 4
+    ):
+        raise AssertionError("condition-score v4 protocol must register spent splits, score axes, unspent split roles, and gates")
+    v4_score_lookup = v4_scores.set_index("score_id")
+    v4_split_lookup = v4_splits.set_index("split_id")
+    v4_status_lookup = v4_status.set_index("item")["status"].to_dict()
+    if not (
+        v4_spent["forbidden_use"].astype(str).str.contains("validation selection").all()
+        and v4_score_lookup.loc[
+            "condition_score_v4_two_axis_transport_jvp",
+            "coefficient_rule",
+        ].startswith("zero-fit axes")
+        and v4_score_lookup.loc[
+            "condition_score_v4_two_axis_transport_jvp",
+            "eligible_for_final_p0_claim",
+        ].startswith("not until validation")
+        and v4_split_lookup.loc[
+            "v4_final_architecture_wide_resnet50_2_cifar100lt",
+            "architecture",
+        ]
+        == "WideResNet50-2 CIFAR stem"
+        and v4_split_lookup.loc[
+            "v4_final_data_cifar10lt_mixed_partition",
+            "class_partition",
+        ]
+        == "head=0,1,4,7,8; tail=2,3,5,6,9"
+        and v4_status_lookup.get("v4 final held-out evidence") == "not_run"
+        and v4_status_lookup.get("v4 score-axis registry") == "registered_pending_validation_commit"
+    ):
+        raise AssertionError("condition-score v4 protocol must keep v2/v3 final splits quarantined and v4 final evidence unrun")
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -4409,6 +4504,23 @@ def main() -> None:
         condition_score_failure_mechanism_audit,
         required_condition_score_failure_phrases,
     )
+    condition_score_v4_protocol = Path("discussion/e11_condition_score_v4_protocol.md").read_text(
+        encoding="utf-8"
+    )
+    required_condition_score_v4_phrases = [
+        "Condition-Score V4 Protocol",
+        "Spent Final Split Register",
+        "condition_score_v4_two_axis_transport_jvp",
+        "WideResNet50-2 CIFAR stem",
+        "head=0,1,4,7,8; tail=2,3,5,6,9",
+        "registered_pending_validation_commit",
+        "Blocked now: claiming a v4 predictive condition",
+    ]
+    assert_required_phrases(
+        "condition-score v4 protocol",
+        condition_score_v4_protocol,
+        required_condition_score_v4_phrases,
+    )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -4424,6 +4536,7 @@ def main() -> None:
         "discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md",
         "discussion/e11_condition_score_fresh_protocol.md",
         "new theory-linked score revision",
+        "discussion/e11_condition_score_v4_protocol.md",
         "held-out architecture",
         "benchmark-level performance claim",
         "GPU via Slurm",
