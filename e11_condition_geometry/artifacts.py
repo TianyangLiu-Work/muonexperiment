@@ -268,6 +268,8 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_top_conference_gap_register/gap_register.csv",
     "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
     "results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv",
+    "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
+    "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv",
     "results/e11_top_conference_claim_decision_audit/paper_sequence.csv",
     "results/e11_top_conference_claim_decision_audit/readiness_summary.csv",
     "results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv",

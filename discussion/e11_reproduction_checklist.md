@@ -36,7 +36,7 @@ make e11-natural-negative-search-phase1-interim-synthesis # summarize partial ph
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # current head-to-tail Markdown/TeX paper assets
-make e11-top-conference-claim-decision-audit # regenerate the supportable/blocked paper claim contract
+make e11-top-conference-claim-decision-audit # regenerate the supportable/blocked paper claim and rebuttal-readiness contract
 make e11-guardrail-assets  # legacy condition-geometry guardrail notes
 make e11-all-assets        # current paper assets plus legacy guardrail notes
 make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf
@@ -170,22 +170,22 @@ Regenerate legacy condition-geometry guardrail notes separately with:
 make e11-guardrail-assets
 ```
 
-| artifact                                                                                    | role                                                                                                              |
-|:--------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------|
-| discussion/e11_main_paper_package.md                                                        | Smallest main figure/table package.                                                                               |
-| discussion/e11_quantitative_claim_ledger.md                                                 | Allowed wording, forbidden wording, quantitative anchors, and evidence links.                                     |
-| paper/specgrad_activation_paper/tables/e11_paper_numbers.tex                                | LaTeX macros generated from the current result CSVs and included by the paper draft.                              |
-| discussion/e11_paper_skeleton.md                                                            | Current section-level paper skeleton and figure/table plan.                                                       |
-| discussion/e11_reviewer_risk_audit.md                                                       | Known reviewer risks and safe claim decisions.                                                                    |
-| discussion/e11_matrix_block_theorem_proof.md                                                | Machine-checkable theorem statements, assumptions, proof steps, and claim implications.                           |
-| discussion/e11_matrix_block_tightness_audit.md                                              | Deterministic exact-witness and ratio-identity audit for the matrix-block theorem.                                |
-| discussion/e11_theory_proof_obligation_register.md                                          | Theory-facing proof obligations, assumptions, claim boundaries, and pending gates.                                |
-| discussion/e11_condition_score_v5_reviewer_failure_response.md                              | Pre-output v5 final failure-mode matrix for reviewer-safe claim downgrades.                                       |
-| discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md  | Completed 12-setting CIFAR-100-LT phase1 readout for the registered natural-negative search.                      |
-| discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md | Completed 8-setting CIFAR-10-LT cross-partition phase1 readout for the registered natural-negative search.        |
-| discussion/e11_natural_negative_search_phase1_evaluation.md                                 | Holm-family evaluator preserving 20/26 observed primary rows and blocking claims until all settings complete.     |
-| discussion/e11_natural_negative_search_phase1_interim_synthesis.md                          | Partial-family claim-boundary synthesis for raw-worse counts, quality gates, and remaining tail-quality controls. |
-| discussion/e11_top_conference_claim_decision_audit.md                                       | Paper-level supportable/registered-not-ready/blocked claim contract for top-conference wording.                   |
+| artifact                                                                                    | role                                                                                                                   |
+|:--------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------|
+| discussion/e11_main_paper_package.md                                                        | Smallest main figure/table package.                                                                                    |
+| discussion/e11_quantitative_claim_ledger.md                                                 | Allowed wording, forbidden wording, quantitative anchors, and evidence links.                                          |
+| paper/specgrad_activation_paper/tables/e11_paper_numbers.tex                                | LaTeX macros generated from the current result CSVs and included by the paper draft.                                   |
+| discussion/e11_paper_skeleton.md                                                            | Current section-level paper skeleton and figure/table plan.                                                            |
+| discussion/e11_reviewer_risk_audit.md                                                       | Known reviewer risks and safe claim decisions.                                                                         |
+| discussion/e11_matrix_block_theorem_proof.md                                                | Machine-checkable theorem statements, assumptions, proof steps, and claim implications.                                |
+| discussion/e11_matrix_block_tightness_audit.md                                              | Deterministic exact-witness and ratio-identity audit for the matrix-block theorem.                                     |
+| discussion/e11_theory_proof_obligation_register.md                                          | Theory-facing proof obligations, assumptions, claim boundaries, and pending gates.                                     |
+| discussion/e11_condition_score_v5_reviewer_failure_response.md                              | Pre-output v5 final failure-mode matrix for reviewer-safe claim downgrades.                                            |
+| discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md  | Completed 12-setting CIFAR-100-LT phase1 readout for the registered natural-negative search.                           |
+| discussion/e11_natural_negative_search_phase1_NNS-P1-cifar10lt-resnet18-cross-partitions.md | Completed 8-setting CIFAR-10-LT cross-partition phase1 readout for the registered natural-negative search.             |
+| discussion/e11_natural_negative_search_phase1_evaluation.md                                 | Holm-family evaluator preserving 20/26 observed primary rows and blocking claims until all settings complete.          |
+| discussion/e11_natural_negative_search_phase1_interim_synthesis.md                          | Partial-family claim-boundary synthesis for raw-worse counts, quality gates, and remaining tail-quality controls.      |
+| discussion/e11_top_conference_claim_decision_audit.md                                       | Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract for top-conference wording. |
 
 ## Batch / Activation Contract
 

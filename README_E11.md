@@ -193,7 +193,7 @@ make e11-natural-negative-search-phase1-interim-synthesis # summarize partial ph
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
-make e11-top-conference-claim-decision-audit # generate the paper-level supportable/blocked claim contract
+make e11-top-conference-claim-decision-audit # generate the paper-level supportable/blocked claim and rebuttal-readiness contract
 make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes
 make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes
 make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf
@@ -781,6 +781,8 @@ Primary paper quantitative tables:
 - `results/e11_top_conference_gap_register/gap_register.csv`
 - `results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv`
 - `results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv`
+- `results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv`
+- `results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv`
 - `results/e11_top_conference_claim_decision_audit/paper_sequence.csv`
 - `results/e11_top_conference_claim_decision_audit/readiness_summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
@@ -951,7 +953,7 @@ Do not claim:
 - `scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py`: executable tuned-benchmark validation-grid registry and per-setting runner for the registered CIFAR-100-LT ResNet18 tuned benchmark.
 - `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py`: paper-asset-safe wrapper that regenerates the tuned validation-grid registry without launching GPU training.
 - `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py`: validation-only selection audit that chooses final recipes after completed validation summaries and keeps final seeds quarantined.
-- `scripts/e11_write_top_conference_claim_decision_audit.py`: paper-level claim decision contract that separates supportable theorem/diagnostic wording from registered-not-ready and blocked predictive, natural-negative, benchmark, and toolchain claims.
+- `scripts/e11_write_top_conference_claim_decision_audit.py`: paper-level claim decision and rebuttal-readiness contract that separates supportable theorem/diagnostic wording from registered-not-ready and blocked predictive, natural-negative, benchmark, and toolchain claims.
 - `scripts/e11_run_cifar100_resnet_practical_muon_bridge.py`: ResNet practical Muon/AdamW trajectory-state bridge from the tail-rich checkpoint.
 - `scripts/slurm/e11_cifar100_resnet_one_step.sbatch`: GPU/Slurm submission wrapper for the ResNet18 diagnostic.
 - `scripts/slurm/e11_cifar100_resnet_one_step_rho002.sbatch`: GPU/Slurm submission wrapper for the smaller-head-gain ResNet18 check.

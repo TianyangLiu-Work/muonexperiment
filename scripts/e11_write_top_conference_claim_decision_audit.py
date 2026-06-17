@@ -30,6 +30,7 @@ SOURCE_FILES = {
         "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv"
     ),
     "submission_build_gates": Path("results/e11_submission_repro_audit/build_gate_summary.csv"),
+    "gap_register": Path("results/e11_top_conference_gap_register/gap_register.csv"),
 }
 
 
@@ -246,11 +247,151 @@ def build_paper_sequence(claims: pd.DataFrame) -> pd.DataFrame:
     ).merge(claims[["claim_id", "current_decision"]], on="claim_id", how="left")
 
 
+def build_rebuttal_response_pack(claims: pd.DataFrame, objections: pd.DataFrame) -> pd.DataFrame:
+    claim_lookup = claims.set_index("claim_id")
+    objection_lookup = objections.set_index("objection_id")
+    return pd.DataFrame(
+        [
+            {
+                "rebuttal_id": "RRP-1-toy-theorem-scope",
+                "objection_id": "RO-1-toy-theorem",
+                "claim_id": "TCD-1-main-mechanism-theorem",
+                "response_posture": "answer_now_with_scope_and_real-diagnostic_bridge",
+                "evidence_to_cite": "discussion/e11_matrix_block_theorem_proof.md; discussion/e11_matrix_block_tightness_audit.md; discussion/e11_quantitative_claim_ledger.md; discussion/e11_natural_head_tail_boundary.md",
+                "manuscript_edit": "State the theorem as a local matched-head-gain mechanism before experiments and cite real-model diagnostics only as diagnostic support.",
+                "missing_gate": objection_lookup.loc["RO-1-toy-theorem", "missing_gate"],
+                "forbidden_rebuttal": objection_lookup.loc["RO-1-toy-theorem", "forbidden_shortcut"],
+            },
+            {
+                "rebuttal_id": "RRP-2-score-selection-leakage",
+                "objection_id": "RO-2-score-cherry-picking",
+                "claim_id": "TCD-3-predictive-condition-generalization",
+                "response_posture": claim_lookup.loc[
+                    "TCD-3-predictive-condition-generalization", "current_decision"
+                ],
+                "evidence_to_cite": "discussion/e11_condition_score_v5_validation_freeze.md; discussion/e11_condition_score_v5_final_evaluation.md; discussion/e11_condition_score_v5_reviewer_failure_response.md",
+                "manuscript_edit": "Describe v5 as a frozen pending held-out test; keep v2/v3/v4 as spent failures and do not use final rows for refit or score selection.",
+                "missing_gate": objection_lookup.loc["RO-2-score-cherry-picking", "missing_gate"],
+                "forbidden_rebuttal": objection_lookup.loc["RO-2-score-cherry-picking", "forbidden_shortcut"],
+            },
+            {
+                "rebuttal_id": "RRP-3-natural-negative-boundary",
+                "objection_id": "RO-3-no-natural-negative",
+                "claim_id": "TCD-4-natural-counterexample-or-finite-null",
+                "response_posture": claim_lookup.loc[
+                    "TCD-4-natural-counterexample-or-finite-null", "current_decision"
+                ],
+                "evidence_to_cite": "discussion/e11_natural_negative_search_protocol.md; discussion/e11_natural_negative_search_phase1_power_audit.md; discussion/e11_natural_negative_search_phase1_interim_synthesis.md",
+                "manuscript_edit": "Report the natural negative search as a registered incomplete family: 20/26 observed, raw_worse_rows=0, and tail-quality controls still missing.",
+                "missing_gate": objection_lookup.loc["RO-3-no-natural-negative", "missing_gate"],
+                "forbidden_rebuttal": objection_lookup.loc["RO-3-no-natural-negative", "forbidden_shortcut"],
+            },
+            {
+                "rebuttal_id": "RRP-4-muon-performance-overclaim",
+                "objection_id": "RO-4-muon-overclaim",
+                "claim_id": "TCD-5-optimizer-performance-benchmark",
+                "response_posture": claim_lookup.loc[
+                    "TCD-5-optimizer-performance-benchmark", "current_decision"
+                ],
+                "evidence_to_cite": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md; discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md; discussion/e11_quantitative_claim_ledger.md",
+                "manuscript_edit": "Keep Muon as motivation and selected-state/local compatibility; quarantine benchmark claims until validation selection and untouched final seeds finish.",
+                "missing_gate": objection_lookup.loc["RO-4-muon-overclaim", "missing_gate"],
+                "forbidden_rebuttal": objection_lookup.loc["RO-4-muon-overclaim", "forbidden_shortcut"],
+            },
+            {
+                "rebuttal_id": "RRP-5-artifact-clean-checkout",
+                "objection_id": "RO-5-artifact-reproducibility",
+                "claim_id": "TCD-6-artifact-reproducibility",
+                "response_posture": claim_lookup.loc[
+                    "TCD-6-artifact-reproducibility", "current_decision"
+                ],
+                "evidence_to_cite": "discussion/e11_submission_repro_audit.md; results/e11_submission_repro_audit/build_gate_summary.csv; discussion/e11_artifact_manifest.md",
+                "manuscript_edit": "State server validation and rendered PDFs, but keep preferred-LaTeX clean-checkout completion as a remaining artifact-review gate.",
+                "missing_gate": objection_lookup.loc["RO-5-artifact-reproducibility", "missing_gate"],
+                "forbidden_rebuttal": objection_lookup.loc[
+                    "RO-5-artifact-reproducibility", "forbidden_shortcut"
+                ],
+            },
+        ]
+    )
+
+
+def build_manuscript_edit_queue(claims: pd.DataFrame, gaps: pd.DataFrame) -> pd.DataFrame:
+    claim_lookup = claims.set_index("claim_id")
+    gap_lookup = gaps.set_index("gap_id")
+    return pd.DataFrame(
+        [
+            {
+                "edit_id": "MEQ-1-theory-frontload-scope",
+                "target_section": "Theory / introduction",
+                "claim_id": "TCD-1-main-mechanism-theorem",
+                "edit_action": "Front-load local matched-head-gain assumptions, worst-case-vs-realized distinction, and theorem caveats before empirical interpretation.",
+                "acceptance_check": "The section must contain local-step, matched-head-gain, sandwich-block, and not-global-optimizer wording.",
+                "current_decision": claim_lookup.loc[
+                    "TCD-1-main-mechanism-theorem", "current_decision"
+                ],
+            },
+            {
+                "edit_id": "MEQ-2-diagnostic-caveat-next-to-results",
+                "target_section": "Experiments",
+                "claim_id": "TCD-2-natural-drift-diagnostic",
+                "edit_action": "Place the tail-loss/margin/accuracy caveat immediately next to every logit-drift table or figure.",
+                "acceptance_check": "No result paragraph may convert matched-head-gain logit drift into tail-accuracy or benchmark wording.",
+                "current_decision": claim_lookup.loc[
+                    "TCD-2-natural-drift-diagnostic", "current_decision"
+                ],
+            },
+            {
+                "edit_id": "MEQ-3-v5-pending-test-language",
+                "target_section": "Predictive condition / limitations",
+                "claim_id": "TCD-3-predictive-condition-generalization",
+                "edit_action": "Describe the v5 score as a frozen pending test and cite the registered final evaluator plus reviewer failure response.",
+                "acceptance_check": gap_lookup.loc["P0-PredictiveCondition", "acceptance_gate"],
+                "current_decision": claim_lookup.loc[
+                    "TCD-3-predictive-condition-generalization", "current_decision"
+                ],
+            },
+            {
+                "edit_id": "MEQ-4-natural-negative-incomplete-family",
+                "target_section": "Natural boundary cases",
+                "claim_id": "TCD-4-natural-counterexample-or-finite-null",
+                "edit_action": "Report 20/26 observed and raw_worse_rows=0 only as incomplete family evidence; defer finite-null and counterexample wording.",
+                "acceptance_check": gap_lookup.loc["P2-NaturalBoundaryCases", "acceptance_gate"],
+                "current_decision": claim_lookup.loc[
+                    "TCD-4-natural-counterexample-or-finite-null", "current_decision"
+                ],
+            },
+            {
+                "edit_id": "MEQ-5-performance-benchmark-quarantine",
+                "target_section": "Practical Muon / limitations",
+                "claim_id": "TCD-5-optimizer-performance-benchmark",
+                "edit_action": "Keep standard/recipe/negative NS-Muon pilots as benchmark context and quarantine all competitive optimizer wording.",
+                "acceptance_check": gap_lookup.loc["P0-StandardBenchmark", "acceptance_gate"],
+                "current_decision": claim_lookup.loc[
+                    "TCD-5-optimizer-performance-benchmark", "current_decision"
+                ],
+            },
+            {
+                "edit_id": "MEQ-6-artifact-review-caveat",
+                "target_section": "Reproducibility",
+                "claim_id": "TCD-6-artifact-reproducibility",
+                "edit_action": "State current server validation and PDF fallback while explicitly naming the preferred-LaTeX clean-checkout gap.",
+                "acceptance_check": gap_lookup.loc["P2-PackagingRepro", "acceptance_gate"],
+                "current_decision": claim_lookup.loc[
+                    "TCD-6-artifact-reproducibility", "current_decision"
+                ],
+            },
+        ]
+    )
+
+
 def write_discussion(
     claims: pd.DataFrame,
     objections: pd.DataFrame,
     sequence: pd.DataFrame,
     readiness_summary: pd.DataFrame,
+    rebuttal_pack: pd.DataFrame,
+    manuscript_queue: pd.DataFrame,
 ) -> None:
     text = f"""# E11 Top-Conference Claim Decision Audit
 
@@ -273,6 +414,14 @@ submission-reproducibility tables; it does not add new empirical results.
 
 {markdown_table(objections, ["objection_id", "likely_objection", "current_response", "response_status", "missing_gate", "forbidden_shortcut"])}
 
+## Rebuttal Response Pack
+
+{markdown_table(rebuttal_pack, ["rebuttal_id", "objection_id", "claim_id", "response_posture", "evidence_to_cite", "manuscript_edit", "missing_gate", "forbidden_rebuttal"])}
+
+## Manuscript Edit Queue
+
+{markdown_table(manuscript_queue, ["edit_id", "target_section", "claim_id", "edit_action", "acceptance_check", "current_decision"])}
+
 ## Paper Sequence
 
 {markdown_table(sequence, ["sequence_step", "claim_id", "current_decision", "paper_move", "writing_rule"])}
@@ -294,6 +443,8 @@ def main() -> None:
     claims = build_claim_decision_matrix(sources)
     objections = build_reviewer_objection_matrix(claims)
     sequence = build_paper_sequence(claims)
+    rebuttal_pack = build_rebuttal_response_pack(claims, objections)
+    manuscript_queue = build_manuscript_edit_queue(claims, sources["gap_register"])
     readiness_summary = (
         claims.groupby("current_decision", sort=True)
         .size()
@@ -303,6 +454,8 @@ def main() -> None:
 
     claims.to_csv(OUTPUT_DIR / "claim_decision_matrix.csv", index=False)
     objections.to_csv(OUTPUT_DIR / "reviewer_objection_matrix.csv", index=False)
+    rebuttal_pack.to_csv(OUTPUT_DIR / "rebuttal_response_pack.csv", index=False)
+    manuscript_queue.to_csv(OUTPUT_DIR / "manuscript_edit_queue.csv", index=False)
     sequence.to_csv(OUTPUT_DIR / "paper_sequence.csv", index=False)
     readiness_summary.to_csv(OUTPUT_DIR / "readiness_summary.csv", index=False)
     (OUTPUT_DIR / "config.json").write_text(
@@ -313,13 +466,14 @@ def main() -> None:
                 "new_empirical_results": False,
                 "supportable_prefix": "supportable",
                 "blocked_decisions": ["registered_not_ready_wait_for_v5_finals", "blocked_partial_family", "blocked_protocol_pending"],
+                "rebuttal_ready": True,
             },
             indent=2,
         )
         + "\n",
         encoding="utf-8",
     )
-    write_discussion(claims, objections, sequence, readiness_summary)
+    write_discussion(claims, objections, sequence, readiness_summary, rebuttal_pack, manuscript_queue)
     print(f"saved {DISCUSSION_PATH} and {OUTPUT_DIR}")
 
 

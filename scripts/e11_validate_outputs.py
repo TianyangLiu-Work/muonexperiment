@@ -416,6 +416,8 @@ def assert_top_conference_gap_register(frame: pd.DataFrame) -> None:
 def assert_top_conference_claim_decision_audit(
     claim_matrix: pd.DataFrame,
     reviewer_objections: pd.DataFrame,
+    rebuttal_pack: pd.DataFrame,
+    manuscript_queue: pd.DataFrame,
     paper_sequence: pd.DataFrame,
     readiness_summary: pd.DataFrame,
 ) -> None:
@@ -496,6 +498,41 @@ def assert_top_conference_claim_decision_audit(
     ]:
         if phrase not in forbidden_shortcuts:
             raise AssertionError(f"top-conference reviewer objection matrix missing forbidden shortcut: {phrase}")
+    if set(rebuttal_pack["objection_id"]) != expected_objections:
+        raise AssertionError("top-conference rebuttal response pack must cover every reviewer objection")
+    if set(rebuttal_pack["claim_id"]) != expected_claim_ids - {"TCD-2-natural-drift-diagnostic"}:
+        raise AssertionError("top-conference rebuttal response pack must map objections to active decision claims")
+    rebuttal_text = " ".join(rebuttal_pack.astype(str).to_numpy().ravel())
+    for phrase in [
+        "answer_now_with_scope_and_real-diagnostic_bridge",
+        "do not use final rows for refit or score selection",
+        "20/26 observed, raw_worse_rows=0",
+        "quarantine benchmark claims",
+        "preferred-LaTeX clean-checkout completion",
+    ]:
+        if phrase not in rebuttal_text:
+            raise AssertionError(f"top-conference rebuttal response pack missing phrase: {phrase}")
+    expected_edits = {
+        "MEQ-1-theory-frontload-scope",
+        "MEQ-2-diagnostic-caveat-next-to-results",
+        "MEQ-3-v5-pending-test-language",
+        "MEQ-4-natural-negative-incomplete-family",
+        "MEQ-5-performance-benchmark-quarantine",
+        "MEQ-6-artifact-review-caveat",
+    }
+    if set(manuscript_queue["edit_id"]) != expected_edits:
+        raise AssertionError("top-conference manuscript edit queue must preserve the fixed edit set")
+    manuscript_text = " ".join(manuscript_queue.astype(str).to_numpy().ravel())
+    for phrase in [
+        "worst-case-vs-realized distinction",
+        "No result paragraph may convert matched-head-gain logit drift into tail-accuracy",
+        "frozen pending test",
+        "defer finite-null and counterexample wording",
+        "quarantine all competitive optimizer wording",
+        "preferred-LaTeX clean-checkout gap",
+    ]:
+        if phrase not in manuscript_text:
+            raise AssertionError(f"top-conference manuscript edit queue missing phrase: {phrase}")
     if list(paper_sequence["sequence_step"]) != [1, 2, 3, 4, 5, 6]:
         raise AssertionError("top-conference paper sequence must preserve the six-step claim order")
     summary_lookup = readiness_summary.set_index("current_decision")["claim_count"].astype(int).to_dict()
@@ -1223,6 +1260,8 @@ def main() -> None:
         Path("discussion/e11_top_conference_gap_register.md"),
         Path("results/e11_top_conference_claim_decision_audit") / "claim_decision_matrix.csv",
         Path("results/e11_top_conference_claim_decision_audit") / "reviewer_objection_matrix.csv",
+        Path("results/e11_top_conference_claim_decision_audit") / "rebuttal_response_pack.csv",
+        Path("results/e11_top_conference_claim_decision_audit") / "manuscript_edit_queue.csv",
         Path("results/e11_top_conference_claim_decision_audit") / "paper_sequence.csv",
         Path("results/e11_top_conference_claim_decision_audit") / "readiness_summary.csv",
         Path("results/e11_top_conference_claim_decision_audit") / "config.json",
@@ -1579,8 +1618,11 @@ def main() -> None:
         "scripts/e11_write_top_conference_claim_decision_audit.py",
         "discussion/e11_top_conference_claim_decision_audit.md",
         "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
+        "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
+        "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv",
         "registered-not-ready",
         "supportable theorem",
+        "rebuttal-readiness contract",
         "scripts/e11_write_submission_repro_audit.py",
     ]
     missing_readme_phrases = [phrase for phrase in required_readme_phrases if phrase not in readme_text]
@@ -6061,7 +6103,7 @@ def main() -> None:
         "Partial-family claim-boundary synthesis",
         "make e11-natural-negative-search-phase1-interim-synthesis",
         "discussion/e11_top_conference_claim_decision_audit.md",
-        "Paper-level supportable/registered-not-ready/blocked claim contract",
+        "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract",
         "make e11-top-conference-claim-decision-audit",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
@@ -6666,6 +6708,12 @@ def main() -> None:
     reviewer_objection_frame = pd.read_csv(
         "results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv"
     )
+    rebuttal_pack_frame = pd.read_csv(
+        "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv"
+    )
+    manuscript_queue_frame = pd.read_csv(
+        "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv"
+    )
     paper_sequence_frame = pd.read_csv(
         "results/e11_top_conference_claim_decision_audit/paper_sequence.csv"
     )
@@ -6675,6 +6723,8 @@ def main() -> None:
     assert_top_conference_claim_decision_audit(
         claim_decision_frame,
         reviewer_objection_frame,
+        rebuttal_pack_frame,
+        manuscript_queue_frame,
         paper_sequence_frame,
         readiness_summary_frame,
     )
@@ -6776,6 +6826,8 @@ def main() -> None:
             "does not add new empirical results",
             "Claim Decision Matrix",
             "Reviewer Objection Matrix",
+            "Rebuttal Response Pack",
+            "Manuscript Edit Queue",
             "Paper Sequence",
             "TCD-1-main-mechanism-theorem",
             "supportable_main_with_assumptions",
@@ -6786,6 +6838,8 @@ def main() -> None:
             "observed=20/26",
             "raw_worse_rows=0",
             "using any final row to refit or reselect the score",
+            "quarantine benchmark claims",
+            "worst-case-vs-realized distinction",
             "No finite-null wording until the 26-setting family is complete",
         ],
     )
