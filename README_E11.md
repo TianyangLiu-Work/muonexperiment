@@ -168,7 +168,9 @@ make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT 
 make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practical Muon/AdamW trajectory bridge via Slurm
 make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases
 make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates
+make e11-natural-negative-search-phase1-settings # write settings-only registries for all registered phase1 natural negative-search settings
 make e11-natural-negative-search-phase1-results # submit the registered phase1 natural negative-search settings via Slurm
+make e11-natural-negative-search-phase1-eval # evaluate Holm-adjusted phase1 decisions after fresh metric outputs exist
 make e11-appendix-results  # current appendix/guardrail probes
 make e11-all-results       # main plus appendix/guardrail result generation
 make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts
@@ -211,7 +213,9 @@ make e11-cifar-resnet-lt-muon-final-benchmark-results
 make e11-cifar-resnet-practical-muon-bridge-results
 make e11-natural-head-tail-boundary-audit
 make e11-natural-negative-search-protocol
+make e11-natural-negative-search-phase1-settings
 make e11-natural-negative-search-phase1-results
+make e11-natural-negative-search-phase1-eval
 ```
 
 This submits `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`, which
@@ -377,8 +381,12 @@ stopping rules, acceptance gates, and claim ladder before any fresh search outpu
 The phase1 GPU entrypoint is now implemented in
 `scripts/e11_run_natural_negative_search_phase1.py` and
 `scripts/slurm/e11_natural_negative_search_phase1.sbatch`; the registered fresh
-output prefixes remain absent until `make e11-natural-negative-search-phase1-results`
-is intentionally submitted.
+output prefixes currently contain settings-only registries and no metric CSVs
+until `make e11-natural-negative-search-phase1-results` finishes. The
+multiplicity evaluator is `scripts/e11_evaluate_natural_negative_search_phase1.py`;
+its current generated artifact
+`discussion/e11_natural_negative_search_phase1_evaluation.md` preserves all 26
+phase1 settings and remains `not_ready` until fresh metric outputs are complete.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -750,6 +758,7 @@ Do not claim:
 - `scripts/e11_freeze_condition_score_v5_validation.py`: v5 validation-freeze evaluator; it writes not_run/not_ready rows until the validation split exists, then freezes or blocks a transport-normalized residual score before final splits.
 - `scripts/e11_write_natural_negative_search_protocol.py`: pre-registered fresh natural negative-search protocol with search space, metric contract, multiplicity rule, stopping rules, gates, and claim ladder.
 - `scripts/e11_run_natural_negative_search_phase1.py`: executable phase1 runner for the registered natural negative-search settings; supports `--list-settings` without launching training and writes fresh outputs only when submitted.
+- `scripts/e11_evaluate_natural_negative_search_phase1.py`: Holm-adjusted phase1 evaluator for the natural negative-search protocol; keeps every registered setting as pending until metric outputs are complete.
 - `scripts/e11_write_submission_repro_audit.py`: submission reproducibility audit for LaTeX toolchain availability, rendered PDF hashes, paper source hashes, and clean-checkout gates.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.
@@ -791,5 +800,5 @@ Most important next steps:
 2. Improve the all-layer ResNet JVP predictive condition benchmark: the held-out checkpoint-transfer run shows source-observed and early-layer controls transfer, and observed residuals transfer after source-fit depth adjustment, but the frozen v2 condition score fails the registered ResNet34 and CIFAR-10-LT held-out residual-ranking gates. The fresh v3 zero-fit scaled-JVP score then passes the CIFAR-10 alternate partition but reverses on the fresh ResNet50 architecture split. V4 then freezes a two-axis amplitude-minus-direction score and passes the WideResNet50-2 final architecture split, but fails the CIFAR-10 mixed final data split. The v4 failure audit localizes this data-partition reversal mechanism problem to amplitude/depth scalar aggregation rather than the direction threshold. V5 now requires a transport-normalized score contract or a narrower fixed-partition claim before any new P0 attempt, with new unspent validation/final splits instead of retuning on the failed final split.
 3. Extend the current fixed-checkpoint, short-trajectory, small practical-training, and negative ResNet final-training Muon diagnostics into a full practical Muon benchmark with schedules, checkpoint distributions, final tail metrics, and hyperparameter robustness.
 4. Add larger-architecture layerwise JVP/decomposition diagnostics if the detailed scaled-head-gain mechanism is meant to survive beyond the current small MLP explanation.
-5. Execute `make e11-natural-negative-search-phase1-results` for the fresh natural negative-search protocol now registered in `discussion/e11_natural_negative_search_protocol.md`, then add multiplicity-adjusted primary decisions and full reporting of null, component-only, secondary, and quality-failure rows.
+5. Let `make e11-natural-negative-search-phase1-results` finish the fresh metric outputs for the protocol registered in `discussion/e11_natural_negative_search_protocol.md`, then rerun `make e11-natural-negative-search-phase1-eval` to refresh Holm-adjusted primary decisions and full reporting of null, component-only, secondary, and quality-failure rows.
 6. Keep separating function-drift evidence from tail loss, margin, accuracy, and final optimizer performance.

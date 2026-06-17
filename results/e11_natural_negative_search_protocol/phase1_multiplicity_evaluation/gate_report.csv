@@ -1,0 +1,6 @@
+gate_id,status,evidence
+NNS-E1-evaluator-implemented,pass,scripts/e11_evaluate_natural_negative_search_phase1.py wrote evaluator artifacts
+NNS-E2-phase1-output-completeness,not_ready,NNS-P1-cifar100lt-resnet18-new-partitions=settings_only_no_metrics (0/12 rows); NNS-P1-cifar10lt-resnet18-cross-partitions=settings_only_no_metrics (0/8 rows); NNS-P1-tail-quality-controls=settings_only_no_metrics (0/6 rows)
+NNS-E3-primary-multiplicity,not_ready,Holm one-sided p-values use the registered 26-setting phase1 family
+NNS-E4-natural-primary-claim,not_ready,0/26 phase1 settings have primary metric rows
+NNS-E5-full-reporting-boundary,pass,"primary_decisions.csv keeps every registered setting, including not-run rows"

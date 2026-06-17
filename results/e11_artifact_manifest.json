@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 403939,
-      "size": "394.5 KB"
+      "size_bytes": 405529,
+      "size": "396.0 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2051167,
+      "size_bytes": 2076047,
       "size": "2.0 MB"
     },
     {
@@ -26,15 +26,15 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1139753,
+      "size_bytes": 1149521,
       "size": "1.1 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 280431390,
-      "size": "267.4 MB"
+      "size_bytes": 280463909,
+      "size": "267.5 MB"
     },
     {
       "path": "figures",
@@ -61,8 +61,8 @@
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 13189,
-      "size": "12.9 KB"
+      "size_bytes": 13609,
+      "size": "13.3 KB"
     },
     {
       "path": ".gitignore",
@@ -852,13 +852,43 @@
     },
     {
       "path": "results/e11_natural_negative_search_protocol/protocol_status.csv",
+      "rows": 7,
+      "size": "1.1 KB"
+    },
+    {
+      "path": "results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/settings_registry.csv",
+      "rows": 12,
+      "size": "10.2 KB"
+    },
+    {
+      "path": "results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18/settings_registry.csv",
+      "rows": 8,
+      "size": "4.7 KB"
+    },
+    {
+      "path": "results/e11_natural_negative_search_protocol/phase1_tail_quality_controls/settings_registry.csv",
       "rows": 6,
-      "size": "790 B"
+      "size": "4.9 KB"
+    },
+    {
+      "path": "results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/run_registry.csv",
+      "rows": 3,
+      "size": "1.1 KB"
+    },
+    {
+      "path": "results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv",
+      "rows": 26,
+      "size": "8.1 KB"
+    },
+    {
+      "path": "results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv",
+      "rows": 5,
+      "size": "714 B"
     },
     {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
       "rows": 7,
-      "size": "12.9 KB"
+      "size": "13.2 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv",
@@ -1214,7 +1244,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "64.0 KB"
+      "size": "64.9 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1238,7 +1268,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "38.3 KB"
+      "size": "39.3 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -1282,7 +1312,11 @@
     },
     {
       "path": "discussion/e11_natural_negative_search_protocol.md",
-      "size": "15.7 KB"
+      "size": "16.6 KB"
+    },
+    {
+      "path": "discussion/e11_natural_negative_search_phase1_evaluation.md",
+      "size": "6.8 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",

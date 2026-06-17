@@ -894,9 +894,18 @@ def main() -> None:
         Path("results/e11_natural_negative_search_protocol") / "acceptance_gates.csv",
         Path("results/e11_natural_negative_search_protocol") / "claim_ladder.csv",
         Path("results/e11_natural_negative_search_protocol") / "protocol_status.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18") / "settings_registry.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18") / "settings_registry.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_tail_quality_controls") / "settings_registry.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "run_registry.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "primary_decisions.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "gate_report.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "config.json",
         Path("discussion/e11_natural_negative_search_protocol.md"),
+        Path("discussion/e11_natural_negative_search_phase1_evaluation.md"),
         Path("scripts/e11_write_natural_negative_search_protocol.py"),
         Path("scripts/e11_run_natural_negative_search_phase1.py"),
+        Path("scripts/e11_evaluate_natural_negative_search_phase1.py"),
         Path("scripts/slurm/e11_natural_negative_search_phase1.sbatch"),
         Path("discussion/e11_condition_score_v4_protocol.md"),
         Path("discussion/e11_condition_score_v4_validation_cifar100_rotated.md"),
@@ -1047,6 +1056,7 @@ def main() -> None:
         Path("scripts/e11_write_natural_head_tail_boundary_audit.py"),
         Path("scripts/e11_write_natural_negative_search_protocol.py"),
         Path("scripts/e11_run_natural_negative_search_phase1.py"),
+        Path("scripts/e11_evaluate_natural_negative_search_phase1.py"),
         Path("scripts/slurm/e11_natural_negative_search_phase1.sbatch"),
         Path("Makefile"),
         Path("README_E11.md"),
@@ -1066,9 +1076,13 @@ def main() -> None:
         "scripts/e11_write_natural_head_tail_boundary_audit.py",
         "e11-natural-negative-search-protocol:",
         "scripts/e11_write_natural_negative_search_protocol.py",
+        "e11-natural-negative-search-phase1-settings:",
+        "scripts/e11_run_natural_negative_search_phase1.py --settings-only",
         "e11-natural-negative-search-phase1-results:",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
+        "e11-natural-negative-search-phase1-eval:",
+        "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "e11-submission-repro-audit:",
         "scripts/e11_write_submission_repro_audit.py",
         "e11-cifar-resnet-lt-muon-final-benchmark-results:",
@@ -1198,7 +1212,9 @@ def main() -> None:
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
         "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
         "make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates",
+        "make e11-natural-negative-search-phase1-settings # write settings-only registries for all registered phase1 natural negative-search settings",
         "make e11-natural-negative-search-phase1-results # submit the registered phase1 natural negative-search settings via Slurm",
+        "make e11-natural-negative-search-phase1-eval # evaluate Holm-adjusted phase1 decisions after fresh metric outputs exist",
         "A ResNet final-layer downstream-aware condition diagnostic over 40 seed/checkpoint points has weakest mean `nrank(G_H) / srank(H_T)` score about `6.566`",
         "A tail-rich ResNet control with 300 tail-train examples per class reaches best pre-update tail accuracy about `0.3739 [0.3454, 0.4024]`",
         "A CIFAR-100-LT ResNet18 imbalance sweep over tail_train_per_class 10/30/100/300 keeps spectral/Frobenius squared drift ratio below 1 in every setting",
@@ -1279,9 +1295,13 @@ def main() -> None:
         "results/e11_natural_negative_search_protocol/*",
         "scripts/e11_write_natural_negative_search_protocol.py",
         "scripts/e11_run_natural_negative_search_phase1.py",
+        "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "phase1 GPU entrypoint is now implemented",
+        "settings-only registries",
+        "discussion/e11_natural_negative_search_phase1_evaluation.md",
         "make e11-natural-negative-search-phase1-results",
+        "make e11-natural-negative-search-phase1-eval",
         "multiplicity-adjusted decision rule",
         "before any fresh search outputs exist",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
@@ -1303,6 +1323,7 @@ def main() -> None:
         "scripts/e11_write_natural_head_tail_boundary_audit.py",
         "scripts/e11_write_natural_negative_search_protocol.py",
         "scripts/e11_run_natural_negative_search_phase1.py",
+        "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "scripts/e11_write_submission_repro_audit.py",
     ]
     missing_readme_phrases = [phrase for phrase in required_readme_phrases if phrase not in readme_text]
@@ -3871,6 +3892,7 @@ def main() -> None:
         "committed natural audit baseline",
         "fresh natural search protocol",
         "fresh natural search entrypoints",
+        "fresh natural search settings registries",
         "fresh natural search outputs",
         "multiplicity-adjusted evaluator",
         "natural negative claim",
@@ -3887,36 +3909,73 @@ def main() -> None:
     natural_phase2_search = natural_protocol_search[
         natural_protocol_search["phase"] == "phase2_fresh_generality_search"
     ]
-    if not (
-        {"entrypoint", "entrypoint_status"}.issubset(natural_protocol_search.columns)
-        and set(natural_protocol_baseline["baseline_id"]) == expected_natural_protocol_baselines
-        and set(natural_protocol_search["search_id"]) == expected_natural_protocol_search_ids
-        and set(natural_protocol_metrics["metric_id"]) == expected_natural_protocol_metrics
-        and set(natural_protocol_stopping["rule_id"]) == expected_natural_protocol_rules
-        and set(natural_protocol_gates["gate_id"]) == expected_natural_protocol_gates
-        and set(natural_protocol_claims["claim_id"]) == expected_natural_protocol_claims
-        and set(natural_protocol_status["item"]) == expected_natural_protocol_status_items
-        and int(natural_protocol_baseline.set_index("baseline_id").loc[
-            "committed_natural_primary_full_drift_scan", "strict_worse_count"
-        ])
-        == 0
-        and natural_protocol_status_lookup["fresh natural search protocol"] == "generated"
-        and natural_protocol_status_lookup["fresh natural search entrypoints"] == "implemented"
-        and natural_protocol_status_lookup["fresh natural search outputs"] == "not_run"
-        and natural_protocol_status_lookup["multiplicity-adjusted evaluator"] == "registered_not_implemented"
-        and natural_protocol_status_lookup["natural negative claim"] == "not_ready"
-        and set(natural_phase1_search["entrypoint"]) == {
-            "scripts/slurm/e11_natural_negative_search_phase1.sbatch"
-        }
-        and set(natural_phase1_search["entrypoint_status"]) == {"implemented_sbatch"}
-        and set(natural_phase2_search["entrypoint_status"]) == {"blocked_until_phase1_registry_commit"}
-        and natural_protocol_claim_lookup["fresh_natural_primary_counterexample"] == "not_ready"
-        and "Holm-adjusted" in str(natural_primary_metric["worse_rule"])
-        and "full-drift counterexample" in str(natural_primary_metric["claim_boundary"])
-        and not any(prefix.exists() for prefix in planned_prefixes)
-    ):
+    phase1_settings_counts = {
+        row.search_id: len(pd.read_csv(Path(row.planned_artifact_prefix) / "settings_registry.csv"))
+        for row in natural_phase1_search.itertuples()
+    }
+    phase1_prefixes_settings_only = all(
+        not Path(row.planned_artifact_prefix).exists()
+        or {path.name for path in Path(row.planned_artifact_prefix).iterdir()} <= {"settings_registry.csv"}
+        for row in natural_phase1_search.itertuples()
+    )
+    phase2_prefixes_absent = all(not Path(row.planned_artifact_prefix).exists() for row in natural_phase2_search.itertuples())
+    natural_eval_dir = natural_protocol_dir / "phase1_multiplicity_evaluation"
+    natural_eval_run_registry = pd.read_csv(natural_eval_dir / "run_registry.csv")
+    natural_eval_decisions = pd.read_csv(natural_eval_dir / "primary_decisions.csv")
+    natural_eval_gates = pd.read_csv(natural_eval_dir / "gate_report.csv")
+    natural_eval_gate_lookup = natural_eval_gates.set_index("gate_id")["status"].to_dict()
+    natural_protocol_checks = {
+        "entrypoint_columns": {"entrypoint", "entrypoint_status"}.issubset(natural_protocol_search.columns),
+        "baseline_ids": set(natural_protocol_baseline["baseline_id"]) == expected_natural_protocol_baselines,
+        "search_ids": set(natural_protocol_search["search_id"]) == expected_natural_protocol_search_ids,
+        "metric_ids": set(natural_protocol_metrics["metric_id"]) == expected_natural_protocol_metrics,
+        "stopping_rules": set(natural_protocol_stopping["rule_id"]) == expected_natural_protocol_rules,
+        "acceptance_gates": set(natural_protocol_gates["gate_id"]) == expected_natural_protocol_gates,
+        "claim_ids": set(natural_protocol_claims["claim_id"]) == expected_natural_protocol_claims,
+        "status_items": set(natural_protocol_status["item"]) == expected_natural_protocol_status_items,
+        "baseline_strict_worse_zero": int(
+            natural_protocol_baseline.set_index("baseline_id").loc[
+                "committed_natural_primary_full_drift_scan", "strict_worse_count"
+            ]
+        )
+        == 0,
+        "protocol_generated": natural_protocol_status_lookup["fresh natural search protocol"] == "generated",
+        "entrypoints_implemented": natural_protocol_status_lookup["fresh natural search entrypoints"] == "implemented",
+        "settings_locked": natural_protocol_status_lookup["fresh natural search settings registries"] == "locked",
+        "metric_outputs_not_run": natural_protocol_status_lookup["fresh natural search outputs"] == "metric_outputs_not_run",
+        "evaluator_implemented": natural_protocol_status_lookup["multiplicity-adjusted evaluator"]
+        == "implemented_pending_outputs",
+        "claim_not_ready": natural_protocol_status_lookup["natural negative claim"] == "not_ready",
+        "phase1_entrypoint": set(natural_phase1_search["entrypoint"])
+        == {"scripts/slurm/e11_natural_negative_search_phase1.sbatch"},
+        "phase1_entrypoint_status": set(natural_phase1_search["entrypoint_status"]) == {"implemented_sbatch"},
+        "phase2_entrypoint_status": set(natural_phase2_search["entrypoint_status"])
+        == {"blocked_until_phase1_registry_commit"},
+        "phase1_settings_counts": phase1_settings_counts
+        == {
+            "NNS-P1-cifar100lt-resnet18-new-partitions": 12,
+            "NNS-P1-cifar10lt-resnet18-cross-partitions": 8,
+            "NNS-P1-tail-quality-controls": 6,
+        },
+        "phase1_prefixes_settings_only": phase1_prefixes_settings_only,
+        "phase2_prefixes_absent": phase2_prefixes_absent,
+        "eval_decision_count": len(natural_eval_decisions) == 26,
+        "eval_decisions_not_run": bool(natural_eval_decisions["output_status"].eq("not_run").all()),
+        "eval_claims_not_ready": bool(natural_eval_decisions["claim_status"].eq("not_ready").all()),
+        "eval_run_status": set(natural_eval_run_registry["output_status"]) == {"settings_only_no_metrics"},
+        "eval_gate_implemented": natural_eval_gate_lookup["NNS-E1-evaluator-implemented"] == "pass",
+        "eval_gate_completeness": natural_eval_gate_lookup["NNS-E2-phase1-output-completeness"] == "not_ready",
+        "eval_gate_multiplicity": natural_eval_gate_lookup["NNS-E3-primary-multiplicity"] == "not_ready",
+        "eval_gate_reporting": natural_eval_gate_lookup["NNS-E5-full-reporting-boundary"] == "pass",
+        "claim_ladder_not_ready": natural_protocol_claim_lookup["fresh_natural_primary_counterexample"] == "not_ready",
+        "primary_rule_holm": "Holm-adjusted" in str(natural_primary_metric["worse_rule"]),
+        "primary_boundary": "full-drift counterexample" in str(natural_primary_metric["claim_boundary"]),
+    }
+    if not all(natural_protocol_checks.values()):
+        failed_checks = [name for name, passed in natural_protocol_checks.items() if not passed]
         raise AssertionError(
-            "natural negative-search protocol must preserve frozen search space, adjusted primary rule, not_run fresh outputs, and claim boundaries"
+            "natural negative-search protocol must preserve frozen search space, settings-only phase1 outputs, implemented evaluator, adjusted primary rule, and claim boundaries; failed checks: "
+            f"{failed_checks}"
         )
     natural_protocol_text = Path("discussion/e11_natural_negative_search_protocol.md").read_text(
         encoding="utf-8"
@@ -3929,9 +3988,27 @@ def main() -> None:
             "pre-registered fresh search",
             "does not claim a new natural counterexample",
             "multiplicity procedure",
-            "fresh_search_outputs as not_run",
-            "phase1 Slurm entrypoint is implemented",
+            "metric_outputs_not_run",
+            "phase1 Slurm entrypoint and multiplicity evaluator",
+            "multiplicity evaluator",
+            "complete fresh metric outputs",
             "Blocked now: claiming a fresh natural primary counterexample",
+        ],
+    )
+    natural_phase1_eval_text = Path("discussion/e11_natural_negative_search_phase1_evaluation.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "natural negative-search phase1 evaluation",
+        natural_phase1_eval_text,
+        [
+            "E11 Natural Negative Search Phase1 Evaluation",
+            "multiplicity boundary",
+            "all 26 declared settings",
+            "Holm",
+            "Current primary metric coverage: 0/26 settings",
+            "NNS-E2-phase1-output-completeness",
+            "not_ready",
         ],
     )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
@@ -5554,8 +5631,11 @@ def main() -> None:
         "search-space registry, metric contract, multiplicity rule, stopping rule",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
+        "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "make e11-natural-negative-search-phase1-results",
-        "multiplicity-adjusted evaluator",
+        "make e11-natural-negative-search-phase1-eval",
+        "multiplicity evaluator",
+        "Holm-adjusted decisions",
         "held-out architecture",
         "benchmark-level performance claim",
         "discussion/e11_submission_repro_audit.md",
@@ -5597,7 +5677,9 @@ def main() -> None:
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-natural-head-tail-boundary-audit" not in readme
         or "make e11-natural-negative-search-protocol" not in readme
+        or "make e11-natural-negative-search-phase1-settings" not in readme
         or "make e11-natural-negative-search-phase1-results" not in readme
+        or "make e11-natural-negative-search-phase1-eval" not in readme
         or "make e11-submission-repro-audit" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme

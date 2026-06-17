@@ -46,14 +46,14 @@ the primary full tail-output drift metric.
 
 ## Acceptance Gates
 
-| gate_id                   | scope                         | requirement                                                                                                                   | pass_condition                                                                                                            |
-|:--------------------------|:------------------------------|:------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------|
-| NNS-1-protocol-freeze     | fresh natural negative search | Protocol tables and discussion are committed before fresh search outputs exist.                                               | protocol_status.csv marks fresh_search_outputs as not_run and the planned phase output directories are absent or empty    |
-| NNS-2-freshness-exclusion | search space                  | No committed-audit setting_id or spent condition-score final partition is reused for selection.                               | fresh evaluator writes an exclusion audit with no overlap against the baseline audit and spent-final registries           |
-| NNS-3-multiplicity        | statistical decision          | Primary discovery uses simultaneous confidence intervals or Holm-adjusted one-sided bootstrap tests over the phase family.    | every primary decision row includes raw CI, adjusted CI or adjusted p-value, and phase family size                        |
-| NNS-4-full-reporting      | artifact reporting            | All declared settings are reported, including nulls, component-only reversals, quality failures, and infrastructure failures. | registry row count equals the declared search-space count minus logged infrastructure failures                            |
-| NNS-5-quality-controls    | claim validity                | Primary negative candidates pass matched head-gain and pre-update tail-quality controls.                                      | candidate rows include head-gain relative error within the registered tolerance and nondegenerate pre-update tail metrics |
-| NNS-6-claim-boundary      | paper claim                   | Component and secondary tradeoffs are not described as primary full-drift counterexamples.                                    | claim ledger separates primary, component, secondary, and final-performance claims                                        |
+| gate_id                   | scope                         | requirement                                                                                                                   | pass_condition                                                                                                                                      |
+|:--------------------------|:------------------------------|:------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
+| NNS-1-protocol-freeze     | fresh natural negative search | Protocol tables and discussion are committed before fresh search outputs exist.                                               | protocol_status.csv marks fresh metric outputs as metric_outputs_not_run and phase prefixes contain at most settings_registry.csv until jobs finish |
+| NNS-2-freshness-exclusion | search space                  | No committed-audit setting_id or spent condition-score final partition is reused for selection.                               | fresh evaluator writes an exclusion audit with no overlap against the baseline audit and spent-final registries                                     |
+| NNS-3-multiplicity        | statistical decision          | Primary discovery uses simultaneous confidence intervals or Holm-adjusted one-sided bootstrap tests over the phase family.    | every primary decision row includes raw CI, adjusted CI or adjusted p-value, and phase family size                                                  |
+| NNS-4-full-reporting      | artifact reporting            | All declared settings are reported, including nulls, component-only reversals, quality failures, and infrastructure failures. | registry row count equals the declared search-space count minus logged infrastructure failures                                                      |
+| NNS-5-quality-controls    | claim validity                | Primary negative candidates pass matched head-gain and pre-update tail-quality controls.                                      | candidate rows include head-gain relative error within the registered tolerance and nondegenerate pre-update tail metrics                           |
+| NNS-6-claim-boundary      | paper claim                   | Component and secondary tradeoffs are not described as primary full-drift counterexamples.                                    | claim ledger separates primary, component, secondary, and final-performance claims                                                                  |
 
 ## Claim Ladder
 
@@ -67,14 +67,15 @@ the primary full tail-output drift metric.
 
 ## Protocol Status
 
-| item                             | status                     | evidence                                                                                                                                | blocks_stronger_claim_if_missing   |
-|:---------------------------------|:---------------------------|:----------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------|
-| committed natural audit baseline | loaded                     | 37 primary rows; strict worse count 0; max CI high 0.936                                                                                | yes                                |
-| fresh natural search protocol    | generated                  | search space, metric contract, stopping rules, gates, and claim ladder written                                                          | yes                                |
-| fresh natural search entrypoints | implemented                | scripts/e11_run_natural_negative_search_phase1.py and scripts/slurm/e11_natural_negative_search_phase1.sbatch are registered for phase1 | yes                                |
-| fresh natural search outputs     | not_run                    | planned phase output prefixes are not generated by this protocol                                                                        | yes                                |
-| multiplicity-adjusted evaluator  | registered_not_implemented | NNS-3 requires adjusted decision columns in future evaluator outputs                                                                    | yes                                |
-| natural negative claim           | not_ready                  | no fresh search outputs exist under this protocol                                                                                       | yes                                |
+| item                                     | status                      | evidence                                                                                                                                                                    | blocks_stronger_claim_if_missing   |
+|:-----------------------------------------|:----------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------|
+| committed natural audit baseline         | loaded                      | 37 primary rows; strict worse count 0; max CI high 0.936                                                                                                                    | yes                                |
+| fresh natural search protocol            | generated                   | search space, metric contract, stopping rules, gates, and claim ladder written                                                                                              | yes                                |
+| fresh natural search entrypoints         | implemented                 | scripts/e11_run_natural_negative_search_phase1.py and scripts/slurm/e11_natural_negative_search_phase1.sbatch are registered for phase1                                     | yes                                |
+| fresh natural search settings registries | locked                      | phase1_cifar100lt_resnet18, phase1_cifar10lt_resnet18, and phase1_tail_quality_controls settings_registry.csv files declare 26 total settings                               | yes                                |
+| fresh natural search outputs             | metric_outputs_not_run      | phase1 metric files are absent until the submitted GPU jobs finish                                                                                                          | yes                                |
+| multiplicity-adjusted evaluator          | implemented_pending_outputs | scripts/e11_evaluate_natural_negative_search_phase1.py writes Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation | yes                                |
+| natural negative claim                   | not_ready                   | no fresh search outputs exist under this protocol                                                                                                                           | yes                                |
 
 ## Claim Boundary
 
@@ -83,9 +84,9 @@ for primary full-drift rows and as component/outcome claim-boundary evidence.
 
 Blocked now: claiming a fresh natural primary counterexample, a finite
 pre-registered null search, or a practical optimizer-performance result from
-this protocol. The phase1 Slurm entrypoint is implemented, but those claims
-still require fresh outputs and multiplicity-adjusted decisions that satisfy
-the acceptance gates above.
+this protocol. The phase1 Slurm entrypoint and multiplicity evaluator are
+implemented, but those claims still require complete fresh metric outputs and
+Holm-adjusted decisions that satisfy the acceptance gates above.
 
 Generated tables:
 

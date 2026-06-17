@@ -290,6 +290,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--list-settings", action="store_true")
+    parser.add_argument("--settings-only", action="store_true")
     parser.add_argument("--download", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--progress", action="store_true")
     return parser.parse_args()
@@ -338,6 +339,22 @@ def output_dir_from_args(args: argparse.Namespace) -> Path:
     if args.search_id in SEARCH_OUTPUT_PREFIXES:
         return SEARCH_OUTPUT_PREFIXES[args.search_id]
     return RESULT_DIR / "phase1_all"
+
+
+def write_settings_only(settings: list[NaturalSearchSetting], *, seeds: tuple[int, ...], args: argparse.Namespace) -> None:
+    if args.output_dir is not None:
+        output_dir = args.output_dir
+        output_dir.mkdir(parents=True, exist_ok=True)
+        settings_registry(settings, seeds=seeds).to_csv(output_dir / "settings_registry.csv", index=False)
+        print(f"saved natural negative-search phase1 settings registry to {output_dir}")
+        return
+
+    for search_id in sorted({setting.search_id for setting in settings}):
+        selected = [setting for setting in settings if setting.search_id == search_id]
+        output_dir = SEARCH_OUTPUT_PREFIXES[search_id]
+        output_dir.mkdir(parents=True, exist_ok=True)
+        settings_registry(selected, seeds=seeds).to_csv(output_dir / "settings_registry.csv", index=False)
+        print(f"saved natural negative-search phase1 settings registry to {output_dir}")
 
 
 def annotate_frame(
@@ -500,6 +517,9 @@ def main() -> None:
     registry = settings_registry(settings, seeds=run_seeds)
     if args.list_settings:
         print(registry.to_csv(index=False), end="")
+        return
+    if args.settings_only:
+        write_settings_only(settings, seeds=run_seeds, args=args)
         return
 
     output_dir = output_dir_from_args(args)

@@ -1,0 +1,10 @@
+{
+  "multiplicity_family": "NNS-P1-fresh-primary-family",
+  "planned_family_size": 26,
+  "alpha": 0.05,
+  "head_gain_relative_error_max": 0.05,
+  "tail_accuracy_floor_by_dataset": {
+    "CIFAR100": 0.02,
+    "CIFAR10": 0.11
+  }
+}
