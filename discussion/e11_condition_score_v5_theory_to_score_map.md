@@ -81,13 +81,13 @@ frozen transport correction and a separate direction guardrail.
 
 ## Claim Readiness Ledger
 
-| item                       | status    | evidence                                                                                                                                                             | blocks_p0_if_missing   |
-|:---------------------------|:----------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------|
-| theory-to-score map        | generated | discussion/e11_condition_score_v5_theory_to_score_map.md                                                                                                             | yes                    |
-| v5 validation output       | generated | results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv                                                                         | yes                    |
-| v5 residual score freeze   | frozen    | results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv                                                                                    | yes                    |
-| no final before freeze     | pass      | results/e11_condition_score_v5_protocol/final_* directories absent before freeze                                                                                     | yes                    |
-| predictive-condition claim | not_ready | frozen validation-selected score is eligible for final evaluation runs; final split outputs are still absent, so the P0 predictive-condition claim remains not_ready | yes                    |
+| item                       | status    | evidence                                                                                                                                                                          | blocks_p0_if_missing   |
+|:---------------------------|:----------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------|
+| theory-to-score map        | generated | discussion/e11_condition_score_v5_theory_to_score_map.md                                                                                                                          | yes                    |
+| v5 validation output       | generated | results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv                                                                                      | yes                    |
+| v5 residual score freeze   | frozen    | results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv                                                                                                 | yes                    |
+| no final before freeze     | pass      | results/e11_condition_score_v5_protocol/final_* directories absent before freeze                                                                                                  | yes                    |
+| predictive-condition claim | not_ready | frozen validation-selected score became eligible for final evaluation runs; completed final gates are evaluated separately and P0 remains not_ready after the registered failures | yes                    |
 
 ## Boundary
 

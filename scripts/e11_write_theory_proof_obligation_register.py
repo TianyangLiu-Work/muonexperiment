@@ -117,12 +117,16 @@ def build_proof_obligations(evidence: dict[str, object]) -> pd.DataFrame:
             "current_evidence": (
                 f"validation score={selected_score}; freeze status="
                 f"{v5_freeze_status['v5 transport-normalized residual score']}; "
+                f"architecture residual={v5_final_status['v5_final_heldout_architecture_residual_spearman']}; "
+                f"architecture direction={v5_final_status['v5_final_heldout_architecture_direction_threshold_accuracy']}; "
+                f"data residual={v5_final_status['v5_final_heldout_data_partition_residual_spearman']}; "
+                f"data direction={v5_final_status['v5_final_heldout_data_partition_direction_threshold_accuracy']}; "
                 f"final P0 gate={v5_final_status['v5_p0_predictive_condition_claim']}"
             ),
-            "current_status": "pending_final_outputs",
+            "current_status": "completed_final_failed_boundary",
             "blocks_main_theory_claim": "yes_for_predictive_condition_claim",
-            "required_upgrade": "consume the registered ResNeXt50-32x4d and CIFAR-10 cross-partition final outputs with no refit",
-            "forbidden_wording": "do not claim held-out predictive-condition generality while the final gate is not_ready",
+            "required_upgrade": "open a new preregistered protocol with new unspent splits before any score repair or renewed predictive-condition attempt",
+            "forbidden_wording": "do not claim held-out predictive-condition generality after the frozen final gates failed",
         },
         {
             "obligation_id": "PTO-5-natural-falsification",
@@ -198,8 +202,8 @@ def build_assumption_stress_tests() -> pd.DataFrame:
                 "assumption": "partition and architecture transport terms preserve residual layer-risk ordering",
                 "stress_test": "v5 frozen final ResNeXt50-32x4d and CIFAR-10 cross-partition gates",
                 "failure_mode": "score becomes a fixed-split diagnostic rather than a predictive condition",
-                "paper_action": "downgrade under the reviewer failure response matrix if either final fails",
-                "status": "pending_final_outputs",
+                "paper_action": "report the completed v5 negative boundary and require a new protocol for any repair",
+                "status": "completed_final_failed_boundary",
             },
             {
                 "assumption_id": "AST-5-multiplicity-integrity",
@@ -232,10 +236,10 @@ def build_claim_scope_boundaries() -> pd.DataFrame:
             },
             {
                 "claim_scope": "predictive_condition",
-                "allowed_claim": "v5 has a frozen candidate and pending final tests",
+                "allowed_claim": "v5 has a frozen candidate whose completed final gates failed under the registered protocol",
                 "blocked_claim": "the v5 score predicts unseen real-task residual risk",
                 "decisive_gate": "both v5 final splits pass residual, direction, baseline, and reporting gates",
-                "current_status": "not_ready",
+                "current_status": "completed_final_failed_boundary",
             },
             {
                 "claim_scope": "natural_counterexample",

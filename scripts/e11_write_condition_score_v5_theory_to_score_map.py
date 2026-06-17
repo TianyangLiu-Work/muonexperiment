@@ -329,8 +329,8 @@ def build_readiness_ledger(freeze_status: pd.DataFrame, freeze_gates: pd.DataFra
     validation_failed = validation_status == "generated" and residual_status == "validation_failed"
     if final_unblocked:
         predictive_evidence = (
-            "frozen validation-selected score is eligible for final evaluation runs; "
-            "final split outputs are still absent, so the P0 predictive-condition claim remains not_ready"
+            "frozen validation-selected score became eligible for final evaluation runs; "
+            "completed final gates are evaluated separately and P0 remains not_ready after the registered failures"
         )
     elif validation_failed:
         predictive_evidence = (

@@ -3,7 +3,7 @@
   "freeze_status_path": "results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv",
   "final_evaluator_config": "results/e11_condition_score_v5_protocol/final_score_evaluation/config.json",
   "interpretation_plan_dir": "results/e11_condition_score_v5_protocol/final_interpretation_plan",
-  "final_outputs_generated": 1,
+  "final_outputs_generated": 2,
   "active_failure_modes": 3,
-  "analysis_scope": "partial-output reviewer failure response; no final-row tuning"
+  "analysis_scope": "completed-final reviewer failure response; no final-row tuning"
 }

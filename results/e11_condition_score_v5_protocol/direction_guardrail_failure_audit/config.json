@@ -1,0 +1,11 @@
+{
+  "final_eval_dir": "results/e11_condition_score_v5_protocol/final_score_evaluation",
+  "reviewer_response_dir": "results/e11_condition_score_v5_protocol/reviewer_failure_response",
+  "final_splits": [
+    "v5_final_architecture_resnext50_32x4d_cifar100lt",
+    "v5_final_data_cifar10lt_cross_partition"
+  ],
+  "primary_score": "condition_score_v5_transport_normalized_amplitude_minus_direction",
+  "current_p0_status": "not_ready",
+  "analysis_scope": "completed final boundary audit; no final-row tuning or score repair"
+}

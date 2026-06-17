@@ -79,7 +79,7 @@ def build_failure_mode_register(score: str) -> pd.DataFrame:
             "failure_mode_id": "V5-RFR-2-data-transport-boundary",
             "trigger_pattern": "architecture final passes but CIFAR-10 cross-partition final fails residual ranking",
             "reviewer_objection": "The condition score does not transport across data families.",
-            "diagnostic_separation": "Architecture transfer and data-partition transport are separated before final rows exist.",
+            "diagnostic_separation": "Architecture transfer and data-partition transport are separated under the frozen final rows.",
             "allowed_claim": "architecture transfer survived, while data-family transport is a negative boundary",
             "forbidden_claim": "general data-family predictive-condition claim",
             "blocks_p0": "yes",
@@ -157,7 +157,7 @@ def build_reviewer_objection_map() -> pd.DataFrame:
                 "objection": "The final predictive-condition claim is not yet evidenced.",
                 "response_table": "failure_mode_register.csv",
                 "decisive_artifact": "final_score_evaluation/final_gate_report.csv",
-                "remaining_evidence": "Wait for registered ResNeXt50-32x4d and CIFAR-10 cross-partition outputs.",
+                "remaining_evidence": "Both registered final outputs are now consumed; preserve failed gates and use a new unspent protocol for any repair.",
             },
             {
                 "reviewer_objection_id": "RFR-O2-generality",
@@ -197,9 +197,9 @@ def build_claim_downgrade_actions() -> pd.DataFrame:
             {
                 "claim_state": "not_ready",
                 "paper_location": "main claim ledger and limitations",
-                "allowed_wording": "The frozen v5 final test is pending registered GPU outputs.",
+                "allowed_wording": "The frozen v5 final test is complete and the P0 predictive-condition claim remains not_ready because registered final gates failed.",
                 "forbidden_wording": "The v5 score generalizes to held-out finals.",
-                "action_if_observed": "Report pending status and do not include final positive wording.",
+                "action_if_observed": "Report the completed final failures and do not include final positive wording.",
                 "top_conference_delta": "Blocks the P0 predictive-condition claim but preserves protocol credibility.",
             },
             {
@@ -251,19 +251,19 @@ def build_next_evidence_queue() -> pd.DataFrame:
         [
             {
                 "priority": "P0",
-                "evidence_item": "consume the two registered v5 final outputs",
-                "resolves_failure_modes": "V5-RFR-0-pending-outputs",
-                "command_or_protocol": "make e11-cifar-resnet-condition-score-v5-final-eval",
-                "claim_unlocked": "narrow frozen-score P0 eligibility if both finals pass",
-                "depends_on_final_outputs": "yes",
+                "evidence_item": "preserve the completed v5 final failures in the main ledger",
+                "resolves_failure_modes": "V5-RFR-2-data-transport-boundary; V5-RFR-4-direction-guardrail-failure; V5-RFR-current-p0-not-ready",
+                "command_or_protocol": "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response",
+                "claim_unlocked": "reviewer-safe negative boundary wording, not P0 eligibility",
+                "depends_on_final_outputs": "no",
             },
             {
                 "priority": "P0",
-                "evidence_item": "rerun the reviewer response asset after final evaluator output changes",
+                "evidence_item": "open a new score protocol before any repair",
                 "resolves_failure_modes": "V5-RFR-1 through V5-RFR-7",
-                "command_or_protocol": "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response",
-                "claim_unlocked": "updated claim downgrade table without score retuning",
-                "depends_on_final_outputs": "yes",
+                "command_or_protocol": "new preregistered validation/final split family with unspent rows",
+                "claim_unlocked": "future P0 attempt only, under a different protocol",
+                "depends_on_final_outputs": "no",
             },
             {
                 "priority": "P1",
@@ -395,7 +395,7 @@ def build_active_failure_modes(split_status: pd.DataFrame, gates: pd.DataFrame) 
                 "supporting_gate_id": "v5_p0_predictive_condition_claim",
                 "current_status": "active",
                 "current_evidence": str(p0_rows["evidence"].iloc[0]),
-                "allowed_current_wording": "registered_not_ready_wait_for_remaining_split_and_failed-gate interpretation",
+                "allowed_current_wording": "completed_final_failed_gate interpretation",
                 "forbidden_current_wording": "the v5 frozen score is an unseen-task predictive condition",
             }
         )
@@ -432,7 +432,7 @@ claim-downgrade plan for the v5 final condition-score test. It reads the
 validation-frozen score `{score}`, the registered final split paths, and the
 current frozen-evaluator gate report, but it does not refit, reselect, retune,
 or repair the score after final rows arrive. Its purpose is to make the current
-partial final state and every remaining plausible final outcome reviewable.
+completed final state and every protocol-safe next action reviewable.
 
 Current final split outputs generated: {generated_count}/{len(split_status)}.
 
@@ -504,7 +504,7 @@ def main() -> None:
                 "interpretation_plan_dir": INTERPRET_DIR.as_posix(),
                 "final_outputs_generated": int(split_status["current_output_status"].eq("generated").sum()),
                 "active_failure_modes": int(active_modes["current_status"].eq("active").sum()),
-                "analysis_scope": "partial-output reviewer failure response; no final-row tuning",
+                "analysis_scope": "completed-final reviewer failure response; no final-row tuning",
             },
             indent=2,
         )

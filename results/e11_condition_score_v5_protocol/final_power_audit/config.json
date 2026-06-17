@@ -5,6 +5,6 @@
   "validation_reference_layer_summary": "results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv",
   "reference_points_per_transfer": 21,
   "reference_transfer_pairs": 9,
-  "final_outputs_generated": 1,
+  "final_outputs_generated": 2,
   "analysis_scope": "pre-output v5 final detectable-effect audit; no final-row tuning"
 }

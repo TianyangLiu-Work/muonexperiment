@@ -142,7 +142,7 @@ def normalize_v5(frame: pd.DataFrame) -> pd.DataFrame:
     for _, row in frame.iterrows():
         score = str(row["score"])
         if score == "condition_score_v5_transport_normalized_amplitude_minus_direction":
-            claim_use = "validation-frozen residual candidate; final P0 claim still pending"
+            claim_use = "validation-frozen residual candidate; completed final P0 gates failed"
         elif score == "condition_score_v5_direction_axis_scaled_jvp_ratio":
             claim_use = "direction guardrail only; not a residual-risk scalar"
         elif score == "source_observed_drift_positive_control":
@@ -261,7 +261,7 @@ def build_term_failure_ladder(summary: pd.DataFrame) -> pd.DataFrame:
                 "ladder_step": "L5-v5-candidate-is-frozen-not-proven",
                 "term_tested": "transport_normalized_amplitude_minus_direction",
                 "evidence": f"v5 validation primary residual Spearman is {ci(v5_primary)}; transport-defect axis alone is {ci(v5_transport)}",
-                "decision": "eligible for the registered final evaluator, but P0 remains not_ready until both unspent finals pass",
+                "decision": "eligible for the registered final evaluator, but completed final gates failed and P0 remains not_ready",
                 "blocked_overclaim": "validation success alone proves unseen architecture/data residual-risk prediction",
             },
         ]
@@ -349,8 +349,9 @@ reverses at {ci(v4_data_amplitude)} and the v4 amplitude-minus-direction scalar
 fails at {ci(v4_data_primary)}. Thus direction success is not enough for
 residual-risk prediction. The v5 validation split freezes the transport-normalized
 candidate at {ci(v5_primary)}, above the early-layer baseline at {ci(v5_early)},
-but the unspent final architecture and data splits are still required before
-any predictive-condition wording is supportable.
+but the completed final architecture and data splits failed the registered P0
+gate family, so any repaired predictive-condition wording needs a new unspent
+protocol.
 
 ## Score-Axis Summary
 

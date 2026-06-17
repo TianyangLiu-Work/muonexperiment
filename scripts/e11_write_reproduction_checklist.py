@@ -121,7 +121,7 @@ def main() -> None:
             },
             {
                 "artifact": "discussion/e11_top_conference_claim_decision_audit.md",
-                "role": "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract for top-conference wording.",
+                "role": "Paper-level supportable/completed-negative-boundary/blocked claim and rebuttal-readiness contract for top-conference wording.",
             },
             {
                 "artifact": "discussion/e11_manuscript_claim_trace.md",

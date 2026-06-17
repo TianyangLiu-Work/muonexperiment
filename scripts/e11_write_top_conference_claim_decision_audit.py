@@ -103,13 +103,13 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
             {
                 "claim_id": "TCD-3-predictive-condition-generalization",
                 "paper_section": "predictive condition",
-                "current_decision": "registered_not_ready_wait_for_v5_finals",
+                "current_decision": "blocked_completed_final_failed_boundary",
                 "evidence_status": f"{pto4['current_status']}; {v5_p0['gate_id']}={v5_p0['status']}",
                 "author_allowed_wording": predictive_scope["allowed_claim"],
                 "author_blocked_wording": predictive_scope["blocked_claim"],
                 "decisive_gate": predictive_scope["decisive_gate"],
                 "required_next_action": pto4["required_upgrade"],
-                "source_artifacts": "discussion/e11_condition_score_v5_validation_freeze.md; discussion/e11_condition_score_v5_final_evaluation.md; discussion/e11_condition_score_v5_reviewer_failure_response.md",
+                "source_artifacts": "discussion/e11_condition_score_v5_validation_freeze.md; discussion/e11_condition_score_v5_final_evaluation.md; discussion/e11_condition_score_v5_reviewer_failure_response.md; discussion/e11_condition_score_v5_direction_guardrail_failure_audit.md",
             },
             {
                 "claim_id": "TCD-4-natural-counterexample-or-finite-null",
@@ -177,11 +177,11 @@ def build_reviewer_objection_matrix(claims: pd.DataFrame) -> pd.DataFrame:
             {
                 "objection_id": "RO-2-score-cherry-picking",
                 "likely_objection": "The condition score was selected after seeing failures.",
-                "current_response": "v5 freezes a transport-normalized score before final outputs and quarantines spent v2/v3/v4 final rows.",
+                "current_response": "v5 froze a transport-normalized score before final outputs, consumed both final splits, preserved the failures, and quarantines spent v2/v3/v4/v5 final rows.",
                 "response_status": lookup.loc[
                     "TCD-3-predictive-condition-generalization", "current_decision"
                 ],
-                "missing_gate": "unspent ResNeXt50-32x4d and CIFAR-10 cross-partition final outputs",
+                "missing_gate": "new unspent validation/final split family before any repaired score can make a renewed P0 attempt",
                 "forbidden_shortcut": "using any final row to refit or reselect the score",
             },
             {
@@ -230,8 +230,8 @@ def build_paper_sequence(claims: pd.DataFrame) -> pd.DataFrame:
             {
                 "sequence_step": 3,
                 "claim_id": "TCD-3-predictive-condition-generalization",
-                "paper_move": "Describe v5 as a preregistered pending held-out test rather than a successful predictor.",
-                "writing_rule": "Update only after both unspent final splits pass the frozen evaluator.",
+                "paper_move": "Describe v5 as a preregistered completed negative held-out boundary rather than a successful predictor.",
+                "writing_rule": "Preserve both failed final gates and open a new protocol before any repaired predictor claim.",
             },
             {
                 "sequence_step": 4,
@@ -277,8 +277,8 @@ def build_rebuttal_response_pack(claims: pd.DataFrame, objections: pd.DataFrame)
                 "response_posture": claim_lookup.loc[
                     "TCD-3-predictive-condition-generalization", "current_decision"
                 ],
-                "evidence_to_cite": "discussion/e11_condition_score_v5_validation_freeze.md; discussion/e11_condition_score_v5_final_evaluation.md; discussion/e11_condition_score_v5_reviewer_failure_response.md",
-                "manuscript_edit": "Describe v5 as a frozen pending held-out test; keep v2/v3/v4 as spent failures and do not use final rows for refit or score selection.",
+                "evidence_to_cite": "discussion/e11_condition_score_v5_validation_freeze.md; discussion/e11_condition_score_v5_final_evaluation.md; discussion/e11_condition_score_v5_reviewer_failure_response.md; discussion/e11_condition_score_v5_direction_guardrail_failure_audit.md",
+                "manuscript_edit": "Describe v5 as a frozen completed held-out failure boundary; keep v2/v3/v4/v5 finals as spent failures and do not use final rows for refit or score selection.",
                 "missing_gate": objection_lookup.loc["RO-2-score-cherry-picking", "missing_gate"],
                 "forbidden_rebuttal": objection_lookup.loc["RO-2-score-cherry-picking", "forbidden_shortcut"],
             },
@@ -350,10 +350,10 @@ def build_manuscript_edit_queue(claims: pd.DataFrame, gaps: pd.DataFrame) -> pd.
                 ],
             },
             {
-                "edit_id": "MEQ-3-v5-pending-test-language",
+                "edit_id": "MEQ-3-v5-completed-boundary-language",
                 "target_section": "Predictive condition / limitations",
                 "claim_id": "TCD-3-predictive-condition-generalization",
-                "edit_action": "Describe the v5 score as a frozen pending test and cite the registered final evaluator plus reviewer failure response.",
+                "edit_action": "Describe the v5 score as a frozen completed negative boundary and cite the registered final evaluator, reviewer failure response, and direction-guardrail failure audit.",
                 "acceptance_check": gap_lookup.loc["P0-PredictiveCondition", "acceptance_gate"],
                 "current_decision": claim_lookup.loc[
                     "TCD-3-predictive-condition-generalization", "current_decision"
@@ -405,8 +405,8 @@ def write_discussion(
 
 This generated audit is the paper-level claim contract. It is stricter than the
 quantitative claim ledger: each row says whether a top-conference manuscript can
-write a claim now, must present it as a registered pending test, or must block
-the wording until a named gate completes. It is generated from existing
+write a claim now, must present it as a registered pending or completed negative
+boundary, or must block the wording until a named gate completes. It is generated from existing
 proof-obligation, v5 final-evaluator, natural-negative, tuned-benchmark, and
 submission-reproducibility tables; it does not add new empirical results.
 
@@ -437,8 +437,8 @@ submission-reproducibility tables; it does not add new empirical results.
 ## Operating Rule
 
 Allowed manuscript wording is limited to rows whose `current_decision` starts
-with `supportable`. Rows marked `registered_not_ready` or `blocked` can be
-reported as protocols, pending tests, or claim boundaries only. Rows marked
+with `supportable`. Rows marked `blocked_completed_final_failed_boundary` or
+`blocked` can be reported as protocols, completed negative boundaries, or claim boundaries only. Rows marked
 `finite_null_candidate` can be reported only with their stated caveats. No row
 can be used as a stronger positive claim unless its decisive gate is rerun and
 this audit is regenerated.
@@ -474,7 +474,11 @@ def main() -> None:
                 "source_files": {name: path.as_posix() for name, path in SOURCE_FILES.items()},
                 "new_empirical_results": False,
                 "supportable_prefix": "supportable",
-                "blocked_decisions": ["registered_not_ready_wait_for_v5_finals", "blocked_partial_family", "blocked_protocol_pending"],
+                "blocked_decisions": [
+                    "blocked_completed_final_failed_boundary",
+                    "blocked_partial_family",
+                    "blocked_protocol_pending",
+                ],
                 "caveated_decisions": ["finite_null_candidate_with_caveats"],
                 "rebuttal_ready": True,
             },

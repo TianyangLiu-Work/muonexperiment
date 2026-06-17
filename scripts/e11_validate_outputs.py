@@ -473,7 +473,7 @@ def assert_top_conference_claim_decision_audit(
     expected_decisions = {
         "TCD-1-main-mechanism-theorem": "supportable_main_with_assumptions",
         "TCD-2-natural-drift-diagnostic": "supportable_diagnostic_only",
-        "TCD-3-predictive-condition-generalization": "registered_not_ready_wait_for_v5_finals",
+        "TCD-3-predictive-condition-generalization": "blocked_completed_final_failed_boundary",
         "TCD-4-natural-counterexample-or-finite-null": "finite_null_candidate_with_caveats",
         "TCD-5-optimizer-performance-benchmark": "blocked_protocol_pending",
         "TCD-6-artifact-reproducibility": "supportable_with_toolchain_caveat",
@@ -539,7 +539,7 @@ def assert_top_conference_claim_decision_audit(
     expected_edits = {
         "MEQ-1-theory-frontload-scope",
         "MEQ-2-diagnostic-caveat-next-to-results",
-        "MEQ-3-v5-pending-test-language",
+        "MEQ-3-v5-completed-boundary-language",
         "MEQ-4-natural-negative-incomplete-family",
         "MEQ-5-performance-benchmark-quarantine",
         "MEQ-6-artifact-review-caveat",
@@ -550,7 +550,7 @@ def assert_top_conference_claim_decision_audit(
     for phrase in [
         "worst-case-vs-realized distinction",
         "No result paragraph may convert matched-head-gain logit drift into tail-accuracy",
-        "frozen pending test",
+        "frozen completed negative boundary",
         "finite registered phase1 null candidate with quality and detectable-effect caveats",
         "quarantine all competitive optimizer wording",
         "preferred-LaTeX clean-checkout gap",
@@ -1086,6 +1086,13 @@ def main() -> None:
         Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "config.json",
         Path("discussion/e11_condition_score_v5_reviewer_failure_response.md"),
         Path("scripts/e11_write_condition_score_v5_reviewer_failure_response.py"),
+        Path("results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit") / "score_axis_contrast.csv",
+        Path("results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit") / "gate_boundary_summary.csv",
+        Path("results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit") / "mechanistic_diagnosis.csv",
+        Path("results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit") / "next_protocol_requirements.csv",
+        Path("results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit") / "config.json",
+        Path("discussion/e11_condition_score_v5_direction_guardrail_failure_audit.md"),
+        Path("scripts/e11_write_condition_score_v5_direction_guardrail_failure_audit.py"),
         Path("results/e11_natural_head_tail_boundary") / "search_registry.csv",
         Path("results/e11_natural_head_tail_boundary") / "primary_drift_scan.csv",
         Path("results/e11_natural_head_tail_boundary") / "secondary_outcome_scan.csv",
@@ -1448,6 +1455,10 @@ def main() -> None:
         "scripts/e11_write_condition_score_v5_final_power_audit.py",
         "e11-cifar-resnet-condition-score-v5-final-interpretation-plan:",
         "scripts/e11_write_condition_score_v5_final_interpretation_plan.py",
+        "e11-cifar-resnet-condition-score-v5-reviewer-failure-response:",
+        "scripts/e11_write_condition_score_v5_reviewer_failure_response.py",
+        "e11-cifar-resnet-condition-score-v5-direction-guardrail-failure-audit:",
+        "scripts/e11_write_condition_score_v5_direction_guardrail_failure_audit.py",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -1535,6 +1546,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-v5-final-power-audit # pre-output detectable-effect audit for v5 final residual-Spearman gates",
         "make e11-cifar-resnet-condition-score-v5-final-interpretation-plan # lock the v5 final outcome-to-claim state machine before outputs exist",
         "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response # map v5 final pass/fail modes to reviewer-safe claim downgrades",
+        "make e11-cifar-resnet-condition-score-v5-direction-guardrail-failure-audit # diagnose completed v5 final boundary failures across residual ranking and direction threshold",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
         "make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
@@ -1713,7 +1725,7 @@ def main() -> None:
         "results/e11_artifact_review_packet/local_state_contract.csv",
         "results/e11_artifact_review_packet/reviewer_response.csv",
         "scripts/e11_write_artifact_review_packet.py",
-        "registered-not-ready",
+        "completed-negative-boundary",
         "supportable theorem",
         "rebuttal-readiness contract",
         "scripts/e11_write_submission_repro_audit.py",
@@ -1870,7 +1882,7 @@ def main() -> None:
         "The supported claim is local matched-head-gain tail-example logit drift",
         "The theorem is a local worst-case comparison",
         "not a global optimizer theorem",
-        "v5 condition-score program is a registered pending test",
+        "v5 condition-score program is a registered completed negative boundary",
         "observed \\(26/26\\) settings",
         "\\texttt{raw\\_worse\\_rows=0}",
         "finite registered phase1 null candidate",
@@ -1957,7 +1969,9 @@ def main() -> None:
         "the direction-axis residual Spearman is positive",
         "the raw Frobenius-amplitude axis reverses",
         "a below-one direction guardrail is not a residual layer-risk ranking claim",
-        "the unspent ResNeXt50-32x4d architecture final and CIFAR-10 cross-partition data final must both pass",
+        "completed final gates failed",
+        "ResNeXt50-32x4d residual ranking survives but direction threshold fails",
+        "CIFAR-10 cross-partition residual ranking reverses but direction threshold survives",
         "figures/cifar100_resnet_imbalance_sweep.png",
         "figures/cifar100_resnet_lt_standard_eval.png",
         "figures/cifar100_resnet_lt_recipe_benchmark.png",
@@ -4249,7 +4263,7 @@ def main() -> None:
         and v5_readiness_lookup["predictive-condition claim"] == "not_ready"
         and "frozen validation-selected score"
         in str(v5_readiness_evidence["predictive-condition claim"])
-        and "final split outputs are still absent"
+        and "completed final gates are evaluated separately"
         in str(v5_readiness_evidence["predictive-condition claim"])
     ):
         raise AssertionError(
@@ -4271,7 +4285,7 @@ def main() -> None:
             "Falsifiable Predictions",
             "Required Ablation Matrix",
             "Claim Readiness Ledger",
-            "frozen validation-selected score is eligible for final evaluation runs",
+            "frozen validation-selected score became eligible for final evaluation runs",
             "run the v5 final splits with the",
             "Blocked now: fitting, selecting, or reweighting any v5 score on v2/v3/v4 final",
         ],
@@ -4770,7 +4784,7 @@ def main() -> None:
         and v5_response_objections["remaining_evidence"].astype(str).str.len().gt(25).all()
         and set(v5_response_next["priority"]).issuperset({"P0", "P1"})
         and set(v5_response_gate_snapshot["gate_id"]) == set(v5_final_gates["gate_id"])
-        and {"V5-RFR-0-pending-outputs", "V5-RFR-4-direction-guardrail-failure", "V5-RFR-current-p0-not-ready"}.issubset(
+        and {"V5-RFR-2-data-transport-boundary", "V5-RFR-4-direction-guardrail-failure", "V5-RFR-current-p0-not-ready"}.issubset(
             set(v5_response_active["active_failure_mode_id"])
         )
         and v5_response_active["forbidden_current_wording"].astype(str).str.len().gt(25).all()
@@ -4798,6 +4812,98 @@ def main() -> None:
             "Claim Downgrade Actions",
             "Next Evidence Queue",
             "V5-RFR-8-post-final-leakage-pressure",
+        ],
+    )
+    v5_direction_dir = Path("results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit")
+    v5_direction_axis = pd.read_csv(v5_direction_dir / "score_axis_contrast.csv")
+    v5_direction_gates = pd.read_csv(v5_direction_dir / "gate_boundary_summary.csv")
+    v5_direction_diagnosis = pd.read_csv(v5_direction_dir / "mechanistic_diagnosis.csv")
+    v5_direction_requirements = pd.read_csv(v5_direction_dir / "next_protocol_requirements.csv")
+    v5_direction_config = json.loads((v5_direction_dir / "config.json").read_text(encoding="utf-8"))
+    expected_v5_direction_axes = {
+        "architecture_primary_residual_ranking",
+        "architecture_direction_threshold_guardrail",
+        "architecture_early_layer_prior_baseline",
+        "architecture_source_observed_positive_control",
+        "data_primary_residual_ranking",
+        "data_direction_threshold_guardrail",
+        "data_early_layer_prior_baseline",
+        "data_source_observed_positive_control",
+    }
+    expected_v5_direction_diagnoses = {
+        "V5-DGF-1-architecture-residual-ranking-survives",
+        "V5-DGF-2-architecture-direction-threshold-fails",
+        "V5-DGF-3-data-residual-ranking-reverses",
+        "V5-DGF-4-data-direction-threshold-survives",
+        "V5-DGF-5-failure-modes-are-orthogonal",
+        "V5-DGF-6-controls-do-not-rescue-p0",
+    }
+    expected_v5_direction_requirements = {
+        "V5-DGF-NP1-separate-endpoints",
+        "V5-DGF-NP2-separate-transport-axes",
+        "V5-DGF-NP3-no-post-final-repair",
+        "V5-DGF-NP4-direction-transport-term",
+        "V5-DGF-NP5-preserve-negative-boundaries",
+    }
+    arch_primary_axis = v5_direction_axis[
+        v5_direction_axis["axis_id"].eq("architecture_primary_residual_ranking")
+    ].iloc[0]
+    arch_direction_axis = v5_direction_axis[
+        v5_direction_axis["axis_id"].eq("architecture_direction_threshold_guardrail")
+    ].iloc[0]
+    data_primary_axis = v5_direction_axis[
+        v5_direction_axis["axis_id"].eq("data_primary_residual_ranking")
+    ].iloc[0]
+    data_direction_axis = v5_direction_axis[
+        v5_direction_axis["axis_id"].eq("data_direction_threshold_guardrail")
+    ].iloc[0]
+    active_direction_diagnoses = set(
+        v5_direction_diagnosis[v5_direction_diagnosis["active_failure_mode"].eq("yes")][
+            "diagnosis_id"
+        ]
+    )
+    if not (
+        set(v5_direction_axis["axis_id"]) == expected_v5_direction_axes
+        and arch_primary_axis["gate_status"] == "pass"
+        and 0.42 < float(arch_primary_axis["mean_spearman"]) < 0.44
+        and float(arch_primary_axis["spearman_ci95_low"]) > 0.0
+        and arch_direction_axis["gate_status"] == "fail"
+        and 0.83 < float(arch_direction_axis["threshold_accuracy"]) < 0.85
+        and 0.68 < float(arch_direction_axis["threshold_ci95_low"]) < 0.69
+        and data_primary_axis["gate_status"] == "fail"
+        and -0.70 < float(data_primary_axis["mean_spearman"]) < -0.67
+        and float(data_primary_axis["spearman_ci95_high"]) < 0.0
+        and data_direction_axis["gate_status"] == "pass"
+        and float(data_direction_axis["threshold_accuracy"]) == 1.0
+        and float(data_direction_axis["threshold_ci95_low"]) == 1.0
+        and set(v5_direction_gates["gate_id"]) == set(v5_final_gates["gate_id"])
+        and "yes" in set(v5_direction_gates["blocks_p0"])
+        and set(v5_direction_diagnosis["diagnosis_id"]) == expected_v5_direction_diagnoses
+        and {"V5-DGF-2-architecture-direction-threshold-fails", "V5-DGF-3-data-residual-ranking-reverses"}.issubset(
+            active_direction_diagnoses
+        )
+        and set(v5_direction_requirements["requirement_id"]) == expected_v5_direction_requirements
+        and v5_direction_config["current_p0_status"] == "not_ready"
+        and set(v5_direction_config["final_splits"]) == expected_v5_final_split_ids
+        and "no final-row tuning or score repair" in str(v5_direction_config["analysis_scope"])
+    ):
+        raise AssertionError("condition-score v5 direction-guardrail failure audit must preserve the completed-final boundary")
+    v5_direction_text = Path("discussion/e11_condition_score_v5_direction_guardrail_failure_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "condition-score v5 direction-guardrail failure audit",
+        v5_direction_text,
+        [
+            "E11 Condition-Score V5 Direction-Guardrail Failure Audit",
+            "completed final boundary diagnosis",
+            "residual ranking survives",
+            "direction-threshold guardrail fails",
+            "residual ranking reverses",
+            "orthogonal final failures",
+            "P0 remains not_ready",
+            "no score repair",
+            "new unspent protocol",
         ],
     )
     natural_boundary_dir = Path("results/e11_natural_head_tail_boundary")
@@ -6612,7 +6718,7 @@ def main() -> None:
         "Pre-output detectable-effect and outcome-state audit",
         "make e11-natural-negative-search-phase1-interim-synthesis",
         "discussion/e11_top_conference_claim_decision_audit.md",
-        "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract",
+        "Paper-level supportable/completed-negative-boundary/blocked claim and rebuttal-readiness contract",
         "discussion/e11_manuscript_claim_trace.md",
         "Main-tex claim trace that maps every top-conference claim decision to anchors",
         "discussion/e11_artifact_review_packet.md",
@@ -6709,7 +6815,7 @@ def main() -> None:
         "PDF/build/test gates pass",
         "CIFAR-100-LT ResNet18 local diagnostics",
         "negative NS-Muon final-training pilot",
-        "registered-not-ready until unspent v5 ResNeXt50-32x4d and CIFAR-10 cross-partition final splits finish",
+        "completed v5 final gates failed under the registered protocol",
     ]
     missing_completion_audit = [
         phrase for phrase in required_completion_audit_phrases if phrase not in completion_audit
@@ -6738,7 +6844,7 @@ def main() -> None:
         "CIFAR-100-LT NS-Muon final-training pilot is negative",
         "registered tuned benchmark protocol is still not_ready",
         "All-layer ResNet18 JVP diagnostics are present",
-        "v5 ResNeXt50-32x4d and CIFAR-10 cross-partition final condition-score outputs are still pending",
+        "v5 ResNeXt50-32x4d and CIFAR-10 cross-partition final condition-score outputs are complete and failed the P0 gate family",
     ]
     missing_end_self_review = [
         phrase for phrase in required_end_self_review_phrases if phrase not in end_self_review
@@ -7297,7 +7403,7 @@ def main() -> None:
         "discussion/e11_cifar100_resnet_condition_score_next.md",
         "discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md",
         "discussion/e11_condition_score_fresh_protocol.md",
-        "v5 has frozen a transport-normalized validation score",
+        "v5 has consumed both frozen final splits",
         "discussion/e11_condition_score_v4_protocol.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
         "discussion/e11_matrix_block_theorem_proof.md",
@@ -7310,7 +7416,7 @@ def main() -> None:
         "discussion/e11_condition_score_v5_theory_to_score_map.md",
         "discussion/e11_condition_score_v5_validation_freeze.md",
         "discussion/e11_condition_score_v5_final_evaluation.md",
-        "pre-registered final evaluator",
+        "completed frozen final evaluator",
         "discussion/e11_condition_score_v5_final_interpretation_plan.md",
         "outcome-to-claim state machine",
         "discussion/e11_condition_score_v5_reviewer_failure_response.md",
@@ -7318,6 +7424,14 @@ def main() -> None:
         "current_gate_snapshot.csv",
         "active_failure_modes.csv",
         "V5-RFR-4-direction-guardrail-failure",
+        "discussion/e11_condition_score_v5_direction_guardrail_failure_audit.md",
+        "score_axis_contrast.csv",
+        "gate_boundary_summary.csv",
+        "mechanistic_diagnosis.csv",
+        "next_protocol_requirements.csv",
+        "scripts/e11_write_condition_score_v5_direction_guardrail_failure_audit.py",
+        "V5-DGF-2-architecture-direction-threshold-fails",
+        "V5-DGF-3-data-residual-ranking-reverses",
         "transport-normalized score contract",
         "transport-stable sandwich residual proposition",
         "theorem terms to measurable score features",
@@ -7336,6 +7450,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-v5-final-power-audit",
         "make e11-cifar-resnet-condition-score-v5-final-interpretation-plan",
         "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response",
+        "make e11-cifar-resnet-condition-score-v5-direction-guardrail-failure-audit",
         "CIFAR-10 mixed final data split fails",
         "data-partition reversal mechanism",
         "discussion/e11_natural_head_tail_boundary.md",
@@ -7419,7 +7534,7 @@ def main() -> None:
             "Paper Sequence",
             "TCD-1-main-mechanism-theorem",
             "supportable_main_with_assumptions",
-            "registered_not_ready_wait_for_v5_finals",
+            "blocked_completed_final_failed_boundary",
             "finite_null_candidate_with_caveats",
             "blocked_protocol_pending",
             "v5_p0_predictive_condition_claim=not_ready",
@@ -7469,7 +7584,7 @@ def main() -> None:
             "Claim Trace",
             "Blocked Phrase Audit",
             "present_as_supportable_scoped_claim",
-            "present_as_registered_not_ready",
+            "present_as_completed_negative_boundary",
             "present_as_finite_null_candidate_with_caveats",
             "present_as_blocked_protocol_context",
             "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server",
@@ -7508,6 +7623,7 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-v5-final-power-audit" not in readme
         or "make e11-cifar-resnet-condition-score-v5-final-interpretation-plan" not in readme
         or "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response" not in readme
+        or "make e11-cifar-resnet-condition-score-v5-direction-guardrail-failure-audit" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-protocol" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-settings" not in readme
@@ -7655,7 +7771,7 @@ def main() -> None:
     artifact_local_text = " ".join(artifact_local_state.astype(str).agg(" ".join, axis=1).tolist())
     for phrase in [
         "Do not stage or commit this file",
-        "pending_not_required_for_current_claims",
+        "Both frozen final split layer tables are present",
         "not_required_for_current_artifact_review",
     ]:
         if phrase not in artifact_local_text:
@@ -7664,8 +7780,8 @@ def main() -> None:
     for phrase in [
         "preferred venue-toolchain reproducibility",
         "serverREADME.md",
-        "No. The current submitted evidence bundle is checked by CPU-side Make targets",
-        "Do not use not_run, not_ready, partial-family, or finite phase1 outputs as broader positive evidence",
+        "including the completed v5 final boundary readout",
+        "Do not use failed v5 finals, not_ready gates, partial-family, or finite phase1 outputs as broader positive evidence",
         "Do not infer broad optimizer-performance, accuracy, or general predictive-condition claims",
     ]:
         if phrase not in artifact_response_text:

@@ -9,7 +9,7 @@ resolve before their outputs exist. The audit records Fisher-z resolution,
 mean-Spearman MDE, and negative transport boundary wording before either final
 split is interpreted.
 
-Current final split outputs generated: 1/2.
+Current final split outputs generated: 2/2.
 
 Under the reference design, each transfer correlation has about 21
 layer points and the final summary averages 9 source/target
@@ -25,7 +25,7 @@ evaluator's summary CI lower endpoint can exclude zero.
 | split_id                                         | split_role                      | current_output_status   |   reference_points_per_transfer |   reference_transfer_pairs | primary_residual_gate                      |
 |:-------------------------------------------------|:--------------------------------|:------------------------|--------------------------------:|---------------------------:|:-------------------------------------------|
 | v5_final_architecture_resnext50_32x4d_cifar100lt | v5_final_heldout_architecture   | generated               |                              21 |                          9 | mean Spearman CI lower endpoint above zero |
-| v5_final_data_cifar10lt_cross_partition          | v5_final_heldout_data_partition | not_run                 |                              21 |                          9 | mean Spearman CI lower endpoint above zero |
+| v5_final_data_cifar10lt_cross_partition          | v5_final_heldout_data_partition | generated               |                              21 |                          9 | mean Spearman CI lower endpoint above zero |
 
 ## Pairwise Fisher-Z Resolution
 

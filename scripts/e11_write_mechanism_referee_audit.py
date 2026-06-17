@@ -204,10 +204,10 @@ def build_alternative_explanations(e: dict[str, object]) -> pd.DataFrame:
                 f"{ci(residual_observed, 'spearman_ci95_low', 'spearman_ci95_high')}, "
                 f"but scaled-JVP residual Spearman is {fmt(residual_scaled_jvp['mean_spearman'])} "
                 f"{ci(residual_scaled_jvp, 'spearman_ci95_low', 'spearman_ci95_high')}. "
-                "The v5 transport-normalized score is frozen but final gates are still not_run/not_ready."
+                "The v5 transport-normalized score is frozen and the completed final gates failed: ResNeXt50 direction threshold failed, while CIFAR-10 residual ranking reversed."
             ),
-            "remaining_risk": "A broad predictive-condition claim depends on the unspent v5 final splits.",
-            "manuscript_action": "Keep the theorem as a mechanism boundary and the score as registered-not-ready.",
+            "remaining_risk": "A broad predictive-condition claim is blocked by the completed v5 final failures.",
+            "manuscript_action": "Keep the theorem as a mechanism boundary and the score as a completed negative final boundary.",
             "forbidden_wording": "nrank(G_H)>ssrank(B_T,A_T) predicts unseen layer risk by itself",
         },
         {
@@ -216,9 +216,9 @@ def build_alternative_explanations(e: dict[str, object]) -> pd.DataFrame:
             "current_status": "controlled_by_registry",
             "decisive_evidence": (
                 "The v5 validation-freeze artifact freezes the score before final rows exist; "
-                "the final evaluator currently reports both registered final split outputs as not_run."
+                "the final evaluator now reports both registered final split outputs and preserves the failed gates without score repair."
             ),
-            "remaining_risk": "The score still may fail; the response matrix must preserve negative outcomes.",
+            "remaining_risk": "Any future score repair must use a new unspent protocol.",
             "manuscript_action": "State spent-final quarantine and no-refit rules in the appendix and rebuttal packet.",
             "forbidden_wording": "final rows influenced the v5 score formula or threshold",
         },
@@ -394,7 +394,7 @@ def build_falsification_triggers(e: dict[str, object]) -> pd.DataFrame:
     rows = [
         {
             "trigger_id": "FT-1-v5-final-fails",
-            "trigger_condition": "Either unspent v5 final split fails residual, direction, baseline-dominance, or reporting gates.",
+            "trigger_condition": "Either registered v5 final split fails residual, direction, baseline-dominance, or reporting gates.",
             "current_status": v5_status_text,
             "required_action": "Downgrade predictive-condition wording under the frozen reviewer failure response.",
             "claim_downgrade": "from registered-not-ready to fixed-split diagnostic or failed predictive condition",

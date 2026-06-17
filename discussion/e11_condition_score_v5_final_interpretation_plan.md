@@ -14,7 +14,7 @@ baseline-dominance failures, and local-mechanism-only outcomes.
 | split_id                                         | split_role                      | current_output_status   | claim_gate_group   | can_be_replaced   | can_be_dropped_after_result   |
 |:-------------------------------------------------|:--------------------------------|:------------------------|:-------------------|:------------------|:------------------------------|
 | v5_final_architecture_resnext50_32x4d_cifar100lt | v5_final_heldout_architecture   | generated               | required_for_p0    | no                | no                            |
-| v5_final_data_cifar10lt_cross_partition          | v5_final_heldout_data_partition | not_run                 | required_for_p0    | no                | no                            |
+| v5_final_data_cifar10lt_cross_partition          | v5_final_heldout_data_partition | generated               | required_for_p0    | no                | no                            |
 
 ## Gate Contract
 

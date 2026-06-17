@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 427101,
-      "size": "417.1 KB"
+      "size_bytes": 428364,
+      "size": "418.3 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2596800,
+      "size_bytes": 2628161,
       "size": "2.5 MB"
     },
     {
@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1506509,
-      "size": "1.4 MB"
+      "size_bytes": 1541816,
+      "size": "1.5 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 285638892,
-      "size": "272.4 MB"
+      "size_bytes": 286837370,
+      "size": "273.5 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 33393634,
-      "size": "31.8 MB"
+      "size_bytes": 33574674,
+      "size": "32.0 MB"
     },
     {
       "path": "configs",
@@ -54,15 +54,15 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5832420,
+      "size_bytes": 5832963,
       "size": "5.6 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 18584,
-      "size": "18.1 KB"
+      "size_bytes": 18885,
+      "size": "18.4 KB"
     },
     {
       "path": ".gitignore",
@@ -748,7 +748,7 @@
     {
       "path": "results/e11_theory_proof_obligation_register/proof_obligations.csv",
       "rows": 6,
-      "size": "4.4 KB"
+      "size": "4.5 KB"
     },
     {
       "path": "results/e11_theory_proof_obligation_register/assumption_stress_tests.csv",
@@ -818,7 +818,7 @@
     {
       "path": "results/e11_condition_score_v5_theory_to_score_map/claim_readiness_ledger.csv",
       "rows": 5,
-      "size": "700 B"
+      "size": "711 B"
     },
     {
       "path": "results/e11_condition_score_ablation/score_ablation_summary.csv",
@@ -888,7 +888,7 @@
     {
       "path": "results/e11_artifact_review_packet/command_matrix.csv",
       "rows": 8,
-      "size": "2.7 KB"
+      "size": "2.8 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/gate_matrix.csv",
@@ -898,12 +898,12 @@
     {
       "path": "results/e11_artifact_review_packet/local_state_contract.csv",
       "rows": 7,
-      "size": "1.5 KB"
+      "size": "1.4 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/reviewer_response.csv",
       "rows": 6,
-      "size": "1.9 KB"
+      "size": "2.0 KB"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv",
@@ -922,8 +922,8 @@
     },
     {
       "path": "results/e11_condition_score_v5_protocol/final_score_evaluation/final_gate_report.csv",
-      "rows": 6,
-      "size": "1.1 KB"
+      "rows": 9,
+      "size": "1.6 KB"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/final_power_audit/split_power_design.csv",
@@ -953,7 +953,7 @@
     {
       "path": "results/e11_condition_score_v5_protocol/final_interpretation_plan/final_split_status.csv",
       "rows": 2,
-      "size": "800 B"
+      "size": "802 B"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/final_interpretation_plan/final_gate_contract.csv",
@@ -973,17 +973,17 @@
     {
       "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/final_split_output_status.csv",
       "rows": 2,
-      "size": "771 B"
+      "size": "773 B"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/current_gate_snapshot.csv",
-      "rows": 6,
-      "size": "1.1 KB"
+      "rows": 9,
+      "size": "1.6 KB"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/active_failure_modes.csv",
       "rows": 3,
-      "size": "1002 B"
+      "size": "983 B"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/failure_mode_register.csv",
@@ -998,12 +998,32 @@
     {
       "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/claim_downgrade_actions.csv",
       "rows": 6,
-      "size": "1.9 KB"
+      "size": "2.0 KB"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/next_evidence_queue.csv",
       "rows": 5,
-      "size": "1.1 KB"
+      "size": "1.2 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit/score_axis_contrast.csv",
+      "rows": 8,
+      "size": "3.1 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit/gate_boundary_summary.csv",
+      "rows": 9,
+      "size": "1.9 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit/mechanistic_diagnosis.csv",
+      "rows": 6,
+      "size": "2.1 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit/next_protocol_requirements.csv",
+      "rows": 5,
+      "size": "1.5 KB"
     },
     {
       "path": "results/e11_natural_head_tail_boundary/search_registry.csv",
@@ -1223,7 +1243,7 @@
     {
       "path": "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
       "rows": 6,
-      "size": "4.4 KB"
+      "size": "4.5 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv",
@@ -1233,7 +1253,7 @@
     {
       "path": "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
       "rows": 5,
-      "size": "3.1 KB"
+      "size": "3.2 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv",
@@ -1263,17 +1283,17 @@
     {
       "path": "results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv",
       "rows": 9,
-      "size": "5.5 KB"
+      "size": "5.7 KB"
     },
     {
       "path": "results/e11_mechanism_referee_audit/theory_measurement_contract.csv",
       "rows": 6,
-      "size": "3.1 KB"
+      "size": "3.3 KB"
     },
     {
       "path": "results/e11_mechanism_referee_audit/falsification_trigger_matrix.csv",
       "rows": 6,
-      "size": "2.6 KB"
+      "size": "2.8 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv",
@@ -1719,7 +1739,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "92.2 KB"
+      "size": "93.7 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1739,11 +1759,11 @@
     },
     {
       "path": "discussion/e11_quantitative_claim_ledger.md",
-      "size": "19.8 KB"
+      "size": "21.4 KB"
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "60.9 KB"
+      "size": "61.5 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -1771,7 +1791,7 @@
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
-      "size": "14.8 KB"
+      "size": "15.3 KB"
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
@@ -1783,19 +1803,19 @@
     },
     {
       "path": "discussion/e11_top_conference_gap_register.md",
-      "size": "55.4 KB"
+      "size": "56.3 KB"
     },
     {
       "path": "discussion/e11_top_conference_claim_decision_audit.md",
-      "size": "28.1 KB"
+      "size": "29.2 KB"
     },
     {
       "path": "discussion/e11_manuscript_claim_trace.md",
-      "size": "7.0 KB"
+      "size": "7.2 KB"
     },
     {
       "path": "discussion/e11_mechanism_referee_audit.md",
-      "size": "25.5 KB"
+      "size": "28.4 KB"
     },
     {
       "path": "discussion/e11_natural_head_tail_boundary.md",
@@ -1983,11 +2003,11 @@
     },
     {
       "path": "discussion/e11_condition_score_v5_theory_to_score_map.md",
-      "size": "20.2 KB"
+      "size": "20.3 KB"
     },
     {
       "path": "discussion/e11_condition_score_ablation.md",
-      "size": "18.9 KB"
+      "size": "19.0 KB"
     },
     {
       "path": "discussion/e11_condition_score_v5_validation_cifar100_mod4_partition.md",
@@ -1999,7 +2019,7 @@
     },
     {
       "path": "discussion/e11_condition_score_v5_final_evaluation.md",
-      "size": "5.0 KB"
+      "size": "6.8 KB"
     },
     {
       "path": "discussion/e11_condition_score_v5_final_power_audit.md",
@@ -2011,7 +2031,11 @@
     },
     {
       "path": "discussion/e11_condition_score_v5_reviewer_failure_response.md",
-      "size": "18.1 KB"
+      "size": "19.6 KB"
+    },
+    {
+      "path": "discussion/e11_condition_score_v5_direction_guardrail_failure_audit.md",
+      "size": "14.5 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_standard_eval.md",

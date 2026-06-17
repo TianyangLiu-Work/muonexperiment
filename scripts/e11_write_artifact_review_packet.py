@@ -62,7 +62,7 @@ def command_matrix() -> pd.DataFrame:
             "purpose": "Regenerate current head-to-tail paper Markdown, TeX tables, manifest, and review packets.",
             "compute_mode": "CPU",
             "expected_state": "all paper-facing generated artifacts are refreshed from committed result CSVs",
-            "claim_boundary": "Does not inspect pending final GPU outputs unless their result files already exist.",
+            "claim_boundary": "Regenerates from existing result files and does not launch GPU reruns.",
         },
         {
             "command_id": "AR-C3",
@@ -91,18 +91,18 @@ def command_matrix() -> pd.DataFrame:
         {
             "command_id": "AR-G1",
             "command": f"make PYTHON={PYTHON_CMD} e11-cifar-resnet-condition-score-v5-architecture-results",
-            "purpose": "Submit the unspent ResNeXt50-32x4d final architecture split.",
+            "purpose": "Regenerate the registered ResNeXt50-32x4d final architecture split if a new run is explicitly needed.",
             "compute_mode": "GPU via Slurm",
-            "expected_state": "pending or running until Slurm writes final architecture layer tables",
-            "claim_boundary": "Not required to reproduce current paper claims; required only before a v5 P0 predictive-condition claim.",
+            "expected_state": "current final architecture layer tables are already present in the committed evidence bundle",
+            "claim_boundary": "Not required to reproduce current paper claims; the completed v5 final already failed its registered P0 gates.",
         },
         {
             "command_id": "AR-G2",
             "command": f"make PYTHON={PYTHON_CMD} e11-cifar-resnet-condition-score-v5-data-results",
-            "purpose": "Submit the unspent CIFAR-10 cross-partition final data split.",
+            "purpose": "Regenerate the registered CIFAR-10 cross-partition final data split if a new run is explicitly needed.",
             "compute_mode": "GPU via Slurm",
-            "expected_state": "pending or running until Slurm writes final data layer tables",
-            "claim_boundary": "Not required to reproduce current paper claims; required only before a v5 P0 predictive-condition claim.",
+            "expected_state": "current final data layer tables are already present in the committed evidence bundle",
+            "claim_boundary": "Not required to reproduce current paper claims; the completed v5 final already failed its registered P0 gates.",
         },
         {
             "command_id": "AR-G3",
@@ -200,8 +200,8 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
                 if final_arch_layer_summary.exists() and final_data_layer_summary.exists()
                 else "pending_not_required_for_current_claims"
             ),
-            "evidence": "The frozen final evaluator remains not_run until both unspent final split layer tables exist.",
-            "reviewer_instruction": "Do not upgrade the v5 predictive-condition claim until both Slurm jobs finish and the frozen evaluator passes.",
+            "evidence": "Both frozen final split layer tables are present; the frozen evaluator reports failed registered gates and P0 remains not_ready.",
+            "reviewer_instruction": "Do not upgrade the v5 predictive-condition claim; any score repair needs a new unspent protocol.",
         },
         {
             "item": "GPU dependence",
@@ -235,15 +235,15 @@ def reviewer_response() -> pd.DataFrame:
         },
         {
             "objection": "Do reviewers need GPUs to check the current paper?",
-            "answer": "No. The current submitted evidence bundle is checked by CPU-side Make targets; GPUs via Slurm are only for pending new evidence.",
+            "answer": "No. The current submitted evidence bundle, including the completed v5 final boundary readout, is checked by CPU-side Make targets; GPUs via Slurm are only for new reruns or new evidence.",
             "status": "cpu_review_path",
-            "forbidden_shortcut": "Do not use pending GPU jobs to support current paper claims before their frozen evaluators pass.",
+            "forbidden_shortcut": "Do not treat GPU reruns as a way to repair the already observed frozen v5 final failures.",
         },
         {
             "objection": "Why are v5 final and natural-negative claims still limited?",
-            "answer": "The unspent v5 final splits are still pending. The natural-negative phase1 family is complete and supports only a finite registered null candidate with detectable-effect and tail-quality caveats.",
+            "answer": "The v5 final splits are complete and failed the registered P0 gate family. The natural-negative phase1 family is complete and supports only a finite registered null candidate with detectable-effect and tail-quality caveats.",
             "status": "claim_boundary_preserved",
-            "forbidden_shortcut": "Do not use not_run, not_ready, partial-family, or finite phase1 outputs as broader positive evidence.",
+            "forbidden_shortcut": "Do not use failed v5 finals, not_ready gates, partial-family, or finite phase1 outputs as broader positive evidence.",
         },
         {
             "objection": "What scientific claim is actually reproducible now?",

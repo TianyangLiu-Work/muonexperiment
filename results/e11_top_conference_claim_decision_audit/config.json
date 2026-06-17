@@ -13,7 +13,7 @@
   "new_empirical_results": false,
   "supportable_prefix": "supportable",
   "blocked_decisions": [
-    "registered_not_ready_wait_for_v5_finals",
+    "blocked_completed_final_failed_boundary",
     "blocked_partial_family",
     "blocked_protocol_pending"
   ],

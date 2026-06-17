@@ -1,5 +1,5 @@
 reviewer_objection_id,objection,response_table,decisive_artifact,remaining_evidence
-RFR-O1-final-evidence,The final predictive-condition claim is not yet evidenced.,failure_mode_register.csv,final_score_evaluation/final_gate_report.csv,Wait for registered ResNeXt50-32x4d and CIFAR-10 cross-partition outputs.
+RFR-O1-final-evidence,The final predictive-condition claim is not yet evidenced.,failure_mode_register.csv,final_score_evaluation/final_gate_report.csv,Both registered final outputs are now consumed; preserve failed gates and use a new unspent protocol for any repair.
 RFR-O2-generality,Positive finals may still be too narrow for broad optimizer or dataset claims.,claim_downgrade_actions.csv,outcome_interpretation_ladder.csv,Add a separately registered larger-dataset or architecture-family protocol.
 RFR-O3-baselines,The frozen score may not beat a simple early-layer nuisance prior.,failure_mode_register.csv,final_score_summary.csv,Keep baseline-dominance as a required final gate.
 RFR-O4-leakage,The score may have been repaired after seeing final rows.,claim_downgrade_actions.csv,validation_score_freeze/freeze_status.csv,"Preserve frozen score identity, split registry, and no-retuning language."

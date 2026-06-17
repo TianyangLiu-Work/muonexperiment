@@ -44,11 +44,11 @@ CLAIM_ANCHORS: dict[str, dict[str, object]] = {
         "main_tex_location": "limitations and appendix condition-score audit",
         "required_anchors": [
             "v5 validation-only split freezes a transport-normalized candidate",
-            "this remains validation evidence",
-            "unspent ResNeXt50-32x4d architecture final and CIFAR-10 cross-partition data final must both pass",
-            "registered pending test",
+            "completed final gates failed",
+            "ResNeXt50-32x4d residual ranking survives but direction threshold fails",
+            "CIFAR-10 cross-partition residual ranking reverses but direction threshold survives",
         ],
-        "trace_status": "present_as_registered_not_ready",
+        "trace_status": "present_as_completed_negative_boundary",
     },
     "TCD-4-natural-counterexample-or-finite-null": {
         "main_tex_location": "limitations",
@@ -171,7 +171,7 @@ def main() -> None:
 
     text = f"""# E11 Manuscript Claim Trace
 
-This generated trace links the paper-level top-conference claim decisions to explicit `main.tex` anchors. It does not add empirical evidence; it checks that the manuscript presents supportable claims as scoped claims, registered claims as pending tests, and blocked claims only as limitations or protocols.
+This generated trace links the paper-level top-conference claim decisions to explicit `main.tex` anchors. It does not add empirical evidence; it checks that the manuscript presents supportable claims as scoped claims, completed negative boundaries as negative boundaries, and blocked claims only as limitations or protocols.
 
 ## Claim Trace
 
@@ -183,7 +183,7 @@ This generated trace links the paper-level top-conference claim decisions to exp
 
 ## Operating Rule
 
-Every `supportable` decision must have a local scoped manuscript anchor. Every `registered_not_ready` or `blocked` decision must have pending, incomplete, negative-boundary, or caveat wording in `main.tex`, and the blocked positive wording from the top-conference claim decision matrix must be absent.
+Every `supportable` decision must have a local scoped manuscript anchor. Every completed-negative-boundary or `blocked` decision must have incomplete, negative-boundary, protocol, or caveat wording in `main.tex`, and the blocked positive wording from the top-conference claim decision matrix must be absent.
 
 Artifacts:
 - [claim_trace.csv](../results/e11_manuscript_claim_trace/claim_trace.csv)

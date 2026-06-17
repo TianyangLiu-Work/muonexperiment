@@ -1,0 +1,74 @@
+# E11 Condition-Score V5 Direction-Guardrail Failure Audit
+
+This generated audit is a completed final boundary diagnosis for the v5
+condition-score program. It reads only the frozen final evaluator summary and
+gate report, plus the reviewer active-failure-mode table. It performs no score repair,
+no threshold change, and no final-row tuning.
+
+The completed final boundary says two things at once. On the ResNeXt50-32x4d
+architecture final, residual ranking survives with primary Spearman
+0.43 CI=[0.2246,
+0.6354], while the direction-threshold
+guardrail fails with below-one threshold accuracy 0.8395
+and CI low 0.6822. On the CIFAR-10
+cross-partition final, residual ranking reverses with primary Spearman
+-0.6851 CI=[-0.718,
+-0.6523], while the direction threshold survives
+with below-one threshold accuracy 1.
+Therefore P0 remains not_ready with orthogonal final failures. Any repair of this
+failure needs a new unspent protocol.
+
+## Score-Axis Contrast
+
+| axis_id                                       | split_role                      | score_role          | gate_status   |   mean_spearman |   spearman_ci95_low |   spearman_ci95_high |   top5_overlap |   threshold_accuracy |   threshold_ci95_low | evidence                                                                         |
+|:----------------------------------------------|:--------------------------------|:--------------------|:--------------|----------------:|--------------------:|---------------------:|---------------:|---------------------:|---------------------:|:---------------------------------------------------------------------------------|
+| architecture_primary_residual_ranking         | v5_final_heldout_architecture   | primary_candidate   | pass          |         0.43    |             0.2246  |              0.6354  |         0.2222 |                      |                      | primary residual Spearman=0.43 CI=[0.2246, 0.6354]                               |
+| architecture_direction_threshold_guardrail    | v5_final_heldout_architecture   | direction_guardrail | fail          |        -0.4431  |            -0.6581  |             -0.228   |         0.1333 |               0.8395 |               0.6822 | direction-axis below-one threshold accuracy=0.8395, CI low=0.6822                |
+| architecture_early_layer_prior_baseline       | v5_final_heldout_architecture   | baseline            | pass          |        -0.08853 |            -0.3971  |              0.2201  |         0      |                      |                      | primary score must beat early_layer_prior on residual Spearman and top-k overlap |
+| architecture_source_observed_positive_control | v5_final_heldout_architecture   | positive_control    | pass          |         0.1789  |             0.03999 |              0.3179  |         0.1778 |               0.8571 |               0.7171 | direction-axis, early-prior, and source-observed controls reported               |
+| data_primary_residual_ranking                 | v5_final_heldout_data_partition | primary_candidate   | fail          |        -0.6851  |            -0.718   |             -0.6523  |         0      |                      |                      | primary residual Spearman=-0.6851 CI=[-0.718, -0.6523]                           |
+| data_direction_threshold_guardrail            | v5_final_heldout_data_partition | direction_guardrail | pass          |         0.6548  |             0.6379  |              0.6718  |         0.8222 |               1      |               1      | direction-axis below-one threshold accuracy=1, CI low=1                          |
+| data_early_layer_prior_baseline               | v5_final_heldout_data_partition | baseline            | pass          |        -0.882   |            -0.9117  |             -0.8522  |         0      |                      |                      | primary score must beat early_layer_prior on residual Spearman and top-k overlap |
+| data_source_observed_positive_control         | v5_final_heldout_data_partition | positive_control    | pass          |        -0.03492 |            -0.08863 |              0.01879 |         0.1333 |               1      |               1      | direction-axis, early-prior, and source-observed controls reported               |
+
+## Gate Boundary Summary
+
+| gate_id                                                      | status    | claim_effect                                                                                                                   | blocks_p0    | evidence                                                                                             |
+|:-------------------------------------------------------------|:----------|:-------------------------------------------------------------------------------------------------------------------------------|:-------------|:-----------------------------------------------------------------------------------------------------|
+| v5_final_heldout_architecture_residual_spearman              | pass      | architecture residual-ranking signal survives the ResNeXt50 final                                                              | no_by_itself | primary residual Spearman=0.43 CI=[0.2246, 0.6354]                                                   |
+| v5_final_heldout_architecture_direction_threshold_accuracy   | fail      | architecture direction-threshold guardrail fails and blocks the frozen-score P0 claim                                          | yes          | direction-axis below-one threshold accuracy=0.8395, CI low=0.6822                                    |
+| v5_final_heldout_architecture_baseline_dominance             | pass      | failure is not explained by the early-layer nuisance baseline dominating the primary score                                     | no           | primary score must beat early_layer_prior on residual Spearman and top-k overlap                     |
+| v5_final_heldout_architecture_controls_reported              | pass      | required controls are present for the generated split                                                                          | no           | direction-axis, early-prior, and source-observed controls reported                                   |
+| v5_final_heldout_data_partition_residual_spearman            | fail      | CIFAR-10 data-partition residual ranking reverses and independently blocks the P0 claim                                        | yes          | primary residual Spearman=-0.6851 CI=[-0.718, -0.6523]                                               |
+| v5_final_heldout_data_partition_direction_threshold_accuracy | pass      | data-partition direction threshold survives, so the data failure is residual-transport rather than direction-threshold failure | no_by_itself | direction-axis below-one threshold accuracy=1, CI low=1                                              |
+| v5_final_heldout_data_partition_baseline_dominance           | pass      | failure is not explained by the early-layer nuisance baseline dominating the primary score                                     | no           | primary score must beat early_layer_prior on residual Spearman and top-k overlap                     |
+| v5_final_heldout_data_partition_controls_reported            | pass      | required controls are present for the generated split                                                                          | no           | direction-axis, early-prior, and source-observed controls reported                                   |
+| v5_p0_predictive_condition_claim                             | not_ready | P0 remains not_ready under the frozen final gate family                                                                        | yes          | Both unspent v5 final splits must pass residual, direction, baseline-dominance, and reporting gates. |
+
+## Mechanistic Diagnosis
+
+| diagnosis_id                                    | evidence                                                                                                   | mechanistic_read                                                                                         | claim_effect                                                                                   | blocked_wording                                                      | active_failure_mode   |
+|:------------------------------------------------|:-----------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------|:---------------------------------------------------------------------|:----------------------|
+| V5-DGF-1-architecture-residual-ranking-survives | architecture primary residual Spearman 0.43 CI=[0.2246, 0.6354]                                            | the transport-normalized scalar still ranks residual layer risk on the generated architecture final      | support partial residual-ranking mechanism evidence only                                       | the generated split alone proves the v5 predictive condition         | no                    |
+| V5-DGF-2-architecture-direction-threshold-fails | architecture direction threshold accuracy 0.8395 with CI low 0.6822                                        | the below-one spectral-vs-Frobenius direction classifier is not sufficiently architecture-stable         | blocks the frozen-score P0 claim under the registered final gates                              | residual ranking is sufficient despite direction-threshold failure   | yes                   |
+| V5-DGF-3-data-residual-ranking-reverses         | CIFAR-10 primary residual Spearman -0.6851 CI=[-0.718, -0.6523]                                            | the same frozen scalar reverses under the CIFAR-10 class-partition transport test                        | independently blocks broad data-family predictive-condition wording                            | the v5 score predicts unseen data-partition residual risk            | yes                   |
+| V5-DGF-4-data-direction-threshold-survives      | CIFAR-10 direction threshold accuracy 1 with CI low 1                                                      | the data split keeps the below-one direction classifier while the residual ranker fails                  | separates residual transport failure from direction-threshold failure                          | direction-threshold success rescues the failed residual-ranking gate | no                    |
+| V5-DGF-5-failure-modes-are-orthogonal           | architecture residual=pass/direction=fail; data residual=fail/direction=pass                               | architecture transfer and data-partition transfer break different endpoints of the frozen score contract | requires endpoint-specific theory and cannot be repaired by reporting only one successful axis | one passing endpoint establishes a broad predictive condition        | yes                   |
+| V5-DGF-6-controls-do-not-rescue-p0              | architecture early prior -0.08853, source control 0.1789; data early prior -0.882, source control -0.03492 | reported controls help localize the failures but do not turn either failed final gate into a pass        | P0 remains not_ready with two registered final failures                                        | the v5 frozen score is an unseen-task predictive condition           | no                    |
+
+## Next Protocol Requirements
+
+| requirement_id                          | requirement                                                                                                              | reason                                                                                                                        | forbidden_shortcut                                                        |
+|:----------------------------------------|:-------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------|
+| V5-DGF-NP1-separate-endpoints           | Keep residual ranking and below-one direction classification as separate registered endpoints.                           | The architecture final passes residual ranking while failing the direction threshold, while the data final does the opposite. | collapse the failed direction gate into the residual-ranking result       |
+| V5-DGF-NP2-separate-transport-axes      | Model architecture transport and data-partition transport as separate theory obligations.                                | ResNeXt50 exposes direction-threshold failure; CIFAR-10 exposes residual-ranking reversal.                                    | treat one split's pass as evidence for the other split's failed endpoint  |
+| V5-DGF-NP3-no-post-final-repair         | Any sign, threshold, normalization, or feature repair needs a new validation/final protocol with unspent splits.         | Both current final splits are already observed under the frozen v5 protocol.                                                  | lower the 0.8 direction threshold or tune the score on these final splits |
+| V5-DGF-NP4-direction-transport-term     | Add a theory term or ablation explaining when the below-one direction threshold transports across architecture families. | The scalar residual ranker can survive while the direction classifier does not.                                               | claim a single transport-normalized scalar explains both phenomena        |
+| V5-DGF-NP5-preserve-negative-boundaries | Keep both the ResNeXt50 direction failure and CIFAR-10 residual reversal in the main ledger.                             | Top-conference credibility depends on preserving registered negative outcomes.                                                | drop either failed final gate because another endpoint later passes       |
+
+Artifacts:
+- [score_axis_contrast.csv](../results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit/score_axis_contrast.csv)
+- [gate_boundary_summary.csv](../results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit/gate_boundary_summary.csv)
+- [mechanistic_diagnosis.csv](../results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit/mechanistic_diagnosis.csv)
+- [next_protocol_requirements.csv](../results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit/next_protocol_requirements.csv)
+- [config.json](../results/e11_condition_score_v5_protocol/direction_guardrail_failure_audit/config.json)

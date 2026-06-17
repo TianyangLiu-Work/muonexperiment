@@ -20,7 +20,7 @@
       "layer_summary_path": "results/e11_condition_score_v5_protocol/final_data_cifar10_cross/layer_summary.csv",
       "metrics_path": "results/e11_condition_score_v5_protocol/final_data_cifar10_cross/metrics.csv",
       "config_path": "results/e11_condition_score_v5_protocol/final_data_cifar10_cross/config.json",
-      "generated": false
+      "generated": true
     }
   ],
   "analysis_scope": "v5 final split evaluator; no post-final refit/reselection; not_ready unless both unspent final splits pass",

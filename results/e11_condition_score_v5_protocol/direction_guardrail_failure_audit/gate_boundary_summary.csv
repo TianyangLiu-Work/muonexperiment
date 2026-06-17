@@ -1,0 +1,10 @@
+gate_id,status,evidence,claim_effect,blocks_p0
+v5_final_heldout_architecture_residual_spearman,pass,"primary residual Spearman=0.43 CI=[0.2246, 0.6354]",architecture residual-ranking signal survives the ResNeXt50 final,no_by_itself
+v5_final_heldout_architecture_direction_threshold_accuracy,fail,"direction-axis below-one threshold accuracy=0.8395, CI low=0.6822",architecture direction-threshold guardrail fails and blocks the frozen-score P0 claim,yes
+v5_final_heldout_architecture_baseline_dominance,pass,primary score must beat early_layer_prior on residual Spearman and top-k overlap,failure is not explained by the early-layer nuisance baseline dominating the primary score,no
+v5_final_heldout_architecture_controls_reported,pass,"direction-axis, early-prior, and source-observed controls reported",required controls are present for the generated split,no
+v5_final_heldout_data_partition_residual_spearman,fail,"primary residual Spearman=-0.6851 CI=[-0.718, -0.6523]",CIFAR-10 data-partition residual ranking reverses and independently blocks the P0 claim,yes
+v5_final_heldout_data_partition_direction_threshold_accuracy,pass,"direction-axis below-one threshold accuracy=1, CI low=1","data-partition direction threshold survives, so the data failure is residual-transport rather than direction-threshold failure",no_by_itself
+v5_final_heldout_data_partition_baseline_dominance,pass,primary score must beat early_layer_prior on residual Spearman and top-k overlap,failure is not explained by the early-layer nuisance baseline dominating the primary score,no
+v5_final_heldout_data_partition_controls_reported,pass,"direction-axis, early-prior, and source-observed controls reported",required controls are present for the generated split,no
+v5_p0_predictive_condition_claim,not_ready,"Both unspent v5 final splits must pass residual, direction, baseline-dominance, and reporting gates.",P0 remains not_ready under the frozen final gate family,yes
