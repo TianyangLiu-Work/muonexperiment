@@ -857,6 +857,14 @@ def main() -> None:
         Path("figures/e11_condition_score_v4_failure_mechanism_audit") / "v4_cifar10_mixed_reversal_top5.png",
         Path("discussion/e11_condition_score_v4_failure_mechanism_audit.md"),
         Path("scripts/e11_write_condition_score_v4_failure_mechanism_audit.py"),
+        Path("results/e11_matrix_block_theorem_proof") / "theorem_statement.csv",
+        Path("results/e11_matrix_block_theorem_proof") / "assumption_ledger.csv",
+        Path("results/e11_matrix_block_theorem_proof") / "proof_steps.csv",
+        Path("results/e11_matrix_block_theorem_proof") / "claim_implications.csv",
+        Path("results/e11_matrix_block_theorem_proof") / "paper_cross_checks.csv",
+        Path("results/e11_matrix_block_theorem_proof") / "config.json",
+        Path("discussion/e11_matrix_block_theorem_proof.md"),
+        Path("scripts/e11_write_matrix_block_theorem_proof.py"),
         Path("results/e11_theory_proof_obligation_register") / "proof_obligations.csv",
         Path("results/e11_theory_proof_obligation_register") / "assumption_stress_tests.csv",
         Path("results/e11_theory_proof_obligation_register") / "claim_scope_boundaries.csv",
@@ -937,6 +945,11 @@ def main() -> None:
         Path("results/e11_natural_negative_search_protocol/phase1_power_audit") / "minimum_detectable_effect.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_power_audit") / "interpretation_ladder.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18") / "settings_registry.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18") / "step_metrics.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18") / "pair_summary.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18") / "layer_metrics.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18") / "decision_template.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18") / "config.json",
         Path("results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18") / "settings_registry.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_tail_quality_controls") / "settings_registry.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "run_registry.csv",
@@ -946,6 +959,7 @@ def main() -> None:
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "config.json",
         Path("discussion/e11_natural_negative_search_protocol.md"),
         Path("discussion/e11_natural_negative_search_phase1_power_audit.md"),
+        Path("discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md"),
         Path("discussion/e11_natural_negative_search_phase1_evaluation.md"),
         Path("scripts/e11_write_natural_negative_search_protocol.py"),
         Path("scripts/e11_write_natural_negative_power_audit.py"),
@@ -1280,6 +1294,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-fresh-eval # evaluate frozen fresh condition-score gates after fresh Slurm jobs finish",
         "make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split",
         "make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish",
+        "make e11-matrix-block-theorem-proof # write the matched-gain theorem/proof contract and sandwich rank derivation",
         "make e11-theory-proof-obligation-register # map theorem assumptions, claim scope, and proof obligations before broad claims",
         "make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract",
         "make e11-cifar-resnet-condition-score-v5-theory-to-score-map # map the v5 theorem terms to score features, leakage boundaries, and falsifiable gates",
@@ -1390,6 +1405,7 @@ def main() -> None:
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
+        "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py",
         "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py",
@@ -1402,7 +1418,7 @@ def main() -> None:
         "validation/final seed splits",
         "tuned AdamW/SGD/class-balanced baselines",
         "phase1 GPU entrypoint is now implemented",
-        "settings-only registries",
+        "12/26 primary metric rows",
         "discussion/e11_natural_negative_search_phase1_evaluation.md",
         "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-results",
@@ -3581,6 +3597,81 @@ def main() -> None:
                 "These final rows are now spent for score fitting.",
             ],
         )
+    matrix_proof_dir = Path("results/e11_matrix_block_theorem_proof")
+    matrix_theorem = pd.read_csv(matrix_proof_dir / "theorem_statement.csv")
+    matrix_assumptions = pd.read_csv(matrix_proof_dir / "assumption_ledger.csv")
+    matrix_steps = pd.read_csv(matrix_proof_dir / "proof_steps.csv")
+    matrix_claims = pd.read_csv(matrix_proof_dir / "claim_implications.csv")
+    matrix_cross_checks = pd.read_csv(matrix_proof_dir / "paper_cross_checks.csv")
+    matrix_config = json.loads((matrix_proof_dir / "config.json").read_text(encoding="utf-8"))
+    expected_matrix_statements = {
+        "MBT-1-general-matched-gain-bound",
+        "MBT-2-sandwich-frobenius-coefficient",
+        "MBT-3-sandwich-spectral-coefficient",
+        "MBT-4-rank-boundary",
+    }
+    expected_matrix_assumptions = {
+        "MBA-1-locality",
+        "MBA-2-head-gain-matching",
+        "MBA-3-sandwich-block",
+        "MBA-4-nondegenerate-tail",
+        "MBA-5-worst-case-vs-realized",
+    }
+    expected_matrix_steps = {
+        "MBS-1-dual-steepest-direction",
+        "MBS-2-tail-sensitivity-bound",
+        "MBS-3-frobenius-unit-ball",
+        "MBS-4-spectral-sandwich-lemma",
+        "MBS-5-rank-ratio",
+        "MBS-6-degeneracy-and-alignment-caveat",
+    }
+    expected_matrix_claims = {
+        "MBC-1-main-mechanism",
+        "MBC-2-realized-drift",
+        "MBC-3-tail-performance",
+        "MBC-4-muon-scope",
+    }
+    expected_matrix_cross_checks = {
+        "assump:local-head-tail",
+        "app:proof-details",
+        "lem:sandwiched-sensitivity",
+        "app:matrix-block-derivation",
+        "matched_gain_theorem",
+        "rank_condition",
+    }
+    if not (
+        set(matrix_theorem["statement_id"]) == expected_matrix_statements
+        and set(matrix_assumptions["assumption_id"]) == expected_matrix_assumptions
+        and set(matrix_steps["step_id"]) == expected_matrix_steps
+        and set(matrix_claims["claim_id"]) == expected_matrix_claims
+        and set(matrix_cross_checks["check_id"]) == expected_matrix_cross_checks
+        and matrix_cross_checks["present"].eq("yes").all()
+        and matrix_theorem["formal_expression"].astype(str).str.len().gt(20).all()
+        and matrix_steps["mathematical_tool"].astype(str).str.len().gt(20).all()
+        and matrix_claims["blocked_claim"].astype(str).str.len().gt(30).all()
+        and matrix_config["all_paper_cross_checks_present"] is True
+        and "no new empirical results" in str(matrix_config["analysis_scope"])
+    ):
+        raise AssertionError("matrix-block theorem proof contract must preserve theorem statements, assumptions, proof steps, claim boundaries, and paper cross-checks")
+    matrix_proof_text = Path("discussion/e11_matrix_block_theorem_proof.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "matrix-block theorem proof",
+        matrix_proof_text,
+        [
+            "E11 Matrix-Block Theorem Proof",
+            "machine-checkable proof contract",
+            "nrank(G_H) > ssrank(B_T,A_T)",
+            "Theorem Statements",
+            "Assumption Ledger",
+            "Proof Steps",
+            "Claim Implications",
+            "Paper Cross-Checks",
+            "sandwich sensitivity lemma",
+            "worst-case bound",
+        ],
+    )
     proof_dir = Path("results/e11_theory_proof_obligation_register")
     proof_obligations = pd.read_csv(proof_dir / "proof_obligations.csv")
     assumption_stress = pd.read_csv(proof_dir / "assumption_stress_tests.csv")
@@ -4343,11 +4434,6 @@ def main() -> None:
         row.search_id: len(pd.read_csv(Path(row.planned_artifact_prefix) / "settings_registry.csv"))
         for row in natural_phase1_search.itertuples()
     }
-    phase1_prefixes_settings_only = all(
-        not Path(row.planned_artifact_prefix).exists()
-        or {path.name for path in Path(row.planned_artifact_prefix).iterdir()} <= {"settings_registry.csv"}
-        for row in natural_phase1_search.itertuples()
-    )
     phase2_prefixes_absent = all(not Path(row.planned_artifact_prefix).exists() for row in natural_phase2_search.itertuples())
     natural_eval_dir = natural_protocol_dir / "phase1_multiplicity_evaluation"
     natural_eval_run_registry = pd.read_csv(natural_eval_dir / "run_registry.csv")
@@ -4355,6 +4441,17 @@ def main() -> None:
     natural_eval_decisions = pd.read_csv(natural_eval_dir / "primary_decisions.csv")
     natural_eval_gates = pd.read_csv(natural_eval_dir / "gate_report.csv")
     natural_eval_gate_lookup = natural_eval_gates.set_index("gate_id")["status"].to_dict()
+    natural_eval_run_status = natural_eval_run_registry.set_index("search_id")["output_status"].to_dict()
+    natural_eval_run_pair_rows = natural_eval_run_registry.set_index("search_id")["pair_summary_rows"].to_dict()
+    natural_eval_observed_count = int(natural_eval_decisions["output_status"].eq("observed").sum())
+    natural_eval_not_run_count = int(natural_eval_decisions["output_status"].eq("not_run").sum())
+    natural_eval_observed = natural_eval_decisions[natural_eval_decisions["output_status"].eq("observed")]
+    natural_eval_not_run = natural_eval_decisions[natural_eval_decisions["output_status"].eq("not_run")]
+    natural_phase1_cifar100_dir = natural_protocol_dir / "phase1_cifar100lt_resnet18"
+    natural_phase1_cifar100_pair = pd.read_csv(natural_phase1_cifar100_dir / "pair_summary.csv")
+    natural_phase1_cifar100_step = pd.read_csv(natural_phase1_cifar100_dir / "step_metrics.csv")
+    natural_phase1_cifar100_layer = pd.read_csv(natural_phase1_cifar100_dir / "layer_metrics.csv")
+    natural_phase1_cifar100_decision = pd.read_csv(natural_phase1_cifar100_dir / "decision_template.csv")
     natural_protocol_checks = {
         "entrypoint_columns": {"entrypoint", "entrypoint_status"}.issubset(natural_protocol_search.columns),
         "baseline_ids": set(natural_protocol_baseline["baseline_id"]) == expected_natural_protocol_baselines,
@@ -4373,9 +4470,9 @@ def main() -> None:
         "protocol_generated": natural_protocol_status_lookup["fresh natural search protocol"] == "generated",
         "entrypoints_implemented": natural_protocol_status_lookup["fresh natural search entrypoints"] == "implemented",
         "settings_locked": natural_protocol_status_lookup["fresh natural search settings registries"] == "locked",
-        "metric_outputs_not_run": natural_protocol_status_lookup["fresh natural search outputs"] == "metric_outputs_not_run",
+        "metric_outputs_partial": natural_protocol_status_lookup["fresh natural search outputs"] == "partial_metric_outputs",
         "evaluator_implemented": natural_protocol_status_lookup["multiplicity-adjusted evaluator"]
-        == "implemented_pending_outputs",
+        == "implemented_partial_outputs",
         "claim_not_ready": natural_protocol_status_lookup["natural negative claim"] == "not_ready",
         "phase1_entrypoint": set(natural_phase1_search["entrypoint"])
         == {"scripts/slurm/e11_natural_negative_search_phase1.sbatch"},
@@ -4388,14 +4485,35 @@ def main() -> None:
             "NNS-P1-cifar10lt-resnet18-cross-partitions": 8,
             "NNS-P1-tail-quality-controls": 6,
         },
-        "phase1_prefixes_settings_only": phase1_prefixes_settings_only,
+        "phase1_cifar100_metric_rows": len(natural_phase1_cifar100_pair) == 12,
+        "phase1_cifar100_step_rows": len(natural_phase1_cifar100_step) == 120,
+        "phase1_cifar100_layer_rows": len(natural_phase1_cifar100_layer) > 0,
+        "phase1_cifar100_decision_rows": len(natural_phase1_cifar100_decision) == 12,
         "phase2_prefixes_absent": phase2_prefixes_absent,
         "eval_decision_count": len(natural_eval_decisions) == 26,
-        "eval_seed_ratio_empty_until_metrics": len(natural_eval_seed_ratios) == 0,
-        "eval_decisions_not_run": bool(natural_eval_decisions["output_status"].eq("not_run").all()),
-        "eval_decisions_missing_source": bool(natural_eval_decisions["inference_source"].eq("missing_output").all()),
+        "eval_observed_count": natural_eval_observed_count == 12,
+        "eval_not_run_count": natural_eval_not_run_count == 14,
+        "eval_seed_ratio_rows": len(natural_eval_seed_ratios) == 60,
+        "eval_observed_inference_source": bool(
+            natural_eval_observed["inference_source"].eq("paired_seed_log_ratio_t_test").all()
+        ),
+        "eval_not_run_missing_source": bool(natural_eval_not_run["inference_source"].eq("missing_output").all()),
+        "eval_observed_pending_completion": bool(
+            natural_eval_observed["adjusted_primary_decision"].eq("pending_phase_completion").all()
+        ),
         "eval_claims_not_ready": bool(natural_eval_decisions["claim_status"].eq("not_ready").all()),
-        "eval_run_status": set(natural_eval_run_registry["output_status"]) == {"settings_only_no_metrics"},
+        "eval_run_status": natural_eval_run_status
+        == {
+            "NNS-P1-cifar100lt-resnet18-new-partitions": "complete",
+            "NNS-P1-cifar10lt-resnet18-cross-partitions": "settings_only_no_metrics",
+            "NNS-P1-tail-quality-controls": "settings_only_no_metrics",
+        },
+        "eval_run_pair_rows": {key: int(value) for key, value in natural_eval_run_pair_rows.items()}
+        == {
+            "NNS-P1-cifar100lt-resnet18-new-partitions": 12,
+            "NNS-P1-cifar10lt-resnet18-cross-partitions": 0,
+            "NNS-P1-tail-quality-controls": 0,
+        },
         "eval_gate_implemented": natural_eval_gate_lookup["NNS-E1-evaluator-implemented"] == "pass",
         "eval_gate_completeness": natural_eval_gate_lookup["NNS-E2-phase1-output-completeness"] == "not_ready",
         "eval_gate_multiplicity": natural_eval_gate_lookup["NNS-E3-primary-multiplicity"] == "not_ready",
@@ -4419,7 +4537,7 @@ def main() -> None:
     if not all(natural_protocol_checks.values()):
         failed_checks = [name for name, passed in natural_protocol_checks.items() if not passed]
         raise AssertionError(
-            "natural negative-search protocol must preserve frozen search space, settings-only phase1 outputs, implemented evaluator, adjusted primary rule, and claim boundaries; failed checks: "
+            "natural negative-search protocol must preserve frozen search space, partial phase1 outputs, implemented evaluator, adjusted primary rule, and claim boundaries; failed checks: "
             f"{failed_checks}"
         )
     natural_protocol_text = Path("discussion/e11_natural_negative_search_protocol.md").read_text(
@@ -4433,7 +4551,8 @@ def main() -> None:
             "pre-registered fresh search",
             "does not claim a new natural counterexample",
             "multiplicity procedure",
-            "metric_outputs_not_run",
+            "partial_metric_outputs",
+            "12/26 phase1 settings have primary metric rows",
             "phase1 Slurm entrypoint and multiplicity evaluator",
             "multiplicity evaluator",
             "complete fresh metric outputs",
@@ -4468,8 +4587,8 @@ def main() -> None:
             "all 26 declared settings",
             "Holm",
             "paired per-seed log-ratio tests",
-            "Current primary metric coverage: 0/26 settings",
-            "Current seed-level primary rows: 0",
+            "Current primary metric coverage: 12/26 settings",
+            "Current seed-level primary rows: 60",
             "NNS-E2-phase1-output-completeness",
             "not_ready",
         ],
@@ -5663,6 +5782,9 @@ def main() -> None:
         "make e11-cifar-resnet-layer-jvp-tail-quality-results",
         "make e11-cifar-resnet-practical-muon-bridge-results",
         "make e11-cifar-resnet-lt-muon-final-benchmark-results",
+        "make e11-natural-negative-search-phase1-power-audit",
+        "make e11-natural-negative-search-phase1-results",
+        "make e11-natural-negative-search-phase1-eval",
         "make e11-appendix-results",
         "make e11-all-results",
         "make e11-paper-assets",
@@ -5686,6 +5808,8 @@ def main() -> None:
         "CIFAR-100-LT ResNet18 all-layer JVP tail-quality diagnostic",
         "CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot",
         "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
+        "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md",
+        "12/26 observed primary rows",
         "Long-tailed Muon-style compatibility diagnostic",
         "Long-tailed practical-Muon trajectory compatibility",
         "Long-tailed practical training diagnostic",
@@ -6270,6 +6394,9 @@ def main() -> None:
         "PTO-1-local-linearization",
         "PTO-2-matrix-block-boundary",
         "PTO-4-v5-transport-score",
+        "main_theorem_contract_generated",
+        "make e11-matrix-block-theorem-proof",
+        "partial_metric_outputs",
         "optimizer-performance",
     ]
     assert_required_phrases(
@@ -6294,6 +6421,8 @@ def main() -> None:
         "v5 has frozen a transport-normalized validation score",
         "discussion/e11_condition_score_v4_protocol.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
+        "discussion/e11_matrix_block_theorem_proof.md",
+        "matched-gain theorem statement",
         "discussion/e11_theory_proof_obligation_register.md",
         "proof-obligation register",
         "discussion/e11_condition_score_v5_theory_protocol.md",
@@ -6324,6 +6453,8 @@ def main() -> None:
         "component true-logit and secondary loss/margin/accuracy tradeoff candidates",
         "discussion/e11_natural_negative_search_protocol.md",
         "search-space registry, metric contract, multiplicity rule, stopping rule",
+        "discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md",
+        "12/26 primary metric rows",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",

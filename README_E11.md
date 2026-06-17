@@ -52,6 +52,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_re
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch
 python3 scripts/e11_evaluate_condition_score_v4_finals.py
 python3 scripts/e11_write_condition_score_v4_failure_mechanism_audit.py
+python3 scripts/e11_write_matrix_block_theorem_proof.py
 python3 scripts/e11_write_theory_proof_obligation_register.py
 python3 scripts/e11_write_condition_score_v5_theory_protocol.py
 python3 scripts/e11_write_condition_score_v5_theory_to_score_map.py
@@ -160,6 +161,7 @@ make e11-cifar-resnet-condition-score-fresh-eval # evaluate frozen fresh conditi
 make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split
 make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-condition-score-v4-failure-audit # localize the frozen v4 CIFAR-10 mixed final failure mechanism
+make e11-matrix-block-theorem-proof # write the matched-gain theorem/proof contract and sandwich rank derivation
 make e11-theory-proof-obligation-register # map theorem assumptions, claim scope, and proof obligations before broad claims
 make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract
 make e11-cifar-resnet-condition-score-v5-theory-to-score-map # map the v5 theorem terms to score features, leakage boundaries, and falsifiable gates
@@ -214,6 +216,7 @@ make e11-cifar-resnet-condition-score-fresh-eval
 make e11-cifar-resnet-condition-score-v4-validation-freeze
 make e11-cifar-resnet-condition-score-v4-final-eval
 make e11-cifar-resnet-condition-score-v4-failure-audit
+make e11-matrix-block-theorem-proof
 make e11-theory-proof-obligation-register
 make e11-cifar-resnet-condition-score-v5-theory-protocol
 make e11-cifar-resnet-condition-score-v5-theory-to-score-map
@@ -362,6 +365,13 @@ It records `V4-O2-data-partition-reversal`: direction is not the failure on
 the CIFAR-10 mixed final split, because the direction axis remains positively
 ordered (`0.611 [0.5886, 0.6334]`) while the amplitude/depth side reverses
 (`-0.6766 [-0.6903, -0.663]`) and drives the frozen scalar aggregation negative.
+The matrix-block theorem proof contract is
+`discussion/e11_matrix_block_theorem_proof.md`, backed by
+`results/e11_matrix_block_theorem_proof/*`. It is the machine-checkable theory
+artifact for the matched-head-gain bound, sandwich sensitivity lemma,
+Frobenius/spectral coefficient derivation, nondegenerate tail block condition,
+and `nrank(G_H) > ssrank(B_T,A_T)` claim boundary already written in the paper
+appendix.
 The theory proof-obligation register is
 `discussion/e11_theory_proof_obligation_register.md`, backed by
 `results/e11_theory_proof_obligation_register/*`. It is a top-conference claim
@@ -435,14 +445,17 @@ separates informative finite nulls from underpowered small-effect nulls.
 The phase1 GPU entrypoint is now implemented in
 `scripts/e11_run_natural_negative_search_phase1.py` and
 `scripts/slurm/e11_natural_negative_search_phase1.sbatch`; the registered fresh
-output prefixes currently contain settings-only registries and no metric CSVs
-until `make e11-natural-negative-search-phase1-results` finishes. The
+output prefixes currently contain a complete 12-setting CIFAR-100-LT ResNet18
+phase1 readout in
+`discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md`,
+while the CIFAR-10-LT cross-partitions and tail-quality-control families remain
+settings-only. The
 multiplicity evaluator is `scripts/e11_evaluate_natural_negative_search_phase1.py`;
 its current generated artifact
 `discussion/e11_natural_negative_search_phase1_evaluation.md` preserves all 26
 phase1 settings, uses paired per-seed log-ratio tests for the primary
 tail-output drift ratio when `step_metrics.csv` is available, and remains
-`not_ready` until fresh metric outputs are complete.
+`not_ready` at 12/26 primary metric rows until fresh metric outputs are complete.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -556,6 +569,7 @@ Paper-facing synthesis:
 - `discussion/e11_condition_score_v4_data_cifar10_mixed.md`
 - `discussion/e11_condition_score_v4_final_evaluation.md`
 - `discussion/e11_condition_score_v4_failure_mechanism_audit.md`
+- `discussion/e11_matrix_block_theorem_proof.md`
 - `discussion/e11_theory_proof_obligation_register.md`
 - `discussion/e11_condition_score_v5_theory_protocol.md`
 - `discussion/e11_condition_score_v5_theory_to_score_map.md`
@@ -564,6 +578,9 @@ Paper-facing synthesis:
 - `discussion/e11_condition_score_v5_final_interpretation_plan.md`
 - `discussion/e11_condition_score_v5_reviewer_failure_response.md`
 - `discussion/e11_natural_negative_search_protocol.md`
+- `discussion/e11_natural_negative_search_phase1_power_audit.md`
+- `discussion/e11_natural_negative_search_phase1_NNS-P1-cifar100lt-resnet18-new-partitions.md`
+- `discussion/e11_natural_negative_search_phase1_evaluation.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
 - `discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md`
@@ -663,6 +680,11 @@ Primary paper quantitative tables:
 - `results/e11_condition_score_v4_failure_mechanism_audit/axis_pair_summary.csv`
 - `results/e11_condition_score_v4_failure_mechanism_audit/top5_stage_summary.csv`
 - `results/e11_condition_score_v4_failure_mechanism_audit/obstruction_summary.csv`
+- `results/e11_matrix_block_theorem_proof/theorem_statement.csv`
+- `results/e11_matrix_block_theorem_proof/assumption_ledger.csv`
+- `results/e11_matrix_block_theorem_proof/proof_steps.csv`
+- `results/e11_matrix_block_theorem_proof/claim_implications.csv`
+- `results/e11_matrix_block_theorem_proof/paper_cross_checks.csv`
 - `results/e11_theory_proof_obligation_register/proof_obligations.csv`
 - `results/e11_theory_proof_obligation_register/assumption_stress_tests.csv`
 - `results/e11_theory_proof_obligation_register/claim_scope_boundaries.csv`
@@ -709,6 +731,18 @@ Primary paper quantitative tables:
 - `results/e11_natural_negative_search_protocol/acceptance_gates.csv`
 - `results/e11_natural_negative_search_protocol/claim_ladder.csv`
 - `results/e11_natural_negative_search_protocol/protocol_status.csv`
+- `results/e11_natural_negative_search_protocol/phase1_power_audit/power_grid.csv`
+- `results/e11_natural_negative_search_protocol/phase1_power_audit/minimum_detectable_effect.csv`
+- `results/e11_natural_negative_search_protocol/phase1_power_audit/interpretation_ladder.csv`
+- `results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/settings_registry.csv`
+- `results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/step_metrics.csv`
+- `results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/pair_summary.csv`
+- `results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/layer_metrics.csv`
+- `results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18/decision_template.csv`
+- `results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/run_registry.csv`
+- `results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/seed_level_primary_ratios.csv`
+- `results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv`
+- `results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv`
 - `results/e11_top_conference_gap_register/gap_register.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
@@ -856,6 +890,7 @@ Do not claim:
 - `scripts/e11_freeze_condition_score_v4_validation.py`: validation-freeze boundary that aggregates the v4 Frobenius amplitude axis from `metrics.csv` and freezes the scalar score before final split evaluation.
 - `scripts/e11_evaluate_condition_score_v4_finals.py`: frozen-score evaluator for the unspent v4 WideResNet50-2 and CIFAR-10 mixed final splits.
 - `scripts/e11_write_condition_score_v4_failure_mechanism_audit.py`: diagnostic-only audit showing that the v4 CIFAR-10 mixed failure is an amplitude/depth scalar-aggregation reversal, not a direction-threshold failure.
+- `scripts/e11_write_matrix_block_theorem_proof.py`: machine-checkable theorem/proof contract for the matched-gain bound, sandwich sensitivity lemma, and `nrank`/`ssrank` boundary.
 - `scripts/e11_write_theory_proof_obligation_register.py`: theory-facing top-conference checklist mapping theorem claims, assumptions, pending empirical gates, and forbidden wording.
 - `scripts/e11_write_condition_score_v5_theory_protocol.py`: theory-facing v5 score contract requiring transport-normalized amplitude or a narrower fixed-partition claim before any new P0 predictive-condition attempt.
 - `scripts/e11_write_condition_score_v5_theory_to_score_map.py`: v5 theorem-to-measurement bridge that maps sandwich-tail-drift terms to score features, transport contracts, ablations, and falsifiable validation/final gates.

@@ -1,0 +1,7 @@
+check_id,paper_path,present
+assump:local-head-tail,paper/specgrad_activation_paper/main.tex,yes
+app:proof-details,paper/specgrad_activation_paper/main.tex,yes
+lem:sandwiched-sensitivity,paper/specgrad_activation_paper/main.tex,yes
+app:matrix-block-derivation,paper/specgrad_activation_paper/main.tex,yes
+matched_gain_theorem,paper/specgrad_activation_paper/main.tex,yes
+rank_condition,paper/specgrad_activation_paper/main.tex,yes

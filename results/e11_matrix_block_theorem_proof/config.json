@@ -1,0 +1,8 @@
+{
+  "purpose": "machine-checkable matrix-block theorem and proof contract",
+  "analysis_scope": "formal proof artifact; no new empirical results",
+  "paper_path": "paper/specgrad_activation_paper/main.tex",
+  "all_paper_cross_checks_present": true,
+  "theorem_statement_count": 4,
+  "proof_step_count": 6
+}

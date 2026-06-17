@@ -31,6 +31,7 @@ def load_evidence() -> dict[str, object]:
     v5_freeze = pd.read_csv("results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv")
     v5_final_gates = pd.read_csv("results/e11_condition_score_v5_protocol/final_score_evaluation/final_gate_report.csv")
     natural_gates = pd.read_csv("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/gate_report.csv")
+    natural_decisions = pd.read_csv("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation/primary_decisions.csv")
     tuned_gates = pd.read_csv("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv")
     v5_response_config = json.loads(
         Path("results/e11_condition_score_v5_protocol/reviewer_failure_response/config.json").read_text(
@@ -43,6 +44,7 @@ def load_evidence() -> dict[str, object]:
         "v5_freeze": v5_freeze,
         "v5_final_gates": v5_final_gates,
         "natural_gates": natural_gates,
+        "natural_decisions": natural_decisions,
         "tuned_gates": tuned_gates,
         "v5_response_config": v5_response_config,
     }
@@ -54,6 +56,7 @@ def build_proof_obligations(evidence: dict[str, object]) -> pd.DataFrame:
     v5_freeze_status = status_lookup(evidence["v5_freeze"], "item")
     v5_final_status = status_lookup(evidence["v5_final_gates"], "gate_id")
     natural_status = status_lookup(evidence["natural_gates"], "gate_id")
+    natural_observed_count = int(evidence["natural_decisions"]["output_status"].eq("observed").sum())
     tuned_status = status_lookup(evidence["tuned_gates"], "gate_id")
     selected_score = str(evidence["v5_response_config"]["primary_score"])
 
@@ -84,9 +87,9 @@ def build_proof_obligations(evidence: dict[str, object]) -> pd.DataFrame:
                 f"negative boundary ratio={fmt(negative['geomean_tail_output_drift_sq_ratio_spectral_over_fro'])} "
                 f"{ci(negative, 'tail_output_drift_sq_ratio_ci95_low', 'tail_output_drift_sq_ratio_ci95_high')}"
             ),
-            "current_status": "main_theorem_candidate",
+            "current_status": "main_theorem_contract_generated",
             "blocks_main_theory_claim": "yes",
-            "required_upgrade": "write the proof with explicit norm definitions, head-gain constraint, and sign condition",
+            "required_upgrade": "keep discussion/e11_matrix_block_theorem_proof.md synchronized with the paper theorem and appendix proof",
             "forbidden_wording": "do not present the synthetic sign boundary as an out-of-sample natural predictor",
         },
         {
@@ -122,11 +125,12 @@ def build_proof_obligations(evidence: dict[str, object]) -> pd.DataFrame:
             "assumptions_to_state": "complete metric rows for every declared setting; paired per-seed log-ratio tests; quality gates applied before claims",
             "current_evidence": (
                 f"phase1 completeness={natural_status['NNS-E2-phase1-output-completeness']}; "
+                f"primary metric rows={natural_observed_count}/26; "
                 f"natural primary claim={natural_status['NNS-E4-natural-primary-claim']}"
             ),
-            "current_status": "pending_metric_outputs",
+            "current_status": "partial_metric_outputs",
             "blocks_main_theory_claim": "no_but_blocks_falsification_upgrade",
-            "required_upgrade": "wait for all phase1 metric rows and rerun the multiplicity evaluator",
+            "required_upgrade": "finish the remaining phase1 metric rows and rerun the multiplicity evaluator",
             "forbidden_wording": "do not call any setting a natural counterexample before adjusted decisions are complete",
         },
         {
@@ -189,7 +193,7 @@ def build_assumption_stress_tests() -> pd.DataFrame:
                 "stress_test": "phase1 multiplicity evaluator with 26 declared settings",
                 "failure_mode": "selected anecdotal counterexamples would be statistically weak",
                 "paper_action": "wait for complete metric rows before using any natural negative claim",
-                "status": "pending_metric_outputs",
+                "status": "partial_metric_outputs",
             },
         ]
     )
@@ -242,8 +246,8 @@ def build_theorem_to_experiment_queue() -> pd.DataFrame:
         [
             {
                 "priority": "P0",
-                "task": "write the exact local matrix-block theorem and proof",
-                "artifact_or_command": "paper theorem section plus proof appendix",
+                "task": "keep the exact local matrix-block theorem/proof contract synchronized with the paper appendix",
+                "artifact_or_command": "make e11-matrix-block-theorem-proof",
                 "unblocks": "main_theorem wording",
                 "dependency": "none",
             },
@@ -263,7 +267,7 @@ def build_theorem_to_experiment_queue() -> pd.DataFrame:
             },
             {
                 "priority": "P1",
-                "task": "complete natural negative-search phase1 metrics",
+                "task": "complete the remaining natural negative-search phase1 metrics",
                 "artifact_or_command": "make e11-natural-negative-search-phase1-eval",
                 "unblocks": "natural_counterexample or finite-null boundary wording",
                 "dependency": "phase1 Slurm outputs",

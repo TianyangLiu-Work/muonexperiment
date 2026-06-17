@@ -231,8 +231,8 @@ def build_acceptance_gates() -> pd.DataFrame:
             {
                 "gate_id": "NNS-1-protocol-freeze",
                 "scope": "fresh natural negative search",
-                "requirement": "Protocol tables and discussion are committed before fresh search outputs exist.",
-                "pass_condition": "protocol_status.csv marks fresh metric outputs as metric_outputs_not_run and phase prefixes contain at most settings_registry.csv until jobs finish",
+                "requirement": "Protocol tables and discussion define the search and claim boundary before fresh outputs are used for any claim.",
+                "pass_condition": "protocol_status.csv records metric_outputs_not_run before jobs or partial_metric_outputs/metric_outputs_complete after jobs; natural claims stay blocked until the evaluator completeness gate passes",
             },
             {
                 "gate_id": "NNS-2-freshness-exclusion",
@@ -310,8 +310,67 @@ def build_claim_ladder() -> pd.DataFrame:
     )
 
 
-def build_protocol_status(audit_baseline: pd.DataFrame) -> pd.DataFrame:
+def phase1_output_status(search_space: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    phase1 = search_space[search_space["phase"].eq("phase1_fresh_primary_search")]
+    for search in phase1.itertuples():
+        prefix = Path(search.planned_artifact_prefix)
+        files = {
+            "settings_registry": prefix / "settings_registry.csv",
+            "step_metrics": prefix / "step_metrics.csv",
+            "pair_summary": prefix / "pair_summary.csv",
+            "layer_metrics": prefix / "layer_metrics.csv",
+            "decision_template": prefix / "decision_template.csv",
+            "config": prefix / "config.json",
+        }
+        required_metric_files = ["step_metrics", "pair_summary", "layer_metrics", "decision_template", "config"]
+        settings_rows = len(pd.read_csv(files["settings_registry"])) if files["settings_registry"].exists() else 0
+        pair_rows = len(pd.read_csv(files["pair_summary"])) if files["pair_summary"].exists() else 0
+        metric_files_present = all(files[name].exists() for name in required_metric_files)
+        if metric_files_present and pair_rows == int(search.max_settings):
+            status = "complete"
+        elif files["settings_registry"].exists() and not any(files[name].exists() for name in required_metric_files):
+            status = "settings_only_no_metrics"
+        elif any(path.exists() for path in files.values()):
+            status = "incomplete_metrics"
+        else:
+            status = "not_run"
+        rows.append(
+            {
+                "search_id": search.search_id,
+                "expected_settings": int(search.max_settings),
+                "settings_registry_rows": int(settings_rows),
+                "primary_metric_rows": int(pair_rows),
+                "output_status": status,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def build_protocol_status(audit_baseline: pd.DataFrame, search_space: pd.DataFrame) -> pd.DataFrame:
     primary = audit_baseline.set_index("baseline_id").loc["committed_natural_primary_full_drift_scan"]
+    phase1_status = phase1_output_status(search_space)
+    expected_metric_rows = int(phase1_status["expected_settings"].sum())
+    observed_metric_rows = int(phase1_status["primary_metric_rows"].sum())
+    status_fragments = [
+        f"{row.search_id}={row.output_status} ({int(row.primary_metric_rows)}/{int(row.expected_settings)} rows)"
+        for row in phase1_status.itertuples()
+    ]
+    if observed_metric_rows == 0:
+        output_status = "metric_outputs_not_run"
+        output_evidence = "phase1 metric files are absent until the submitted GPU jobs finish"
+        evaluator_status = "implemented_pending_outputs"
+        claim_evidence = "no fresh search outputs exist under this protocol"
+    elif observed_metric_rows == expected_metric_rows and phase1_status["output_status"].eq("complete").all():
+        output_status = "metric_outputs_complete"
+        output_evidence = "; ".join(status_fragments)
+        evaluator_status = "implemented_complete_outputs"
+        claim_evidence = "fresh outputs are complete, but claims require the multiplicity evaluator decision table"
+    else:
+        output_status = "partial_metric_outputs"
+        output_evidence = f"{observed_metric_rows}/{expected_metric_rows} phase1 settings have primary metric rows; " + "; ".join(status_fragments)
+        evaluator_status = "implemented_partial_outputs"
+        claim_evidence = f"{observed_metric_rows}/{expected_metric_rows} fresh metric rows exist, so natural claims remain blocked until the family is complete"
     return pd.DataFrame(
         [
             {
@@ -349,13 +408,13 @@ def build_protocol_status(audit_baseline: pd.DataFrame) -> pd.DataFrame:
             },
             {
                 "item": "fresh natural search outputs",
-                "status": "metric_outputs_not_run",
-                "evidence": "phase1 metric files are absent until the submitted GPU jobs finish",
+                "status": output_status,
+                "evidence": output_evidence,
                 "blocks_stronger_claim_if_missing": "yes",
             },
             {
                 "item": "multiplicity-adjusted evaluator",
-                "status": "implemented_pending_outputs",
+                "status": evaluator_status,
                 "evidence": (
                     "scripts/e11_evaluate_natural_negative_search_phase1.py writes per-seed log-ratio rows "
                     "and Holm-adjusted decision rows under results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation"
@@ -365,7 +424,7 @@ def build_protocol_status(audit_baseline: pd.DataFrame) -> pd.DataFrame:
             {
                 "item": "natural negative claim",
                 "status": "not_ready",
-                "evidence": "no fresh search outputs exist under this protocol",
+                "evidence": claim_evidence,
                 "blocks_stronger_claim_if_missing": "yes",
             },
         ]
@@ -458,7 +517,7 @@ def main() -> None:
     stopping_rules = build_stopping_rules()
     gates = build_acceptance_gates()
     claim_ladder = build_claim_ladder()
-    status = build_protocol_status(audit_baseline)
+    status = build_protocol_status(audit_baseline, search_space)
     write_outputs(audit_baseline, search_space, metric_contract, stopping_rules, gates, claim_ladder, status)
     print(f"saved natural negative search protocol to {DISCUSSION_PATH} and {RESULT_DIR}")
 
