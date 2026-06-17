@@ -1,0 +1,6 @@
+locked_item,locked_value,forbidden_after_final_outputs,allowed_after_final_outputs
+primary_score,condition_score_v5_transport_normalized_amplitude_minus_direction,"changing score weights, features, signs, or aliases",rerun the same evaluator and report generated rows
+final_splits,ResNeXt50-32x4d CIFAR-100-LT; CIFAR-10 cross partition,"dropping, replacing, or adding splits to rescue the claim",add future splits only under a new preregistered protocol
+residual_gate,Spearman CI lower endpoint above zero on each final split,using mean-only positivity or a one-split pass as P0 evidence,report partial positives as boundary evidence
+direction_gate,threshold accuracy and CI lower endpoint at least 0.8,lowering the threshold or merging it into residual ranking,report a direction failure as a separate obstruction
+baseline_gate,primary beats early_layer_prior on residual ranking and top-k overlap,omitting the early-layer nuisance comparison,downgrade to nuisance-proxy boundary if baseline wins

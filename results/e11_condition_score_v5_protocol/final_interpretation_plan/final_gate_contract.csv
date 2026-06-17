@@ -1,0 +1,7 @@
+gate_id,required_for,pass_rule,failure_effect
+V5-FINAL-G1-frozen-primary-score,all final interpretations,primary score remains condition_score_v5_transport_normalized_amplitude_minus_direction,all final interpretations are invalid until the committed evaluator is restored
+V5-FINAL-G2-output-completeness,P0 predictive-condition claim,both registered final splits have layer_summary.csv and metrics.csv,P0 remains not_ready; no split may be substituted
+V5-FINAL-G3-residual-ranking,P0 predictive-condition claim,primary residual Spearman CI lower endpoint is above zero on each final split,"the failed split becomes a transport-boundary result, not a tuning target"
+V5-FINAL-G4-direction-guardrail,P0 predictive-condition claim,direction-axis below-one threshold accuracy and CI lower endpoint are both at least 0.8,the local spectral/Frobenius direction guardrail failed to transport
+V5-FINAL-G5-baseline-dominance,P0 predictive-condition claim,primary score beats early_layer_prior on residual Spearman and top-k overlap,the score is treated as a depth/stage nuisance proxy
+V5-FINAL-G6-control-reporting,paper reporting,"direction, early-layer, and source-observed controls are reported for every generated final split",the final evaluator output is incomplete for review
