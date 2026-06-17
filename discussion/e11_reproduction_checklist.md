@@ -191,6 +191,7 @@ make e11-guardrail-assets
 | discussion/e11_natural_negative_search_phase1_evaluation.md                                 | Holm-family evaluator preserving 20/26 observed primary rows and blocking claims until all settings complete.                         |
 | discussion/e11_natural_negative_search_phase1_interim_synthesis.md                          | Partial-family claim-boundary synthesis for raw-worse counts, quality gates, and remaining tail-quality controls.                     |
 | discussion/e11_top_conference_claim_decision_audit.md                                       | Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract for top-conference wording.                |
+| discussion/e11_manuscript_claim_trace.md                                                    | Main-tex claim trace that maps every top-conference claim decision to anchors and checks blocked positive wording is absent.          |
 | discussion/e11_artifact_review_packet.md                                                    | Artifact-review command, gate, local-state, and reviewer-response packet for reproducing the current bundle without expanding claims. |
 | discussion/e11_mechanism_referee_audit.md                                                   | Adversarial alternative-explanation, theory-measurement, and falsification-trigger audit for top-conference reviewer scrutiny.        |
 

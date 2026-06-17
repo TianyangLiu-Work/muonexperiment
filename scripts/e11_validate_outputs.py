@@ -1282,6 +1282,11 @@ def main() -> None:
         Path("results/e11_top_conference_claim_decision_audit") / "config.json",
         Path("discussion/e11_top_conference_claim_decision_audit.md"),
         Path("scripts/e11_write_top_conference_claim_decision_audit.py"),
+        Path("discussion/e11_manuscript_claim_trace.md"),
+        Path("results/e11_manuscript_claim_trace") / "claim_trace.csv",
+        Path("results/e11_manuscript_claim_trace") / "blocked_phrase_audit.csv",
+        Path("results/e11_manuscript_claim_trace") / "config.json",
+        Path("scripts/e11_write_manuscript_claim_trace.py"),
         Path("discussion/e11_mechanism_referee_audit.md"),
         Path("results/e11_mechanism_referee_audit") / "alternative_explanation_matrix.csv",
         Path("results/e11_mechanism_referee_audit") / "theory_measurement_contract.csv",
@@ -6281,6 +6286,8 @@ def main() -> None:
         "make e11-natural-negative-search-phase1-interim-synthesis",
         "discussion/e11_top_conference_claim_decision_audit.md",
         "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract",
+        "discussion/e11_manuscript_claim_trace.md",
+        "Main-tex claim trace that maps every top-conference claim decision to anchors",
         "discussion/e11_artifact_review_packet.md",
         "Artifact-review command, gate, local-state, and reviewer-response packet",
         "discussion/e11_mechanism_referee_audit.md",
@@ -7032,6 +7039,50 @@ def main() -> None:
             "No finite-null wording until the 26-setting family is complete",
         ],
     )
+    manuscript_trace = pd.read_csv("results/e11_manuscript_claim_trace/claim_trace.csv")
+    blocked_phrase_audit = pd.read_csv("results/e11_manuscript_claim_trace/blocked_phrase_audit.csv")
+    manuscript_trace_config = json.loads(
+        Path("results/e11_manuscript_claim_trace/config.json").read_text(encoding="utf-8")
+    )
+    expected_trace_claims = {
+        "TCD-1-main-mechanism-theorem",
+        "TCD-2-natural-drift-diagnostic",
+        "TCD-3-predictive-condition-generalization",
+        "TCD-4-natural-counterexample-or-finite-null",
+        "TCD-5-optimizer-performance-benchmark",
+        "TCD-6-artifact-reproducibility",
+    }
+    if set(manuscript_trace["claim_id"]) != expected_trace_claims:
+        raise AssertionError("manuscript claim trace must cover every top-conference claim decision")
+    decision_by_claim = claim_decision_frame.set_index("claim_id")["current_decision"].to_dict()
+    trace_decision_by_claim = manuscript_trace.set_index("claim_id")["current_decision"].to_dict()
+    if trace_decision_by_claim != decision_by_claim:
+        raise AssertionError("manuscript claim trace decisions must match the top-conference decision matrix")
+    if not (
+        manuscript_trace["missing_anchors"].eq("none").all()
+        and manuscript_trace["blocked_phrase_audit"].eq("pass").all()
+        and blocked_phrase_audit["audit_status"].eq("pass").all()
+        and bool(manuscript_trace_config.get("all_anchors_present"))
+        and bool(manuscript_trace_config.get("blocked_phrases_absent"))
+    ):
+        raise AssertionError("manuscript claim trace must find all anchors and exclude blocked positive wording")
+    manuscript_trace_text = Path("discussion/e11_manuscript_claim_trace.md").read_text(encoding="utf-8")
+    assert_required_phrases(
+        "manuscript claim trace",
+        manuscript_trace_text,
+        [
+            "E11 Manuscript Claim Trace",
+            "top-conference claim decisions",
+            "Claim Trace",
+            "Blocked Phrase Audit",
+            "present_as_supportable_scoped_claim",
+            "present_as_registered_not_ready",
+            "present_as_blocked_partial_family",
+            "present_as_blocked_protocol_context",
+            "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server",
+            "Every `supportable` decision must have a local scoped manuscript anchor",
+        ],
+    )
     readme = Path("README_E11.md").read_text(encoding="utf-8")
     if "## Main Entry Points" not in readme or "## Current Publication Gaps" not in readme:
         raise AssertionError("README_E11.md must document entry points and publication gaps")
@@ -7077,6 +7128,7 @@ def main() -> None:
         or "make e11-natural-negative-search-phase1-eval" not in readme
         or "make e11-natural-negative-search-phase1-interim-synthesis" not in readme
         or "make e11-top-conference-claim-decision-audit" not in readme
+        or "make e11-manuscript-claim-trace" not in readme
         or "make e11-mechanism-referee-audit" not in readme
         or "make e11-submission-repro-audit" not in readme
         or "make e11-artifact-review-packet" not in readme

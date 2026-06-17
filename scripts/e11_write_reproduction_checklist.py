@@ -112,6 +112,10 @@ def main() -> None:
                 "role": "Paper-level supportable/registered-not-ready/blocked claim and rebuttal-readiness contract for top-conference wording.",
             },
             {
+                "artifact": "discussion/e11_manuscript_claim_trace.md",
+                "role": "Main-tex claim trace that maps every top-conference claim decision to anchors and checks blocked positive wording is absent.",
+            },
+            {
                 "artifact": "discussion/e11_artifact_review_packet.md",
                 "role": "Artifact-review command, gate, local-state, and reviewer-response packet for reproducing the current bundle without expanding claims.",
             },
