@@ -10,9 +10,9 @@ residual-ranking and direction gates pass before final outputs exist.
 
 | item                       | status     | evidence                                                                                                                                                                         |
 |:---------------------------|:-----------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| v4 validation split output | not_run    | results/e11_condition_score_v4_protocol/validation_cifar100_rotated/layer_summary.csv                                                                                            |
+| v4 validation split output | generated  | results/e11_condition_score_v4_protocol/validation_cifar100_rotated/layer_summary.csv                                                                                            |
 | v4 candidate pool          | registered | candidate formulas are fixed in scripts/e11_freeze_condition_score_v4_validation.py                                                                                              |
-| v4 selected residual score | not_ready  | pending_validation_output                                                                                                                                                        |
+| v4 selected residual score | frozen     | condition_score_v4_two_axis_amplitude_minus_direction                                                                                                                            |
 | v4 final split outputs     | not_run    | results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/layer_summary.csv; results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/layer_summary.csv |
 
 ## Candidate Formula Registry
@@ -22,37 +22,42 @@ residual-ranking and direction gates pass before final outputs exist.
 | condition_score_v4_direction_axis_scaled_jvp_ratio    | direction_guardrail | raw log scaled-JVP spectral/Frobenius squared ratio                                 | no                              |
 | condition_score_v4_fro_amplitude_axis                 | residual_candidate  | source-standardized Frobenius matched-head-gain scaled-JVP amplitude                | no                              |
 | condition_score_v4_two_axis_positive                  | residual_candidate  | source-standardized direction ratio plus Frobenius amplitude                        | no                              |
-| condition_score_v4_two_axis_amplitude_minus_direction | residual_candidate  | source-standardized Frobenius amplitude minus direction ratio                       | no                              |
+| condition_score_v4_two_axis_amplitude_minus_direction | residual_candidate  | source-standardized Frobenius amplitude minus direction ratio                       | yes                             |
 | condition_score_v4_two_axis_transport                 | residual_candidate  | two-axis score with generic downsample/classifier transport tags                    | no                              |
 | early_layer_prior                                     | baseline            | raw log early-layer prior                                                           | no                              |
 | source_observed_drift_positive_control                | positive_control    | source observed residual under source-fit depth baseline, matched by parameter name | no                              |
-| condition_score_v4_validation_selected                | primary_alias       | pending_validation_output                                                           | no                              |
+| condition_score_v4_validation_selected                | primary_alias       | condition_score_v4_two_axis_amplitude_minus_direction                               | yes                             |
 
 ## Validation Score Summary
 
-Validation score rows are not generated yet because the v4 validation Slurm output is missing.
+| score                                                 | score_role          |   validation_transfer_pairs |   mean_spearman_score_vs_target_residual |   spearman_ci95_low |   spearman_ci95_high | mean_threshold_below_one_accuracy   |
+|:------------------------------------------------------|:--------------------|----------------------------:|-----------------------------------------:|--------------------:|---------------------:|:------------------------------------|
+| condition_score_v4_direction_axis_scaled_jvp_ratio    | direction_guardrail |                           9 |                                 -0.2468  |            -0.3085  |              -0.185  | 1                                   |
+| condition_score_v4_fro_amplitude_axis                 | residual_candidate  |                           9 |                                  0.2     |             0.09707 |               0.3029 | n/a                                 |
+| condition_score_v4_two_axis_positive                  | residual_candidate  |                           9 |                                  0.1879  |             0.1104  |               0.2654 | n/a                                 |
+| condition_score_v4_two_axis_amplitude_minus_direction | residual_candidate  |                           9 |                                  0.3758  |             0.2759  |               0.4756 | n/a                                 |
+| condition_score_v4_two_axis_transport                 | residual_candidate  |                           9 |                                  0.2203  |             0.1321  |               0.3086 | n/a                                 |
+| early_layer_prior                                     | baseline            |                           9 |                                  0.04242 |            -0.05664 |               0.1415 | n/a                                 |
+| source_observed_drift_positive_control                | positive_control    |                           9 |                                  0.8586  |             0.8135  |               0.9037 | 1                                   |
 
 ## Gate Report
 
-| gate_id                                | scope                          | status    | evidence                                                                              |
-|:---------------------------------------|:-------------------------------|:----------|:--------------------------------------------------------------------------------------|
-| V4F-1-validation-output                | validation-only split          | not_run   | results/e11_condition_score_v4_protocol/validation_cifar100_rotated/layer_summary.csv |
-| V4F-2-no-final-before-freeze           | unspent final splits           | pass      | no v4 final layer_summary.csv exists before a frozen validation score                 |
-| V4F-3-residual-score-freeze            | primary residual-ranking score | not_ready | pending_validation_output                                                             |
-| V4F-4-direction-threshold-guardrail    | direction axis                 | not_run   | validation score rows missing                                                         |
-| V4F-5-selected-score-residual-spearman | validation residual ranking    | not_run   | no selected validation summary row                                                    |
-| V4F-6-final-claim-readiness            | P0 predictive-condition claim  | not_ready | final splits remain blocked until this gate is pass in a committed artifact           |
+| gate_id                                | scope                          | status   | evidence                                                                                                    |
+|:---------------------------------------|:-------------------------------|:---------|:------------------------------------------------------------------------------------------------------------|
+| V4F-1-validation-output                | validation-only split          | pass     | results/e11_condition_score_v4_protocol/validation_cifar100_rotated/layer_summary.csv                       |
+| V4F-2-no-final-before-freeze           | unspent final splits           | pass     | no v4 final layer_summary.csv exists before a frozen validation score                                       |
+| V4F-3-residual-score-freeze            | primary residual-ranking score | pass     | condition_score_v4_two_axis_amplitude_minus_direction                                                       |
+| V4F-4-direction-threshold-guardrail    | direction axis                 | pass     | validation direction-axis threshold accuracy=1 CI=[1, 1]                                                    |
+| V4F-5-selected-score-residual-spearman | validation residual ranking    | pass     | selected=condition_score_v4_two_axis_amplitude_minus_direction; Spearman=0.3758 CI=[0.2759, 0.4756]         |
+| V4F-6-final-claim-readiness            | P0 predictive-condition claim  | pass     | unspent final split jobs may run after this pass artifact is committed; P0 claim still requires final gates |
 
 ## Claim Boundary
 
-Current status: validation output is not run.
+Current status: validation output exists.
 
-Allowed now: commit the v4 validation-freeze machinery and, if needed, submit
-the validation-only Slurm job.
+Allowed now: commit this pass validation-freeze artifact, then submit the unspent WideResNet50-2 and CIFAR-10 mixed final split Slurm jobs with the frozen selected score.
 
-Blocked now: running or interpreting the unspent WideResNet50-2 and CIFAR-10
-mixed final splits as P0 evidence before `V4F-6-final-claim-readiness` passes in
-a committed artifact.
+Blocked now: making a v4 P0 predictive-condition claim before both unspent final split evaluations pass their residual-ranking, direction, baseline-reporting, and claim-boundary gates.
 
 Artifacts:
 - [score_formula_registry.csv](../results/e11_condition_score_v4_protocol/validation_score_freeze/score_formula_registry.csv)

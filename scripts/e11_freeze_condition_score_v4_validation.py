@@ -503,6 +503,7 @@ def gate_report(summary: pd.DataFrame, registry: pd.DataFrame, validation_genera
     )
     selected_score = evidence_lookup.get("v4 selected residual score")
     selected_summary = summary[summary["score"].eq(selected_score)] if selected_score in set(summary["score"]) else pd.DataFrame()
+    final_claim_ready = selected_status == "frozen" and direction_pass and final_outputs_absent
     rows = [
         {
             "gate_id": "V4F-1-validation-output",
@@ -555,8 +556,12 @@ def gate_report(summary: pd.DataFrame, registry: pd.DataFrame, validation_genera
         {
             "gate_id": "V4F-6-final-claim-readiness",
             "scope": "P0 predictive-condition claim",
-            "status": "pass" if selected_status == "frozen" and direction_pass and final_outputs_absent else "not_ready",
-            "evidence": "final splits remain blocked until this gate is pass in a committed artifact",
+            "status": "pass" if final_claim_ready else "not_ready",
+            "evidence": (
+                "unspent final split jobs may run after this pass artifact is committed; P0 claim still requires final gates"
+                if final_claim_ready
+                else "final splits remain blocked until this gate is pass in a committed artifact"
+            ),
         },
     ]
     return pd.DataFrame(rows)
@@ -569,6 +574,8 @@ def write_discussion(
     gates: pd.DataFrame,
     validation_generated: bool,
 ) -> None:
+    gate_lookup = gates.set_index("gate_id")["status"].to_dict()
+    final_ready = gate_lookup.get("V4F-6-final-claim-readiness") == "pass"
     if summary.empty:
         summary_text = "Validation score rows are not generated yet because the v4 validation Slurm output is missing."
     else:
@@ -584,6 +591,28 @@ def write_discussion(
                 "mean_threshold_below_one_accuracy",
             ],
         )
+    if final_ready:
+        allowed_text = (
+            "Allowed now: commit this pass validation-freeze artifact, then submit the "
+            "unspent WideResNet50-2 and CIFAR-10 mixed final split Slurm jobs with the "
+            "frozen selected score."
+        )
+        blocked_text = (
+            "Blocked now: making a v4 P0 predictive-condition claim before both "
+            "unspent final split evaluations pass their residual-ranking, direction, "
+            "baseline-reporting, and claim-boundary gates."
+        )
+    else:
+        allowed_text = (
+            "Allowed now: commit the v4 validation-freeze machinery and, if needed, "
+            "submit the validation-only Slurm job."
+        )
+        blocked_text = (
+            "Blocked now: running or interpreting the unspent WideResNet50-2 and CIFAR-10 "
+            "mixed final splits as P0 evidence before `V4F-6-final-claim-readiness` passes "
+            "in a committed artifact."
+        )
+
     text = f"""# E11 Condition-Score V4 Validation Freeze
 
 This generated artifact is the missing commit boundary between the registered
@@ -612,12 +641,9 @@ residual-ranking and direction gates pass before final outputs exist.
 
 Current status: {"validation output exists" if validation_generated else "validation output is not run"}.
 
-Allowed now: commit the v4 validation-freeze machinery and, if needed, submit
-the validation-only Slurm job.
+{allowed_text}
 
-Blocked now: running or interpreting the unspent WideResNet50-2 and CIFAR-10
-mixed final splits as P0 evidence before `V4F-6-final-claim-readiness` passes in
-a committed artifact.
+{blocked_text}
 
 Artifacts:
 - [score_formula_registry.csv](../{(OUTPUT_DIR / 'score_formula_registry.csv').as_posix()})

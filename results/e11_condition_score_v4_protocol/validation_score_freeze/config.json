@@ -3,7 +3,7 @@
   "source_metrics": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/metrics.csv",
   "validation_layer_summary": "results/e11_condition_score_v4_protocol/validation_cifar100_rotated/layer_summary.csv",
   "validation_metrics": "results/e11_condition_score_v4_protocol/validation_cifar100_rotated/metrics.csv",
-  "validation_generated": false,
+  "validation_generated": true,
   "final_layer_summaries": [
     "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/layer_summary.csv",
     "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/layer_summary.csv"

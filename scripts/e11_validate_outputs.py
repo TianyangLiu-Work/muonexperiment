@@ -808,6 +808,16 @@ def main() -> None:
         Path("results/e11_condition_score_v4_protocol") / "unspent_split_registry.csv",
         Path("results/e11_condition_score_v4_protocol") / "acceptance_gates.csv",
         Path("results/e11_condition_score_v4_protocol") / "protocol_status.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_cifar100_rotated") / "metrics.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_cifar100_rotated") / "paired_metrics.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_cifar100_rotated") / "layer_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_cifar100_rotated") / "checkpoint_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_cifar100_rotated") / "prediction_pairs.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_cifar100_rotated") / "prediction_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_cifar100_rotated") / "residual_prediction_pairs.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_cifar100_rotated") / "residual_prediction_summary.csv",
+        Path("results/e11_condition_score_v4_protocol/validation_cifar100_rotated") / "config.json",
+        Path("figures/e11_condition_score_v4_protocol/validation_cifar100_rotated") / "cifar100_resnet_layer_jvp_checkpoint_prediction.png",
         Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "score_formula_registry.csv",
         Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "freeze_status.csv",
         Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "validation_score_pairs.csv",
@@ -815,6 +825,7 @@ def main() -> None:
         Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "validation_gate_report.csv",
         Path("results/e11_condition_score_v4_protocol/validation_score_freeze") / "config.json",
         Path("discussion/e11_condition_score_v4_protocol.md"),
+        Path("discussion/e11_condition_score_v4_validation_cifar100_rotated.md"),
         Path("discussion/e11_condition_score_v4_validation_freeze.md"),
         Path("scripts/e11_write_condition_score_v4_protocol.py"),
         Path("scripts/e11_freeze_condition_score_v4_validation.py"),
@@ -1078,6 +1089,7 @@ def main() -> None:
         "discussion/e11_condition_score_fresh_evaluation.md",
         "discussion/e11_condition_score_failure_mechanism_audit.md",
         "discussion/e11_condition_score_v4_protocol.md",
+        "discussion/e11_condition_score_v4_validation_cifar100_rotated.md",
         "discussion/e11_condition_score_v4_validation_freeze.md",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
@@ -1098,7 +1110,11 @@ def main() -> None:
         "V4 is not a positive result yet",
         "validation-frozen scalar",
         "validation-freeze boundary",
-        "current freeze artifact remains `not_ready`",
+        "validation split now exists",
+        "condition_score_v4_two_axis_amplitude_minus_direction",
+        "0.3758 [0.2759, 0.4756]",
+        "committed validation-freeze boundary",
+        "run only the unspent WideResNet50-2",
         "aggregation before either unspent final split",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
@@ -3050,6 +3066,7 @@ def main() -> None:
     ):
         raise AssertionError("condition-score v4 validation freeze must preserve candidate formulas, status rows, gates, and Frobenius amplitude axis")
     v4_freeze_status_lookup = v4_freeze_status.set_index("item")["status"].to_dict()
+    v4_freeze_evidence_lookup = v4_freeze_status.set_index("item")["evidence"].to_dict()
     v4_freeze_gate_lookup = v4_freeze_gates.set_index("gate_id")["status"].to_dict()
     if not bool(v4_freeze_config["validation_generated"]):
         if not (
@@ -3073,6 +3090,22 @@ def main() -> None:
             raise AssertionError("condition-score v4 validation freeze must mark the selected final score when validation passes")
         if v4_freeze_status_lookup.get("v4 final split outputs") != "not_run":
             raise AssertionError("condition-score v4 final split outputs must not exist before the validation freeze is committed")
+        selected_score_id = "condition_score_v4_two_axis_amplitude_minus_direction"
+        selected_summary = v4_freeze_summary[v4_freeze_summary["score"].eq(selected_score_id)]
+        direction_summary = v4_freeze_summary[
+            v4_freeze_summary["score"].eq("condition_score_v4_direction_axis_scaled_jvp_ratio")
+        ]
+        if not (
+            v4_freeze_evidence_lookup.get("v4 selected residual score") == selected_score_id
+            and set(v4_freeze_gate_lookup.values()) == {"pass"}
+            and not selected_summary.empty
+            and not direction_summary.empty
+            and abs(float(selected_summary.iloc[0]["mean_spearman_score_vs_target_residual"]) - 0.375758) < 1e-5
+            and float(selected_summary.iloc[0]["spearman_ci95_low"]) > 0.27
+            and float(direction_summary.iloc[0]["mean_threshold_below_one_accuracy"]) == 1.0
+            and int(v4_freeze_config["validation_generated"]) == 1
+        ):
+            raise AssertionError("condition-score v4 validation freeze must preserve the committed pass state and selected two-axis score")
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
