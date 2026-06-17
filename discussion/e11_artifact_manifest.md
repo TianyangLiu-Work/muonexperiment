@@ -6,15 +6,15 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 382.7 KB |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 383.4 KB |
 | scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 1.7 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 64.2 KB  |
-| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 964.0 KB |
+| discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 967.9 KB |
 | results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 265.3 MB |
 | figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 31.0 MB  |
 | configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
 | paper                  | Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.   | commit source and selected rendered PDFs | 5.6 MB   |
-| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 9.9 KB   |
+| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 10.1 KB  |
 | .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.            | commit                                   | 479 B    |
 | .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.        | commit                                   | 667 B    |
 
@@ -122,6 +122,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_condition_score_v4_protocol/validation_score_freeze/score_formula_registry.csv            |      8 | 2.5 KB    |
 | results/e11_condition_score_v4_protocol/validation_score_freeze/freeze_status.csv                     |      4 | 553 B     |
 | results/e11_condition_score_v4_protocol/validation_score_freeze/validation_gate_report.csv            |      6 | 870 B     |
+| results/e11_condition_score_v4_protocol/final_score_evaluation/final_gate_report.csv                  |      3 | 629 B     |
 | results/e11_top_conference_gap_register/gap_register.csv                                              |      7 | 8.9 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv                                          |    110 | 5.7 KB    |
 | results/e11_cifar100_resnet_lt_standard_eval/class_metrics.csv                                        |   1000 | 58.6 KB   |
@@ -198,13 +199,13 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                                        | size    |
 |:----------------------------------------------------------------------------|:--------|
-| README_E11.md                                                               | 50.7 KB |
+| README_E11.md                                                               | 51.4 KB |
 | discussion/e11_paper_skeleton.md                                            | 10.9 KB |
 | discussion/e11_main_paper_package.md                                        | 22.8 KB |
 | discussion/e11_main_figure_captions.md                                      | 6.5 KB  |
 | discussion/e11_notation_glossary.md                                         | 8.7 KB  |
 | discussion/e11_quantitative_claim_ledger.md                                 | 11.0 KB |
-| discussion/e11_reproduction_checklist.md                                    | 32.0 KB |
+| discussion/e11_reproduction_checklist.md                                    | 32.6 KB |
 | discussion/e11_reviewer_risk_audit.md                                       | 24.1 KB |
 | discussion/e11_pasted_review_audit.md                                       | 8.3 KB  |
 | discussion/e11_completion_audit.md                                          | 4.8 KB  |
@@ -241,6 +242,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_condition_score_v4_protocol.md                               | 16.5 KB |
 | discussion/e11_condition_score_v4_validation_cifar100_rotated.md            | 8.2 KB  |
 | discussion/e11_condition_score_v4_validation_freeze.md                      | 8.5 KB  |
+| discussion/e11_condition_score_v4_final_evaluation.md                       | 2.2 KB  |
 | discussion/e11_cifar100_resnet_lt_standard_eval.md                          | 3.3 KB  |
 | discussion/e11_cifar100_resnet_lt_recipe_benchmark.md                       | 6.6 KB  |
 | discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md                   | 6.9 KB  |

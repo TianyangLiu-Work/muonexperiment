@@ -1,0 +1,25 @@
+{
+  "source_layer_summary": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/layer_summary.csv",
+  "source_metrics": "results/e11_cifar100_resnet_layer_jvp_checkpoint_prediction/metrics.csv",
+  "freeze_dir": "results/e11_condition_score_v4_protocol/validation_score_freeze",
+  "primary_score": "condition_score_v4_two_axis_amplitude_minus_direction",
+  "final_splits": [
+    {
+      "split_id": "v4_final_architecture_wide_resnet50_2_cifar100lt",
+      "role": "fresh_final_heldout_architecture",
+      "display_name": "WideResNet50-2 CIFAR-100-LT final architecture split",
+      "layer_summary_path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/layer_summary.csv",
+      "metrics_path": "results/e11_condition_score_v4_protocol/final_architecture_wide_resnet50_2/metrics.csv",
+      "generated": false
+    },
+    {
+      "split_id": "v4_final_data_cifar10lt_mixed_partition",
+      "role": "fresh_final_heldout_data_partition",
+      "display_name": "CIFAR-10-LT mixed-partition final data split",
+      "layer_summary_path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/layer_summary.csv",
+      "metrics_path": "results/e11_condition_score_v4_protocol/final_data_cifar10_mixed/metrics.csv",
+      "generated": false
+    }
+  ],
+  "analysis_scope": "v4 final split evaluator; not_ready unless both unspent final splits pass"
+}

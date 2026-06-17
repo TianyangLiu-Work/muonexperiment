@@ -50,6 +50,7 @@ sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_validation_cifar100_
 python3 scripts/e11_freeze_condition_score_v4_validation.py
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v4_data_cifar10_mixed.sbatch
+python3 scripts/e11_evaluate_condition_score_v4_finals.py
 sbatch scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_recipe_benchmark.sbatch
 sbatch scripts/slurm/e11_cifar100_resnet_lt_muon_final_benchmark.sbatch
@@ -146,6 +147,7 @@ make e11-cifar-resnet-condition-score-fresh-architecture-results # submit the fr
 make e11-cifar-resnet-condition-score-fresh-data-results # submit the fresh CIFAR-10 alternate-partition condition-score data split via Slurm
 make e11-cifar-resnet-condition-score-fresh-eval # evaluate frozen fresh condition-score gates after fresh Slurm jobs finish
 make e11-cifar-resnet-condition-score-v4-validation-freeze # freeze or block the v4 scalar aggregation after the validation split
+make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish
 make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm
 make e11-cifar-resnet-lt-recipe-benchmark-results # submit the augmented CIFAR-100-LT ResNet18 recipe benchmark pilot via Slurm
 make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm
@@ -177,6 +179,7 @@ make e11-cifar-resnet-condition-score-fresh-architecture-results
 make e11-cifar-resnet-condition-score-fresh-data-results
 make e11-cifar-resnet-condition-score-fresh-eval
 make e11-cifar-resnet-condition-score-v4-validation-freeze
+make e11-cifar-resnet-condition-score-v4-final-eval
 make e11-cifar-resnet-lt-standard-eval-results
 make e11-cifar-resnet-lt-recipe-benchmark-results
 make e11-cifar-resnet-lt-muon-final-benchmark-results
@@ -293,6 +296,9 @@ Spearman `0.3758 [0.2759, 0.4756]` and direction-axis threshold accuracy `1`.
 V4 is not a positive result yet; it now has a validation-frozen scalar
 aggregation before either unspent final split, but still needs the unspent
 WideResNet50-2 and CIFAR-10 mixed final split evaluations before any P0 claim.
+The final evaluator is `scripts/e11_evaluate_condition_score_v4_finals.py`;
+its current gate report is `not_ready` because the two unspent final Slurm jobs
+are submitted but their final layer summaries are not available yet.
 
 The standard long-tail reporting target submits
 `scripts/slurm/e11_cifar100_resnet_lt_standard_eval.sbatch`, which runs
@@ -373,6 +379,7 @@ Paper-facing synthesis:
 - `discussion/e11_condition_score_v4_protocol.md`
 - `discussion/e11_condition_score_v4_validation_cifar100_rotated.md`
 - `discussion/e11_condition_score_v4_validation_freeze.md`
+- `discussion/e11_condition_score_v4_final_evaluation.md`
 - `discussion/e11_cifar100_resnet_lt_standard_eval.md`
 - `discussion/e11_cifar100_resnet_lt_recipe_benchmark.md`
 - `discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md`
@@ -464,6 +471,7 @@ Primary paper quantitative tables:
 - `results/e11_condition_score_v4_protocol/validation_score_freeze/score_formula_registry.csv`
 - `results/e11_condition_score_v4_protocol/validation_score_freeze/freeze_status.csv`
 - `results/e11_condition_score_v4_protocol/validation_score_freeze/validation_gate_report.csv`
+- `results/e11_condition_score_v4_protocol/final_score_evaluation/final_gate_report.csv`
 - `results/e11_top_conference_gap_register/gap_register.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/summary.csv`
 - `results/e11_cifar100_resnet_lt_standard_eval/class_summary.csv`
@@ -608,7 +616,8 @@ Do not claim:
 - `scripts/e11_write_condition_score_fresh_protocol.py`: generated fresh condition-score protocol with spent-heldout quarantine, score-freeze registry, fresh split registry, and acceptance gates.
 - `scripts/e11_write_condition_score_failure_mechanism_audit.py`: diagnostic-only obstruction audit for the v2/v3 held-out failures and the fresh ResNet50 scaled-JVP reversal.
 - `scripts/e11_write_condition_score_v4_protocol.py`: generated v4 protocol that quarantines all spent final splits, separates direction/amplitude/transport score axes, and registers unspent WideResNet50-2 and CIFAR-10 mixed final splits.
-- `scripts/e11_freeze_condition_score_v4_validation.py`: validation-freeze boundary that aggregates the v4 Frobenius amplitude axis from `metrics.csv`, selects or blocks the scalar score after the validation split, and keeps final splits blocked while the gate is `not_ready`.
+- `scripts/e11_freeze_condition_score_v4_validation.py`: validation-freeze boundary that aggregates the v4 Frobenius amplitude axis from `metrics.csv` and freezes the scalar score before final split evaluation.
+- `scripts/e11_evaluate_condition_score_v4_finals.py`: frozen-score evaluator for the unspent v4 WideResNet50-2 and CIFAR-10 mixed final splits.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.
 - `scripts/e11_run_cifar100_resnet_practical_muon_bridge.py`: ResNet practical Muon/AdamW trajectory-state bridge from the tail-rich checkpoint.
