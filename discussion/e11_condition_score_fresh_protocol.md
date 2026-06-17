@@ -49,7 +49,7 @@ This generated protocol revision starts after the registered v2 held-out failure
 
 ## Claim Boundary
 
-The zero-fit scaled-JVP score is a theory-derived candidate because it directly measures the downstream finite-difference tail-drift ratio under matched head-gain scaling. It is not a positive result until the fresh ResNet50 architecture split and the fresh CIFAR-10 alternate-partition split exist and pass the residual-ranking and threshold gates. The spent ResNet34 and original CIFAR-10 held-outs may appear only as negative evidence and must not be used for revised score fitting or final claims.
+The zero-fit scaled-JVP score is a theory-derived candidate because it directly measures the downstream finite-difference tail-drift ratio under matched head-gain scaling. It is not a positive result unless the fresh ResNet50 architecture split and the fresh CIFAR-10 alternate-partition split both pass the residual-ranking and threshold gates. In the current evaluated state, the fresh ResNet50 architecture residual-ranking gate fails, so the fresh v3 result is an obstruction rather than a P0 predictive-condition claim. The spent ResNet34 and original CIFAR-10 held-outs may appear only as negative evidence and must not be used for revised score fitting or final claims.
 
 Artifacts:
 - [quarantine_register.csv](../results/e11_condition_score_fresh_protocol/quarantine_register.csv)

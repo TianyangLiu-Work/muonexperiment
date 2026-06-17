@@ -797,6 +797,12 @@ def main() -> None:
         Path("scripts/e11_write_condition_score_fresh_protocol.py"),
         Path("scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch"),
         Path("scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch"),
+        Path("results/e11_condition_score_failure_mechanism_audit") / "score_outcome_matrix.csv",
+        Path("results/e11_condition_score_failure_mechanism_audit") / "split_obstruction_taxonomy.csv",
+        Path("results/e11_condition_score_failure_mechanism_audit") / "resnet50_stage_reversal.csv",
+        Path("figures/e11_condition_score_failure_mechanism_audit") / "resnet50_stage_reversal.png",
+        Path("discussion/e11_condition_score_failure_mechanism_audit.md"),
+        Path("scripts/e11_write_condition_score_failure_mechanism_audit.py"),
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "train_trace.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "class_metrics.csv",
         Path("results/e11_cifar100_resnet_lt_standard_eval") / "group_metrics.csv",
@@ -950,6 +956,8 @@ def main() -> None:
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
         "e11-cifar-resnet-condition-score-fresh-eval:",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
+        "e11-cifar-resnet-condition-score-failure-audit:",
+        "scripts/e11_write_condition_score_failure_mechanism_audit.py",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -1039,13 +1047,19 @@ def main() -> None:
         "discussion/e11_condition_score_theory_bridge.md",
         "discussion/e11_condition_score_fresh_protocol.md",
         "discussion/e11_condition_score_fresh_evaluation.md",
+        "discussion/e11_condition_score_failure_mechanism_audit.md",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
         "scripts/e11_write_condition_score_fresh_protocol.py",
+        "scripts/e11_write_condition_score_failure_mechanism_audit.py",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
         "registers fresh final splits: ResNet50",
         "CIFAR-100-LT and a CIFAR-10 alternate head/tail partition",
+        "current fresh v3 result is still `not_ready`",
+        "architecture split fails and reverses",
+        "`-0.8157 [-0.8652, -0.7661]`",
+        "results/e11_condition_score_failure_mechanism_audit/resnet50_stage_reversal.csv",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
         "candidate condition-score audit",
@@ -2845,6 +2859,47 @@ def main() -> None:
             )
     else:
         raise AssertionError("fresh condition-score evaluator should not be committed with only one fresh final split generated")
+    failure_audit_dir = Path("results/e11_condition_score_failure_mechanism_audit")
+    score_outcome_matrix = pd.read_csv(failure_audit_dir / "score_outcome_matrix.csv")
+    obstruction_taxonomy = pd.read_csv(failure_audit_dir / "split_obstruction_taxonomy.csv")
+    resnet50_stage_reversal = pd.read_csv(failure_audit_dir / "resnet50_stage_reversal.csv")
+    expected_obstruction_ids = {
+        "O1-v2-architecture-weak-transfer",
+        "O2-v2-data-family-sign-reversal",
+        "O3-v3-resnet50-jvp-reversal",
+        "O4-v3-data-pass-is-not-universal",
+    }
+    if not (
+        len(score_outcome_matrix) == 18
+        and len(obstruction_taxonomy) == 4
+        and set(obstruction_taxonomy["obstruction_id"]) == expected_obstruction_ids
+        and len(resnet50_stage_reversal) == 18
+    ):
+        raise AssertionError("condition-score failure mechanism audit must cover all held-out/fresh score rows and ResNet50 stage terms")
+    score_lookup = score_outcome_matrix.set_index(["split_role", "score"])
+    resnet50_v3 = score_lookup.loc[
+        ("fresh_final_heldout_architecture", "condition_score_v3_zero_fit_scaled_jvp")
+    ]
+    cifar10_v3 = score_lookup.loc[
+        ("fresh_final_heldout_data_partition", "condition_score_v3_zero_fit_scaled_jvp")
+    ]
+    if not (
+        resnet50_v3["residual_gate_status"] == "inverted_residual_ranking"
+        and bool(resnet50_v3["threshold_only_success"])
+        and float(resnet50_v3["spearman_ci95_high"]) < 0.0
+        and cifar10_v3["residual_gate_status"] == "passes_residual_gate"
+        and float(cifar10_v3["spearman_ci95_low"]) > 0.0
+    ):
+        raise AssertionError("condition-score failure mechanism audit must preserve the fresh ResNet50 reversal and CIFAR-10 alternate pass")
+    stage_lookup = resnet50_stage_reversal.set_index(["stage", "block_term"])
+    if not (
+        ("layer3", "conv2") in stage_lookup.index
+        and int(stage_lookup.loc[("layer3", "conv2"), "total_top5_target_residual_layers"]) >= 20
+        and int(stage_lookup.loc[("layer3", "conv2"), "total_top5_primary_score_layers"]) == 0
+        and ("classifier", "classifier") in stage_lookup.index
+        and int(stage_lookup.loc[("classifier", "classifier"), "total_top5_primary_score_layers"]) > 0
+    ):
+        raise AssertionError("condition-score failure mechanism audit must expose the ResNet50 layer2/layer3 residual versus classifier/stem score mismatch")
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -4313,7 +4368,7 @@ def main() -> None:
         "head=0,2,4,6,8; tail=1,3,5,7,9",
         "condition_score_v3_zero_fit_scaled_jvp",
         "spent ResNet34 and original CIFAR-10 held-outs",
-        "not a positive result until the fresh ResNet50 architecture split",
+        "fresh ResNet50 architecture residual-ranking gate fails",
     ]
     assert_required_phrases(
         "fresh condition-score protocol",
@@ -4336,6 +4391,23 @@ def main() -> None:
         "fresh condition-score evaluation",
         condition_score_fresh_evaluation,
         required_condition_score_fresh_evaluation_phrases,
+    )
+    condition_score_failure_mechanism_audit = Path(
+        "discussion/e11_condition_score_failure_mechanism_audit.md"
+    ).read_text(encoding="utf-8")
+    required_condition_score_failure_phrases = [
+        "Condition-Score Failure Mechanism Audit",
+        "diagnostic-only",
+        "O3-v3-resnet50-jvp-reversal",
+        "ResNet50 Stage Reversal",
+        "architecture/parameterization reversal",
+        "bottleneck/downsample parameterization",
+        "Blocked: tuning a new score on these rows",
+    ]
+    assert_required_phrases(
+        "condition-score failure mechanism audit",
+        condition_score_failure_mechanism_audit,
+        required_condition_score_failure_phrases,
     )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)

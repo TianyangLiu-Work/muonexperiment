@@ -19,5 +19,5 @@
   ],
   "primary_score": "condition_score_v3_zero_fit_scaled_jvp",
   "primary_score_rule": "zero-fit log scaled-JVP ratio; no spent held-out fitting",
-  "analysis_scope": "fresh final split evaluator; not_ready until all fresh split outputs exist"
+  "analysis_scope": "fresh final split evaluator; not_ready unless all fresh split gates pass"
 }

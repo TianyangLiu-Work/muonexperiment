@@ -1,6 +1,6 @@
 # E11 Fresh Condition-Score Evaluation
 
-This generated evaluator is frozen before the fresh final Slurm outputs exist. It applies the registered `condition_score_v3_zero_fit_scaled_jvp` primary score, reports the retired v2 calibrated residual baseline, and keeps the spent ResNet34/original-CIFAR-10 held-outs out of fitting and final evidence.
+This generated evaluator was frozen before the fresh final Slurm outputs existed. It applies the registered `condition_score_v3_zero_fit_scaled_jvp` primary score, reports the retired v2 calibrated residual baseline, and keeps the spent ResNet34/original-CIFAR-10 held-outs out of fitting and final evidence.
 
 ![Fresh condition-score evaluation](../figures/e11_condition_score_fresh_protocol/fresh_score_evaluation/condition_score_fresh_evaluation.png)
 
@@ -33,7 +33,7 @@ This generated evaluator is frozen before the fresh final Slurm outputs exist. I
 
 ## Boundary
 
-`not_run` or `not_ready` is the expected state until both fresh final layer summaries exist. A P0 predictive-condition claim requires both fresh final splits to pass residual-Spearman, threshold-direction, baseline-comparison, and baseline-reporting gates.
+`not_run` is the pre-output state for missing fresh final layer summaries. Once those summaries exist, `not_ready` remains the correct state unless both fresh final splits pass residual-Spearman, threshold-direction, baseline-comparison, and baseline-reporting gates.
 
 Artifacts:
 - [fresh_score_pairs.csv](../results/e11_condition_score_fresh_protocol/fresh_score_evaluation/fresh_score_pairs.csv)
