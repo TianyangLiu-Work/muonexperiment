@@ -1,0 +1,61 @@
+# E11 Condition-Score V5 Validation Freeze
+
+This generated artifact is the freeze boundary for the v5 theory protocol. It
+is allowed to run before the validation Slurm job finishes; in that state it
+writes `not_run`/`not_ready` rows and keeps the final splits blocked. Once the
+validation-only mod-4 CIFAR-100-LT split exists, the same script evaluates the
+registered v5 candidate pool and freezes a transport-normalized residual score
+only if the validation residual-ranking gate passes.
+
+## Formula Registry
+
+| score_id                                                          | role                      | formula                                                                                                                                               | theory_contract                                                           | normalization_source                                | uses_spent_final_rows   | selected_for_final_evaluation   |
+|:------------------------------------------------------------------|:--------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------|:----------------------------------------------------|:------------------------|:--------------------------------|
+| condition_score_v5_direction_axis_scaled_jvp_ratio                | direction_guardrail       | raw log scaled-JVP spectral/Frobenius squared ratio                                                                                                   | sandwiched tail-drift plus partition/architecture transport normalization | raw log axis                                        | no                      | no                              |
+| condition_score_v5_raw_fro_amplitude_axis                         | diagnostic_residual_axis  | source-standardized raw Frobenius matched-head-gain scaled-JVP amplitude                                                                              | sandwiched tail-drift plus partition/architecture transport normalization | source calibration step mean/std                    | no                      | no                              |
+| condition_score_v5_transport_normalized_amplitude_minus_direction | residual_candidate        | source-standardized Frobenius amplitude minus direction ratio, with pre-registered downsample/classifier transport and early-depth nuisance penalties | sandwiched tail-drift plus partition/architecture transport normalization | source calibration step mean/std                    | no                      | no                              |
+| condition_score_v5_transport_defect_penalty                       | diagnostic_transport_axis | absolute source-standardized amplitude defect plus downsample/classifier transport tags                                                               | sandwiched tail-drift plus partition/architecture transport normalization | source calibration step mean/std                    | no                      | no                              |
+| early_layer_prior                                                 | baseline                  | raw log early-layer prior                                                                                                                             | sandwiched tail-drift plus partition/architecture transport normalization | raw log axis                                        | no                      | no                              |
+| source_observed_drift_positive_control                            | positive_control          | source observed residual under source-fit depth baseline, matched by parameter name                                                                   | upper-bound transfer control; not a score candidate                       | source observed drift; not eligible for final claim | no final-target tuning  | no                              |
+| condition_score_v5_validation_selected                            | primary_alias             | pending_validation_output                                                                                                                             | points to selected v5 residual candidate after validation                 | pending until validation output exists              | no                      | no                              |
+
+## Freeze Status
+
+| item                                   | status     | evidence                                                                                                                                                                         |
+|:---------------------------------------|:-----------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| v5 validation split output             | not_run    | results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv                                                                                     |
+| v5 candidate pool                      | registered | candidate formulas are fixed in scripts/e11_freeze_condition_score_v5_validation.py                                                                                              |
+| v5 transport-normalized residual score | not_ready  | pending_validation_output                                                                                                                                                        |
+| v5 final split outputs                 | not_run    | results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/layer_summary.csv; results/e11_condition_score_v5_protocol/final_data_cifar10_cross/layer_summary.csv |
+| v5 spent-final quarantine              | enforced   | results/e11_condition_score_v5_theory_protocol/spent_evidence_policy.csv                                                                                                         |
+
+## Validation Score Summary
+
+| score   | score_role   | validation_transfer_pairs   | mean_points   | mean_spearman_score_vs_target_residual   | spearman_ci95_low   | spearman_ci95_high   | mean_pearson_score_vs_target_residual   | pearson_ci95_low   | pearson_ci95_high   | mean_top5_residual_risk_overlap_fraction   | top5_residual_risk_overlap_ci95_low   | top5_residual_risk_overlap_ci95_high   | mean_threshold_below_one_accuracy   | threshold_below_one_accuracy_ci95_low   | threshold_below_one_accuracy_ci95_high   |
+|---------|--------------|-----------------------------|---------------|------------------------------------------|---------------------|----------------------|-----------------------------------------|--------------------|---------------------|--------------------------------------------|---------------------------------------|----------------------------------------|-------------------------------------|-----------------------------------------|------------------------------------------|
+
+## Gate Report
+
+| gate_id                             | scope                               | status    | evidence                                                                                          |
+|:------------------------------------|:------------------------------------|:----------|:--------------------------------------------------------------------------------------------------|
+| V5F-1-validation-output             | validation-only split               | not_run   | results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv      |
+| V5F-2-no-final-before-freeze        | unspent final splits                | pass      | no v5 final layer_summary.csv exists before a frozen validation score                             |
+| V5F-3-spent-final-quarantine        | v2/v3/v4 final rows                 | pass      | spent evidence policy forbids fitting, feature selection, threshold tuning, and final P0 evidence |
+| V5F-4-residual-score-freeze         | transport-normalized residual score | not_ready | pending_validation_output                                                                         |
+| V5F-5-direction-threshold-guardrail | direction guardrail                 | not_run   | direction threshold accuracy lower endpoint must be at least 0.8                                  |
+| V5F-6-final-claim-readiness         | P0 predictive-condition claim       | not_ready | new final splits may run only after validation freeze passes                                      |
+
+## Boundary
+
+Validation output is not present yet, so no v5 residual score is frozen.
+
+Blocked now: the v5 final architecture and data splits cannot support a P0
+claim until this artifact reports a frozen residual score, a passing direction
+guardrail, and no generated final outputs before the freeze.
+
+Artifacts:
+- [score_formula_registry.csv](../results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv)
+- [freeze_status.csv](../results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv)
+- [validation_gate_report.csv](../results/e11_condition_score_v5_protocol/validation_score_freeze/validation_gate_report.csv)
+- [validation_score_summary.csv](../results/e11_condition_score_v5_protocol/validation_score_freeze/validation_score_summary.csv)
+- [validation_score_pairs.csv](../results/e11_condition_score_v5_protocol/validation_score_freeze/validation_score_pairs.csv)

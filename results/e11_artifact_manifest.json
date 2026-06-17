@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 398528,
-      "size": "389.2 KB"
+      "size_bytes": 399416,
+      "size": "390.1 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 1883630,
+      "size_bytes": 1920134,
       "size": "1.8 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1054643,
+      "size_bytes": 1067812,
       "size": "1.0 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 280219379,
+      "size_bytes": 280226405,
       "size": "267.2 MB"
     },
     {
@@ -61,8 +61,8 @@
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 11916,
-      "size": "11.6 KB"
+      "size_bytes": 12141,
+      "size": "11.9 KB"
     },
     {
       "path": ".gitignore",
@@ -731,9 +731,24 @@
       "size": "1.6 KB"
     },
     {
+      "path": "results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv",
+      "rows": 7,
+      "size": "2.6 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv",
+      "rows": 5,
+      "size": "653 B"
+    },
+    {
+      "path": "results/e11_condition_score_v5_protocol/validation_score_freeze/validation_gate_report.csv",
+      "rows": 6,
+      "size": "814 B"
+    },
+    {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
       "rows": 7,
-      "size": "10.4 KB"
+      "size": "10.8 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv",
@@ -1089,7 +1104,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "56.7 KB"
+      "size": "58.0 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1113,7 +1128,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "35.2 KB"
+      "size": "35.7 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -1145,7 +1160,7 @@
     },
     {
       "path": "discussion/e11_top_conference_gap_register.md",
-      "size": "33.1 KB"
+      "size": "35.6 KB"
     },
     {
       "path": "discussion/e11_evidence_index.md",
@@ -1278,6 +1293,10 @@
     {
       "path": "discussion/e11_condition_score_v5_theory_protocol.md",
       "size": "17.8 KB"
+    },
+    {
+      "path": "discussion/e11_condition_score_v5_validation_freeze.md",
+      "size": "9.4 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_standard_eval.md",

@@ -1,0 +1,7 @@
+gate_id,scope,status,evidence
+V5F-1-validation-output,validation-only split,not_run,results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv
+V5F-2-no-final-before-freeze,unspent final splits,pass,no v5 final layer_summary.csv exists before a frozen validation score
+V5F-3-spent-final-quarantine,v2/v3/v4 final rows,pass,"spent evidence policy forbids fitting, feature selection, threshold tuning, and final P0 evidence"
+V5F-4-residual-score-freeze,transport-normalized residual score,not_ready,pending_validation_output
+V5F-5-direction-threshold-guardrail,direction guardrail,not_run,direction threshold accuracy lower endpoint must be at least 0.8
+V5F-6-final-claim-readiness,P0 predictive-condition claim,not_ready,new final splits may run only after validation freeze passes

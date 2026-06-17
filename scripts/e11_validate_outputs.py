@@ -864,6 +864,14 @@ def main() -> None:
         Path("results/e11_condition_score_v5_theory_protocol") / "acceptance_gates.csv",
         Path("discussion/e11_condition_score_v5_theory_protocol.md"),
         Path("scripts/e11_write_condition_score_v5_theory_protocol.py"),
+        Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "score_formula_registry.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "freeze_status.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "validation_score_pairs.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "validation_score_summary.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "validation_gate_report.csv",
+        Path("results/e11_condition_score_v5_protocol/validation_score_freeze") / "config.json",
+        Path("discussion/e11_condition_score_v5_validation_freeze.md"),
+        Path("scripts/e11_freeze_condition_score_v5_validation.py"),
         Path("discussion/e11_condition_score_v4_protocol.md"),
         Path("discussion/e11_condition_score_v4_validation_cifar100_rotated.md"),
         Path("discussion/e11_condition_score_v4_validation_freeze.md"),
@@ -1052,6 +1060,8 @@ def main() -> None:
         "scripts/e11_write_condition_score_v5_theory_protocol.py",
         "e11-cifar-resnet-condition-score-v5-validation-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v5_validation_mod4_partition.sbatch",
+        "e11-cifar-resnet-condition-score-v5-validation-freeze:",
+        "scripts/e11_freeze_condition_score_v5_validation.py",
         "e11-cifar-resnet-condition-score-v5-architecture-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch",
         "e11-cifar-resnet-condition-score-v5-data-results:",
@@ -1132,6 +1142,7 @@ def main() -> None:
         "make e11-cifar-resnet-condition-score-v4-final-eval # evaluate frozen v4 final gates after both unspent final Slurm jobs finish",
         "make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract",
         "make e11-cifar-resnet-condition-score-v5-validation-results # submit the v5 validation-only CIFAR-100-LT mod-4 partition via Slurm",
+        "make e11-cifar-resnet-condition-score-v5-validation-freeze # freeze or block the v5 transport-normalized score after validation",
         "make e11-cifar-resnet-condition-score-v5-architecture-results # submit the v5 ResNeXt50-32x4d final architecture split via Slurm",
         "make e11-cifar-resnet-condition-score-v5-data-results # submit the v5 CIFAR-10 cross-partition final data split via Slurm",
         "make e11-cifar-resnet-lt-standard-eval-results # submit the standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline via Slurm",
@@ -1160,6 +1171,7 @@ def main() -> None:
         "discussion/e11_condition_score_v4_final_evaluation.md",
         "discussion/e11_condition_score_v4_failure_mechanism_audit.md",
         "discussion/e11_condition_score_v5_theory_protocol.md",
+        "discussion/e11_condition_score_v5_validation_freeze.md",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
         "scripts/e11_write_condition_score_fresh_protocol.py",
@@ -1169,6 +1181,7 @@ def main() -> None:
         "scripts/e11_evaluate_condition_score_v4_finals.py",
         "scripts/e11_write_condition_score_v4_failure_mechanism_audit.py",
         "scripts/e11_write_condition_score_v5_theory_protocol.py",
+        "scripts/e11_freeze_condition_score_v5_validation.py",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch",
@@ -1200,6 +1213,8 @@ def main() -> None:
         "ResNeXt50-32x4d",
         "data-partition reversal mechanism problem",
         "aggregation before either unspent final split",
+        "results/e11_condition_score_v5_protocol/validation_score_freeze/*",
+        "transport-normalized residual score",
         "frozen `condition_score_v2_calibrated_residual` coefficients",
         "source-observed positive-control Spearman",
         "candidate condition-score audit",
@@ -3467,6 +3482,103 @@ def main() -> None:
             "Blocked now: fitting, selecting, or thresholding a v5 score on any v2/v3/v4 final row",
         ],
     )
+    v5_freeze_dir = Path("results/e11_condition_score_v5_protocol/validation_score_freeze")
+    v5_freeze_formulas = pd.read_csv(v5_freeze_dir / "score_formula_registry.csv")
+    v5_freeze_status = pd.read_csv(v5_freeze_dir / "freeze_status.csv")
+    v5_freeze_pairs = pd.read_csv(v5_freeze_dir / "validation_score_pairs.csv")
+    v5_freeze_summary = pd.read_csv(v5_freeze_dir / "validation_score_summary.csv")
+    v5_freeze_gates = pd.read_csv(v5_freeze_dir / "validation_gate_report.csv")
+    v5_freeze_config = json.loads((v5_freeze_dir / "config.json").read_text(encoding="utf-8"))
+    expected_v5_freeze_scores = {
+        "condition_score_v5_direction_axis_scaled_jvp_ratio",
+        "condition_score_v5_raw_fro_amplitude_axis",
+        "condition_score_v5_transport_normalized_amplitude_minus_direction",
+        "condition_score_v5_transport_defect_penalty",
+        "early_layer_prior",
+        "source_observed_drift_positive_control",
+        "condition_score_v5_validation_selected",
+    }
+    expected_v5_freeze_items = {
+        "v5 validation split output",
+        "v5 candidate pool",
+        "v5 transport-normalized residual score",
+        "v5 final split outputs",
+        "v5 spent-final quarantine",
+    }
+    expected_v5_freeze_gates = {
+        "V5F-1-validation-output",
+        "V5F-2-no-final-before-freeze",
+        "V5F-3-spent-final-quarantine",
+        "V5F-4-residual-score-freeze",
+        "V5F-5-direction-threshold-guardrail",
+        "V5F-6-final-claim-readiness",
+    }
+    if not (
+        set(v5_freeze_formulas["score_id"]) == expected_v5_freeze_scores
+        and set(v5_freeze_status["item"]) == expected_v5_freeze_items
+        and set(v5_freeze_gates["gate_id"]) == expected_v5_freeze_gates
+        and not v5_freeze_formulas["uses_spent_final_rows"].astype(str).str.contains("yes", case=False).any()
+    ):
+        raise AssertionError(
+            "condition-score v5 validation freeze must preserve registered scores, status rows, gates, and spent-final exclusion"
+        )
+    v5_freeze_status_lookup = v5_freeze_status.set_index("item")["status"].to_dict()
+    v5_freeze_evidence_lookup = v5_freeze_status.set_index("item")["evidence"].to_dict()
+    v5_freeze_gate_lookup = v5_freeze_gates.set_index("gate_id")["status"].to_dict()
+    if not bool(v5_freeze_config["validation_generated"]):
+        if not (
+            v5_freeze_pairs.empty
+            and v5_freeze_summary.empty
+            and v5_freeze_status_lookup["v5 validation split output"] == "not_run"
+            and v5_freeze_status_lookup["v5 candidate pool"] == "registered"
+            and v5_freeze_status_lookup["v5 transport-normalized residual score"] == "not_ready"
+            and v5_freeze_evidence_lookup["v5 transport-normalized residual score"] == "pending_validation_output"
+            and v5_freeze_status_lookup["v5 final split outputs"] == "not_run"
+            and v5_freeze_status_lookup["v5 spent-final quarantine"] == "enforced"
+            and v5_freeze_gate_lookup["V5F-1-validation-output"] == "not_run"
+            and v5_freeze_gate_lookup["V5F-2-no-final-before-freeze"] == "pass"
+            and v5_freeze_gate_lookup["V5F-3-spent-final-quarantine"] == "pass"
+            and v5_freeze_gate_lookup["V5F-4-residual-score-freeze"] == "not_ready"
+            and v5_freeze_gate_lookup["V5F-5-direction-threshold-guardrail"] == "not_run"
+            and v5_freeze_gate_lookup["V5F-6-final-claim-readiness"] == "not_ready"
+        ):
+            raise AssertionError(
+                "condition-score v5 validation freeze must block final claims cleanly before validation output exists"
+            )
+    else:
+        selected_status = v5_freeze_status_lookup["v5 transport-normalized residual score"]
+        selected_score = v5_freeze_evidence_lookup["v5 transport-normalized residual score"]
+        if not (
+            not v5_freeze_pairs.empty
+            and not v5_freeze_summary.empty
+            and v5_freeze_status_lookup["v5 validation split output"] == "generated"
+            and v5_freeze_status_lookup["v5 final split outputs"] == "not_run"
+            and selected_status in {"frozen", "validation_failed"}
+            and selected_score == "condition_score_v5_transport_normalized_amplitude_minus_direction"
+            and v5_freeze_gate_lookup["V5F-1-validation-output"] == "pass"
+            and v5_freeze_gate_lookup["V5F-2-no-final-before-freeze"] == "pass"
+            and v5_freeze_gate_lookup["V5F-3-spent-final-quarantine"] == "pass"
+            and v5_freeze_gate_lookup["V5F-5-direction-threshold-guardrail"] in {"pass", "fail"}
+            and v5_freeze_gate_lookup["V5F-6-final-claim-readiness"] in {"pass", "not_ready"}
+        ):
+            raise AssertionError(
+                "condition-score v5 validation freeze must either freeze or reject the residual candidate before final outputs exist"
+            )
+    v5_freeze_text = Path("discussion/e11_condition_score_v5_validation_freeze.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "condition-score v5 validation freeze",
+        v5_freeze_text,
+        [
+            "E11 Condition-Score V5 Validation Freeze",
+            "Formula Registry",
+            "Freeze Status",
+            "transport-normalized residual score",
+            "V5F-2-no-final-before-freeze",
+            "Blocked now: the v5 final architecture and data splits cannot support a P0",
+        ],
+    )
     lt_standard_dir = Path("results/e11_cifar100_resnet_lt_standard_eval")
     lt_standard_trace = pd.read_csv(lt_standard_dir / "train_trace.csv")
     lt_standard_class_metrics = pd.read_csv(lt_standard_dir / "class_metrics.csv")
@@ -5013,6 +5125,23 @@ def main() -> None:
         condition_score_v5_protocol,
         required_condition_score_v5_phrases,
     )
+    condition_score_v5_freeze = Path("discussion/e11_condition_score_v5_validation_freeze.md").read_text(
+        encoding="utf-8"
+    )
+    required_condition_score_v5_freeze_phrases = [
+        "Condition-Score V5 Validation Freeze",
+        "not_run",
+        "not_ready",
+        "transport-normalized residual score",
+        "V5F-1-validation-output",
+        "V5F-4-residual-score-freeze",
+        "Blocked now: the v5 final architecture and data splits cannot support a P0",
+    ]
+    assert_required_phrases(
+        "condition-score v5 validation freeze",
+        condition_score_v5_freeze,
+        required_condition_score_v5_freeze_phrases,
+    )
     gap_register_frame = pd.read_csv("results/e11_top_conference_gap_register/gap_register.csv")
     assert_top_conference_gap_register(gap_register_frame)
     top_conference_gap_register = Path("discussion/e11_top_conference_gap_register.md").read_text(
@@ -5031,7 +5160,11 @@ def main() -> None:
         "discussion/e11_condition_score_v4_protocol.md",
         "discussion/e11_condition_score_v4_final_evaluation.md",
         "discussion/e11_condition_score_v5_theory_protocol.md",
+        "discussion/e11_condition_score_v5_validation_freeze.md",
         "transport-normalized score contract",
+        "validation-freeze boundary",
+        "validation-only mod-4 CIFAR-100-LT split",
+        "not_ready",
         "ResNeXt50-32x4d",
         "CIFAR-10 mixed final data split fails",
         "data-partition reversal mechanism",
@@ -5066,6 +5199,7 @@ def main() -> None:
         or "make e11-cifar-resnet-condition-score-fresh-eval" not in readme
         or "make e11-cifar-resnet-condition-score-v5-theory-protocol" not in readme
         or "make e11-cifar-resnet-condition-score-v5-validation-results" not in readme
+        or "make e11-cifar-resnet-condition-score-v5-validation-freeze" not in readme
         or "make e11-cifar-resnet-condition-score-v5-architecture-results" not in readme
         or "make e11-cifar-resnet-condition-score-v5-data-results" not in readme
         or "make e11-cifar-resnet-lt-muon-final-benchmark-results" not in readme

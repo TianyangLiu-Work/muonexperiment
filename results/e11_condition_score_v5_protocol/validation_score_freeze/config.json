@@ -1,0 +1,18 @@
+{
+  "candidate_scores": [
+    "condition_score_v5_direction_axis_scaled_jvp_ratio",
+    "condition_score_v5_raw_fro_amplitude_axis",
+    "condition_score_v5_transport_normalized_amplitude_minus_direction",
+    "condition_score_v5_transport_defect_penalty",
+    "early_layer_prior"
+  ],
+  "final_layer_summaries": [
+    "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/layer_summary.csv",
+    "results/e11_condition_score_v5_protocol/final_data_cifar10_cross/layer_summary.csv"
+  ],
+  "selection_rule": "freeze highest residual-candidate CI lower endpoint above zero after validation; direction guardrail must pass separately",
+  "theory_protocol": "discussion/e11_condition_score_v5_theory_protocol.md",
+  "validation_generated": false,
+  "validation_layer_summary": "results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv",
+  "validation_metrics": "results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/metrics.csv"
+}

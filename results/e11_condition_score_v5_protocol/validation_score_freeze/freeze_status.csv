@@ -1,0 +1,6 @@
+item,status,evidence
+v5 validation split output,not_run,results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv
+v5 candidate pool,registered,candidate formulas are fixed in scripts/e11_freeze_condition_score_v5_validation.py
+v5 transport-normalized residual score,not_ready,pending_validation_output
+v5 final split outputs,not_run,results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/layer_summary.csv; results/e11_condition_score_v5_protocol/final_data_cifar10_cross/layer_summary.csv
+v5 spent-final quarantine,enforced,results/e11_condition_score_v5_theory_protocol/spent_evidence_policy.csv
