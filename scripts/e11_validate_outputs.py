@@ -1267,6 +1267,12 @@ def main() -> None:
         Path("results/e11_top_conference_claim_decision_audit") / "config.json",
         Path("discussion/e11_top_conference_claim_decision_audit.md"),
         Path("scripts/e11_write_top_conference_claim_decision_audit.py"),
+        Path("scripts/e11_write_condition_score_ablation.py"),
+        Path("discussion/e11_condition_score_ablation.md"),
+        Path("results/e11_condition_score_ablation") / "score_ablation_summary.csv",
+        Path("results/e11_condition_score_ablation") / "term_failure_ladder.csv",
+        Path("results/e11_condition_score_ablation") / "leakage_and_claim_boundary.csv",
+        Path("results/e11_condition_score_ablation") / "config.json",
         Path("discussion/e11_paper_skeleton.md"),
         Path("discussion/e11_main_paper_package.md"),
         Path("discussion/e11_main_figure_captions.md"),
@@ -1504,6 +1510,7 @@ def main() -> None:
         "discussion/e11_condition_score_v4_failure_mechanism_audit.md",
         "discussion/e11_condition_score_v5_theory_protocol.md",
         "discussion/e11_condition_score_v5_theory_to_score_map.md",
+        "discussion/e11_condition_score_ablation.md",
         "discussion/e11_condition_score_v5_validation_freeze.md",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
@@ -1603,6 +1610,7 @@ def main() -> None:
         "make e11-all-results",
         "make e11-paper-assets      # regenerate current head-to-tail paper Markdown/TeX artifacts",
         "make e11-top-conference-claim-decision-audit",
+        "make e11-condition-score-ablation",
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
         "make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes",
         "make e11-submission-repro-audit # audit toolchain availability, PDF hashes, source hashes, and clean-checkout gates",
@@ -1620,6 +1628,10 @@ def main() -> None:
         "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
         "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
         "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv",
+        "discussion/e11_condition_score_ablation.md",
+        "results/e11_condition_score_ablation/score_ablation_summary.csv",
+        "results/e11_condition_score_ablation/term_failure_ladder.csv",
+        "results/e11_condition_score_ablation/leakage_and_claim_boundary.csv",
         "registered-not-ready",
         "supportable theorem",
         "rebuttal-readiness contract",
@@ -4178,6 +4190,103 @@ def main() -> None:
     )
     if "validation is not frozen" in v5_map_text:
         raise AssertionError("condition-score v5 theory-to-score map must not retain stale pre-freeze wording")
+    score_ablation_dir = Path("results/e11_condition_score_ablation")
+    score_ablation_summary = pd.read_csv(score_ablation_dir / "score_ablation_summary.csv")
+    score_ablation_ladder = pd.read_csv(score_ablation_dir / "term_failure_ladder.csv")
+    score_ablation_leakage = pd.read_csv(score_ablation_dir / "leakage_and_claim_boundary.csv")
+    score_ablation_config = json.loads((score_ablation_dir / "config.json").read_text(encoding="utf-8"))
+    expected_ablation_steps = {
+        "L1-direction-guardrail-is-separate",
+        "L2-raw-amplitude-needs-transport",
+        "L3-depth-is-a-nuisance-baseline",
+        "L4-v4-scalar-fails-data-transport",
+        "L5-v5-candidate-is-frozen-not-proven",
+    }
+    expected_ablation_boundaries = {
+        "B1-spent-v2-v3-v4",
+        "B2-v5-validation",
+        "B3-v5-finals",
+        "B4-paper-wording",
+    }
+    score_ablation_lookup = score_ablation_summary.set_index(["generation", "split_role", "score_id"])
+    v4_data_direction = score_ablation_lookup.loc[
+        (
+            "v4 frozen final axis audit",
+            "fresh_final_heldout_data_partition",
+            "v4_direction_axis_scaled_jvp_ratio",
+        )
+    ]
+    v4_data_amplitude = score_ablation_lookup.loc[
+        (
+            "v4 frozen final axis audit",
+            "fresh_final_heldout_data_partition",
+            "v4_residual_amplitude_axis_scaled_jvp_fro",
+        )
+    ]
+    v4_data_primary = score_ablation_lookup.loc[
+        (
+            "v4 frozen final axis audit",
+            "fresh_final_heldout_data_partition",
+            "condition_score_v4_two_axis_amplitude_minus_direction",
+        )
+    ]
+    v5_primary = score_ablation_lookup.loc[
+        (
+            "v5 validation freeze",
+            "validation_only",
+            "condition_score_v5_transport_normalized_amplitude_minus_direction",
+        )
+    ]
+    v5_direction = score_ablation_lookup.loc[
+        (
+            "v5 validation freeze",
+            "validation_only",
+            "condition_score_v5_direction_axis_scaled_jvp_ratio",
+        )
+    ]
+    if not (
+        set(score_ablation_ladder["ladder_step"]) == expected_ablation_steps
+        and set(score_ablation_leakage["boundary_id"]) == expected_ablation_boundaries
+        and score_ablation_config["uses_new_gpu_results"] is False
+        and score_ablation_config["uses_spent_final_rows_for_tuning"] is False
+        and score_ablation_summary["leakage_status"]
+        .isin({"spent_final_row_diagnostic_only", "validation_only_no_final_rows"})
+        .all()
+        and 0.60 <= float(v4_data_direction["residual_spearman"]) <= 0.62
+        and float(v4_data_direction["spearman_ci95_low"]) > 0.58
+        and -0.69 <= float(v4_data_amplitude["residual_spearman"]) <= -0.66
+        and float(v4_data_amplitude["spearman_ci95_high"]) < -0.66
+        and -0.71 <= float(v4_data_primary["residual_spearman"]) <= -0.67
+        and float(v4_data_primary["spearman_ci95_high"]) < -0.67
+        and 0.63 <= float(v5_primary["residual_spearman"]) <= 0.66
+        and float(v5_primary["spearman_ci95_low"]) > 0.58
+        and float(v5_direction["threshold_accuracy"]) == 1.0
+        and score_ablation_leakage["forbidden_use"].astype(str).str.contains("fitting|changing|turning", regex=True).any()
+    ):
+        raise AssertionError(
+            "condition-score ablation audit must preserve the v4 direction/amplitude reversal, v5 validation freeze, and no-final-row-tuning boundary"
+        )
+    score_ablation_text = Path("discussion/e11_condition_score_ablation.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "condition-score ablation audit",
+        score_ablation_text,
+        [
+            "E11 Condition-Score Ablation Audit",
+            "CPU-only theory-to-score ablation",
+            "below-one direction guardrail",
+            "residual layer-risk ranking",
+            "partition/architecture transport",
+            "direction axis positive",
+            "raw amplitude",
+            "transport-normalized",
+            "Score-Axis Summary",
+            "Term Failure Ladder",
+            "Leakage and Claim Boundary",
+            "Blocked now: using any v2/v3/v4 final row",
+        ],
+    )
     v5_validation_dir = Path("results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition")
     v5_validation_metrics = pd.read_csv(v5_validation_dir / "metrics.csv")
     v5_validation_paired = pd.read_csv(v5_validation_dir / "paired_metrics.csv")
@@ -6771,6 +6880,7 @@ def main() -> None:
         "transport-normalized score contract",
         "transport-stable sandwich residual proposition",
         "theorem terms to measurable score features",
+        "direction guardrail, raw amplitude, early-depth nuisance, and transport-normalized validation",
         "validation-freeze boundary",
         "validation-only mod-4 CIFAR-100-LT split",
         "condition_score_v5_transport_normalized_amplitude_minus_direction",

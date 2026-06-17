@@ -57,6 +57,7 @@ python3 scripts/e11_write_matrix_block_tightness_audit.py
 python3 scripts/e11_write_theory_proof_obligation_register.py
 python3 scripts/e11_write_condition_score_v5_theory_protocol.py
 python3 scripts/e11_write_condition_score_v5_theory_to_score_map.py
+python3 scripts/e11_write_condition_score_ablation.py
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_validation_mod4_partition.sbatch
 python3 scripts/e11_freeze_condition_score_v5_validation.py
 sbatch scripts/slurm/e11_cifar100_resnet_condition_score_v5_architecture_resnext50_32x4d.sbatch
@@ -168,6 +169,7 @@ make e11-matrix-block-tightness-audit # verify theorem tightness, ratio identity
 make e11-theory-proof-obligation-register # map theorem assumptions, claim scope, and proof obligations before broad claims
 make e11-cifar-resnet-condition-score-v5-theory-protocol # write the v5 transport-normalized theory/score contract
 make e11-cifar-resnet-condition-score-v5-theory-to-score-map # map the v5 theorem terms to score features, leakage boundaries, and falsifiable gates
+make e11-condition-score-ablation # write the spent-evidence score-axis ablation separating direction, residual, nuisance, and transport terms
 make e11-cifar-resnet-condition-score-v5-validation-results # submit the v5 validation-only CIFAR-100-LT mod-4 partition via Slurm
 make e11-cifar-resnet-condition-score-v5-validation-freeze # freeze or block the v5 transport-normalized score after validation
 make e11-cifar-resnet-condition-score-v5-architecture-results # submit the v5 ResNeXt50-32x4d final architecture split via Slurm
@@ -226,6 +228,7 @@ make e11-matrix-block-tightness-audit
 make e11-theory-proof-obligation-register
 make e11-cifar-resnet-condition-score-v5-theory-protocol
 make e11-cifar-resnet-condition-score-v5-theory-to-score-map
+make e11-condition-score-ablation
 make e11-cifar-resnet-condition-score-v5-validation-results
 make e11-cifar-resnet-condition-score-v5-validation-freeze
 make e11-cifar-resnet-condition-score-v5-architecture-results
@@ -406,6 +409,13 @@ The theorem-to-measurement bridge is
 transport-stable sandwich residual proposition, maps theorem terms to score
 features, and records the ablation and falsifiable prediction matrix that the
 v5 validation/final splits must satisfy before any predictive-condition claim.
+The standalone score-axis ablation audit is
+`discussion/e11_condition_score_ablation.md`, backed by
+`results/e11_condition_score_ablation/*`. It is CPU-only and uses spent
+v2/v3/v4 rows only for diagnostic obstruction: it separates the direction
+guardrail, raw-amplitude reversal, early-depth nuisance baseline, and
+transport-normalized v5 validation candidate without fitting or reselecting on
+any final row.
 The executable freeze boundary is
 `discussion/e11_condition_score_v5_validation_freeze.md`, backed by
 `results/e11_condition_score_v5_protocol/validation_score_freeze/*`. The v5
@@ -594,6 +604,7 @@ Paper-facing synthesis:
 - `discussion/e11_theory_proof_obligation_register.md`
 - `discussion/e11_condition_score_v5_theory_protocol.md`
 - `discussion/e11_condition_score_v5_theory_to_score_map.md`
+- `discussion/e11_condition_score_ablation.md`
 - `discussion/e11_condition_score_v5_validation_freeze.md`
 - `discussion/e11_condition_score_v5_final_evaluation.md`
 - `discussion/e11_condition_score_v5_final_interpretation_plan.md`
@@ -725,6 +736,9 @@ Primary paper quantitative tables:
 - `results/e11_condition_score_v5_theory_to_score_map/transport_normalization_contract.csv`
 - `results/e11_condition_score_v5_theory_to_score_map/falsifiable_predictions.csv`
 - `results/e11_condition_score_v5_theory_to_score_map/ablation_matrix.csv`
+- `results/e11_condition_score_ablation/score_ablation_summary.csv`
+- `results/e11_condition_score_ablation/term_failure_ladder.csv`
+- `results/e11_condition_score_ablation/leakage_and_claim_boundary.csv`
 - `results/e11_submission_repro_audit/toolchain_status.csv`
 - `results/e11_submission_repro_audit/pdf_artifact_checks.csv`
 - `results/e11_submission_repro_audit/source_package_manifest.csv`
@@ -936,6 +950,7 @@ Do not claim:
 - `scripts/e11_write_theory_proof_obligation_register.py`: theory-facing top-conference checklist mapping theorem claims, assumptions, pending empirical gates, and forbidden wording.
 - `scripts/e11_write_condition_score_v5_theory_protocol.py`: theory-facing v5 score contract requiring transport-normalized amplitude or a narrower fixed-partition claim before any new P0 predictive-condition attempt.
 - `scripts/e11_write_condition_score_v5_theory_to_score_map.py`: v5 theorem-to-measurement bridge that maps sandwich-tail-drift terms to score features, transport contracts, ablations, and falsifiable validation/final gates.
+- `scripts/e11_write_condition_score_ablation.py`: spent-evidence score-axis ablation that separates the direction guardrail, residual-risk ranking, amplitude/depth nuisance, transport validation, and leakage boundary before final rows exist.
 - `scripts/e11_freeze_condition_score_v5_validation.py`: v5 validation-freeze evaluator; it now freezes the transport-normalized residual score after the validation split and keeps final splits blocked until run with the frozen score.
 - `scripts/e11_evaluate_condition_score_v5_finals.py`: validation-frozen v5 final evaluator for the submitted ResNeXt50-32x4d and CIFAR-10 cross-partition final splits; it reports `not_run` until final layer tables exist and never retunes on final rows.
 - `scripts/e11_write_condition_score_v5_final_evaluation.py`: paper-asset wrapper that refreshes the v5 final evaluator outputs without changing the registered scoring rule.
