@@ -12,7 +12,7 @@
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2537334,
+      "size_bytes": 2545331,
       "size": "2.4 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1446988,
+      "size_bytes": 1453073,
       "size": "1.4 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 284767173,
+      "size_bytes": 284769611,
       "size": "271.6 MB"
     },
     {
@@ -1227,18 +1227,18 @@
     },
     {
       "path": "results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv",
-      "rows": 8,
-      "size": "4.4 KB"
+      "rows": 9,
+      "size": "5.5 KB"
     },
     {
       "path": "results/e11_mechanism_referee_audit/theory_measurement_contract.csv",
-      "rows": 5,
-      "size": "2.3 KB"
+      "rows": 6,
+      "size": "2.9 KB"
     },
     {
       "path": "results/e11_mechanism_referee_audit/falsification_trigger_matrix.csv",
-      "rows": 5,
-      "size": "1.8 KB"
+      "rows": 6,
+      "size": "2.4 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_standard_eval/train_trace.csv",
@@ -1674,7 +1674,7 @@
     },
     {
       "path": "discussion/e11_quantitative_claim_ledger.md",
-      "size": "18.1 KB"
+      "size": "18.2 KB"
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
@@ -1730,7 +1730,7 @@
     },
     {
       "path": "discussion/e11_mechanism_referee_audit.md",
-      "size": "17.2 KB"
+      "size": "23.0 KB"
     },
     {
       "path": "discussion/e11_natural_head_tail_boundary.md",

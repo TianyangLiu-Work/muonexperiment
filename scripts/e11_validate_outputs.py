@@ -7505,6 +7505,7 @@ def main() -> None:
         "MEA-6-post-hoc-score-tuning",
         "MEA-7-anecdotal-natural-negative",
         "MEA-8-performance-proxy",
+        "MEA-9-phase2-power-overread",
     }
     if set(alternative_matrix["audit_id"]) != expected_alternative_ids:
         raise AssertionError("mechanism referee audit must preserve the fixed alternative-explanation set")
@@ -7512,12 +7513,14 @@ def main() -> None:
     for phrase in [
         "addressed_for_local_claim",
         "rejected_as_primary_explanation",
-        "finite_phase1_null_candidate_with_quality_caveat",
+        "finite_phase1_null_candidate_phase2_registered_not_ready",
+        "pre_output_registered_not_ready_with_power_boundary",
         "not_claimed",
         "the validator enforces matched-update/head-gain consistency",
         "unit-JVP ratios",
         "tail-rich control",
         "v5 transport-normalized score is frozen",
+        "phase2 power audit fixes the Holm worst-case 80% MDE",
         "local drift improvements imply final long-tail optimizer superiority",
     ]:
         if phrase not in alternative_text:
@@ -7528,6 +7531,7 @@ def main() -> None:
         "TMC-3-sandwich-rank-boundary",
         "TMC-4-transport-normalized-score",
         "TMC-5-term-ablation-lineage",
+        "TMC-6-natural-negative-registered-boundary",
     }
     if set(theory_contract["contract_id"]) != expected_contract_ids:
         raise AssertionError("mechanism referee audit must preserve the fixed theory-measurement contract set")
@@ -7537,7 +7541,9 @@ def main() -> None:
         "head-gain-normalized comparison",
         "nrank(G_H)>ssrank(B_T,A_T)",
         "source-standardized transport residual",
+        "finite natural boundary search",
         "global trajectory or convergence theorem",
+        "phase2 held-out architecture claim before complete metric rows",
     ]:
         if phrase not in contract_text:
             raise AssertionError(f"mechanism referee theory contract missing phrase: {phrase}")
@@ -7547,17 +7553,19 @@ def main() -> None:
         "FT-3-unit-jvp-misread",
         "FT-4-performance-overread",
         "FT-5-clean-checkout-gap",
+        "FT-6-phase2-power-overread",
     }
     if set(falsification_triggers["trigger_id"]) != expected_trigger_ids:
         raise AssertionError("mechanism referee audit must preserve the fixed falsification-trigger set")
     trigger_text = " ".join(falsification_triggers.astype(str).agg(" ".join, axis=1).tolist())
     for phrase in [
         "Downgrade predictive-condition wording",
-        "Allow only finite registered phase1 null-candidate wording",
-        "finite phase1 null candidate with detectable-effect and quality caveats",
+        "Allow only finite registered phase1 null-candidate wording and registered-not-ready phase2 wording",
+        "finite phase1 null candidate with detectable-effect and quality caveats; phase2 in-progress",
         "matched-head-gain local mechanism only",
         "mechanism diagnostic, not benchmark claim",
         "toolchain caveat",
+        "underpowered phase2 null",
     ]:
         if phrase not in trigger_text:
             raise AssertionError(f"mechanism referee falsification matrix missing phrase: {phrase}")
@@ -7571,14 +7579,19 @@ def main() -> None:
             "Theory-To-Measurement Contract",
             "Falsification Trigger Matrix",
             "local matched-head-gain mechanism paper",
+            "phase2 registered-not-ready wording",
             "Blocked now: broad optimizer-performance claims",
             "alternative_explanation_matrix.csv",
             "theory_measurement_contract.csv",
             "falsification_trigger_matrix.csv",
         ],
     )
-    if mechanism_config.get("alternative_explanations") != 8:
-        raise AssertionError("mechanism referee config must record eight alternative explanations")
+    if mechanism_config.get("alternative_explanations") != 9:
+        raise AssertionError("mechanism referee config must record nine alternative explanations")
+    if mechanism_config.get("theory_measurement_contracts") != 6:
+        raise AssertionError("mechanism referee config must record six theory-measurement contracts")
+    if mechanism_config.get("falsification_triggers") != 6:
+        raise AssertionError("mechanism referee config must record six falsification triggers")
     assert_no_unguarded_overclaims(
         [
             Path("README_E11.md"),

@@ -21,8 +21,8 @@ gate remains `not_ready` when those tools are absent on the server.
 
 | path                                         | exists   |   size_bytes | sha256                                                           | header_is_pdf   | audit_status   |
 |:---------------------------------------------|:---------|-------------:|:-----------------------------------------------------------------|:----------------|:---------------|
-| paper/specgrad_activation_paper/main.pdf     | yes      |      2596716 | e965738e7f78f7f8a350cae9a4067acdf0b00157cce79fa6b2f103e639134c6c | yes             | pass           |
-| paper/specgrad_activation_paper/two_page.pdf | yes      |        62048 | e72304ce74daf98123d64851623a8068fbf52c9812fbb333fb4e8f0eeb3242f1 | yes             | pass           |
+| paper/specgrad_activation_paper/main.pdf     | yes      |      2596716 | 4da48604fbf8335acadbc788ef1e84d0937a10d546a6d82ddd69fe1d9281f66b | yes             | pass           |
+| paper/specgrad_activation_paper/two_page.pdf | yes      |        62048 | 91d5b2b922da3243b1326bdc20b82d875a2f167e81755a8d9f49e50d81b2cb70 | yes             | pass           |
 
 ## Source Package Manifest
 
