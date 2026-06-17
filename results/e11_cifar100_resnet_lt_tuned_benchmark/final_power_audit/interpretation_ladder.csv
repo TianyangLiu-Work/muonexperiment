@@ -1,0 +1,7 @@
+case_id,evidence_condition,allowed_wording,blocked_wording
+TB-PWR-1-validation-incomplete,validation grid incomplete or family selection not_ready,registered benchmark power audit only; no final-performance result,tuned optimizer performance claim
+TB-PWR-2-positive-primary,all final recipes complete; Muon few-class diff beats AdamW and SGD after Holm adjustment; all-class guardrail passes,CIFAR-100-LT ResNet18 practical Muon improvement under the registered tuned protocol,broad long-tail optimizer superiority across datasets or architectures
+TB-PWR-3-underpowered-null,final mean few-class differences are below the audited MDE for observed paired-diff SD,underpowered or small-effect tuned benchmark boundary,Muon has been ruled out as a practical optimizer
+TB-PWR-4-negative-at-detectable-scale,Muon fails tuned baselines at or above the audited detectable-effect scale,negative tuned-performance boundary under the registered CIFAR-100-LT ResNet18 protocol,suppressing negative tuned outcomes while keeping optimizer-performance motivation
+TB-PWR-5-tradeoff-only,few-class gain passes but all-class guardrail fails,"few/all tradeoff result, not a clean practical optimizer improvement",unqualified benchmark win
+TB-PWR-6-reporting-incomplete,"per-seed rows, many/medium/few/all metrics, or paired differences are missing",appendix-only incomplete benchmark progress,main benchmark claim

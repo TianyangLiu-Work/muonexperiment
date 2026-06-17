@@ -1,0 +1,7 @@
+recipe_family,optimizer,claim_role,validation_selection_status,final_status,final_seed_set,final_seed_count,final_output_status,selection_gate_status
+adamw_ce_tuned,adamw,tuned AdamW baseline,not_ready,not_ready,20..29,10,absent,TVS-1-validation-grid-complete=not_ready; TVS-2-family-selection=not_ready; TVS-3-final-seed-quarantine=pass; TVS-4-final-run-plan=not_ready
+sgd_momentum_ce_tuned,sgd,tuned SGD baseline,not_ready,not_ready,20..29,10,absent,TVS-1-validation-grid-complete=not_ready; TVS-2-family-selection=not_ready; TVS-3-final-seed-quarantine=pass; TVS-4-final-run-plan=not_ready
+adamw_cb_loss_tuned,adamw,class-balanced AdamW baseline,not_ready,not_ready,20..29,10,absent,TVS-1-validation-grid-complete=not_ready; TVS-2-family-selection=not_ready; TVS-3-final-seed-quarantine=pass; TVS-4-final-run-plan=not_ready
+adamw_cb_sampler_tuned,adamw,sampler baseline required before any practical claim,not_ready,not_ready,20..29,10,absent,TVS-1-validation-grid-complete=not_ready; TVS-2-family-selection=not_ready; TVS-3-final-seed-quarantine=pass; TVS-4-final-run-plan=not_ready
+ns_muon_matrix_tuned,ns_muon,candidate practical Muon recipe,not_ready,not_ready,20..29,10,absent,TVS-1-validation-grid-complete=not_ready; TVS-2-family-selection=not_ready; TVS-3-final-seed-quarantine=pass; TVS-4-final-run-plan=not_ready
+ns_muon_cb_tuned,ns_muon,candidate practical Muon class-balanced recipe,not_ready,not_ready,20..29,10,absent,TVS-1-validation-grid-complete=not_ready; TVS-2-family-selection=not_ready; TVS-3-final-seed-quarantine=pass; TVS-4-final-run-plan=not_ready

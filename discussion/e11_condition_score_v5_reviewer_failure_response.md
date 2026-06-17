@@ -7,13 +7,13 @@ does not inspect, refit, reselect, or retune on final rows. Its purpose is to
 make every plausible final outcome reviewable before the pending ResNeXt50-32x4d
 and CIFAR-10 cross-partition tables exist.
 
-Current final split outputs generated: 0/2.
+Current final split outputs generated: 1/2.
 
 ## Final Split Output Status
 
 | split_id                                         | split_role                      | current_output_status   | pre_output_policy            |
 |:-------------------------------------------------|:--------------------------------|:------------------------|:-----------------------------|
-| v5_final_architecture_resnext50_32x4d_cifar100lt | v5_final_heldout_architecture   | not_run                 | do_not_change_score_or_split |
+| v5_final_architecture_resnext50_32x4d_cifar100lt | v5_final_heldout_architecture   | generated               | do_not_change_score_or_split |
 | v5_final_data_cifar10lt_cross_partition          | v5_final_heldout_data_partition | not_run                 | do_not_change_score_or_split |
 
 ## Failure Mode Register

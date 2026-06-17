@@ -11,7 +11,7 @@
       "layer_summary_path": "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/layer_summary.csv",
       "metrics_path": "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/metrics.csv",
       "config_path": "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/config.json",
-      "generated": false
+      "generated": true
     },
     {
       "split_id": "v5_final_data_cifar10lt_cross_partition",

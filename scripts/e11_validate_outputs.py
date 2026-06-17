@@ -1191,9 +1191,18 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection") / "gate_report.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection") / "config.json",
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md"),
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "final_family_design.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "primary_comparison_plan.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "paired_diff_mde.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "all_class_guardrail_mde.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "interpretation_ladder.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "outcome_state_machine.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "config.json",
+        Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md"),
         Path("scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py"),
+        Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py"),
         Path("scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch"),
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv",
@@ -1388,6 +1397,8 @@ def main() -> None:
         "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
         "e11-cifar-resnet-lt-tuned-benchmark-selection:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py",
+        "e11-cifar-resnet-lt-tuned-benchmark-power-audit:",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
         "e11-cifar-resnet-imbalance-sweep-results:",
         "e11-cifar-resnet-condition-score-heldout-architecture-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch",
@@ -1529,6 +1540,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-settings # write the executable 164-setting tuned validation grid registry",
         "make e11-cifar-resnet-lt-tuned-benchmark-validation-results # submit the tuned validation grid via Slurm array",
         "make e11-cifar-resnet-lt-tuned-benchmark-selection # select final recipes from completed validation summaries without touching final seeds",
+        "make e11-cifar-resnet-lt-tuned-benchmark-power-audit # lock tuned final seed MDE, Holm family, and all-class guardrail before final outputs",
         "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
         "make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates",
         "make e11-natural-negative-search-phase1-power-audit # compute the phase1 detectable-effect and interpretation boundary",
@@ -1629,12 +1641,15 @@ def main() -> None:
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol.py",
         "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
         "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",
         "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit",
         "validation/final seed splits",
         "tuned AdamW/SGD/class-balanced baselines",
         "phase1 GPU entrypoint is now implemented",
@@ -4578,7 +4593,7 @@ def main() -> None:
             "does not refit",
             "does not reselect",
             "baseline-dominance",
-            "`not_run` is the expected state",
+            "`not_run` is the expected state only for final splits",
         ],
     )
     v5_power_dir = Path("results/e11_condition_score_v5_protocol/final_power_audit")
@@ -5592,7 +5607,85 @@ def main() -> None:
             "The current result is not a final-performance benchmark result",
         ],
     )
-    final_outputs = sorted(Path("results/e11_cifar100_resnet_lt_tuned_benchmark").glob("final*"))
+    tuned_power_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit")
+    tuned_power_design = pd.read_csv(tuned_power_dir / "final_family_design.csv")
+    tuned_power_comparisons = pd.read_csv(tuned_power_dir / "primary_comparison_plan.csv")
+    tuned_power_mde = pd.read_csv(tuned_power_dir / "paired_diff_mde.csv")
+    tuned_power_guardrail = pd.read_csv(tuned_power_dir / "all_class_guardrail_mde.csv")
+    tuned_power_ladder = pd.read_csv(tuned_power_dir / "interpretation_ladder.csv")
+    tuned_power_states = pd.read_csv(tuned_power_dir / "outcome_state_machine.csv")
+    tuned_power_config = json.loads((tuned_power_dir / "config.json").read_text(encoding="utf-8"))
+    if len(tuned_power_design) != 6 or set(tuned_power_design["recipe_family"]) != expected_recipe_families:
+        raise AssertionError("CIFAR-100-LT tuned benchmark power audit must cover the frozen recipe families")
+    if set(tuned_power_design["validation_selection_status"]) != {"not_ready"}:
+        raise AssertionError("CIFAR-100-LT tuned benchmark power audit must reflect validation-not-ready status")
+    if set(tuned_power_design["final_output_status"]) != {"absent"}:
+        raise AssertionError("CIFAR-100-LT tuned benchmark power audit must not inspect final outputs")
+    if int(tuned_power_config.get("final_seed_count", -1)) != 10:
+        raise AssertionError("CIFAR-100-LT tuned benchmark power audit must lock 10 final paired seeds")
+    if int(tuned_power_config.get("primary_comparison_family_size", -1)) != 4:
+        raise AssertionError("CIFAR-100-LT tuned benchmark power audit must lock the 4-comparison Holm family")
+    if (
+        len(tuned_power_comparisons) != 4
+        or set(tuned_power_comparisons["candidate_family"]) != {"ns_muon_matrix_tuned", "ns_muon_cb_tuned"}
+        or set(tuned_power_comparisons["baseline_family"]) != {"adamw_ce_tuned", "sgd_momentum_ce_tuned"}
+    ):
+        raise AssertionError("CIFAR-100-LT tuned benchmark power audit primary comparison family changed")
+    holm_sd003 = tuned_power_mde[
+        tuned_power_mde["alpha_scope"].eq("holm_bonferroni_worst_case")
+        & tuned_power_mde["paired_diff_sd"].eq(0.03)
+    ]
+    if len(holm_sd003) != 1 or not (0.028 < float(holm_sd003["minimum_detectable_paired_mean_diff"].iloc[0]) < 0.033):
+        raise AssertionError("CIFAR-100-LT tuned benchmark Holm MDE changed unexpectedly")
+    holm_guardrail_sd003 = tuned_power_guardrail[
+        tuned_power_guardrail["alpha_scope"].eq("holm_bonferroni_worst_case")
+        & tuned_power_guardrail["paired_diff_sd"].eq(0.03)
+    ]
+    if (
+        len(holm_guardrail_sd003) != 1
+        or not (0.018 < float(holm_guardrail_sd003["minimum_mean_all_accuracy_diff_to_pass"].iloc[0]) < 0.023)
+    ):
+        raise AssertionError("CIFAR-100-LT tuned benchmark all-class guardrail MDE changed unexpectedly")
+    if set(tuned_power_ladder["case_id"]) != {
+        "TB-PWR-1-validation-incomplete",
+        "TB-PWR-2-positive-primary",
+        "TB-PWR-3-underpowered-null",
+        "TB-PWR-4-negative-at-detectable-scale",
+        "TB-PWR-5-tradeoff-only",
+        "TB-PWR-6-reporting-incomplete",
+    }:
+        raise AssertionError("CIFAR-100-LT tuned benchmark power-audit interpretation ladder changed")
+    if set(tuned_power_states["state_id"]) != {
+        "TB-PWR-S1-not-ready",
+        "TB-PWR-S2-final-quarantine-broken",
+        "TB-PWR-S3-final-family-complete-positive",
+        "TB-PWR-S4-final-family-complete-underpowered",
+        "TB-PWR-S5-final-family-complete-negative",
+    }:
+        raise AssertionError("CIFAR-100-LT tuned benchmark power-audit outcome state machine changed")
+    if "no final seed outputs inspected" not in str(tuned_power_config.get("analysis_scope", "")):
+        raise AssertionError("CIFAR-100-LT tuned benchmark power audit must state that final outputs are uninspected")
+    tuned_power_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark power audit",
+        tuned_power_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Power Audit",
+            "pre-output detectable-effect contract",
+            "Holm-adjusted",
+            "all-class guardrail",
+            "underpowered",
+            "negative tuned-performance boundary",
+            "Outcome State Machine",
+        ],
+    )
+    final_outputs = sorted(
+        path
+        for path in Path("results/e11_cifar100_resnet_lt_tuned_benchmark").glob("final*")
+        if path.name != "final_power_audit"
+    )
     if final_outputs:
         raise AssertionError(f"CIFAR-100-LT tuned benchmark final outputs must stay absent before validation: {final_outputs}")
     cifar_resnet_practical_metrics = pd.read_csv(
@@ -7274,8 +7367,11 @@ def main() -> None:
         "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py",
         "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
         "final seeds 20..29 quarantined",
         "make e11-cifar-resnet-lt-tuned-benchmark-selection",
+        "make e11-cifar-resnet-lt-tuned-benchmark-power-audit",
         "164-setting validation registry",
         "discussion/e11_submission_repro_audit.md",
         "discussion/e11_artifact_review_packet.md",
@@ -7401,6 +7497,7 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-tuned-benchmark-settings" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-validation-results" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-selection" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-power-audit" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-natural-head-tail-boundary-audit" not in readme
         or "make e11-natural-negative-search-protocol" not in readme

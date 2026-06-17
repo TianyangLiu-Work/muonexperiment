@@ -472,9 +472,10 @@ and does not change the validation-selected score after final outputs exist.
 
 ## Claim Boundary
 
-`not_run` is the expected state until both final Slurm jobs finish. `not_ready`
-remains the correct P0 state unless both unspent final splits pass residual
-Spearman, direction-threshold, baseline-dominance, and control-reporting gates.
+`not_run` is the expected state only for final splits whose layer/metrics
+outputs have not arrived yet. `not_ready` remains the correct P0 state unless
+both unspent final splits pass residual Spearman, direction-threshold,
+baseline-dominance, and control-reporting gates.
 
 Artifacts:
 - [final_score_pairs.csv](../{(OUTPUT_DIR / 'final_score_pairs.csv').as_posix()})
