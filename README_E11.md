@@ -168,6 +168,7 @@ make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT 
 make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practical Muon/AdamW trajectory bridge via Slurm
 make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases
 make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates
+make e11-natural-negative-search-phase1-power-audit # compute the phase1 detectable-effect and interpretation boundary
 make e11-natural-negative-search-phase1-settings # write settings-only registries for all registered phase1 natural negative-search settings
 make e11-natural-negative-search-phase1-results # submit the registered phase1 natural negative-search settings via Slurm
 make e11-natural-negative-search-phase1-eval # evaluate Holm-adjusted phase1 decisions after fresh metric outputs exist
@@ -213,6 +214,7 @@ make e11-cifar-resnet-lt-muon-final-benchmark-results
 make e11-cifar-resnet-practical-muon-bridge-results
 make e11-natural-head-tail-boundary-audit
 make e11-natural-negative-search-protocol
+make e11-natural-negative-search-phase1-power-audit
 make e11-natural-negative-search-phase1-settings
 make e11-natural-negative-search-phase1-results
 make e11-natural-negative-search-phase1-eval
@@ -378,6 +380,10 @@ The fresh natural negative-search protocol is
 new natural counterexample. It freezes phase1/phase2 search-space rows, the
 primary full-drift metric contract, multiplicity-adjusted decision rule,
 stopping rules, acceptance gates, and claim ladder before any fresh search outputs exist.
+The phase1 detectable-effect audit is
+`discussion/e11_natural_negative_search_phase1_power_audit.md`; it records the
+minimum-detectable primary drift ratios for the 26-setting Holm family and
+separates informative finite nulls from underpowered small-effect nulls.
 The phase1 GPU entrypoint is now implemented in
 `scripts/e11_run_natural_negative_search_phase1.py` and
 `scripts/slurm/e11_natural_negative_search_phase1.sbatch`; the registered fresh
@@ -759,6 +765,7 @@ Do not claim:
 - `scripts/e11_write_condition_score_v5_theory_to_score_map.py`: v5 theorem-to-measurement bridge that maps sandwich-tail-drift terms to score features, transport contracts, ablations, and falsifiable validation/final gates.
 - `scripts/e11_freeze_condition_score_v5_validation.py`: v5 validation-freeze evaluator; it writes not_run/not_ready rows until the validation split exists, then freezes or blocks a transport-normalized residual score before final splits.
 - `scripts/e11_write_natural_negative_search_protocol.py`: pre-registered fresh natural negative-search protocol with search space, metric contract, multiplicity rule, stopping rules, gates, and claim ladder.
+- `scripts/e11_write_natural_negative_power_audit.py`: phase1 natural-negative power/MDE audit for interpreting adjusted positive and finite-null outcomes.
 - `scripts/e11_run_natural_negative_search_phase1.py`: executable phase1 runner for the registered natural negative-search settings; supports `--list-settings` without launching training and writes fresh outputs only when submitted.
 - `scripts/e11_evaluate_natural_negative_search_phase1.py`: Holm-adjusted phase1 evaluator for the natural negative-search protocol; uses paired per-seed log-ratio tests when metric outputs exist and keeps every registered setting as pending until they are complete.
 - `scripts/e11_write_submission_repro_audit.py`: submission reproducibility audit for LaTeX toolchain availability, rendered PDF hashes, paper source hashes, and clean-checkout gates.

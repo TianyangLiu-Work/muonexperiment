@@ -1,0 +1,5 @@
+case_id,evidence_condition,allowed_wording,blocked_wording
+PWR-1-adjusted-positive,complete 26-setting family; Holm-adjusted primary p <= 0.05; quality gates pass,fresh natural primary boundary candidate,broad optimizer-performance claim or universal natural counterexample claim
+PWR-2-complete-null-above-mde,complete 26-setting family; no adjusted primary row; observed SD makes target effect above the MDE,finite registered null for effects at or above the audited detectable scale,absence of smaller natural counterexamples
+PWR-3-complete-null-below-mde,complete 26-setting family; no adjusted primary row; target effect below MDE,underpowered for small natural negative effects,convincing null or mechanism generality claim
+PWR-4-incomplete-family,any declared phase1 metric output missing,running registered search; no phase1 discovery decision yet,"primary counterexample, finite null, or selected-subset claim"

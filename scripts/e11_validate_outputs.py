@@ -894,6 +894,9 @@ def main() -> None:
         Path("results/e11_natural_negative_search_protocol") / "acceptance_gates.csv",
         Path("results/e11_natural_negative_search_protocol") / "claim_ladder.csv",
         Path("results/e11_natural_negative_search_protocol") / "protocol_status.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_power_audit") / "power_grid.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_power_audit") / "minimum_detectable_effect.csv",
+        Path("results/e11_natural_negative_search_protocol/phase1_power_audit") / "interpretation_ladder.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_cifar100lt_resnet18") / "settings_registry.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_cifar10lt_resnet18") / "settings_registry.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_tail_quality_controls") / "settings_registry.csv",
@@ -903,8 +906,10 @@ def main() -> None:
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "gate_report.csv",
         Path("results/e11_natural_negative_search_protocol/phase1_multiplicity_evaluation") / "config.json",
         Path("discussion/e11_natural_negative_search_protocol.md"),
+        Path("discussion/e11_natural_negative_search_phase1_power_audit.md"),
         Path("discussion/e11_natural_negative_search_phase1_evaluation.md"),
         Path("scripts/e11_write_natural_negative_search_protocol.py"),
+        Path("scripts/e11_write_natural_negative_power_audit.py"),
         Path("scripts/e11_run_natural_negative_search_phase1.py"),
         Path("scripts/e11_evaluate_natural_negative_search_phase1.py"),
         Path("scripts/slurm/e11_natural_negative_search_phase1.sbatch"),
@@ -1077,6 +1082,8 @@ def main() -> None:
         "scripts/e11_write_natural_head_tail_boundary_audit.py",
         "e11-natural-negative-search-protocol:",
         "scripts/e11_write_natural_negative_search_protocol.py",
+        "e11-natural-negative-search-phase1-power-audit:",
+        "scripts/e11_write_natural_negative_power_audit.py",
         "e11-natural-negative-search-phase1-settings:",
         "scripts/e11_run_natural_negative_search_phase1.py --settings-only",
         "e11-natural-negative-search-phase1-results:",
@@ -1213,6 +1220,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-muon-final-benchmark-results # submit the CIFAR-100-LT ResNet18 NS-Muon final-training benchmark pilot via Slurm",
         "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
         "make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates",
+        "make e11-natural-negative-search-phase1-power-audit # compute the phase1 detectable-effect and interpretation boundary",
         "make e11-natural-negative-search-phase1-settings # write settings-only registries for all registered phase1 natural negative-search settings",
         "make e11-natural-negative-search-phase1-results # submit the registered phase1 natural negative-search settings via Slurm",
         "make e11-natural-negative-search-phase1-eval # evaluate Holm-adjusted phase1 decisions after fresh metric outputs exist",
@@ -1295,12 +1303,15 @@ def main() -> None:
         "discussion/e11_natural_negative_search_protocol.md",
         "results/e11_natural_negative_search_protocol/*",
         "scripts/e11_write_natural_negative_search_protocol.py",
+        "scripts/e11_write_natural_negative_power_audit.py",
+        "discussion/e11_natural_negative_search_phase1_power_audit.md",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "phase1 GPU entrypoint is now implemented",
         "settings-only registries",
         "discussion/e11_natural_negative_search_phase1_evaluation.md",
+        "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-results",
         "make e11-natural-negative-search-phase1-eval",
         "multiplicity-adjusted decision rule",
@@ -1323,6 +1334,7 @@ def main() -> None:
         *APPENDIX_RUNNER_SCRIPTS,
         "scripts/e11_write_natural_head_tail_boundary_audit.py",
         "scripts/e11_write_natural_negative_search_protocol.py",
+        "scripts/e11_write_natural_negative_power_audit.py",
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "scripts/e11_write_submission_repro_audit.py",
@@ -3848,6 +3860,9 @@ def main() -> None:
     natural_protocol_gates = pd.read_csv(natural_protocol_dir / "acceptance_gates.csv")
     natural_protocol_claims = pd.read_csv(natural_protocol_dir / "claim_ladder.csv")
     natural_protocol_status = pd.read_csv(natural_protocol_dir / "protocol_status.csv")
+    natural_power_grid = pd.read_csv(natural_protocol_dir / "phase1_power_audit" / "power_grid.csv")
+    natural_mde = pd.read_csv(natural_protocol_dir / "phase1_power_audit" / "minimum_detectable_effect.csv")
+    natural_power_ladder = pd.read_csv(natural_protocol_dir / "phase1_power_audit" / "interpretation_ladder.csv")
     expected_natural_protocol_baselines = {
         "committed_natural_primary_full_drift_scan",
         "committed_component_ratio_boundaries",
@@ -3974,6 +3989,18 @@ def main() -> None:
         "claim_ladder_not_ready": natural_protocol_claim_lookup["fresh_natural_primary_counterexample"] == "not_ready",
         "primary_rule_holm": "Holm-adjusted" in str(natural_primary_metric["worse_rule"]),
         "primary_boundary": "full-drift counterexample" in str(natural_primary_metric["claim_boundary"]),
+        "power_grid_shape": len(natural_power_grid) == 72,
+        "mde_shape": len(natural_mde) == 36,
+        "power_ladder_shape": set(natural_power_ladder["case_id"])
+        == {
+            "PWR-1-adjusted-positive",
+            "PWR-2-complete-null-above-mde",
+            "PWR-3-complete-null-below-mde",
+            "PWR-4-incomplete-family",
+        },
+        "adjusted_mde_above_one": natural_mde[
+            natural_mde["alpha_scope"].eq("holm_bonferroni_worst_case")
+        ]["minimum_detectable_ratio"].gt(1.0).all(),
     }
     if not all(natural_protocol_checks.values()):
         failed_checks = [name for name, passed in natural_protocol_checks.items() if not passed]
@@ -3997,6 +4024,22 @@ def main() -> None:
             "multiplicity evaluator",
             "complete fresh metric outputs",
             "Blocked now: claiming a fresh natural primary counterexample",
+        ],
+    )
+    natural_power_text = Path("discussion/e11_natural_negative_search_phase1_power_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "natural negative-search phase1 power audit",
+        natural_power_text,
+        [
+            "E11 Natural Negative Search Phase1 Power Audit",
+            "detectable-effect boundary",
+            "26-setting natural negative-search phase1 family",
+            "Bonferroni `0.05 / 26`",
+            "Adjusted Minimum Detectable Ratio",
+            "Interpretation Ladder",
+            "underpowered for small natural negative effects",
         ],
     )
     natural_phase1_eval_text = Path("discussion/e11_natural_negative_search_phase1_evaluation.md").read_text(
@@ -5638,6 +5681,7 @@ def main() -> None:
         "scripts/e11_run_natural_negative_search_phase1.py",
         "scripts/slurm/e11_natural_negative_search_phase1.sbatch",
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
+        "make e11-natural-negative-search-phase1-power-audit",
         "make e11-natural-negative-search-phase1-results",
         "make e11-natural-negative-search-phase1-eval",
         "multiplicity evaluator",
@@ -5683,6 +5727,7 @@ def main() -> None:
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-natural-head-tail-boundary-audit" not in readme
         or "make e11-natural-negative-search-protocol" not in readme
+        or "make e11-natural-negative-search-phase1-power-audit" not in readme
         or "make e11-natural-negative-search-phase1-settings" not in readme
         or "make e11-natural-negative-search-phase1-results" not in readme
         or "make e11-natural-negative-search-phase1-eval" not in readme
