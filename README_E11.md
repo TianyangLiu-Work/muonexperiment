@@ -443,9 +443,11 @@ CIFAR-10 cross-partition final splits have been submitted as unspent GPU jobs.
 The pre-registered final evaluator is
 `discussion/e11_condition_score_v5_final_evaluation.md`, backed by
 `results/e11_condition_score_v5_protocol/final_score_evaluation/*`; its current
-state is `not_run` until both final Slurm jobs write layer/metric tables, and it
-will apply the frozen validation-selected score without refitting or
-reselection.
+state is partial: the ResNeXt50-32x4d final architecture split has generated
+layer/metric tables, passes residual Spearman, fails the direction-threshold
+guardrail, and leaves the P0 gate `not_ready` while the CIFAR-10
+cross-partition split is still `not_run`. It applies the frozen
+validation-selected score without refitting or reselection.
 The pre-output final power audit is
 `discussion/e11_condition_score_v5_final_power_audit.md`, backed by
 `results/e11_condition_score_v5_protocol/final_power_audit/*`. It fixes the
@@ -463,10 +465,10 @@ leakage lock.
 The reviewer failure response is
 `discussion/e11_condition_score_v5_reviewer_failure_response.md`, backed by
 `results/e11_condition_score_v5_protocol/reviewer_failure_response/*`. It is a
-pre-output claim-downgrade plan for top-conference review: every registered v5
-final pass/fail mode maps to allowed wording, forbidden wording, blocking status,
-and next evidence without inspecting, refitting, reselecting, or retuning on
-final rows.
+partial-output-aware claim-downgrade plan for top-conference review: current
+active failure modes and every registered v5 final pass/fail mode map to allowed
+wording, forbidden wording, blocking status, and next evidence without
+refitting, reselecting, retuning, or repairing the frozen score after final rows.
 
 The natural head-to-tail boundary audit is
 `discussion/e11_natural_head_tail_boundary.md`, backed by
@@ -827,6 +829,8 @@ Primary paper quantitative tables:
 - `results/e11_condition_score_v5_protocol/final_interpretation_plan/outcome_interpretation_ladder.csv`
 - `results/e11_condition_score_v5_protocol/final_interpretation_plan/leakage_lock.csv`
 - `results/e11_condition_score_v5_protocol/reviewer_failure_response/final_split_output_status.csv`
+- `results/e11_condition_score_v5_protocol/reviewer_failure_response/current_gate_snapshot.csv`
+- `results/e11_condition_score_v5_protocol/reviewer_failure_response/active_failure_modes.csv`
 - `results/e11_condition_score_v5_protocol/reviewer_failure_response/failure_mode_register.csv`
 - `results/e11_condition_score_v5_protocol/reviewer_failure_response/reviewer_objection_map.csv`
 - `results/e11_condition_score_v5_protocol/reviewer_failure_response/claim_downgrade_actions.csv`
@@ -1038,11 +1042,11 @@ Do not claim:
 - `scripts/e11_write_condition_score_v5_theory_to_score_map.py`: v5 theorem-to-measurement bridge that maps sandwich-tail-drift terms to score features, transport contracts, ablations, and falsifiable validation/final gates.
 - `scripts/e11_write_condition_score_ablation.py`: spent-evidence score-axis ablation that separates the direction guardrail, residual-risk ranking, amplitude/depth nuisance, transport validation, and leakage boundary before final rows exist.
 - `scripts/e11_freeze_condition_score_v5_validation.py`: v5 validation-freeze evaluator; it now freezes the transport-normalized residual score after the validation split and keeps final splits blocked until run with the frozen score.
-- `scripts/e11_evaluate_condition_score_v5_finals.py`: validation-frozen v5 final evaluator for the submitted ResNeXt50-32x4d and CIFAR-10 cross-partition final splits; it reports `not_run` until final layer tables exist and never retunes on final rows.
+- `scripts/e11_evaluate_condition_score_v5_finals.py`: validation-frozen v5 final evaluator for the submitted ResNeXt50-32x4d and CIFAR-10 cross-partition final splits; it reports generated split gates and `not_run` split gates without retuning on final rows.
 - `scripts/e11_write_condition_score_v5_final_evaluation.py`: paper-asset wrapper that refreshes the v5 final evaluator outputs without changing the registered scoring rule.
 - `scripts/e11_write_condition_score_v5_final_power_audit.py`: pre-output v5 final detectable-effect audit that fixes Fisher-z resolution, mean-Spearman MDE, and underpowered-null versus negative-transport wording before final rows exist.
 - `scripts/e11_write_condition_score_v5_final_interpretation_plan.py`: pre-output v5 final interpretation lock that maps pass/fail patterns to allowed claims, boundary interpretations, and forbidden post-hoc retuning actions.
-- `scripts/e11_write_condition_score_v5_reviewer_failure_response.py`: pre-output v5 reviewer failure response that maps each final pass/fail mode to claim downgrades, forbidden wording, and next evidence.
+- `scripts/e11_write_condition_score_v5_reviewer_failure_response.py`: partial-output-aware v5 reviewer failure response that maps current active final failure modes and pending pass/fail modes to claim downgrades, forbidden wording, and next evidence.
 - `scripts/e11_write_natural_negative_search_protocol.py`: pre-registered fresh natural negative-search protocol with search space, metric contract, multiplicity rule, stopping rules, gates, and claim ladder.
 - `scripts/e11_write_natural_negative_power_audit.py`: phase1 natural-negative power/MDE audit for interpreting adjusted positive and finite-null outcomes.
 - `scripts/e11_run_natural_negative_search_phase1.py`: executable phase1 runner for the registered natural negative-search settings; supports `--list-settings` without launching training and writes fresh outputs only when submitted.

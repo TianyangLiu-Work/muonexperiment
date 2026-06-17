@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 426887,
-      "size": "416.9 KB"
+      "size_bytes": 427101,
+      "size": "417.1 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2588659,
+      "size_bytes": 2596800,
       "size": "2.5 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1499832,
+      "size_bytes": 1506509,
       "size": "1.4 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 285635904,
+      "size_bytes": 285638892,
       "size": "272.4 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5832424,
+      "size_bytes": 5832420,
       "size": "5.6 MB"
     },
     {
@@ -976,6 +976,16 @@
       "size": "771 B"
     },
     {
+      "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/current_gate_snapshot.csv",
+      "rows": 6,
+      "size": "1.1 KB"
+    },
+    {
+      "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/active_failure_modes.csv",
+      "rows": 3,
+      "size": "1002 B"
+    },
+    {
       "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/failure_mode_register.csv",
       "rows": 9,
       "size": "4.5 KB"
@@ -1208,7 +1218,7 @@
     {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
       "rows": 7,
-      "size": "22.2 KB"
+      "size": "22.7 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
@@ -1228,7 +1238,7 @@
     {
       "path": "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv",
       "rows": 6,
-      "size": "2.7 KB"
+      "size": "2.8 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/paper_sequence.csv",
@@ -1709,7 +1719,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "91.7 KB"
+      "size": "92.2 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1773,11 +1783,11 @@
     },
     {
       "path": "discussion/e11_top_conference_gap_register.md",
-      "size": "53.5 KB"
+      "size": "55.4 KB"
     },
     {
       "path": "discussion/e11_top_conference_claim_decision_audit.md",
-      "size": "27.9 KB"
+      "size": "28.1 KB"
     },
     {
       "path": "discussion/e11_manuscript_claim_trace.md",
@@ -2001,7 +2011,7 @@
     },
     {
       "path": "discussion/e11_condition_score_v5_reviewer_failure_response.md",
-      "size": "13.9 KB"
+      "size": "18.1 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_standard_eval.md",

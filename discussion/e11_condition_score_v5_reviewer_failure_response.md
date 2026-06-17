@@ -1,11 +1,11 @@
 # E11 Condition-Score V5 Reviewer Failure Response
 
-This generated top-conference reviewer failure response is a pre-output
+This generated top-conference reviewer failure response is a leakage-safe
 claim-downgrade plan for the v5 final condition-score test. It reads the
-validation-frozen score `condition_score_v5_transport_normalized_amplitude_minus_direction` and the registered final split paths, but it
-does not inspect, refit, reselect, or retune on final rows. Its purpose is to
-make every plausible final outcome reviewable before the pending ResNeXt50-32x4d
-and CIFAR-10 cross-partition tables exist.
+validation-frozen score `condition_score_v5_transport_normalized_amplitude_minus_direction`, the registered final split paths, and the
+current frozen-evaluator gate report, but it does not refit, reselect, retune,
+or repair the score after final rows arrive. Its purpose is to make the current
+partial final state and every remaining plausible final outcome reviewable.
 
 Current final split outputs generated: 1/2.
 
@@ -15,6 +15,25 @@ Current final split outputs generated: 1/2.
 |:-------------------------------------------------|:--------------------------------|:------------------------|:-----------------------------|
 | v5_final_architecture_resnext50_32x4d_cifar100lt | v5_final_heldout_architecture   | generated               | do_not_change_score_or_split |
 | v5_final_data_cifar10lt_cross_partition          | v5_final_heldout_data_partition | not_run                 | do_not_change_score_or_split |
+
+## Current Final Gate Snapshot
+
+| gate_id                                                    | scope                                                 | status    | evidence                                                                                                                  |
+|:-----------------------------------------------------------|:------------------------------------------------------|:----------|:--------------------------------------------------------------------------------------------------------------------------|
+| v5_final_heldout_architecture_residual_spearman            | ResNeXt50-32x4d CIFAR-100-LT final architecture split | pass      | primary residual Spearman=0.43 CI=[0.2246, 0.6354]                                                                        |
+| v5_final_heldout_architecture_direction_threshold_accuracy | ResNeXt50-32x4d CIFAR-100-LT final architecture split | fail      | direction-axis below-one threshold accuracy=0.8395, CI low=0.6822                                                         |
+| v5_final_heldout_architecture_baseline_dominance           | ResNeXt50-32x4d CIFAR-100-LT final architecture split | pass      | primary score must beat early_layer_prior on residual Spearman and top-k overlap                                          |
+| v5_final_heldout_architecture_controls_reported            | ResNeXt50-32x4d CIFAR-100-LT final architecture split | pass      | direction-axis, early-prior, and source-observed controls reported                                                        |
+| v5_final_heldout_data_partition_generated                  | CIFAR-10-LT cross-partition final data split          | not_run   | missing final layer/metrics summary at results/e11_condition_score_v5_protocol/final_data_cifar10_cross/layer_summary.csv |
+| v5_p0_predictive_condition_claim                           | v5 condition-score final evaluation                   | not_ready | Both unspent v5 final splits must pass residual, direction, baseline-dominance, and reporting gates.                      |
+
+## Current Active Failure Modes
+
+| active_failure_mode_id               | supporting_gate_id                                         | current_status   | current_evidence                                                                                     | allowed_current_wording                                                              | forbidden_current_wording                                  |
+|:-------------------------------------|:-----------------------------------------------------------|:-----------------|:-----------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------|:-----------------------------------------------------------|
+| V5-RFR-0-pending-outputs             | v5_final_heldout_data_partition_generated                  | active           | 1/2 final split outputs generated; missing=v5_final_data_cifar10lt_cross_partition                   | partial final state; no P0 predictive-condition claim                                | both registered final splits have been evaluated           |
+| V5-RFR-4-direction-guardrail-failure | v5_final_heldout_architecture_direction_threshold_accuracy | active           | direction-axis below-one threshold accuracy=0.8395, CI low=0.6822                                    | the generated split has a residual-ranking signal but failed the direction guardrail | the generated split supports the frozen-score P0 claim     |
+| V5-RFR-current-p0-not-ready          | v5_p0_predictive_condition_claim                           | active           | Both unspent v5 final splits must pass residual, direction, baseline-dominance, and reporting gates. | registered_not_ready_wait_for_remaining_split_and_failed-gate interpretation         | the v5 frozen score is an unseen-task predictive condition |
 
 ## Failure Mode Register
 
@@ -63,6 +82,8 @@ Current final split outputs generated: 1/2.
 
 Artifacts:
 - [final_split_output_status.csv](../results/e11_condition_score_v5_protocol/reviewer_failure_response/final_split_output_status.csv)
+- [current_gate_snapshot.csv](../results/e11_condition_score_v5_protocol/reviewer_failure_response/current_gate_snapshot.csv)
+- [active_failure_modes.csv](../results/e11_condition_score_v5_protocol/reviewer_failure_response/active_failure_modes.csv)
 - [failure_mode_register.csv](../results/e11_condition_score_v5_protocol/reviewer_failure_response/failure_mode_register.csv)
 - [reviewer_objection_map.csv](../results/e11_condition_score_v5_protocol/reviewer_failure_response/reviewer_objection_map.csv)
 - [claim_downgrade_actions.csv](../results/e11_condition_score_v5_protocol/reviewer_failure_response/claim_downgrade_actions.csv)

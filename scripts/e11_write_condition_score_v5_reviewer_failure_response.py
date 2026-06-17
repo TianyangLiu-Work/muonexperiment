@@ -293,8 +293,131 @@ def build_next_evidence_queue() -> pd.DataFrame:
     )
 
 
+def load_current_gate_snapshot() -> pd.DataFrame:
+    path = FINAL_EVAL_DIR / "final_gate_report.csv"
+    if not path.exists():
+        return pd.DataFrame(columns=["gate_id", "scope", "status", "evidence"])
+    return pd.read_csv(path)
+
+
+def build_active_failure_modes(split_status: pd.DataFrame, gates: pd.DataFrame) -> pd.DataFrame:
+    rows: list[dict[str, str]] = []
+    generated_count = int(split_status["current_output_status"].eq("generated").sum())
+    if generated_count < len(split_status):
+        missing = split_status[~split_status["current_output_status"].eq("generated")]
+        rows.append(
+            {
+                "active_failure_mode_id": "V5-RFR-0-pending-outputs",
+                "supporting_gate_id": "; ".join(
+                    gates[gates["status"].eq("not_run")]["gate_id"].astype(str).tolist()
+                )
+                or "final_split_output_status",
+                "current_status": "active",
+                "current_evidence": (
+                    f"{generated_count}/{len(split_status)} final split outputs generated; "
+                    f"missing={'; '.join(missing['split_id'].astype(str).tolist())}"
+                ),
+                "allowed_current_wording": "partial final state; no P0 predictive-condition claim",
+                "forbidden_current_wording": "both registered final splits have been evaluated",
+            }
+        )
+
+    failed_direction = gates[
+        gates["status"].eq("fail") & gates["gate_id"].astype(str).str.contains("direction_threshold_accuracy")
+    ]
+    for row in failed_direction.itertuples(index=False):
+        rows.append(
+            {
+                "active_failure_mode_id": "V5-RFR-4-direction-guardrail-failure",
+                "supporting_gate_id": str(row.gate_id),
+                "current_status": "active",
+                "current_evidence": str(row.evidence),
+                "allowed_current_wording": "the generated split has a residual-ranking signal but failed the direction guardrail",
+                "forbidden_current_wording": "the generated split supports the frozen-score P0 claim",
+            }
+        )
+
+    failed_residual = gates[
+        gates["status"].eq("fail") & gates["gate_id"].astype(str).str.contains("residual_spearman")
+    ]
+    for row in failed_residual.itertuples(index=False):
+        mode = (
+            "V5-RFR-3-architecture-transport-boundary"
+            if "architecture" in str(row.gate_id)
+            else "V5-RFR-2-data-transport-boundary"
+        )
+        rows.append(
+            {
+                "active_failure_mode_id": mode,
+                "supporting_gate_id": str(row.gate_id),
+                "current_status": "active",
+                "current_evidence": str(row.evidence),
+                "allowed_current_wording": "negative residual-ranking transport boundary under the frozen protocol",
+                "forbidden_current_wording": "unseen-task residual-risk prediction on the failed split",
+            }
+        )
+
+    failed_baseline = gates[
+        gates["status"].eq("fail") & gates["gate_id"].astype(str).str.contains("baseline_dominance")
+    ]
+    for row in failed_baseline.itertuples(index=False):
+        rows.append(
+            {
+                "active_failure_mode_id": "V5-RFR-5-baseline-dominance-failure",
+                "supporting_gate_id": str(row.gate_id),
+                "current_status": "active",
+                "current_evidence": str(row.evidence),
+                "allowed_current_wording": "nuisance-prior boundary for the generated split",
+                "forbidden_current_wording": "the theory-derived score dominates simple stage priors",
+            }
+        )
+
+    failed_controls = gates[
+        gates["status"].eq("fail") & gates["gate_id"].astype(str).str.contains("controls_reported")
+    ]
+    for row in failed_controls.itertuples(index=False):
+        rows.append(
+            {
+                "active_failure_mode_id": "V5-RFR-6-control-reporting-failure",
+                "supporting_gate_id": str(row.gate_id),
+                "current_status": "active",
+                "current_evidence": str(row.evidence),
+                "allowed_current_wording": "incomplete final reporting state",
+                "forbidden_current_wording": "any final-score conclusion from a partial control table",
+            }
+        )
+
+    p0_rows = gates[gates["gate_id"].eq("v5_p0_predictive_condition_claim")]
+    if len(p0_rows) == 1 and str(p0_rows["status"].iloc[0]) == "not_ready":
+        rows.append(
+            {
+                "active_failure_mode_id": "V5-RFR-current-p0-not-ready",
+                "supporting_gate_id": "v5_p0_predictive_condition_claim",
+                "current_status": "active",
+                "current_evidence": str(p0_rows["evidence"].iloc[0]),
+                "allowed_current_wording": "registered_not_ready_wait_for_remaining_split_and_failed-gate interpretation",
+                "forbidden_current_wording": "the v5 frozen score is an unseen-task predictive condition",
+            }
+        )
+
+    if not rows:
+        rows.append(
+            {
+                "active_failure_mode_id": "V5-RFR-current-none-active",
+                "supporting_gate_id": "final_gate_report",
+                "current_status": "inactive",
+                "current_evidence": "no active reviewer failure mode in current final gate report",
+                "allowed_current_wording": "report final gates as generated",
+                "forbidden_current_wording": "change the frozen protocol after final outputs",
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def write_discussion(
     split_status: pd.DataFrame,
+    gate_snapshot: pd.DataFrame,
+    active_modes: pd.DataFrame,
     failure_modes: pd.DataFrame,
     objections: pd.DataFrame,
     downgrades: pd.DataFrame,
@@ -304,18 +427,26 @@ def write_discussion(
     generated_count = int(split_status["current_output_status"].eq("generated").sum())
     text = f"""# E11 Condition-Score V5 Reviewer Failure Response
 
-This generated top-conference reviewer failure response is a pre-output
+This generated top-conference reviewer failure response is a leakage-safe
 claim-downgrade plan for the v5 final condition-score test. It reads the
-validation-frozen score `{score}` and the registered final split paths, but it
-does not inspect, refit, reselect, or retune on final rows. Its purpose is to
-make every plausible final outcome reviewable before the pending ResNeXt50-32x4d
-and CIFAR-10 cross-partition tables exist.
+validation-frozen score `{score}`, the registered final split paths, and the
+current frozen-evaluator gate report, but it does not refit, reselect, retune,
+or repair the score after final rows arrive. Its purpose is to make the current
+partial final state and every remaining plausible final outcome reviewable.
 
 Current final split outputs generated: {generated_count}/{len(split_status)}.
 
 ## Final Split Output Status
 
 {markdown_table(split_status, ["split_id", "split_role", "current_output_status", "pre_output_policy"])}
+
+## Current Final Gate Snapshot
+
+{markdown_table(gate_snapshot, ["gate_id", "scope", "status", "evidence"])}
+
+## Current Active Failure Modes
+
+{markdown_table(active_modes, ["active_failure_mode_id", "supporting_gate_id", "current_status", "current_evidence", "allowed_current_wording", "forbidden_current_wording"])}
 
 ## Failure Mode Register
 
@@ -335,6 +466,8 @@ Current final split outputs generated: {generated_count}/{len(split_status)}.
 
 Artifacts:
 - [final_split_output_status.csv](../{(OUTPUT_DIR / 'final_split_output_status.csv').as_posix()})
+- [current_gate_snapshot.csv](../{(OUTPUT_DIR / 'current_gate_snapshot.csv').as_posix()})
+- [active_failure_modes.csv](../{(OUTPUT_DIR / 'active_failure_modes.csv').as_posix()})
 - [failure_mode_register.csv](../{(OUTPUT_DIR / 'failure_mode_register.csv').as_posix()})
 - [reviewer_objection_map.csv](../{(OUTPUT_DIR / 'reviewer_objection_map.csv').as_posix()})
 - [claim_downgrade_actions.csv](../{(OUTPUT_DIR / 'claim_downgrade_actions.csv').as_posix()})
@@ -348,12 +481,16 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     score = selected_score()
     split_status = build_split_status(load_final_splits())
+    gate_snapshot = load_current_gate_snapshot()
+    active_modes = build_active_failure_modes(split_status, gate_snapshot)
     failure_modes = build_failure_mode_register(score)
     objections = build_reviewer_objection_map()
     downgrades = build_claim_downgrade_actions()
     next_queue = build_next_evidence_queue()
 
     split_status.to_csv(OUTPUT_DIR / "final_split_output_status.csv", index=False)
+    gate_snapshot.to_csv(OUTPUT_DIR / "current_gate_snapshot.csv", index=False)
+    active_modes.to_csv(OUTPUT_DIR / "active_failure_modes.csv", index=False)
     failure_modes.to_csv(OUTPUT_DIR / "failure_mode_register.csv", index=False)
     objections.to_csv(OUTPUT_DIR / "reviewer_objection_map.csv", index=False)
     downgrades.to_csv(OUTPUT_DIR / "claim_downgrade_actions.csv", index=False)
@@ -366,14 +503,15 @@ def main() -> None:
                 "final_evaluator_config": (FINAL_EVAL_DIR / "config.json").as_posix(),
                 "interpretation_plan_dir": INTERPRET_DIR.as_posix(),
                 "final_outputs_generated": int(split_status["current_output_status"].eq("generated").sum()),
-                "analysis_scope": "pre-output reviewer failure response; no final-row tuning",
+                "active_failure_modes": int(active_modes["current_status"].eq("active").sum()),
+                "analysis_scope": "partial-output reviewer failure response; no final-row tuning",
             },
             indent=2,
         )
         + "\n",
         encoding="utf-8",
     )
-    write_discussion(split_status, failure_modes, objections, downgrades, next_queue, score)
+    write_discussion(split_status, gate_snapshot, active_modes, failure_modes, objections, downgrades, next_queue, score)
     print(f"saved {DISCUSSION_PATH} and {OUTPUT_DIR}")
 
 

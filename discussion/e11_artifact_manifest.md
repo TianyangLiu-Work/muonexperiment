@@ -6,7 +6,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 416.9 KB |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 417.1 KB |
 | scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 2.5 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 65.0 KB  |
 | discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 1.4 MB   |
@@ -201,6 +201,8 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_condition_score_v5_protocol/final_interpretation_plan/outcome_interpretation_ladder.csv        |      7 | 2.0 KB    |
 | results/e11_condition_score_v5_protocol/final_interpretation_plan/leakage_lock.csv                         |      5 | 998 B     |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/final_split_output_status.csv            |      2 | 771 B     |
+| results/e11_condition_score_v5_protocol/reviewer_failure_response/current_gate_snapshot.csv                |      6 | 1.1 KB    |
+| results/e11_condition_score_v5_protocol/reviewer_failure_response/active_failure_modes.csv                 |      3 | 1002 B    |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/failure_mode_register.csv                |      9 | 4.5 KB    |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/reviewer_objection_map.csv               |      5 | 1.2 KB    |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/claim_downgrade_actions.csv              |      6 | 1.9 KB    |
@@ -247,11 +249,11 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_natural_negative_search_protocol/phase2_power_audit/minimum_detectable_effect.csv              |     36 | 8.3 KB    |
 | results/e11_natural_negative_search_protocol/phase2_power_audit/interpretation_ladder.csv                  |      5 | 1.2 KB    |
 | results/e11_natural_negative_search_protocol/phase2_power_audit/outcome_state_machine.csv                  |      6 | 1.1 KB    |
-| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 22.2 KB   |
+| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 22.7 KB   |
 | results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv                                  |      6 | 4.4 KB    |
 | results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv                              |      5 | 2.0 KB    |
 | results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv                                 |      5 | 3.1 KB    |
-| results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv                                  |      6 | 2.7 KB    |
+| results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv                                  |      6 | 2.8 KB    |
 | results/e11_top_conference_claim_decision_audit/paper_sequence.csv                                         |      6 | 1.5 KB    |
 | results/e11_top_conference_claim_decision_audit/readiness_summary.csv                                      |      6 | 237 B     |
 | results/e11_manuscript_claim_trace/claim_trace.csv                                                         |      6 | 2.4 KB    |
@@ -352,7 +354,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                                                        | size    |
 |:--------------------------------------------------------------------------------------------|:--------|
-| README_E11.md                                                                               | 91.7 KB |
+| README_E11.md                                                                               | 92.2 KB |
 | discussion/e11_paper_skeleton.md                                                            | 10.9 KB |
 | discussion/e11_main_paper_package.md                                                        | 22.8 KB |
 | discussion/e11_main_figure_captions.md                                                      | 6.5 KB  |
@@ -368,8 +370,8 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_artifact_review_packet.md                                                    | 14.8 KB |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB |
-| discussion/e11_top_conference_gap_register.md                                               | 53.5 KB |
-| discussion/e11_top_conference_claim_decision_audit.md                                       | 27.9 KB |
+| discussion/e11_top_conference_gap_register.md                                               | 55.4 KB |
+| discussion/e11_top_conference_claim_decision_audit.md                                       | 28.1 KB |
 | discussion/e11_manuscript_claim_trace.md                                                    | 7.0 KB  |
 | discussion/e11_mechanism_referee_audit.md                                                   | 25.5 KB |
 | discussion/e11_natural_head_tail_boundary.md                                                | 17.5 KB |
@@ -425,7 +427,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_condition_score_v5_final_evaluation.md                                       | 5.0 KB  |
 | discussion/e11_condition_score_v5_final_power_audit.md                                      | 10.3 KB |
 | discussion/e11_condition_score_v5_final_interpretation_plan.md                              | 8.9 KB  |
-| discussion/e11_condition_score_v5_reviewer_failure_response.md                              | 13.9 KB |
+| discussion/e11_condition_score_v5_reviewer_failure_response.md                              | 18.1 KB |
 | discussion/e11_cifar100_resnet_lt_standard_eval.md                                          | 3.3 KB  |
 | discussion/e11_cifar100_resnet_lt_recipe_benchmark.md                                       | 6.6 KB  |
 | discussion/e11_cifar100_resnet_lt_muon_final_benchmark.md                                   | 6.9 KB  |

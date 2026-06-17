@@ -1077,6 +1077,8 @@ def main() -> None:
         Path("discussion/e11_condition_score_v5_final_interpretation_plan.md"),
         Path("scripts/e11_write_condition_score_v5_final_interpretation_plan.py"),
         Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "final_split_output_status.csv",
+        Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "current_gate_snapshot.csv",
+        Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "active_failure_modes.csv",
         Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "failure_mode_register.csv",
         Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "reviewer_objection_map.csv",
         Path("results/e11_condition_score_v5_protocol/reviewer_failure_response") / "claim_downgrade_actions.csv",
@@ -1587,6 +1589,7 @@ def main() -> None:
         "scripts/e11_evaluate_condition_score_v5_finals.py",
         "scripts/e11_write_condition_score_v5_final_evaluation.py",
         "scripts/e11_write_condition_score_v5_final_interpretation_plan.py",
+        "scripts/e11_write_condition_score_v5_reviewer_failure_response.py",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_architecture_resnet50.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_fresh_data_cifar10_alt.sbatch",
         "scripts/slurm/e11_cifar100_resnet_condition_score_v4_architecture_wide_resnet50_2.sbatch",
@@ -4730,6 +4733,8 @@ def main() -> None:
     )
     v5_response_dir = Path("results/e11_condition_score_v5_protocol/reviewer_failure_response")
     v5_response_status = pd.read_csv(v5_response_dir / "final_split_output_status.csv")
+    v5_response_gate_snapshot = pd.read_csv(v5_response_dir / "current_gate_snapshot.csv")
+    v5_response_active = pd.read_csv(v5_response_dir / "active_failure_modes.csv")
     v5_response_modes = pd.read_csv(v5_response_dir / "failure_mode_register.csv")
     v5_response_objections = pd.read_csv(v5_response_dir / "reviewer_objection_map.csv")
     v5_response_downgrades = pd.read_csv(v5_response_dir / "claim_downgrade_actions.csv")
@@ -4764,6 +4769,11 @@ def main() -> None:
         and set(v5_response_downgrades["claim_state"]) == expected_v5_response_claim_states
         and v5_response_objections["remaining_evidence"].astype(str).str.len().gt(25).all()
         and set(v5_response_next["priority"]).issuperset({"P0", "P1"})
+        and set(v5_response_gate_snapshot["gate_id"]) == set(v5_final_gates["gate_id"])
+        and {"V5-RFR-0-pending-outputs", "V5-RFR-4-direction-guardrail-failure", "V5-RFR-current-p0-not-ready"}.issubset(
+            set(v5_response_active["active_failure_mode_id"])
+        )
+        and v5_response_active["forbidden_current_wording"].astype(str).str.len().gt(25).all()
         and v5_response_config["primary_score"]
         == "condition_score_v5_transport_normalized_amplitude_minus_direction"
         and "no final-row tuning" in str(v5_response_config["analysis_scope"])
@@ -4779,7 +4789,10 @@ def main() -> None:
             "E11 Condition-Score V5 Reviewer Failure Response",
             "top-conference reviewer failure response",
             "claim-downgrade plan",
-            "does not inspect, refit, reselect, or retune on final rows",
+            "does not refit, reselect, retune",
+            "Current Final Gate Snapshot",
+            "Current Active Failure Modes",
+            "V5-RFR-4-direction-guardrail-failure",
             "Failure Mode Register",
             "Reviewer Objection Map",
             "Claim Downgrade Actions",
@@ -7302,6 +7315,9 @@ def main() -> None:
         "outcome-to-claim state machine",
         "discussion/e11_condition_score_v5_reviewer_failure_response.md",
         "claim-downgrade plan",
+        "current_gate_snapshot.csv",
+        "active_failure_modes.csv",
+        "V5-RFR-4-direction-guardrail-failure",
         "transport-normalized score contract",
         "transport-stable sandwich residual proposition",
         "theorem terms to measurable score features",

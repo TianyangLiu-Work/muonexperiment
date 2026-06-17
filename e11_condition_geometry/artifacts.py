@@ -240,6 +240,8 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_condition_score_v5_protocol/final_interpretation_plan/outcome_interpretation_ladder.csv",
     "results/e11_condition_score_v5_protocol/final_interpretation_plan/leakage_lock.csv",
     "results/e11_condition_score_v5_protocol/reviewer_failure_response/final_split_output_status.csv",
+    "results/e11_condition_score_v5_protocol/reviewer_failure_response/current_gate_snapshot.csv",
+    "results/e11_condition_score_v5_protocol/reviewer_failure_response/active_failure_modes.csv",
     "results/e11_condition_score_v5_protocol/reviewer_failure_response/failure_mode_register.csv",
     "results/e11_condition_score_v5_protocol/reviewer_failure_response/reviewer_objection_map.csv",
     "results/e11_condition_score_v5_protocol/reviewer_failure_response/claim_downgrade_actions.csv",
@@ -813,7 +815,7 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "stage": "Condition-score v5 reviewer failure response",
         "command": "python3 scripts/e11_write_condition_score_v5_reviewer_failure_response.py",
         "produces": "results/e11_condition_score_v5_protocol/reviewer_failure_response/* and discussion/e11_condition_score_v5_reviewer_failure_response.md",
-        "paper_role": "Pre-output top-conference reviewer response matrix that maps every pending v5 final pass/fail mode to claim downgrades and next evidence.",
+        "paper_role": "Partial-output-aware top-conference reviewer response matrix that maps current and pending v5 final pass/fail modes to claim downgrades and next evidence.",
     },
     {
         "stage": "Natural head-to-tail boundary audit",
