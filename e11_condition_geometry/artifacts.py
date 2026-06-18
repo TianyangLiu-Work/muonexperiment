@@ -1022,6 +1022,18 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "paper_role": "No-peeking selection audit that keeps final seeds blocked until every registered validation setting is complete.",
     },
     {
+        "stage": "CIFAR-100-LT ResNet18 tuned benchmark interim audit",
+        "command": "python3 scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_interim_audit.py",
+        "produces": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/* and discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md",
+        "paper_role": "Reviewer-facing progress audit for completed validation settings and occupancy coverage, without selection authority for partial families.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 tuned benchmark leakage audit",
+        "command": "python3 scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_leakage_audit.py",
+        "produces": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/* and discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md",
+        "paper_role": "Selection-leakage and optional-stopping guard matrix for partial validation visibility, frozen registry order, and final seed quarantine.",
+    },
+    {
         "stage": "CIFAR-100-LT ResNet18 tuned benchmark power audit",
         "command": "python3 scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
         "produces": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit/* and discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",

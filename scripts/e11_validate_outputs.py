@@ -493,6 +493,7 @@ def assert_top_conference_claim_decision_audit(
         "Muon or spectral training is competitive on long-tail benchmarks",
         "local Muon drift compatibility implies benchmark superiority",
         "sampled bridge states represent the full training trajectory distribution",
+        "using partial validation leaderboard to change selection, launch order, or final seed plan",
         "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server",
     ]:
         if phrase not in joined_blocked:
@@ -507,6 +508,9 @@ def assert_top_conference_claim_decision_audit(
         "phase2_head_gain_gate_fail_rows=8",
         "TVS-1-validation-grid-complete=not_ready",
         "TVS-5-occupancy-logging-complete=not_ready",
+        "TLA-1-selection-rule-frozen=pass",
+        "TLA-4-partial-grid-selection-block=pass",
+        "TLA-6-launch-history-auditable=pass",
         "MSD-T1-local-response-integrand=local_integrand_supported_on_sampled_states",
         "MSD-T2-state-occupancy-measure=occupancy_measure_missing_for_final_training",
         "MSD-T4-terminal-risk-functional=final_performance_negative_boundary",
@@ -531,6 +535,7 @@ def assert_top_conference_claim_decision_audit(
         "claiming a universal finite null or natural counterexample without adjusted primary evidence",
         "turning lower local drift into a final tail-accuracy claim",
         "treating sampled bridge states as the full training trajectory distribution",
+        "partial validation leaderboard to change selection, launch order, or final seed plan",
     ]:
         if phrase not in forbidden_shortcuts:
             raise AssertionError(f"top-conference reviewer objection matrix missing forbidden shortcut: {phrase}")
@@ -545,6 +550,8 @@ def assert_top_conference_claim_decision_audit(
         "26/26 phase1 observed, 8/8 phase2 observed",
         "finite-null-candidate wording only with detectable-effect, head-gain, and quality caveats",
         "quarantine benchmark claims",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md",
+        "leakage guards",
         "discussion/e11_muon_state_distribution_contract.md",
         "local compatibility can coexist with poor final performance",
         "occupancy logging",
@@ -569,8 +576,9 @@ def assert_top_conference_claim_decision_audit(
         "frozen completed negative boundary",
         "finite registered null candidates with detectable-effect, head-gain, and quality caveats",
         "quarantine all competitive optimizer wording",
+        "tuned leakage audit",
         "state-distribution contract",
-        "state-distribution occupancy summaries",
+        "state-distribution occupancy summaries and passing leakage guards",
         "preferred-LaTeX clean-checkout gap",
     ]:
         if phrase not in manuscript_text:
@@ -8070,6 +8078,7 @@ def main() -> None:
         "discussion/e11_artifact_review_packet.md",
         "artifact-review packet",
         "GPU-pending boundary",
+        "leakage/optional-stopping audit",
         "preferred pdflatex/bibtex/xelatex clean-checkout gate remains not_ready",
         "GPU via Slurm",
         "No row in this register authorizes a stronger paper claim by itself",
@@ -8105,6 +8114,9 @@ def main() -> None:
             "quality_gate_fail_rows=23",
             "using any final row to refit or reselect the score",
             "quarantine benchmark claims",
+            "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md",
+            "TLA-1-selection-rule-frozen=pass",
+            "using partial validation leaderboard to change selection, launch order, or final seed plan",
             "discussion/e11_muon_state_distribution_contract.md",
             "state-distribution transport contract",
             "MSD-T1-local-response-integrand=local_integrand_supported_on_sampled_states",
@@ -8447,7 +8459,17 @@ def main() -> None:
     artifact_local_state = pd.read_csv(artifact_review_dir / "local_state_contract.csv")
     artifact_reviewer_response = pd.read_csv(artifact_review_dir / "reviewer_response.csv")
     artifact_config = json.loads((artifact_review_dir / "config.json").read_text(encoding="utf-8"))
-    expected_artifact_command_ids = {"AR-C1", "AR-C2", "AR-C3", "AR-C4", "AR-C5", "AR-G1", "AR-G2", "AR-G3"}
+    expected_artifact_command_ids = {
+        "AR-C1",
+        "AR-C2",
+        "AR-C3",
+        "AR-C4",
+        "AR-C5",
+        "AR-C6",
+        "AR-G1",
+        "AR-G2",
+        "AR-G3",
+    }
     if not expected_artifact_command_ids.issubset(set(artifact_command_matrix["command_id"])):
         raise AssertionError("artifact review packet command matrix missing CPU/GPU reviewer commands")
     artifact_command_text = " ".join(artifact_command_matrix.astype(str).agg(" ".join, axis=1).tolist())
@@ -8456,6 +8478,7 @@ def main() -> None:
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-paper-assets",
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-paper-pdf",
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-check",
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-cifar-resnet-lt-tuned-benchmark-leakage-audit",
         "GPU via Slurm",
         "Not required to reproduce current paper claims",
     ]:
@@ -8473,6 +8496,7 @@ def main() -> None:
         "Preferred LaTeX toolchain",
         "Rendered PDFs",
         "Full artifact validation",
+        "Tuned validation leakage audit",
         "v5 final layer tables",
         "GPU dependence",
     }
@@ -8482,6 +8506,7 @@ def main() -> None:
     for phrase in [
         "Do not stage or commit this file",
         "Both frozen final split layer tables are present",
+        "partial validation observations cannot change the registry",
         "not_required_for_current_artifact_review",
     ]:
         if phrase not in artifact_local_text:
@@ -8491,6 +8516,8 @@ def main() -> None:
         "preferred venue-toolchain reproducibility",
         "serverREADME.md",
         "including the completed v5 final boundary readout",
+        "optional-stopping leakage",
+        "partial validation observations are progress accounting only",
         "Do not use failed v5 finals, not_ready gates, partial-family, or finite phase1 outputs as broader positive evidence",
         "Do not infer broad optimizer-performance, accuracy, or general predictive-condition claims",
     ]:
@@ -8509,6 +8536,7 @@ def main() -> None:
             "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full",
             "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility",
             "v5 predictive-condition upgrade",
+            "partial-validation optional-stopping",
             "unqualified natural-null",
             "broad optimizer-performance claim",
             "Machine-readable tables",

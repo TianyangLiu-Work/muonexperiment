@@ -9,6 +9,7 @@
     "natural_phase2_gates": "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/gate_report.csv",
     "natural_phase2_decisions": "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/primary_decisions.csv",
     "tuned_benchmark_gates": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv",
+    "tuned_leakage_guards": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv",
     "muon_state_terms": "results/e11_muon_state_distribution_contract/state_distribution_terms.csv",
     "muon_claim_gates": "results/e11_muon_state_distribution_contract/claim_gate_ladder.csv",
     "submission_build_gates": "results/e11_submission_repro_audit/build_gate_summary.csv",

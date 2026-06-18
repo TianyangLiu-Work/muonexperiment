@@ -35,6 +35,9 @@ SOURCE_FILES = {
     "tuned_benchmark_gates": Path(
         "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv"
     ),
+    "tuned_leakage_guards": Path(
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv"
+    ),
     "muon_state_terms": Path("results/e11_muon_state_distribution_contract/state_distribution_terms.csv"),
     "muon_claim_gates": Path("results/e11_muon_state_distribution_contract/claim_gate_ladder.csv"),
     "submission_build_gates": Path("results/e11_submission_repro_audit/build_gate_summary.csv"),
@@ -66,6 +69,7 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
     phase2_gates = sources["natural_phase2_gates"]
     phase2_decisions = sources["natural_phase2_decisions"]
     tuned_gates = sources["tuned_benchmark_gates"]
+    tuned_leakage = sources["tuned_leakage_guards"]
     muon_terms = sources["muon_state_terms"]
     muon_gates = sources["muon_claim_gates"]
     submission_gates = sources["submission_build_gates"]
@@ -169,6 +173,7 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
                 "current_decision": "blocked_protocol_pending",
                 "evidence_status": (
                     f"{pto6['current_status']}; {status_line(tuned_gates, 'gate_id')}; "
+                    f"{status_line(tuned_leakage, 'guard_id')}; "
                     f"{msd_t1['term_id']}={msd_t1['careful_status']}; "
                     f"{msd_t2['term_id']}={msd_t2['careful_status']}; "
                     f"{msd_t4['term_id']}={msd_t4['careful_status']}; "
@@ -176,23 +181,29 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
                 ),
                 "author_allowed_wording": (
                     f"{benchmark_scope['allowed_claim']}; state-distribution transport contract "
-                    "allows sampled-state local compatibility and negative final pilot boundary only"
+                    "allows sampled-state local compatibility and negative final pilot boundary only; "
+                    "validation leakage audit permits progress accounting only while selection rule, "
+                    "array order, and final seed quarantine remain frozen"
                 ),
                 "author_blocked_wording": (
                     f"{benchmark_scope['blocked_claim']}; local Muon drift compatibility implies "
-                    "benchmark superiority; sampled bridge states represent the full training trajectory distribution"
+                    "benchmark superiority; sampled bridge states represent the full training trajectory distribution; "
+                    "using partial validation leaderboard to change selection, launch order, or final seed plan"
                 ),
                 "decisive_gate": (
                     f"{benchmark_scope['decisive_gate']} plus state-distribution occupancy logging "
-                    "and MSG-4 top-tier practical gate"
+                    "and MSG-4 top-tier practical gate, with TLA leakage guards still passing"
                 ),
                 "required_next_action": (
                     f"{pto6['required_upgrade']} plus record trajectory occupancy summaries during "
-                    "tuned validation and final seeds"
+                    "tuned validation and final seeds; rerun the leakage/optional-stopping audit after "
+                    "each validation refresh"
                 ),
                 "source_artifacts": (
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md; "
+                    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md; "
+                    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv; "
                     "discussion/e11_muon_state_distribution_contract.md; "
                     "results/e11_muon_state_distribution_contract/claim_gate_ladder.csv"
                 ),
@@ -252,13 +263,15 @@ def build_reviewer_objection_matrix(claims: pd.DataFrame) -> pd.DataFrame:
                     "TCD-5 blocks benchmark wording; the Muon state-distribution contract separates "
                     "sampled-state local compatibility from trajectory occupancy and notes local "
                     "compatibility can coexist with poor final performance until tuned validation, "
-                    "occupancy logging, and final seeds finish."
+                    "occupancy logging, and final seeds finish. The tuned leakage audit separately "
+                    "blocks optional-stopping moves from partial validation observations."
                 ),
                 "response_status": lookup.loc["TCD-5-optimizer-performance-benchmark", "current_decision"],
                 "missing_gate": lookup.loc["TCD-5-optimizer-performance-benchmark", "decisive_gate"],
                 "forbidden_shortcut": (
                     "turning lower local drift into a final tail-accuracy claim or treating sampled "
-                    "bridge states as the full training trajectory distribution"
+                    "bridge states as the full training trajectory distribution or using partial validation "
+                    "leaderboard to change selection, launch order, or final seed plan"
                 ),
             },
             {
@@ -306,9 +319,9 @@ def build_paper_sequence(claims: pd.DataFrame) -> pd.DataFrame:
                 "paper_move": (
                     "Keep practical Muon training results in scope-control and route them through "
                     "the state-distribution transport contract unless tuned benchmark protocol and "
-                    "occupancy logging complete."
+                    "occupancy logging complete, and cite the leakage audit while validation is partial."
                 ),
-                "writing_rule": "Do not let sampled local drift diagnostics imply benchmark superiority or state occupancy.",
+                "writing_rule": "Do not let sampled local drift diagnostics or partial validation leaderboards imply benchmark superiority, state occupancy, or selection authority.",
             },
             {
                 "sequence_step": 6,
@@ -369,6 +382,8 @@ def build_rebuttal_response_pack(claims: pd.DataFrame, objections: pd.DataFrame)
                 "evidence_to_cite": (
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md; "
+                    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md; "
+                    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv; "
                     "discussion/e11_muon_state_distribution_contract.md; "
                     "results/e11_muon_state_distribution_contract/claim_gate_ladder.csv; "
                     "discussion/e11_quantitative_claim_ledger.md"
@@ -377,7 +392,7 @@ def build_rebuttal_response_pack(claims: pd.DataFrame, objections: pd.DataFrame)
                     "Keep Muon as motivation, selected-state/local compatibility, and a "
                     "state-distribution transport contract: local compatibility can coexist with poor "
                     "final performance; quarantine benchmark claims until validation selection, "
-                    "occupancy logging, and untouched final seeds finish."
+                    "occupancy logging, leakage guards, and untouched final seeds finish."
                 ),
                 "missing_gate": objection_lookup.loc["RO-4-muon-overclaim", "missing_gate"],
                 "forbidden_rebuttal": objection_lookup.loc["RO-4-muon-overclaim", "forbidden_shortcut"],
@@ -451,11 +466,13 @@ def build_manuscript_edit_queue(claims: pd.DataFrame, gaps: pd.DataFrame) -> pd.
                 "claim_id": "TCD-5-optimizer-performance-benchmark",
                 "edit_action": (
                     "Keep standard/recipe/negative NS-Muon pilots as benchmark context, cite the "
-                    "state-distribution contract, and quarantine all competitive optimizer wording."
+                    "state-distribution contract and tuned leakage audit, and quarantine all competitive "
+                    "optimizer wording."
                 ),
                 "acceptance_check": (
                     f"{gap_lookup.loc['P0-StandardBenchmark', 'acceptance_gate']} Also require "
-                    "state-distribution occupancy summaries for selected recipes before practical-performance wording."
+                    "state-distribution occupancy summaries and passing leakage guards for selected recipes "
+                    "before practical-performance wording."
                 ),
                 "current_decision": claim_lookup.loc[
                     "TCD-5-optimizer-performance-benchmark", "current_decision"

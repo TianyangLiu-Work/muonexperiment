@@ -89,6 +89,14 @@ def command_matrix() -> pd.DataFrame:
             "claim_boundary": "Still CPU-side and still separate from the preferred LaTeX clean-checkout gate.",
         },
         {
+            "command_id": "AR-C6",
+            "command": f"make PYTHON={PYTHON_CMD} e11-cifar-resnet-lt-tuned-benchmark-leakage-audit",
+            "purpose": "Regenerate the tuned-validation leakage and optional-stopping guard matrix.",
+            "compute_mode": "CPU",
+            "expected_state": "refreshes validation_leakage_audit tables and reviewer-facing leakage discussion from current validation/queue artifacts",
+            "claim_boundary": "Only audits partial validation visibility; it does not authorize recipe selection or final-performance wording.",
+        },
+        {
             "command_id": "AR-G1",
             "command": f"make PYTHON={PYTHON_CMD} e11-cifar-resnet-condition-score-v5-architecture-results",
             "purpose": "Regenerate the registered ResNeXt50-32x4d final architecture split if a new run is explicitly needed.",
@@ -155,6 +163,15 @@ def gate_matrix(build_gates: pd.DataFrame) -> pd.DataFrame:
 def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> pd.DataFrame:
     tool_available = status_lookup(toolchain, "tool", "available")
     gate_status = status_lookup(build_gates, "gate_id", "status")
+    leakage_guards = read_csv(
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv")
+    )
+    leakage_state = "missing"
+    leakage_evidence = "validation_leakage_audit/leakage_guard_matrix.csv is absent"
+    if not leakage_guards.empty and {"guard_id", "status"}.issubset(leakage_guards.columns):
+        status_by_guard = status_lookup(leakage_guards, "guard_id", "status")
+        leakage_state = "pass" if set(status_by_guard.values()) == {"pass"} else "check_required"
+        leakage_evidence = "; ".join(f"{guard}={status}" for guard, status in status_by_guard.items())
     server_readme_state = "present_untracked_local_file" if Path("serverREADME.md").exists() else "absent"
     final_arch_layer_summary = Path(
         "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/layer_summary.csv"
@@ -192,6 +209,12 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
             "state": gate_status.get("R6-full-artifact-validation", "unknown"),
             "evidence": "The strongest local gate is make e11-full; e11-check records validator, pytest, and whitespace status.",
             "reviewer_instruction": "Use make e11-full for artifact-review reproduction of the current bundle.",
+        },
+        {
+            "item": "Tuned validation leakage audit",
+            "state": leakage_state,
+            "evidence": leakage_evidence,
+            "reviewer_instruction": "Use this audit to show partial validation observations cannot change the registry, selection rule, launch order, or final seed quarantine.",
         },
         {
             "item": "v5 final layer tables",
@@ -240,6 +263,12 @@ def reviewer_response() -> pd.DataFrame:
             "forbidden_shortcut": "Do not treat GPU reruns as a way to repair the already observed frozen v5 final failures.",
         },
         {
+            "objection": "Can partial tuned validation create optional-stopping leakage?",
+            "answer": "The tuned leakage audit records TLA guards for frozen selection rules, validation-only seed inputs, contiguous array order, partial-grid selection blocking, final-output quarantine, and queue-audited launches; partial validation observations are progress accounting only.",
+            "status": "partial_validation_leakage_controlled",
+            "forbidden_shortcut": "Do not use the partial leaderboard to change the recipe grid, selection rule, launch order, final seed plan, or benchmark wording.",
+        },
+        {
             "objection": "Why are v5 final and natural-negative claims still limited?",
             "answer": "The v5 final splits are complete and failed the registered P0 gate family. The natural-negative phase1 family is complete and supports only a finite registered null candidate with detectable-effect and tail-quality caveats.",
             "status": "claim_boundary_preserved",
@@ -273,13 +302,13 @@ def write_outputs(
         "git_branch": git_output("branch", "--show-current"),
         "python_command": PYTHON_CMD,
         "strongest_local_gate": f"make PYTHON={PYTHON_CMD} e11-full",
-        "claim_boundary": "current evidence bundle only; finite phase1 natural-null candidate with caveats; no v5 final or optimizer-performance upgrade",
+        "claim_boundary": "current evidence bundle only; finite phase1 natural-null candidate with caveats; no v5 final, optional-stopping, partial-grid, or optimizer-performance upgrade",
     }
     (OUTPUT_DIR / "config.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
 
     text = f"""# E11 Artifact Review Packet
 
-This generated packet converts the submission reproducibility audit into an artifact-review response plan. It is intentionally conservative: it supports the current evidence bundle, records the CPU reviewer path, and keeps preferred LaTeX clean-checkout, v5 final, unqualified natural-null, and optimizer-performance claims outside the current artifact boundary.
+This generated packet converts the submission reproducibility audit into an artifact-review response plan. It is intentionally conservative: it supports the current evidence bundle, records the CPU reviewer path, and keeps preferred LaTeX clean-checkout, v5 final, partial-validation optional-stopping, unqualified natural-null, and optimizer-performance claims outside the current artifact boundary.
 
 ## Reviewer Command Matrix
 
@@ -301,7 +330,7 @@ This generated packet converts the submission reproducibility audit into an arti
 
 Allowed now: artifact reviewers can reproduce the current bundle with `make PYTHON={PYTHON_CMD} e11-full`, or inspect the narrower steps `make PYTHON={PYTHON_CMD} e11-paper-assets`, `make PYTHON={PYTHON_CMD} e11-paper-pdf`, and `make PYTHON={PYTHON_CMD} e11-check`.
 
-Blocked now: preferred pdflatex/bibtex/xelatex clean-checkout reproducibility, any v5 predictive-condition upgrade, any unqualified natural-null or counterexample wording, and any broad optimizer-performance claim.
+Blocked now: preferred pdflatex/bibtex/xelatex clean-checkout reproducibility, any v5 predictive-condition upgrade, partial-validation optional-stopping or recipe-selection authority, any unqualified natural-null or counterexample wording, and any broad optimizer-performance claim.
 
 Machine-readable tables:
 - [command_matrix.csv](../results/e11_artifact_review_packet/command_matrix.csv)
