@@ -2,7 +2,7 @@
 
 This generated selection report is the no-peeking bridge between the tuned benchmark validation grid and the untouched final claim seeds. It reads only validation summaries under `results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/*`.
 
-Current status: `not_ready` with `19/164` validation summaries complete and `19/164` trajectory occupancy traces complete.
+Current status: `not_ready` with `20/164` validation summaries complete and `20/164` trajectory occupancy traces complete.
 
 ## Selection Rule
 
@@ -12,9 +12,9 @@ For each recipe family, select the validation setting with maximum few-class bal
 
 | gate_id                          | status    | evidence                                                                                    | blocks_final_claim   |
 |:---------------------------------|:----------|:--------------------------------------------------------------------------------------------|:---------------------|
-| TVS-1-validation-grid-complete   | not_ready | 19/164 validation settings complete                                                         | yes                  |
+| TVS-1-validation-grid-complete   | not_ready | 20/164 validation settings complete                                                         | yes                  |
 | TVS-2-family-selection           | not_ready | 1/6 recipe families selected                                                                | yes                  |
-| TVS-5-occupancy-logging-complete | not_ready | 19/164 occupancy traces complete                                                            | yes                  |
+| TVS-5-occupancy-logging-complete | not_ready | 20/164 occupancy traces complete                                                            | yes                  |
 | TVS-3-final-seed-quarantine      | pass      | no final_claim outputs exist before validation selection                                    | yes                  |
 | TVS-4-final-run-plan             | not_ready | final seed set 20..29 assigned only after validation family selection and occupancy logging | yes                  |
 
@@ -27,7 +27,7 @@ For each recipe family, select the validation setting with maximum few-class bal
 | adamw_ce_tuned         | selected           |                  12 |                  12 | TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0 | adamw_ce_tuned_lr1e-3_wd5e-4_warm0 |                          0.1121 |                            0.4151 | maximize validation few balanced accuracy, tie-break by all balanced accuracy |
 | ns_muon_cb_tuned       | not_ready          |                  36 |                   0 |                                        |                                    |                                 |                                   | wait for every registered validation setting in the family                    |
 | ns_muon_matrix_tuned   | not_ready          |                  72 |                   0 |                                        |                                    |                                 |                                   | wait for every registered validation setting in the family                    |
-| sgd_momentum_ce_tuned  | not_ready          |                  12 |                   7 |                                        |                                    |                                 |                                   | wait for every registered validation setting in the family                    |
+| sgd_momentum_ce_tuned  | not_ready          |                  12 |                   8 |                                        |                                    |                                 |                                   | wait for every registered validation setting in the family                    |
 
 ## Occupancy Logging Status
 
@@ -52,7 +52,7 @@ For each recipe family, select the validation setting with maximum few-class bal
 | TBV-sgd_momentum_ce_tuned-lr0p1-wd5e-4-warm0               | sgd_momentum_ce_tuned  | complete            | complete                | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p1-wd5e-4-warm0/summary.csv               | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p1-wd5e-4-warm0/occupancy_trace.csv               |
 | TBV-sgd_momentum_ce_tuned-lr0p1-wd5e-4-warm500             | sgd_momentum_ce_tuned  | complete            | complete                | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p1-wd5e-4-warm500/summary.csv             | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p1-wd5e-4-warm500/occupancy_trace.csv             |
 | TBV-sgd_momentum_ce_tuned-lr0p1-wd1e-3-warm0               | sgd_momentum_ce_tuned  | complete            | complete                | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p1-wd1e-3-warm0/summary.csv               | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p1-wd1e-3-warm0/occupancy_trace.csv               |
-| TBV-sgd_momentum_ce_tuned-lr0p1-wd1e-3-warm500             | sgd_momentum_ce_tuned  | missing_summary     | missing_occupancy_trace | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p1-wd1e-3-warm500/summary.csv             | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p1-wd1e-3-warm500/occupancy_trace.csv             |
+| TBV-sgd_momentum_ce_tuned-lr0p1-wd1e-3-warm500             | sgd_momentum_ce_tuned  | complete            | complete                | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p1-wd1e-3-warm500/summary.csv             | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p1-wd1e-3-warm500/occupancy_trace.csv             |
 | TBV-sgd_momentum_ce_tuned-lr0p3-wd5e-4-warm0               | sgd_momentum_ce_tuned  | missing_summary     | missing_occupancy_trace | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p3-wd5e-4-warm0/summary.csv               | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p3-wd5e-4-warm0/occupancy_trace.csv               |
 | TBV-sgd_momentum_ce_tuned-lr0p3-wd5e-4-warm500             | sgd_momentum_ce_tuned  | missing_summary     | missing_occupancy_trace | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p3-wd5e-4-warm500/summary.csv             | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p3-wd5e-4-warm500/occupancy_trace.csv             |
 | TBV-sgd_momentum_ce_tuned-lr0p3-wd1e-3-warm0               | sgd_momentum_ce_tuned  | missing_summary     | missing_occupancy_trace | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p3-wd1e-3-warm0/summary.csv               | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p3-wd1e-3-warm0/occupancy_trace.csv               |

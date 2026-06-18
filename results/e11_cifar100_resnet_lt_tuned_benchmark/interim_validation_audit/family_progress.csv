@@ -4,4 +4,4 @@ adamw_cb_sampler_tuned,8,0,0.0,not_started,,,,,,,not_observed,not_allowed_partia
 adamw_ce_tuned,12,12,1.0,complete,TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0,adamw_ce_tuned_lr1e-3_wd5e-4_warm0,0.1121333333333333,0.1039578680148738,0.1203087986517927,0.4150600000000001,few_ci_intervals_overlap_or_family_is_global_best,eligible_family_complete
 ns_muon_cb_tuned,36,0,0.0,not_started,,,,,,,not_observed,not_allowed_partial_family
 ns_muon_matrix_tuned,72,0,0.0,not_started,,,,,,,not_observed,not_allowed_partial_family
-sgd_momentum_ce_tuned,12,7,0.5833333333333334,partial,TBV-sgd_momentum_ce_tuned-lr0p03-wd5e-4-warm0,sgd_momentum_ce_tuned_lr0p03_wd5e-4_warm0,0.0843999999999999,0.0784720861544721,0.0903279138455277,0.3789399999999999,current_global_best_ci_low_above_family_best_ci_high,not_allowed_partial_family
+sgd_momentum_ce_tuned,12,8,0.6666666666666666,partial,TBV-sgd_momentum_ce_tuned-lr0p1-wd1e-3-warm500,sgd_momentum_ce_tuned_lr0p1_wd1e-3_warm500,0.0875333333333333,0.0767596554378532,0.0983070112288133,0.43016,current_global_best_ci_low_above_family_best_ci_high,not_allowed_partial_family

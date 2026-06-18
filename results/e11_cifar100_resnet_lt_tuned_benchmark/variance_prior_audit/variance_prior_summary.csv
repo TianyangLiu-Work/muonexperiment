@@ -1,8 +1,8 @@
 source_id,frequency_group,row_count,sd_p50,sd_p80,sd_p95,sd_max,assumed_paired_diff_sd,p80_within_assumed_0p03,interpretation
-validation_within_setting,all,19,0.005592405564692132,0.007826895520667178,0.008697081235854198,0.008879020216217589,0.03,yes,within-setting seed SD is a loose variance prior
-validation_within_setting,few,19,0.0058376174744306205,0.0066238622804644385,0.009810447312129274,0.012444097217378033,0.03,yes,within-setting seed SD is a loose variance prior
-validation_within_setting,many,19,0.00845974863330913,0.010992119461221651,0.013818065095605871,0.014891443920614835,0.03,yes,within-setting seed SD is a loose variance prior
-validation_within_setting,medium,19,0.008153126356665577,0.010881891178596413,0.012951975719767276,0.013568571127756219,0.03,yes,within-setting seed SD is a loose variance prior
+validation_within_setting,all,20,0.005899950516940512,0.008336643244525658,0.008902583911057771,0.009350294113021249,0.03,yes,within-setting seed SD is a loose variance prior
+validation_within_setting,few,20,0.005857062186687175,0.00671353037374214,0.00966413342850435,0.012444097217378033,0.03,yes,within-setting seed SD is a loose variance prior
+validation_within_setting,many,20,0.008832890186933619,0.010949573856982081,0.013758432938660933,0.014891443920614835,0.03,yes,within-setting seed SD is a loose variance prior
+validation_within_setting,medium,20,0.008299194140765784,0.011359990222434503,0.012917720419323448,0.013568571127756219,0.03,yes,within-setting seed SD is a loose variance prior
 spent_pilot_paired_diff,all,4,0.0033177492793271747,0.004920186144884198,0.005144031015779019,0.005218645972743959,0.03,yes,spent pilot paired-diff SD is the closest available pre-final paired-diff prior
 spent_pilot_paired_diff,few,4,0.00666035108624596,0.009330462879728994,0.010679929893391544,0.011129752231279062,0.03,yes,spent pilot paired-diff SD is the closest available pre-final paired-diff prior
 spent_pilot_paired_diff,many,4,0.0038058081116522143,0.007168282425444754,0.010047562283501482,0.011007322236187061,0.03,yes,spent pilot paired-diff SD is the closest available pre-final paired-diff prior
