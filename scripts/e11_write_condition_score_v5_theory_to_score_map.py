@@ -354,6 +354,72 @@ def build_falsifiable_predictions() -> pd.DataFrame:
     )
 
 
+def build_next_protocol_firewall(post_final_obligations: pd.DataFrame) -> pd.DataFrame:
+    obligation_lookup = post_final_obligations.set_index("obligation_id")
+    return pd.DataFrame(
+        [
+            {
+                "firewall_id": "NPF-1-unspent-split-reset",
+                "bold_hypothesis": "A repaired transport score may exist, but it must be developed on a new validation/final split family.",
+                "allowed_use_of_v5_failure": "define failure modes and preregister endpoint-specific transport terms",
+                "forbidden_use_of_v5_failure": obligation_lookup.loc[
+                    "PFO-4-post-final-quarantine", "forbidden_shortcut"
+                ],
+                "pre_registration_gate": "new validation split, final split, scalar formula, thresholds, and claim ladder are committed before any new final rows exist",
+                "failure_action": "preserve another completed negative boundary instead of retuning on visible final rows",
+            },
+            {
+                "firewall_id": "NPF-2-endpoint-separated-object",
+                "bold_hypothesis": "Residual-risk ranking and below-one direction classification are two coupled but non-identical mathematical endpoints.",
+                "allowed_use_of_v5_failure": obligation_lookup.loc[
+                    "PFO-1-endpoint-factorization", "final_evidence"
+                ],
+                "forbidden_use_of_v5_failure": obligation_lookup.loc[
+                    "PFO-1-endpoint-factorization", "forbidden_shortcut"
+                ],
+                "pre_registration_gate": "committed new score report keeps residual Spearman and direction-threshold accuracy as separate primary gates before any new final rows exist",
+                "failure_action": "one endpoint pass cannot rescue a failed endpoint",
+            },
+            {
+                "firewall_id": "NPF-3-architecture-direction-term",
+                "bold_hypothesis": "Architecture transport needs a direction-threshold reliability term beyond residual ranking.",
+                "allowed_use_of_v5_failure": obligation_lookup.loc[
+                    "PFO-2-architecture-direction-transport", "final_evidence"
+                ],
+                "forbidden_use_of_v5_failure": obligation_lookup.loc[
+                    "PFO-2-architecture-direction-transport", "forbidden_shortcut"
+                ],
+                "pre_registration_gate": "architecture tags, shape/downsample terms, and direction-threshold acceptance rule are frozen before architecture final outputs",
+                "failure_action": "narrow to fixed architecture or local mechanism wording",
+            },
+            {
+                "firewall_id": "NPF-4-data-partition-residual-term",
+                "bold_hypothesis": "Data-partition transport needs a residual-risk term even when direction signs survive.",
+                "allowed_use_of_v5_failure": obligation_lookup.loc[
+                    "PFO-3-data-partition-residual-transport", "final_evidence"
+                ],
+                "forbidden_use_of_v5_failure": obligation_lookup.loc[
+                    "PFO-3-data-partition-residual-transport", "forbidden_shortcut"
+                ],
+                "pre_registration_gate": "class-partition transport features are computed without target residual labels and frozen before data final outputs",
+                "failure_action": "report residual-transport failure and keep predictive-condition P0 not_ready",
+            },
+            {
+                "firewall_id": "NPF-5-negative-boundary-retention",
+                "bold_hypothesis": "Top-conference credibility improves when failed predictive scores are retained as falsifiers.",
+                "allowed_use_of_v5_failure": obligation_lookup.loc[
+                    "PFO-5-negative-boundary-ledger", "final_evidence"
+                ],
+                "forbidden_use_of_v5_failure": obligation_lookup.loc[
+                    "PFO-5-negative-boundary-ledger", "forbidden_shortcut"
+                ],
+                "pre_registration_gate": "committed paper ledger, gap register, and claim decision audit keep the failed gates visible before any new protocol claims a repaired score",
+                "failure_action": "downgrade the claim rather than repair the spent score",
+            },
+        ]
+    )
+
+
 def build_ablation_matrix(axis_pairs: pd.DataFrame, obstructions: pd.DataFrame) -> pd.DataFrame:
     data_role = "fresh_final_heldout_data_partition"
     arch_role = "fresh_final_heldout_architecture"
@@ -533,6 +599,7 @@ def write_discussion(
     score_lineage: pd.DataFrame,
     transport_contract: pd.DataFrame,
     post_final_obligations: pd.DataFrame,
+    next_protocol_firewall: pd.DataFrame,
     predictions: pd.DataFrame,
     ablations: pd.DataFrame,
     readiness: pd.DataFrame,
@@ -592,6 +659,10 @@ score cannot be repaired with these final rows.
 
 {markdown_table(post_final_obligations, ["obligation_id", "theory_gap", "final_evidence", "required_next_protocol", "forbidden_shortcut", "claim_boundary"])}
 
+## Next Protocol Firewall
+
+{markdown_table(next_protocol_firewall, ["firewall_id", "bold_hypothesis", "allowed_use_of_v5_failure", "forbidden_use_of_v5_failure", "pre_registration_gate", "failure_action"])}
+
 ## Falsifiable Predictions
 
 {markdown_table(predictions, ["prediction_id", "target", "claim_tested", "pass_rule", "fail_interpretation", "claim_effect"])}
@@ -613,6 +684,7 @@ Artifacts:
 - [score_lineage.csv](../results/e11_condition_score_v5_theory_to_score_map/score_lineage.csv)
 - [transport_normalization_contract.csv](../results/e11_condition_score_v5_theory_to_score_map/transport_normalization_contract.csv)
 - [post_final_transport_obligations.csv](../results/e11_condition_score_v5_theory_to_score_map/post_final_transport_obligations.csv)
+- [next_protocol_firewall.csv](../results/e11_condition_score_v5_theory_to_score_map/next_protocol_firewall.csv)
 - [falsifiable_predictions.csv](../results/e11_condition_score_v5_theory_to_score_map/falsifiable_predictions.csv)
 - [ablation_matrix.csv](../results/e11_condition_score_v5_theory_to_score_map/ablation_matrix.csv)
 - [claim_readiness_ledger.csv](../results/e11_condition_score_v5_theory_to_score_map/claim_readiness_ledger.csv)
@@ -630,6 +702,7 @@ def main() -> None:
         inputs["final_gate_boundaries"],
         inputs["next_protocol_requirements"],
     )
+    next_protocol_firewall = build_next_protocol_firewall(post_final_obligations)
     predictions = build_falsifiable_predictions()
     ablations = build_ablation_matrix(inputs["axis_pairs"], inputs["obstructions"])
     readiness = build_readiness_ledger(inputs["freeze_status"], inputs["freeze_gates"], inputs["final_gates"])
@@ -639,6 +712,7 @@ def main() -> None:
     score_lineage.to_csv(OUTPUT_DIR / "score_lineage.csv", index=False)
     transport_contract.to_csv(OUTPUT_DIR / "transport_normalization_contract.csv", index=False)
     post_final_obligations.to_csv(OUTPUT_DIR / "post_final_transport_obligations.csv", index=False)
+    next_protocol_firewall.to_csv(OUTPUT_DIR / "next_protocol_firewall.csv", index=False)
     predictions.to_csv(OUTPUT_DIR / "falsifiable_predictions.csv", index=False)
     ablations.to_csv(OUTPUT_DIR / "ablation_matrix.csv", index=False)
     readiness.to_csv(OUTPUT_DIR / "claim_readiness_ledger.csv", index=False)
@@ -647,6 +721,7 @@ def main() -> None:
         score_lineage,
         transport_contract,
         post_final_obligations,
+        next_protocol_firewall,
         predictions,
         ablations,
         readiness,

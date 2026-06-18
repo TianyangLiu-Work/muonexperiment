@@ -12,7 +12,7 @@
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2993571,
+      "size_bytes": 3000756,
       "size": "2.9 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1915268,
+      "size_bytes": 1925681,
       "size": "1.8 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289233467,
+      "size_bytes": 289237079,
       "size": "275.8 MB"
     },
     {
@@ -1288,7 +1288,7 @@
     {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
       "rows": 7,
-      "size": "28.2 KB"
+      "size": "28.6 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
@@ -2048,7 +2048,7 @@
     },
     {
       "path": "discussion/e11_top_conference_gap_register.md",
-      "size": "61.0 KB"
+      "size": "63.5 KB"
     },
     {
       "path": "discussion/e11_top_conference_claim_decision_audit.md",
@@ -2268,7 +2268,7 @@
     },
     {
       "path": "discussion/e11_condition_score_v5_theory_to_score_map.md",
-      "size": "28.6 KB"
+      "size": "36.3 KB"
     },
     {
       "path": "discussion/e11_condition_score_ablation.md",

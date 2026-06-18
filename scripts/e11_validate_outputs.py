@@ -1082,6 +1082,7 @@ def main() -> None:
         Path("results/e11_condition_score_v5_theory_to_score_map") / "score_lineage.csv",
         Path("results/e11_condition_score_v5_theory_to_score_map") / "transport_normalization_contract.csv",
         Path("results/e11_condition_score_v5_theory_to_score_map") / "post_final_transport_obligations.csv",
+        Path("results/e11_condition_score_v5_theory_to_score_map") / "next_protocol_firewall.csv",
         Path("results/e11_condition_score_v5_theory_to_score_map") / "falsifiable_predictions.csv",
         Path("results/e11_condition_score_v5_theory_to_score_map") / "ablation_matrix.csv",
         Path("results/e11_condition_score_v5_theory_to_score_map") / "claim_readiness_ledger.csv",
@@ -4400,6 +4401,7 @@ def main() -> None:
     v5_score_lineage = pd.read_csv(v5_map_dir / "score_lineage.csv")
     v5_transport_contract = pd.read_csv(v5_map_dir / "transport_normalization_contract.csv")
     v5_post_final_obligations = pd.read_csv(v5_map_dir / "post_final_transport_obligations.csv")
+    v5_next_protocol_firewall = pd.read_csv(v5_map_dir / "next_protocol_firewall.csv")
     v5_predictions = pd.read_csv(v5_map_dir / "falsifiable_predictions.csv")
     v5_ablations = pd.read_csv(v5_map_dir / "ablation_matrix.csv")
     v5_readiness = pd.read_csv(v5_map_dir / "claim_readiness_ledger.csv")
@@ -4438,6 +4440,13 @@ def main() -> None:
         "PFO-4-post-final-quarantine",
         "PFO-5-negative-boundary-ledger",
     }
+    expected_v5_next_protocol_firewall = {
+        "NPF-1-unspent-split-reset",
+        "NPF-2-endpoint-separated-object",
+        "NPF-3-architecture-direction-term",
+        "NPF-4-data-partition-residual-term",
+        "NPF-5-negative-boundary-retention",
+    }
     expected_v5_readiness_items = {
         "theory-to-score map",
         "v5 validation output",
@@ -4461,6 +4470,7 @@ def main() -> None:
         and set(v5_ablations["ablation_id"]) == expected_v5_ablation_ids
         and set(v5_transport_contract["step_id"]) == expected_v5_transport_steps
         and set(v5_post_final_obligations["obligation_id"]) == expected_v5_post_final_obligations
+        and set(v5_next_protocol_firewall["firewall_id"]) == expected_v5_next_protocol_firewall
         and set(v5_readiness["item"]) == expected_v5_readiness_items
         and set(v5_score_lineage["score_id"]) == expected_v5_score_ids
     ):
@@ -4487,10 +4497,26 @@ def main() -> None:
         in str(v5_readiness_evidence["predictive-condition claim"])
         and v5_post_final_obligations["forbidden_shortcut"].astype(str).str.len().gt(20).all()
         and v5_post_final_obligations["claim_boundary"].astype(str).str.len().gt(20).all()
+        and v5_next_protocol_firewall["forbidden_use_of_v5_failure"].astype(str).str.len().gt(20).all()
+        and v5_next_protocol_firewall["pre_registration_gate"].astype(str).str.contains(
+            "before|committed|frozen|without", case=False, regex=True
+        ).all()
     ):
         raise AssertionError(
             "condition-score v5 theory-to-score map must keep leakage boundaries, quantitative gates, ablation reports, and not_ready P0 claim status"
         )
+    firewall_text = " ".join(v5_next_protocol_firewall.astype(str).to_numpy().ravel())
+    for phrase in [
+        "new validation/final split family",
+        "Residual-risk ranking and below-one direction classification",
+        "Architecture transport needs a direction-threshold reliability term",
+        "Data-partition transport needs a residual-risk term",
+        "failed predictive scores are retained as falsifiers",
+        "one endpoint pass cannot rescue a failed endpoint",
+        "downgrade the claim rather than repair the spent score",
+    ]:
+        if phrase not in firewall_text:
+            raise AssertionError(f"condition-score v5 next-protocol firewall missing phrase: {phrase}")
     v5_map_text = Path("discussion/e11_condition_score_v5_theory_to_score_map.md").read_text(
         encoding="utf-8"
     )
@@ -4506,6 +4532,7 @@ def main() -> None:
             "Transport Normalization Contract",
             "Post-Final Failure Reading",
             "Post-Final Transport Obligations",
+            "Next Protocol Firewall",
             "Falsifiable Predictions",
             "Required Ablation Matrix",
             "Claim Readiness Ledger",
@@ -8243,6 +8270,7 @@ def main() -> None:
         "Transport Normalization Contract",
         "Post-Final Failure Reading",
         "Post-Final Transport Obligations",
+        "Next Protocol Firewall",
         "Falsifiable Predictions",
         "Required Ablation Matrix",
         "Claim Readiness Ledger",
@@ -8416,6 +8444,11 @@ def main() -> None:
         "proof-obligation register",
         "discussion/e11_condition_score_v5_theory_protocol.md",
         "discussion/e11_condition_score_v5_theory_to_score_map.md",
+        "results/e11_condition_score_v5_theory_to_score_map/next_protocol_firewall.csv",
+        "pre-registered next-protocol firewall",
+        "unspent split reset",
+        "endpoint-separated residual/direction gates",
+        "negative-boundary retention",
         "discussion/e11_condition_score_v5_validation_freeze.md",
         "discussion/e11_condition_score_v5_final_evaluation.md",
         "completed frozen final evaluator",

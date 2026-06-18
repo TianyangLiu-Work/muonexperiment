@@ -263,7 +263,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_muon_state_distribution_contract/evidence_link_matrix.csv                                      |      5 | 1.5 KB    |
 | results/e11_muon_state_distribution_contract/falsification_tests.csv                                       |      5 | 2.3 KB    |
 | results/e11_muon_state_distribution_contract/claim_gate_ladder.csv                                         |      4 | 1.2 KB    |
-| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 28.2 KB   |
+| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 28.6 KB   |
 | results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv                                  |      6 | 7.9 KB    |
 | results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv                              |      5 | 2.8 KB    |
 | results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv                                 |      5 | 4.7 KB    |
@@ -431,7 +431,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_artifact_review_packet.md                                                    | 30.3 KB  |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB  |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB  |
-| discussion/e11_top_conference_gap_register.md                                               | 61.0 KB  |
+| discussion/e11_top_conference_gap_register.md                                               | 63.5 KB  |
 | discussion/e11_top_conference_claim_decision_audit.md                                       | 64.5 KB  |
 | discussion/e11_manuscript_claim_trace.md                                                    | 8.7 KB   |
 | discussion/e11_clean_worktree_replay_audit.md                                               | 3.2 KB   |
@@ -486,7 +486,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_matrix_block_tightness_audit.md                                              | 6.0 KB   |
 | discussion/e11_theory_proof_obligation_register.md                                          | 17.3 KB  |
 | discussion/e11_condition_score_v5_theory_protocol.md                                        | 17.8 KB  |
-| discussion/e11_condition_score_v5_theory_to_score_map.md                                    | 28.6 KB  |
+| discussion/e11_condition_score_v5_theory_to_score_map.md                                    | 36.3 KB  |
 | discussion/e11_condition_score_ablation.md                                                  | 19.0 KB  |
 | discussion/e11_condition_score_v5_validation_cifar100_mod4_partition.md                     | 8.2 KB   |
 | discussion/e11_condition_score_v5_validation_freeze.md                                      | 13.0 KB  |
