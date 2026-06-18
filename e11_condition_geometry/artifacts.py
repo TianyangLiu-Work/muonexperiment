@@ -390,6 +390,9 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/observed_surface.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/immutability_contract.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/refresh_state.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/allowed_transition_matrix.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/forbidden_action_matrix.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/paired_metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv",
@@ -1088,6 +1091,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "python3 scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_leakage_audit.py",
         "produces": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/* and discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md",
         "paper_role": "Selection-leakage and optional-stopping guard matrix for partial validation visibility, frozen registry order, and final seed quarantine.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 tuned benchmark validation refresh firewall",
+        "command": "python3 scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.py",
+        "produces": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/* and discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md",
+        "paper_role": "Sequential refresh firewall that fixes allowed and forbidden actions after each partial validation update before any final-performance wording.",
     },
     {
         "stage": "CIFAR-100-LT ResNet18 tuned benchmark power audit",

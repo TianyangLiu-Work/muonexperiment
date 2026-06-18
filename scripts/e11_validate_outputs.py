@@ -1264,6 +1264,15 @@ def main() -> None:
         / "immutability_contract.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit") / "config.json",
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md"),
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall")
+        / "refresh_state.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall")
+        / "allowed_transition_matrix.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall")
+        / "forbidden_action_matrix.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall") / "config.json",
+        Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md"),
+        Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.py"),
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "final_family_design.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "primary_comparison_plan.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "paired_diff_mde.csv",
@@ -6283,6 +6292,124 @@ def main() -> None:
             "Immutability Contract",
             "does not authorize a new recipe grid",
             "fresh unspent validation/final splits",
+        ],
+    )
+    tuned_refresh_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall")
+    tuned_refresh_state = pd.read_csv(tuned_refresh_dir / "refresh_state.csv")
+    tuned_refresh_allowed = pd.read_csv(tuned_refresh_dir / "allowed_transition_matrix.csv")
+    tuned_refresh_forbidden = pd.read_csv(tuned_refresh_dir / "forbidden_action_matrix.csv")
+    tuned_refresh_config = json.loads((tuned_refresh_dir / "config.json").read_text(encoding="utf-8"))
+    expected_refresh_allowed_ids = {
+        "VRF-A1-prefix-result-refresh",
+        "VRF-A2-nonprefix-result-quarantine",
+        "VRF-A3-full-validation-refresh",
+        "VRF-A4-final-submit-handoff",
+        "VRF-A5-leakage-guard-repair",
+    }
+    expected_refresh_forbidden_ids = {
+        "VRF-F1-change-selection-objective",
+        "VRF-F2-metric-dependent-launch-order",
+        "VRF-F3-partial-family-selection",
+        "VRF-F4-premature-final-submit",
+        "VRF-F5-validation-leaderboard-performance-claim",
+        "VRF-F6-in-place-protocol-repair-after-violation",
+    }
+    if (
+        len(tuned_refresh_state) != 1
+        or set(tuned_refresh_allowed["transition_id"]) != expected_refresh_allowed_ids
+        or set(tuned_refresh_forbidden["forbidden_id"]) != expected_refresh_forbidden_ids
+    ):
+        raise AssertionError("CIFAR-100-LT tuned validation refresh firewall IDs changed unexpectedly")
+    refresh_complete_rows = tuned_selection_run_registry[
+        tuned_selection_run_registry["validation_status"].eq("complete")
+    ].copy()
+    refresh_completed_indices = sorted(refresh_complete_rows["array_index"].astype(int).tolist())
+    refresh_prefix_is_contiguous = refresh_completed_indices == list(range(len(refresh_completed_indices)))
+    refresh_missing_indices = sorted(
+        set(tuned_selection_run_registry["array_index"].astype(int).tolist()).difference(refresh_completed_indices)
+    )
+    refresh_next_missing = str(refresh_missing_indices[0]) if refresh_missing_indices else "none"
+    refresh_completed_families = int(
+        tuned_selection_run_registry.groupby("recipe_family")["validation_status"]
+        .apply(lambda values: bool(values.eq("complete").all()))
+        .sum()
+    )
+    refresh_leakage_ok = bool(tuned_leakage_guards["status"].astype(str).isin({"pass", "ready"}).all())
+    refresh_full_validation_ready = (
+        tuned_gate_status["TVS-1-validation-grid-complete"] == "pass"
+        and tuned_gate_status["TVS-2-family-selection"] == "pass"
+        and tuned_gate_status["TVS-5-occupancy-logging-complete"] == "pass"
+        and refresh_leakage_ok
+    )
+    expected_refresh_state_status = (
+        "full_grid_ready_for_final_gate_refresh"
+        if refresh_full_validation_ready
+        else "partial_grid_no_claim_change"
+        if refresh_prefix_is_contiguous and refresh_leakage_ok
+        else "quarantine_refresh_until_audit_repaired"
+    )
+    refresh_state_row = tuned_refresh_state.iloc[0]
+    if not (
+        str(refresh_state_row["state_id"]) == "VRF-current-validation-prefix"
+        and str(refresh_state_row["status"]) == expected_refresh_state_status
+        and int(refresh_state_row["completed_validation_settings"]) == tuned_validation_complete_count
+        and int(refresh_state_row["total_validation_settings"]) == len(tuned_selection_run_registry)
+        and int(refresh_state_row["completed_occupancy_traces"]) == tuned_occupancy_complete_count
+        and int(refresh_state_row["completed_recipe_families"]) == refresh_completed_families
+        and str(refresh_state_row["next_missing_array_index"]) == refresh_next_missing
+        and str(refresh_state_row["prefix_contiguous"]) == ("yes" if refresh_prefix_is_contiguous else "no")
+    ):
+        raise AssertionError("CIFAR-100-LT tuned validation refresh state drifted from selection registry")
+    expected_refresh_allowed_status = {
+        "VRF-A1-prefix-result-refresh": "pass"
+        if refresh_prefix_is_contiguous and refresh_next_missing != "none"
+        else "not_ready",
+        "VRF-A2-nonprefix-result-quarantine": "not_ready",
+        "VRF-A3-full-validation-refresh": "ready"
+        if tuned_gate_status["TVS-1-validation-grid-complete"] == "pass"
+        and tuned_gate_status["TVS-5-occupancy-logging-complete"] == "pass"
+        and refresh_leakage_ok
+        else "not_ready",
+        "VRF-A4-final-submit-handoff": "ready" if refresh_full_validation_ready else "not_ready",
+        "VRF-A5-leakage-guard-repair": "pass" if refresh_leakage_ok else "fail",
+    }
+    observed_refresh_allowed_status = tuned_refresh_allowed.set_index("transition_id")["status"].astype(str).to_dict()
+    if observed_refresh_allowed_status != expected_refresh_allowed_status:
+        raise AssertionError(f"CIFAR-100-LT tuned refresh allowed transitions drifted: {observed_refresh_allowed_status}")
+    expected_forbidden_status = {
+        "VRF-F1-change-selection-objective": "active",
+        "VRF-F2-metric-dependent-launch-order": "active",
+        "VRF-F3-partial-family-selection": "active"
+        if tuned_gate_status["TVS-1-validation-grid-complete"] != "pass"
+        else "retire_after_full_grid",
+        "VRF-F4-premature-final-submit": "active",
+        "VRF-F5-validation-leaderboard-performance-claim": "active",
+        "VRF-F6-in-place-protocol-repair-after-violation": "active",
+    }
+    observed_forbidden_status = tuned_refresh_forbidden.set_index("forbidden_id")["status"].astype(str).to_dict()
+    if observed_forbidden_status != expected_forbidden_status:
+        raise AssertionError(f"CIFAR-100-LT tuned refresh forbidden-action statuses drifted: {observed_forbidden_status}")
+    if tuned_refresh_config.get("scope") != "sequential_validation_refresh_firewall" or tuned_refresh_config.get(
+        "claim_authority"
+    ) != "progress_accounting_only_until_TVS_FEP_TFE_FLA_pass":
+        raise AssertionError("CIFAR-100-LT tuned refresh firewall config must preserve claim-authority scope")
+    tuned_refresh_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark validation refresh firewall",
+        tuned_refresh_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Validation Refresh Firewall",
+            "sequential optional-stopping firewall",
+            "Refresh State",
+            "Allowed Transition Matrix",
+            "Forbidden Action Matrix",
+            "progress accounting only",
+            "fresh preregistered protocol",
+            "TVS-1",
+            "TVS-2",
+            "TVS-5",
         ],
     )
     tuned_slurm_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan")

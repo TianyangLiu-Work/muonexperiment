@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 442428,
-      "size": "432.1 KB"
+      "size_bytes": 443295,
+      "size": "432.9 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 3029450,
+      "size_bytes": 3049504,
       "size": "2.9 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1938822,
-      "size": "1.8 MB"
+      "size_bytes": 1945805,
+      "size": "1.9 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289243090,
+      "size_bytes": 289247043,
       "size": "275.8 MB"
     },
     {
@@ -61,8 +61,8 @@
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 23287,
-      "size": "22.7 KB"
+      "size_bytes": 23636,
+      "size": "23.1 KB"
     },
     {
       "path": ".gitignore",
@@ -1726,6 +1726,21 @@
       "size": "821 B"
     },
     {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/refresh_state.csv",
+      "rows": 1,
+      "size": "398 B"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/allowed_transition_matrix.csv",
+      "rows": 5,
+      "size": "1.2 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/forbidden_action_matrix.csv",
+      "rows": 6,
+      "size": "1.2 KB"
+    },
+    {
       "path": "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
       "rows": 240,
       "size": "257.6 KB"
@@ -2028,7 +2043,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "70.9 KB"
+      "size": "71.5 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",

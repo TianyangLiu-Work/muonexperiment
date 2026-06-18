@@ -1,0 +1,7 @@
+forbidden_id,status,forbidden_action,violation_response
+VRF-F1-change-selection-objective,active,rewrite the validation objective after seeing partial validation metrics,discard current validation/final split and open a fresh preregistered protocol
+VRF-F2-metric-dependent-launch-order,active,"change array order, queue priority, or resubmission policy based on interim leaderboard rank",quarantine affected rows from selection and audit launch history
+VRF-F3-partial-family-selection,active,select a cross-family winner or baseline from an incomplete recipe family grid,rerun only progress audits; do not run final_claim jobs
+VRF-F4-premature-final-submit,active,"submit final_claim seed jobs before TVS, FEP, TFE, and FLA gates pass",mark final outputs contaminated and require fresh final seeds
+VRF-F5-validation-leaderboard-performance-claim,active,describe validation leaderboard rows as benchmark performance results,downgrade wording to progress accounting and rerun claim-decision audit
+VRF-F6-in-place-protocol-repair-after-violation,active,repair a selection-leakage or final-unblinding violation inside the same validation/final split,register new unspent validation and final splits before renewed performance claims

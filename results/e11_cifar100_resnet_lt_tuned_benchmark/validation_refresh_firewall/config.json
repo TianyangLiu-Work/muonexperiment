@@ -1,0 +1,8 @@
+{
+  "claim_authority": "progress_accounting_only_until_TVS_FEP_TFE_FLA_pass",
+  "gate_report": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv",
+  "leakage_guard_matrix": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv",
+  "partial_grid_guardrail": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/partial_grid_guardrail.csv",
+  "run_registry": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
+  "scope": "sequential_validation_refresh_firewall"
+}
