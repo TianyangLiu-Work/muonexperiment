@@ -1328,6 +1328,7 @@ PAPER_ASSET_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py",
     "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_interim_audit.py",
     "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_leakage_audit.py",
+    "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.py",
     "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
     "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.py",
     "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.py",
