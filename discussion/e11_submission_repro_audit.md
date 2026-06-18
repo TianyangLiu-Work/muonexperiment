@@ -21,8 +21,8 @@ gate remains `not_ready` when those tools are absent on the server.
 
 | path                                         | exists   |   size_bytes | sha256                                                           | header_is_pdf   | audit_status   |
 |:---------------------------------------------|:---------|-------------:|:-----------------------------------------------------------------|:----------------|:---------------|
-| paper/specgrad_activation_paper/main.pdf     | yes      |      2597000 | ab496466edf02a23f03150761141e838a031a30fb1e8da1d74b236b14cba1761 | yes             | pass           |
-| paper/specgrad_activation_paper/two_page.pdf | yes      |        62047 | 2a15cc24aa552632b9a5af582b80d7bd51f725b1bee2b055910ae49f404c6c2d | yes             | pass           |
+| paper/specgrad_activation_paper/main.pdf     | yes      |      2597000 | 243d4195c405bd6b3af1182d4ff6957371d6734dd10b85a93626d614927d03d0 | yes             | pass           |
+| paper/specgrad_activation_paper/two_page.pdf | yes      |        62048 | 8db91d5d91726888b16d286e61a7f62eb985f67762d7b6fbf6034d19cb8407a6 | yes             | pass           |
 
 ## Source Package Manifest
 
@@ -36,7 +36,7 @@ gate remains `not_ready` when those tools are absent on the server.
 | paper/specgrad_activation_paper/tables/e11_paper_numbers.tex           | yes      |        55974 | 70b0130ae2d7fb538f3316745d01387f714464b53e1597ec6286032aa488f227 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex | yes      |         4934 | 1264d8923f3cfff52ae9af90f44b10bd29710c949ed93fc3d2eda5dff7b30471 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/local_linearization_errors.tex  | yes      |          961 | 12c108dd5bfdfd2d1ad219904a4f82f1d10e01ab6d6de4cd86a9252cb298a5ef | paper source or root reproduction entrypoint | pass           |
-| Makefile                                                               | yes      |        20148 | a7cfd955d1ad662f9a14afa9de56828e560f6a1973fbff699feadd7f45b5a5d8 | paper source or root reproduction entrypoint | pass           |
+| Makefile                                                               | yes      |        20459 | 0284c942b4abaf460578f69372c18a99679477523f9d3501a4f96634edf5deb3 | paper source or root reproduction entrypoint | pass           |
 | README_E11.md                                                          | yes      |        99224 | 238701bc6f0fe038a865a0098761e8b5c82f410f37b5cb7987e80d4c67b73bcd | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/figures                                | yes      |      2923280 | 21 png files                                                     | paper-local figure bundle                    | pass           |
 
@@ -49,7 +49,7 @@ gate remains `not_ready` when those tools are absent on the server.
 | R3-preferred-latex-toolchain   | not_ready | pdflatex/bibtex/xelatex not all available                                                                                                                              | run a clean checkout with pdflatex/bibtex/xelatex before claiming full venue-toolchain reproducibility |
 | R4-tectonic-fallback-toolchain | pass      | tectonic available                                                                                                                                                     | use make e11-paper-pdf or paper/specgrad_activation_paper make tectonic on this server                 |
 | R5-rendered-pdfs               | pass      | main.pdf and two_page.pdf have PDF headers and expected sizes                                                                                                          | rebuild paper PDFs if either rendered artifact fails                                                   |
-| R6-full-artifact-validation    | pass      | make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full passed after first tuned-validation GPU result (1/164) and tuned-validation discussion validation | record the make e11-full result in the commit/push summary                                             |
+| R6-full-artifact-validation    | pass      | make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full passed after two tuned-validation GPU results (2/164) and automatic validation-discussion refresh | record the make e11-full result in the commit/push summary                                             |
 
 ## Boundary
 

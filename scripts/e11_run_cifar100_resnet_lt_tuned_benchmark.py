@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 
 import pandas as pd
@@ -539,6 +539,52 @@ def run_setting(
     print(f"saved tuned benchmark setting {setting.setting_id} to {output_dir}")
 
 
+def _config_from_payload(payload: dict[str, object]) -> recipe_benchmark.RecipeBenchmarkConfig:
+    config_fields = {field.name for field in fields(recipe_benchmark.RecipeBenchmarkConfig)}
+    kwargs = {key: value for key, value in payload.items() if key in config_fields}
+    if "seeds" in kwargs:
+        kwargs["seeds"] = tuple(int(seed) for seed in kwargs["seeds"])
+    if "recipe_names" in kwargs:
+        kwargs["recipe_names"] = tuple(str(name) for name in kwargs["recipe_names"])
+    return recipe_benchmark.RecipeBenchmarkConfig(**kwargs)
+
+
+def refresh_completed_discussions(settings: list[TunedBenchmarkSetting]) -> None:
+    refreshed = 0
+    skipped = 0
+    for setting in settings:
+        output_dir = setting.planned_output_dir
+        required_paths = [
+            output_dir / "config.json",
+            output_dir / "summary.csv",
+            output_dir / "pair_summary.csv",
+            output_dir / "occupancy_trace.csv",
+        ]
+        if not all(path.exists() for path in required_paths):
+            skipped += 1
+            continue
+        payload = json.loads((output_dir / "config.json").read_text(encoding="utf-8"))
+        config = _config_from_payload(payload)
+        summary = pd.read_csv(output_dir / "summary.csv")
+        pair_summary = pd.read_csv(output_dir / "pair_summary.csv")
+        occupancy_trace = pd.read_csv(output_dir / "occupancy_trace.csv")
+        figure_path = setting.planned_figure_dir / "cifar100_resnet_lt_recipe_benchmark.png"
+        if not figure_path.exists():
+            figure_path = recipe_benchmark.write_figure(summary, pair_summary, setting.planned_figure_dir)
+        write_tuned_validation_discussion(
+            setting,
+            config,
+            summary,
+            pair_summary,
+            occupancy_trace,
+            figure_path,
+            output_dir,
+            setting.planned_discussion_path,
+        )
+        refreshed += 1
+    print(f"refreshed tuned validation discussions for {refreshed} completed settings; skipped {skipped}")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--setting-id", default=None)
@@ -550,6 +596,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", default="auto")
     parser.add_argument("--download", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--progress", action="store_true")
+    parser.add_argument("--refresh-discussions", action="store_true")
     return parser.parse_args()
 
 
@@ -561,6 +608,10 @@ def main() -> None:
             raise ValueError("--max-settings must be positive")
         settings = settings[: args.max_settings]
     registry_path = write_settings_registry(settings)
+    if args.refresh_discussions:
+        refresh_completed_discussions(settings)
+        print(f"saved tuned benchmark settings registry to {registry_path}")
+        return
     if args.list_settings:
         print(settings_frame(settings)[["array_index", "setting_id", "recipe_family", "recipe_name"]].to_string(index=False))
     selected = select_setting(settings, setting_id=args.setting_id, array_index=args.array_index)
