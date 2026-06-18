@@ -1,0 +1,8 @@
+{
+  "claim_authority": "progress_accounting_only",
+  "final_seed_set": "20..29",
+  "final_seed_status": "not_touched",
+  "gate_report": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv",
+  "run_registry": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
+  "scope": "validation_tuning_only"
+}

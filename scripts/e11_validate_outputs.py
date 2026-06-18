@@ -1219,6 +1219,15 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection") / "gate_report.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection") / "config.json",
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md"),
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit")
+        / "completed_setting_leaderboard.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit") / "family_progress.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit")
+        / "occupancy_interim_summary.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit")
+        / "claim_boundary_gates.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit") / "config.json",
+        Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md"),
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "final_family_design.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "primary_comparison_plan.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "paired_diff_mde.csv",
@@ -1240,6 +1249,7 @@ def main() -> None:
         Path("scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py"),
+        Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_interim_audit.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_slurm_plan.py"),
         Path("scripts/e11_submit_cifar100_resnet_lt_tuned_benchmark_validation.py"),
@@ -1450,6 +1460,8 @@ def main() -> None:
         "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
         "e11-cifar-resnet-lt-tuned-benchmark-selection:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py",
+        "e11-cifar-resnet-lt-tuned-benchmark-interim-audit:",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_interim_audit.py",
         "e11-cifar-resnet-lt-tuned-benchmark-power-audit:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
         "e11-cifar-resnet-imbalance-sweep-results:",
@@ -5938,6 +5950,70 @@ def main() -> None:
             "TVS-5-occupancy-logging-complete",
             "Occupancy Logging Status",
             "The current result is not a final-performance benchmark result",
+        ],
+    )
+    tuned_interim_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit")
+    tuned_interim_leaderboard = pd.read_csv(tuned_interim_dir / "completed_setting_leaderboard.csv")
+    tuned_interim_family = pd.read_csv(tuned_interim_dir / "family_progress.csv")
+    tuned_interim_occupancy = pd.read_csv(tuned_interim_dir / "occupancy_interim_summary.csv")
+    tuned_interim_gates = pd.read_csv(tuned_interim_dir / "claim_boundary_gates.csv")
+    tuned_interim_config = json.loads((tuned_interim_dir / "config.json").read_text(encoding="utf-8"))
+    if len(tuned_interim_leaderboard) != tuned_validation_complete_count:
+        raise AssertionError("CIFAR-100-LT tuned interim leaderboard must contain every completed validation setting")
+    if len(tuned_interim_family) != len(expected_recipe_families) or len(tuned_interim_occupancy) != len(
+        expected_recipe_families
+    ):
+        raise AssertionError("CIFAR-100-LT tuned interim audit must summarize every recipe family")
+    if set(tuned_interim_family["recipe_family"]) != expected_recipe_families:
+        raise AssertionError("CIFAR-100-LT tuned interim family progress missing recipe families")
+    if set(tuned_interim_occupancy["recipe_family"]) != expected_recipe_families:
+        raise AssertionError("CIFAR-100-LT tuned interim occupancy summary missing recipe families")
+    interim_complete_by_family = tuned_interim_family.set_index("recipe_family")["complete_settings"].astype(int)
+    if interim_complete_by_family.to_dict() != complete_by_family.astype(int).to_dict():
+        raise AssertionError("CIFAR-100-LT tuned interim family completion counts drifted from run_registry")
+    if not tuned_interim_leaderboard.empty:
+        if sorted(tuned_interim_leaderboard["rank"].astype(int).tolist()) != list(
+            range(1, tuned_validation_complete_count + 1)
+        ):
+            raise AssertionError("CIFAR-100-LT tuned interim leaderboard ranks must be contiguous")
+        if set(tuned_interim_leaderboard["selection_allowed"].astype(str)) != {"no_partial_grid_only"}:
+            raise AssertionError("CIFAR-100-LT tuned interim leaderboard must forbid partial-grid selection")
+        sorted_scores = tuned_interim_leaderboard["few_balanced_accuracy"].astype(float).tolist()
+        if sorted_scores != sorted(sorted_scores, reverse=True):
+            raise AssertionError("CIFAR-100-LT tuned interim leaderboard must sort by few balanced accuracy")
+    expected_interim_gates = {
+        "IVA-1-validation-readout-scope",
+        "IVA-2-partial-grid-blocks-selection",
+        "IVA-3-familywise-selection-authority",
+        "IVA-4-occupancy-coverage",
+        "IVA-5-final-seed-quarantine",
+    }
+    if set(tuned_interim_gates["gate_id"]) != expected_interim_gates:
+        raise AssertionError("CIFAR-100-LT tuned interim claim-boundary gates changed unexpectedly")
+    if not tuned_interim_gates["blocked_wording"].astype(str).str.contains("final|selection|claim|trajectory").all():
+        raise AssertionError("CIFAR-100-LT tuned interim gates must include blocked wording")
+    if tuned_interim_config.get("scope") != "validation_tuning_only" or tuned_interim_config.get(
+        "final_seed_status"
+    ) != "not_touched":
+        raise AssertionError("CIFAR-100-LT tuned interim config must preserve validation-only scope")
+    tuned_interim_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark interim validation audit",
+        tuned_interim_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Interim Validation Audit",
+            "interim, no-peeking progress readout",
+            "does not authorize final seed runs",
+            "Claim Boundary Gates",
+            "Completed-Setting Leaderboard",
+            "Interim Occupancy Summary",
+            f"{tuned_validation_complete_count}/{len(tuned_selection_run_registry)}",
+            "TVS-1",
+            "TVS-2",
+            "TVS-5",
+            "final claim seed set `20..29` remains blocked",
         ],
     )
     tuned_slurm_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan")
