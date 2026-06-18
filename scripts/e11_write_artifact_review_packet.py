@@ -17,6 +17,7 @@ from e11_condition_geometry.reporting import markdown_table, write_markdown
 OUTPUT_DIR = Path("results/e11_artifact_review_packet")
 OUTPUT_PATH = Path("discussion/e11_artifact_review_packet.md")
 SUBMISSION_REPRO_DIR = Path("results/e11_submission_repro_audit")
+PDF_RENDER_BOUNDARY_DIR = Path("results/e11_pdf_render_boundary_audit")
 PYTHON_CMD = "/data/conda_envs/SpatialQuantization/bin/python"
 
 
@@ -105,6 +106,14 @@ def command_matrix() -> pd.DataFrame:
             "claim_boundary": "Checks tracked-source artifact replay only; preferred LaTeX clean-checkout reproducibility remains separate.",
         },
         {
+            "command_id": "AR-C8",
+            "command": f"make PYTHON={PYTHON_CMD} e11-pdf-render-boundary-audit",
+            "purpose": "Audit rendered PDF header/hash/source-trace coverage and PDF text/metadata inspection tool availability.",
+            "compute_mode": "CPU",
+            "expected_state": "records PDF inspection tool status plus render-boundary gates without changing empirical claims",
+            "claim_boundary": "Supports binary/hash/source-claim trace evidence now; rendered text-layer and metadata verification remain tool-gated.",
+        },
+        {
             "command_id": "AR-G1",
             "command": f"make PYTHON={PYTHON_CMD} e11-cifar-resnet-condition-score-v5-architecture-results",
             "purpose": "Regenerate the registered ResNeXt50-32x4d final architecture split if a new run is explicitly needed.",
@@ -175,6 +184,7 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv")
     )
     clean_replay = read_csv(Path("results/e11_clean_worktree_replay_audit/run_summary.csv"))
+    pdf_render_gates = read_csv(PDF_RENDER_BOUNDARY_DIR / "render_boundary_gates.csv")
     leakage_state = "missing"
     leakage_evidence = "validation_leakage_audit/leakage_guard_matrix.csv is absent"
     if not leakage_guards.empty and {"guard_id", "status"}.issubset(leakage_guards.columns):
@@ -190,6 +200,15 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
         clean_replay_evidence = (
             f"{clean_replay['command'].iloc[0]}; "
             f"serverREADME.md in clean worktree={clean_replay['server_readme_present_in_worktree'].iloc[0]}"
+        )
+    pdf_render_state = "missing"
+    pdf_render_evidence = "results/e11_pdf_render_boundary_audit/render_boundary_gates.csv is absent"
+    if not pdf_render_gates.empty and {"gate_id", "status"}.issubset(pdf_render_gates.columns):
+        pdf_gate_status = status_lookup(pdf_render_gates, "gate_id", "status")
+        pdf_render_state = ",".join(f"{gate}={status}" for gate, status in pdf_gate_status.items())
+        pdf_render_evidence = (
+            "Rendered PDF binary/hash/source-trace gates pass; text-layer and metadata gates are explicit "
+            "pass/not_ready states: " + pdf_render_state
         )
     server_readme_state = "present_untracked_local_file" if Path("serverREADME.md").exists() else "absent"
     final_arch_layer_summary = Path(
@@ -242,6 +261,12 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
             "reviewer_instruction": "Use this as tracked-source replay evidence that e11-check does not depend on local untracked attachments.",
         },
         {
+            "item": "PDF render boundary audit",
+            "state": pdf_render_state,
+            "evidence": pdf_render_evidence,
+            "reviewer_instruction": "Use this as rendered-PDF byte/header/hash and source-claim trace evidence; do not claim text-layer or metadata inspection until PRB-4/PRB-5 pass.",
+        },
+        {
             "item": "v5 final layer tables",
             "state": (
                 "present"
@@ -286,6 +311,12 @@ def reviewer_response() -> pd.DataFrame:
             "answer": "Yes. The clean-worktree replay audit creates a detached Git worktree, confirms serverREADME.md is absent, runs make e11-check, observes pytest and git diff --check, and confirms the replay worktree stays clean.",
             "status": "tracked_source_replay_supported",
             "forbidden_shortcut": "Do not treat this as preferred pdflatex/bibtex/xelatex clean-checkout reproducibility.",
+        },
+        {
+            "objection": "Can reviewers verify rendered PDF text-layer and page metadata here?",
+            "answer": "Partly. The PDF render boundary audit verifies PDF bytes, headers, hashes, and source-level claim trace now, but rendered text-layer and page-metadata inspection are not_ready on this server until pdftotext, pdfinfo, mutool, or a Python PDF parser is available.",
+            "status": "pdf_render_boundary_declared",
+            "forbidden_shortcut": "Do not claim rendered-PDF text-layer or metadata verification from source-level claim trace alone.",
         },
         {
             "objection": "Do reviewers need GPUs to check the current paper?",

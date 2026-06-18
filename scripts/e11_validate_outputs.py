@@ -1377,6 +1377,11 @@ def main() -> None:
         Path("results/e11_clean_worktree_replay_audit") / "command_log_tail.txt",
         Path("results/e11_clean_worktree_replay_audit") / "config.json",
         Path("scripts/e11_write_clean_worktree_replay_audit.py"),
+        Path("discussion/e11_pdf_render_boundary_audit.md"),
+        Path("results/e11_pdf_render_boundary_audit") / "pdf_inspection_tool_status.csv",
+        Path("results/e11_pdf_render_boundary_audit") / "render_boundary_gates.csv",
+        Path("results/e11_pdf_render_boundary_audit") / "config.json",
+        Path("scripts/e11_write_pdf_render_boundary_audit.py"),
         Path("discussion/e11_mechanism_referee_audit.md"),
         Path("results/e11_mechanism_referee_audit") / "alternative_explanation_matrix.csv",
         Path("results/e11_mechanism_referee_audit") / "theory_measurement_contract.csv",
@@ -1468,6 +1473,8 @@ def main() -> None:
         "e11-submission-repro-audit:",
         "e11-clean-worktree-replay-audit:",
         "scripts/e11_write_clean_worktree_replay_audit.py",
+        "e11-pdf-render-boundary-audit:",
+        "scripts/e11_write_pdf_render_boundary_audit.py",
         "scripts/e11_write_submission_repro_audit.py",
         "e11-artifact-review-packet:",
         "scripts/e11_write_artifact_review_packet.py",
@@ -1795,6 +1802,7 @@ def main() -> None:
         "make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes",
         "make e11-submission-repro-audit # audit toolchain availability, PDF hashes, source hashes, and clean-checkout gates",
         "make e11-clean-worktree-replay-audit # replay e11-check from a detached clean tracked-source worktree",
+        "make e11-pdf-render-boundary-audit # audit rendered PDF header/hash/source-trace coverage and text-extraction tool gaps",
         "make e11-artifact-review-packet # regenerate the artifact-review command, gate, local-state, and reviewer-response packet",
         "make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf",
         "`diagnostic_A_definition == full_layer_input_activation`",
@@ -1816,6 +1824,10 @@ def main() -> None:
         "results/e11_clean_worktree_replay_audit/run_summary.csv",
         "results/e11_clean_worktree_replay_audit/gate_matrix.csv",
         "scripts/e11_write_clean_worktree_replay_audit.py",
+        "discussion/e11_pdf_render_boundary_audit.md",
+        "results/e11_pdf_render_boundary_audit/pdf_inspection_tool_status.csv",
+        "results/e11_pdf_render_boundary_audit/render_boundary_gates.csv",
+        "scripts/e11_write_pdf_render_boundary_audit.py",
         "discussion/e11_mechanism_referee_audit.md",
         "results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv",
         "results/e11_mechanism_referee_audit/theory_measurement_contract.csv",
@@ -8246,6 +8258,61 @@ def main() -> None:
             "does not close the preferred `pdflatex`/`bibtex`/`xelatex` clean-checkout gate",
         ],
     )
+    pdf_render_dir = Path("results/e11_pdf_render_boundary_audit")
+    pdf_tool_status = pd.read_csv(pdf_render_dir / "pdf_inspection_tool_status.csv")
+    pdf_render_gates = pd.read_csv(pdf_render_dir / "render_boundary_gates.csv")
+    pdf_render_config = json.loads((pdf_render_dir / "config.json").read_text(encoding="utf-8"))
+    expected_pdf_tools = {
+        "pdftotext",
+        "pdfinfo",
+        "mutool",
+        "gs",
+        "python:pypdf",
+        "python:PyPDF2",
+        "python:fitz",
+        "python:pdfminer.high_level",
+    }
+    expected_pdf_render_gates = {
+        "PRB-1-rendered-pdf-binaries",
+        "PRB-2-pdf-hashes-recorded",
+        "PRB-3-source-claim-trace-covered",
+        "PRB-4-pdf-text-extraction-tool",
+        "PRB-5-pdf-metadata-tool",
+        "PRB-6-preferred-latex-toolchain",
+    }
+    if set(pdf_tool_status["tool"]) != expected_pdf_tools:
+        raise AssertionError("PDF render boundary audit tool-status rows changed unexpectedly")
+    if set(pdf_render_gates["gate_id"]) != expected_pdf_render_gates:
+        raise AssertionError("PDF render boundary audit gate IDs changed unexpectedly")
+    pdf_gate_lookup = pdf_render_gates.set_index("gate_id")["status"].astype(str).to_dict()
+    if not set(pdf_gate_lookup.values()).issubset({"pass", "not_ready"}):
+        raise AssertionError("PDF render boundary gates must use only pass/not_ready statuses")
+    if not (
+        pdf_gate_lookup["PRB-1-rendered-pdf-binaries"] == "pass"
+        and pdf_gate_lookup["PRB-2-pdf-hashes-recorded"] == "pass"
+        and pdf_gate_lookup["PRB-3-source-claim-trace-covered"] == "pass"
+        and pdf_gate_lookup["PRB-4-pdf-text-extraction-tool"] in {"pass", "not_ready"}
+        and pdf_gate_lookup["PRB-5-pdf-metadata-tool"] in {"pass", "not_ready"}
+        and pdf_gate_lookup["PRB-6-preferred-latex-toolchain"] in {"pass", "not_ready"}
+    ):
+        raise AssertionError("PDF render boundary audit must keep binary/hash/source gates passing and tool gates explicit")
+    if pdf_render_config.get("purpose") != "rendered PDF inspection boundary audit":
+        raise AssertionError("PDF render boundary audit config purpose changed unexpectedly")
+    pdf_render_text = Path("discussion/e11_pdf_render_boundary_audit.md").read_text(encoding="utf-8")
+    assert_required_phrases(
+        "PDF render boundary audit",
+        pdf_render_text,
+        [
+            "E11 PDF Render Boundary Audit",
+            "PDF Inspection Tool Status",
+            "Render Boundary Gates",
+            "PRB-1-rendered-pdf-binaries",
+            "PRB-4-pdf-text-extraction-tool",
+            "PRB-5-pdf-metadata-tool",
+            "Allowed now: cite rendered PDF byte hashes",
+            "Blocked now: claiming rendered-PDF text-layer or page-metadata verification",
+        ],
+    )
     heldout_generality_dir = Path("results/e11_heldout_generality_audit")
     heldout_generality_evidence = pd.read_csv(heldout_generality_dir / "generality_evidence_matrix.csv")
     heldout_generality_gates = pd.read_csv(heldout_generality_dir / "generality_claim_gate.csv")
@@ -8434,6 +8501,7 @@ def main() -> None:
         or "make e11-manuscript-claim-trace" not in readme
         or "make e11-mechanism-referee-audit" not in readme
         or "make e11-submission-repro-audit" not in readme
+        or "make e11-pdf-render-boundary-audit" not in readme
         or "make e11-artifact-review-packet" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
@@ -8447,6 +8515,7 @@ def main() -> None:
         "discussion/e11_reference_audit.md",
         "discussion/e11_submission_repro_audit.md",
         "discussion/e11_artifact_review_packet.md",
+        "discussion/e11_pdf_render_boundary_audit.md",
         "discussion/e11_mechanism_referee_audit.md",
         "discussion/e11_bold_conjecture_register.md",
         "discussion/e11_muon_state_distribution_contract.md",
@@ -8463,6 +8532,8 @@ def main() -> None:
         "results/e11_bold_conjecture_register/stress_test_matrix.csv",
         "results/e11_muon_state_distribution_contract/state_distribution_terms.csv",
         "results/e11_muon_state_distribution_contract/falsification_tests.csv",
+        "results/e11_pdf_render_boundary_audit/pdf_inspection_tool_status.csv",
+        "results/e11_pdf_render_boundary_audit/render_boundary_gates.csv",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:
@@ -8542,6 +8613,7 @@ def main() -> None:
         "AR-C5",
         "AR-C6",
         "AR-C7",
+        "AR-C8",
         "AR-G1",
         "AR-G2",
         "AR-G3",
@@ -8556,6 +8628,7 @@ def main() -> None:
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-check",
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-cifar-resnet-lt-tuned-benchmark-leakage-audit",
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-clean-worktree-replay-audit",
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-pdf-render-boundary-audit",
         "GPU via Slurm",
         "Not required to reproduce current paper claims",
     ]:
@@ -8575,6 +8648,7 @@ def main() -> None:
         "Full artifact validation",
         "Tuned validation leakage audit",
         "Clean worktree replay",
+        "PDF render boundary audit",
         "v5 final layer tables",
         "GPU dependence",
     }
@@ -8586,6 +8660,7 @@ def main() -> None:
         "Both frozen final split layer tables are present",
         "partial validation observations cannot change the registry",
         "tracked-source replay evidence",
+        "rendered-PDF byte/header/hash and source-claim trace evidence",
         "not_required_for_current_artifact_review",
     ]:
         if phrase not in artifact_local_text:
@@ -8598,6 +8673,8 @@ def main() -> None:
         "detached Git worktree",
         "serverREADME.md is absent",
         "optional-stopping leakage",
+        "rendered text-layer and page-metadata inspection are not_ready",
+        "Do not claim rendered-PDF text-layer or metadata verification",
         "partial validation observations are progress accounting only",
         "Do not use failed v5 finals, not_ready gates, partial-family, or finite phase1 outputs as broader positive evidence",
         "Do not infer broad optimizer-performance, accuracy, or general predictive-condition claims",
@@ -8618,6 +8695,7 @@ def main() -> None:
             "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility",
             "v5 predictive-condition upgrade",
             "partial-validation optional-stopping",
+            "rendered text-layer and page-metadata inspection",
             "unqualified natural-null",
             "broad optimizer-performance claim",
             "Machine-readable tables",

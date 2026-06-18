@@ -1,0 +1,9 @@
+tool,available,path,role
+pdftotext,no,,external PDF text/metadata inspection
+pdfinfo,no,,external PDF text/metadata inspection
+mutool,no,,external PDF text/metadata inspection
+gs,no,,external PDF text/metadata inspection
+python:pypdf,no,,Python PDF text extraction fallback
+python:PyPDF2,no,,Python PDF text extraction fallback
+python:fitz,no,,Python PDF text extraction fallback
+python:pdfminer.high_level,no,,Python PDF text extraction fallback

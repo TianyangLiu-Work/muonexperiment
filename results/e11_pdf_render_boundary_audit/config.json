@@ -1,0 +1,8 @@
+{
+  "metadata_gate": "PRB-5-pdf-metadata-tool",
+  "new_empirical_results": false,
+  "purpose": "rendered PDF inspection boundary audit",
+  "rendered_pdf_checks": "results/e11_submission_repro_audit/pdf_artifact_checks.csv",
+  "source_claim_trace": "results/e11_manuscript_claim_trace/claim_trace.csv",
+  "text_layer_gate": "PRB-4-pdf-text-extraction-tool"
+}
