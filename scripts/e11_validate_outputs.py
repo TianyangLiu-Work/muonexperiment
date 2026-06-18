@@ -1284,6 +1284,18 @@ def main() -> None:
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.py"),
         Path("scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_final.sbatch"),
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation") / "run_registry.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation")
+        / "per_seed_final_metrics.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation")
+        / "paired_primary_comparisons.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation") / "primary_decisions.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation") / "final_summary.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation") / "occupancy_summary.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation") / "claim_gate_report.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation") / "config.json",
+        Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md"),
+        Path("scripts/e11_evaluate_cifar100_resnet_lt_tuned_benchmark_final.py"),
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "chunk_plan.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "queue_policy.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "config.json",
@@ -1537,6 +1549,8 @@ def main() -> None:
         "e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.py",
         "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_final.sbatch",
+        "e11-cifar-resnet-lt-tuned-benchmark-final-eval:",
+        "scripts/e11_evaluate_cifar100_resnet_lt_tuned_benchmark_final.py",
         "e11-cifar-resnet-imbalance-sweep-results:",
         "e11-cifar-resnet-condition-score-heldout-architecture-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch",
@@ -1692,6 +1706,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit # calibrate tuned benchmark MDE assumptions from validation and spent-pilot variance",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan # pre-register final paired tests, Holm adjustment, reporting schema, and claim states",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan # write a no-side-effect final-claim execution contract and gate-checked Slurm wrapper plan",
+        "make e11-cifar-resnet-lt-tuned-benchmark-final-eval # evaluate final paired seeds with fixed Holm tests and claim gates after final outputs exist",
         "make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan # write a chunked no-side-effect Slurm launch plan for the 164-setting validation grid",
         "make e11-cifar-resnet-lt-tuned-benchmark-launch-audit # compute the current queue-aware validation launch decision without submitting",
         "make e11-cifar-resnet-lt-tuned-benchmark-safe-submit # submit the largest safe validation subchunk under MaxSubmitJobsPerUser",
@@ -6542,6 +6557,88 @@ def main() -> None:
             "Holm-adjusted final-analysis plan",
         ],
     )
+    tuned_final_eval_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation")
+    tuned_final_eval_registry = pd.read_csv(tuned_final_eval_dir / "run_registry.csv")
+    tuned_final_eval_per_seed = pd.read_csv(tuned_final_eval_dir / "per_seed_final_metrics.csv")
+    tuned_final_eval_paired = pd.read_csv(tuned_final_eval_dir / "paired_primary_comparisons.csv")
+    tuned_final_eval_decisions = pd.read_csv(tuned_final_eval_dir / "primary_decisions.csv")
+    tuned_final_eval_summary = pd.read_csv(tuned_final_eval_dir / "final_summary.csv")
+    tuned_final_eval_occupancy = pd.read_csv(tuned_final_eval_dir / "occupancy_summary.csv")
+    tuned_final_eval_gates = pd.read_csv(tuned_final_eval_dir / "claim_gate_report.csv")
+    tuned_final_eval_config = json.loads((tuned_final_eval_dir / "config.json").read_text(encoding="utf-8"))
+    expected_final_eval_gates = {
+        "TFE-1-evaluator-implemented",
+        "TFE-2-selection-gates-ready",
+        "TFE-3-final-output-completeness",
+        "TFE-4-primary-holm-family",
+        "TFE-5-all-class-guardrail",
+        "TFE-6-final-claim-state",
+    }
+    if set(tuned_final_eval_gates["gate_id"]) != expected_final_eval_gates:
+        raise AssertionError("CIFAR-100-LT tuned final evaluator gate IDs changed unexpectedly")
+    final_eval_lookup = tuned_final_eval_gates.set_index("gate_id")["status"].astype(str).to_dict()
+    if final_eval_lookup["TFE-1-evaluator-implemented"] != "pass":
+        raise AssertionError("CIFAR-100-LT tuned final evaluator implementation gate must pass")
+    if final_eval_lookup["TFE-6-final-claim-state"] != "not_ready":
+        raise AssertionError("CIFAR-100-LT tuned final evaluator must remain not_ready before final outputs exist")
+    if len(tuned_final_eval_registry) != 6 or set(tuned_final_eval_registry["recipe_family"]) != expected_recipe_families:
+        raise AssertionError("CIFAR-100-LT tuned final evaluator registry must cover all six recipe families")
+    if int(tuned_final_eval_registry["selection_status"].eq("selected").sum()) != 1:
+        raise AssertionError("CIFAR-100-LT tuned final evaluator should reflect the current partial 1/6 selection state")
+    if not tuned_final_eval_registry["final_output_status"].astype(str).eq("missing_or_incomplete").all():
+        raise AssertionError("CIFAR-100-LT tuned final evaluator must not see complete final outputs yet")
+    if list(tuned_final_eval_per_seed.columns) != [
+        "seed",
+        "recipe_family",
+        "recipe_name",
+        "many_bacc",
+        "medium_bacc",
+        "few_bacc",
+        "all_bacc",
+        "loss",
+        "margin",
+    ]:
+        raise AssertionError("CIFAR-100-LT tuned final evaluator per-seed schema changed unexpectedly")
+    if list(tuned_final_eval_paired.columns) != [
+        "comparison_id",
+        "seed",
+        "candidate_family",
+        "baseline_family",
+        "few_bacc_diff",
+        "all_bacc_diff",
+    ]:
+        raise AssertionError("CIFAR-100-LT tuned final evaluator paired schema changed unexpectedly")
+    if (
+        len(tuned_final_eval_decisions) != 4
+        or set(tuned_final_eval_decisions["comparison_id"]) != set(tuned_final_comparisons["comparison_id"])
+        or not tuned_final_eval_decisions["primary_decision"].astype(str).eq("not_ready").all()
+        or not tuned_final_eval_decisions["all_class_guardrail"].astype(str).eq("not_ready").all()
+    ):
+        raise AssertionError("CIFAR-100-LT tuned final evaluator decisions must keep the fixed not_ready Holm family")
+    if not tuned_final_eval_summary.empty or not tuned_final_eval_occupancy.empty:
+        raise AssertionError("CIFAR-100-LT tuned final evaluator summary/occupancy tables must be empty before final outputs")
+    if (
+        tuned_final_eval_config.get("primary_test")
+        != "paired one-sided t-test on candidate-minus-baseline few balanced accuracy with Holm adjustment"
+        or int(tuned_final_eval_config.get("primary_family_size", -1)) != 4
+        or int(tuned_final_eval_config.get("expected_final_seed_count", -1)) != 10
+    ):
+        raise AssertionError("CIFAR-100-LT tuned final evaluator config changed unexpectedly")
+    tuned_final_eval_text = Path(
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md"
+    ).read_text(encoding="utf-8")
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark final evaluator",
+        tuned_final_eval_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Final Evaluation",
+            "fixed post-final analysis path",
+            "Holm family",
+            "all-class noninferiority guardrail",
+            "Current claim state: `not_ready`",
+            "Blocked now: benchmark-performance wording remains unavailable",
+        ],
+    )
     tuned_final_claim_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim")
     final_outputs = sorted(tuned_final_claim_dir.rglob("*")) if tuned_final_claim_dir.exists() else []
     if final_outputs:
@@ -8328,20 +8425,24 @@ def main() -> None:
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.py",
+        "scripts/e11_evaluate_cifar100_resnet_lt_tuned_benchmark_final.py",
         "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_final.sbatch",
         "completed validation-only seed variability and spent-pilot paired-diff variability",
         "paired tests, Holm adjustment, reporting schema, and claim states",
         "gate-checked final runner, Slurm wrapper, selected recipe families, and seed 20..29",
+        "post-final paired seed metrics, Holm-adjusted primary comparisons, all-class guardrails, occupancy summaries, and claim gates",
         "final seeds 20..29 quarantined",
         "make e11-cifar-resnet-lt-tuned-benchmark-selection",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan",
+        "make e11-cifar-resnet-lt-tuned-benchmark-final-eval",
         "164-setting validation registry",
         "planned_occupancy_trace_path",
         "occupancy_trace.csv",
@@ -8733,6 +8834,7 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-final-eval" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-launch-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-safe-submit" not in readme
@@ -8773,6 +8875,7 @@ def main() -> None:
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
         "discussion/e11_mechanism_referee_audit.md",
         "discussion/e11_bold_conjecture_register.md",
         "discussion/e11_muon_state_distribution_contract.md",
@@ -8797,6 +8900,8 @@ def main() -> None:
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan/reporting_schema.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/gate_matrix.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/final_family_run_plan.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation/primary_decisions.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation/claim_gate_report.csv",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:

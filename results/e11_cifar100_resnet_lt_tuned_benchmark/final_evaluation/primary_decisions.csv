@@ -1,0 +1,5 @@
+comparison_id,candidate_family,baseline_family,paired_seed_count,mean_few_bacc_diff,few_bacc_diff_ci95_low,few_bacc_diff_ci95_high,raw_one_sided_p,holm_adjusted_one_sided_p,primary_decision,mean_all_bacc_diff,all_bacc_diff_ci95_low,all_bacc_diff_ci95_high,all_class_guardrail,claim_effect
+ns_muon_matrix_tuned_vs_adamw_ce_tuned,ns_muon_matrix_tuned,adamw_ce_tuned,0,,,,,,not_ready,,,,not_ready,final paired seed family incomplete
+ns_muon_matrix_tuned_vs_sgd_momentum_ce_tuned,ns_muon_matrix_tuned,sgd_momentum_ce_tuned,0,,,,,,not_ready,,,,not_ready,final paired seed family incomplete
+ns_muon_cb_tuned_vs_adamw_ce_tuned,ns_muon_cb_tuned,adamw_ce_tuned,0,,,,,,not_ready,,,,not_ready,final paired seed family incomplete
+ns_muon_cb_tuned_vs_sgd_momentum_ce_tuned,ns_muon_cb_tuned,sgd_momentum_ce_tuned,0,,,,,,not_ready,,,,not_ready,final paired seed family incomplete

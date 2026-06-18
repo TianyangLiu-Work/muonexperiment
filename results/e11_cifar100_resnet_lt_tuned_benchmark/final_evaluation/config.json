@@ -1,0 +1,12 @@
+{
+  "all_class_noninferiority_margin": -0.01,
+  "alpha": 0.05,
+  "analysis_plan": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan",
+  "claim_boundary": "no benchmark-performance wording until TFE gates are complete",
+  "execution_plan": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan",
+  "expected_final_seed_count": 10,
+  "final_root": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim",
+  "primary_family_size": 4,
+  "primary_test": "paired one-sided t-test on candidate-minus-baseline few balanced accuracy with Holm adjustment",
+  "selection_plan": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/final_claim_plan.csv"
+}

@@ -1,0 +1,7 @@
+gate_id,status,evidence,claim_state
+TFE-1-evaluator-implemented,pass,scripts/e11_evaluate_cifar100_resnet_lt_tuned_benchmark_final.py writes the fixed final evaluator tables,not_ready
+TFE-2-selection-gates-ready,not_ready,TVS-1-validation-grid-complete=not_ready; TVS-2-family-selection=not_ready; TVS-5-occupancy-logging-complete=not_ready; TVS-3-final-seed-quarantine=pass; TVS-4-final-run-plan=not_ready,not_ready
+TFE-3-final-output-completeness,not_ready,0/6 selected recipe families have complete 10-seed final outputs,not_ready
+TFE-4-primary-holm-family,not_ready,0/4 primary comparisons pass Holm,not_ready
+TFE-5-all-class-guardrail,not_ready,0/4 all-class guardrails pass,not_ready
+TFE-6-final-claim-state,not_ready,selected=1/6; final_complete=0/6,not_ready
