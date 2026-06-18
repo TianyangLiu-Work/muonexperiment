@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1728016,
-      "size": "1.6 MB"
+      "size_bytes": 1733033,
+      "size": "1.7 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 288167899,
-      "size": "274.8 MB"
+      "size_bytes": 288248338,
+      "size": "274.9 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 34002504,
-      "size": "32.4 MB"
+      "size_bytes": 34089693,
+      "size": "32.5 MB"
     },
     {
       "path": "configs",
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833090,
+      "size_bytes": 5833091,
       "size": "5.6 MB"
     },
     {
@@ -1463,7 +1463,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
       "rows": 164,
-      "size": "74.5 KB"
+      "size": "74.6 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/family_selection.csv",
