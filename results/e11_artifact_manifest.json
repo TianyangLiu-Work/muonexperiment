@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 2091800,
+      "size_bytes": 2097139,
       "size": "2.0 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289961329,
-      "size": "276.5 MB"
+      "size_bytes": 290052133,
+      "size": "276.6 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 35784874,
-      "size": "34.1 MB"
+      "size_bytes": 35874729,
+      "size": "34.2 MB"
     },
     {
       "path": "configs",
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833550,
+      "size_bytes": 5833552,
       "size": "5.6 MB"
     },
     {
@@ -1498,7 +1498,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
       "rows": 164,
-      "size": "77.8 KB"
+      "size": "78.0 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/family_selection.csv",
@@ -1547,8 +1547,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/validation_setting_variance.csv",
-      "rows": 100,
-      "size": "24.6 KB"
+      "rows": 104,
+      "size": "25.7 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/spent_pilot_paired_variance.csv",
@@ -1687,8 +1687,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv",
-      "rows": 25,
-      "size": "5.8 KB"
+      "rows": 26,
+      "size": "6.1 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/family_progress.csv",
