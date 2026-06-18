@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts import e11_run_cifar100_resnet_lt_recipe_benchmark as recipe_benchmark
+from e11_condition_geometry.reporting import fmt, markdown_table
 
 
 RESULT_ROOT = Path("results/e11_cifar100_resnet_lt_tuned_benchmark")
@@ -316,6 +317,148 @@ def select_setting(
     return settings[int(array_index)]
 
 
+def _group_line(summary: pd.DataFrame, recipe_name: str, group: str) -> str:
+    row = summary[summary["recipe"].eq(recipe_name) & summary["frequency_group"].eq(group)].iloc[0]
+    return (
+        f"{fmt(row['mean_balanced_accuracy'])} "
+        f"[{fmt(row['balanced_accuracy_ci95_low'])}, {fmt(row['balanced_accuracy_ci95_high'])}]"
+    )
+
+
+def write_tuned_validation_discussion(
+    setting: TunedBenchmarkSetting,
+    config: recipe_benchmark.RecipeBenchmarkConfig,
+    summary: pd.DataFrame,
+    pair_summary: pd.DataFrame,
+    occupancy_trace: pd.DataFrame,
+    figure_path: Path,
+    output_dir: Path,
+    discussion_path: Path,
+) -> None:
+    occupancy_summary = pd.DataFrame(
+        [
+            {
+                "setting_id": setting.setting_id,
+                "occupancy_probe_rows": int(len(occupancy_trace)),
+                "occupancy_seed_count": int(occupancy_trace["seed"].nunique()),
+                "occupancy_eval_step_count": int(occupancy_trace["step"].nunique()),
+                "mean_batch_few_fraction": float(occupancy_trace["batch_few_fraction"].mean()),
+                "mean_tail_probe_loss": float(occupancy_trace["tail_probe_loss"].mean()),
+                "mean_ns_tail_output_drift_sq_ratio_vs_fro": float(
+                    occupancy_trace["ns_tail_output_drift_sq_ratio_vs_fro"].mean()
+                ),
+            }
+        ]
+    )
+    array_index = next(
+        index for index, candidate in enumerate(all_settings()) if candidate.setting_id == setting.setting_id
+    )
+    lines = [
+        "# E11 CIFAR-100-LT ResNet18 Tuned Benchmark Validation Setting",
+        "",
+        "This run is one cell of the preregistered 164-setting tuned validation grid.",
+        "It uses validation seeds only and cannot select or report the untouched",
+        "final-claim seeds by itself.",
+        "",
+        f"- Setting id: `{setting.setting_id}`",
+        f"- Array index: {array_index}",
+        f"- Recipe family: `{setting.recipe_family}`",
+        f"- Recipe: `{setting.recipe_name}`",
+        f"- Phase / seed set: `{setting.phase}` / `{setting.seed_set}`",
+        f"- Protocol reference: `{setting.protocol_reference}`",
+        f"- Number of classes: {config.num_classes}",
+        f"- Max train examples per class: {config.max_train_count}",
+        f"- Imbalance factor: {config.imbalance_factor}",
+        f"- Train steps: {config.train_steps}",
+        f"- Batch size: {config.train_batch_size}",
+        f"- Augmentation: reflect-padded random crop with padding {config.crop_padding} and horizontal flip probability {config.hflip_probability}",
+        f"- Device/dtype request: {config.device}/{config.dtype}",
+        "",
+        f"![CIFAR-100-LT tuned validation setting](../{figure_path.as_posix()})",
+        "",
+        "## Summary",
+        "",
+        markdown_table(
+            summary,
+            [
+                "recipe",
+                "frequency_group",
+                "seeds",
+                "classes",
+                "mean_balanced_accuracy",
+                "balanced_accuracy_ci95_low",
+                "balanced_accuracy_ci95_high",
+                "mean_loss",
+                "mean_margin",
+            ],
+        ),
+        "",
+        "## Paired Differences",
+        "",
+        markdown_table(
+            pair_summary,
+            [
+                "recipe",
+                "frequency_group",
+                "seeds",
+                "mean_balanced_accuracy_diff",
+                "balanced_accuracy_diff_ci95_low",
+                "balanced_accuracy_diff_ci95_high",
+                "mean_loss_diff",
+                "mean_margin_diff",
+            ],
+        ),
+        "",
+        "## Occupancy Trace",
+        "",
+        markdown_table(
+            occupancy_summary,
+            [
+                "setting_id",
+                "occupancy_probe_rows",
+                "occupancy_seed_count",
+                "occupancy_eval_step_count",
+                "mean_batch_few_fraction",
+                "mean_tail_probe_loss",
+                "mean_ns_tail_output_drift_sq_ratio_vs_fro",
+            ],
+        ),
+        "",
+        "## Readout",
+        "",
+    ]
+    for recipe_name in config.recipe_names:
+        if (summary["recipe"].eq(recipe_name)).any():
+            lines.append(
+                f"- `{recipe_name}` many/medium/few balanced accuracy: "
+                f"{_group_line(summary, recipe_name, 'many')} / "
+                f"{_group_line(summary, recipe_name, 'medium')} / "
+                f"{_group_line(summary, recipe_name, 'few')}."
+            )
+    lines.extend(
+        [
+            "",
+            "Interpretation: this is validation evidence for the frozen tuned benchmark",
+            "selection rule only. It may update `TVS-1` and `TVS-5`, but it does not",
+            "unblock a final-performance or broad optimizer claim until all registered",
+            "validation settings complete, one recipe per family is selected without",
+            "peeking, and final seeds `20..29` are run pairwise.",
+            "",
+            "Artifacts:",
+            f"- [train_trace.csv](../{(output_dir / 'train_trace.csv').as_posix()})",
+            f"- [class_metrics.csv](../{(output_dir / 'class_metrics.csv').as_posix()})",
+            f"- [group_metrics.csv](../{(output_dir / 'group_metrics.csv').as_posix()})",
+            f"- [summary.csv](../{(output_dir / 'summary.csv').as_posix()})",
+            f"- [pair_summary.csv](../{(output_dir / 'pair_summary.csv').as_posix()})",
+            f"- [occupancy_trace.csv](../{(output_dir / 'occupancy_trace.csv').as_posix()})",
+            f"- [setting_metadata.csv](../{(output_dir / 'setting_metadata.csv').as_posix()})",
+            f"- [config.json](../{(output_dir / 'config.json').as_posix()})",
+        ]
+    )
+    discussion_path.parent.mkdir(parents=True, exist_ok=True)
+    discussion_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def run_setting(
     setting: TunedBenchmarkSetting,
     *,
@@ -383,7 +526,16 @@ def run_setting(
     (output_dir / "config.json").write_text(json.dumps(config_payload, indent=2, sort_keys=True) + "\n")
     pd.DataFrame([config_payload["setting"]]).to_csv(output_dir / "setting_metadata.csv", index=False)
     figure_path = recipe_benchmark.write_figure(summary, pair_summary, figure_dir)
-    recipe_benchmark.write_discussion(config, summary, pair_summary, figure_path, output_dir, discussion_path)
+    write_tuned_validation_discussion(
+        setting,
+        config,
+        summary,
+        pair_summary,
+        occupancy_trace,
+        figure_path,
+        output_dir,
+        discussion_path,
+    )
     print(f"saved tuned benchmark setting {setting.setting_id} to {output_dir}")
 
 

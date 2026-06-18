@@ -5825,6 +5825,43 @@ def main() -> None:
     tuned_occupancy_complete_count = int(tuned_occupancy_complete.sum())
     if tuned_validation_complete_count == 164:
         raise AssertionError("CIFAR-100-LT tuned benchmark validator needs an explicit final-selection audit update after 164/164 validation summaries complete")
+    completed_tuned_rows = tuned_selection_run_registry[tuned_validation_complete & tuned_occupancy_complete]
+    for row in completed_tuned_rows.itertuples(index=False):
+        setting_id = str(row.setting_id)
+        output_dir = Path(str(row.summary_path)).parent
+        completed_required_paths = [
+            output_dir / "train_trace.csv",
+            output_dir / "class_metrics.csv",
+            output_dir / "group_metrics.csv",
+            output_dir / "summary.csv",
+            output_dir / "pair_summary.csv",
+            output_dir / "occupancy_trace.csv",
+            output_dir / "setting_metadata.csv",
+            output_dir / "config.json",
+            Path("figures/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning")
+            / setting_id
+            / "cifar100_resnet_lt_recipe_benchmark.png",
+            Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark") / f"{setting_id}.md",
+        ]
+        missing_completed_paths = [path.as_posix() for path in completed_required_paths if not path.exists()]
+        if missing_completed_paths:
+            raise AssertionError(f"completed tuned validation setting {setting_id} missing artifacts: {missing_completed_paths}")
+        if int(row.occupancy_probe_rows) < 30 or int(row.occupancy_seed_count) != 5 or int(row.occupancy_eval_step_count) != 6:
+            raise AssertionError(f"completed tuned validation setting {setting_id} has incomplete occupancy summary")
+        completed_text = (Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark") / f"{setting_id}.md").read_text(
+            encoding="utf-8"
+        )
+        assert_required_phrases(
+            f"completed tuned validation setting {setting_id}",
+            completed_text,
+            [
+                "E11 CIFAR-100-LT ResNet18 Tuned Benchmark Validation Setting",
+                "preregistered 164-setting tuned validation grid",
+                "Occupancy Trace",
+                "final seeds `20..29`",
+                "unblock a final-performance or broad optimizer claim",
+            ],
+        )
     if not tuned_selection_run_registry["occupancy_trace_path"].astype(str).str.endswith("occupancy_trace.csv").all():
         raise AssertionError("CIFAR-100-LT tuned benchmark selection must carry occupancy trace paths")
     complete_by_family = tuned_selection_run_registry.groupby("recipe_family")["validation_status"].apply(
