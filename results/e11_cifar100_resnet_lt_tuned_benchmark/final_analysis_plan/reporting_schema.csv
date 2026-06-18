@@ -1,0 +1,5 @@
+table_id,required_columns,granularity,claim_role
+TAB-1-per-seed-final-metrics,seed;recipe_family;recipe_name;many_bacc;medium_bacc;few_bacc;all_bacc;loss;margin,one row per final seed and recipe,audit trail for paired tests and dropped-seed checks
+TAB-2-paired-primary-comparisons,comparison_id;seed;candidate_family;baseline_family;few_bacc_diff;all_bacc_diff,one row per paired seed and primary comparison,input to Holm-adjusted superiority and all-class guardrail decisions
+TAB-3-final-summary,recipe_family;frequency_group;mean_bacc;ci95_low;ci95_high;mean_loss;mean_margin,one row per recipe family and frequency group,main benchmark reporting surface if all gates pass
+TAB-4-occupancy-summary,recipe_family;seed;occupancy_rows;batch_few_fraction;tail_probe_loss;gradient_momentum_cosine;drift_ratio,one row per final seed and recipe,state-distribution context for why local Muon evidence transfers or fails to transfer

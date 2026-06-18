@@ -1,0 +1,6 @@
+claim_state,trigger,allowed_wording,blocked_wording
+not_ready,"any validation family, occupancy trace, or final seed recipe is incomplete",registered tuned benchmark analysis plan only,final optimizer-performance result
+clean_cifar100lt_resnet18_win,primary Holm family passes and all-class guardrail passes with complete reporting,CIFAR-100-LT ResNet18 tuned final-performance improvement under the registered protocol,broad long-tail optimizer superiority
+few_all_tradeoff,few-class primary passes but all-class guardrail fails,few/all tradeoff under the registered protocol,clean benchmark win
+negative_or_underpowered_boundary,"Muon does not beat tuned baselines, or observed effect is below the pre-output MDE sensitivity grid",negative or underpowered tuned benchmark boundary,Muon has been ruled out broadly or silently dropping the tuned result
+protocol_violation,final outputs exist before all selection and analysis gates are ready,protocol violation; rows excluded from tuned-performance claims,using leaked final rows for selection or claim repair

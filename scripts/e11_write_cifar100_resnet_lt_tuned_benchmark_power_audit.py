@@ -58,11 +58,8 @@ def build_final_family_design(inputs: dict[str, pd.DataFrame]) -> pd.DataFrame:
     family_selection = inputs["family_selection"]
     final_plan = inputs["final_plan"]
     selection_gate_lookup = inputs["selection_gates"].set_index("gate_id")["status"].astype(str).to_dict()
-    final_outputs = sorted(
-        path.as_posix()
-        for path in RESULT_ROOT.glob("final*")
-        if path.name != "final_power_audit"
-    )
+    final_claim_dir = RESULT_ROOT / "final_claim"
+    final_outputs = sorted(path.as_posix() for path in final_claim_dir.rglob("*")) if final_claim_dir.exists() else []
 
     rows = []
     for recipe in recipe_grid.itertuples(index=False):

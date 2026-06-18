@@ -1,0 +1,5 @@
+metric_id,frequency_group,statistic,role,direction,claim_gate
+MET-1-primary-few-balanced-accuracy,few,balanced_accuracy,primary superiority metric,candidate_minus_baseline higher is better,TB-2-primary-few-accuracy
+MET-2-all-balanced-accuracy-guardrail,all,balanced_accuracy,all-class noninferiority guardrail,candidate_minus_best_baseline must not collapse below -0.01,TB-3-no-all-class-collapse
+MET-3-reporting-many-medium,many;medium,balanced_accuracy;loss;margin,required full reporting surface,descriptive with confidence intervals,TB-4-full-reporting-surface
+MET-4-state-distribution-occupancy,all,batch_few_fraction;tail_probe_loss;gradient_momentum_cosine;ns_vs_fro_drift_ratio,"mechanism-transfer context, not a performance gate by itself",descriptive with missingness gate,TB-7-state-distribution-occupancy

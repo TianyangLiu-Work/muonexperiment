@@ -1,0 +1,7 @@
+input_id,recipe_family,selection_status,selected_setting_id,final_seed_set,required_files,pairing_key,claim_boundary
+FIN-IN-adamw_cb_loss_tuned,adamw_cb_loss_tuned,not_ready,,20..29,summary.csv; group_metrics.csv; class_metrics.csv; train_trace.csv; occupancy_trace.csv,seed,required for final analysis only after all six families are selected and run
+FIN-IN-adamw_cb_sampler_tuned,adamw_cb_sampler_tuned,not_ready,,20..29,summary.csv; group_metrics.csv; class_metrics.csv; train_trace.csv; occupancy_trace.csv,seed,required for final analysis only after all six families are selected and run
+FIN-IN-adamw_ce_tuned,adamw_ce_tuned,ready_for_final_run,TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0,20..29,summary.csv; group_metrics.csv; class_metrics.csv; train_trace.csv; occupancy_trace.csv,seed,required for final analysis only after all six families are selected and run
+FIN-IN-ns_muon_cb_tuned,ns_muon_cb_tuned,not_ready,,20..29,summary.csv; group_metrics.csv; class_metrics.csv; train_trace.csv; occupancy_trace.csv,seed,required for final analysis only after all six families are selected and run
+FIN-IN-ns_muon_matrix_tuned,ns_muon_matrix_tuned,not_ready,,20..29,summary.csv; group_metrics.csv; class_metrics.csv; train_trace.csv; occupancy_trace.csv,seed,required for final analysis only after all six families are selected and run
+FIN-IN-sgd_momentum_ce_tuned,sgd_momentum_ce_tuned,not_ready,,20..29,summary.csv; group_metrics.csv; class_metrics.csv; train_trace.csv; occupancy_trace.csv,seed,required for final analysis only after all six families are selected and run

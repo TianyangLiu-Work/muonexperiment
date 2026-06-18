@@ -208,11 +208,8 @@ def build_gate_report(
     all_validation_complete = bool(run_registry["validation_status"].eq("complete").all())
     all_occupancy_complete = bool(run_registry["occupancy_status"].eq("complete").all())
     all_families_selected = bool(family_selection["selection_status"].eq("selected").all())
-    final_outputs = sorted(
-        path
-        for path in Path("results/e11_cifar100_resnet_lt_tuned_benchmark").glob("final*")
-        if path.name != "final_power_audit"
-    )
+    final_claim_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim")
+    final_outputs = sorted(final_claim_dir.rglob("*")) if final_claim_dir.exists() else []
     return pd.DataFrame(
         [
             {
