@@ -30,7 +30,7 @@ This generated packet converts the submission reproducibility audit into an arti
 | R3-preferred-latex-toolchain   | not_ready | external_toolchain_required | pdflatex/bibtex/xelatex not all available                                                                         | Use Tectonic-backed server evidence now; run pdflatex/bibtex/xelatex in a clean checkout before venue-toolchain claims. |
 | R4-tectonic-fallback-toolchain | pass      | reproducible_now            | tectonic available                                                                                                | Record the command output in the run summary.                                                                           |
 | R5-rendered-pdfs               | pass      | reproducible_now            | main.pdf and two_page.pdf have PDF headers and expected sizes                                                     | Record the command output in the run summary.                                                                           |
-| R6-full-artifact-validation    | pass      | reproducible_now            | make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full passed after 31/164 tuned-validation refresh | Record the command output in the run summary.                                                                           |
+| R6-full-artifact-validation    | pass      | reproducible_now            | make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full passed after 32/164 tuned-validation refresh | Record the command output in the run summary.                                                                           |
 
 ## Local State Contract
 
