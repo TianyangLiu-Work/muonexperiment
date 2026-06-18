@@ -349,6 +349,10 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit/outcome_state_machine.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/chunk_plan.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/queue_policy.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_launch_decision.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_selected_settings.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_queue_snapshot.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/launch_history.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/paired_metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv",
@@ -493,6 +497,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",
     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md",
+    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md",
     "discussion/e11_cifar100_resnet_practical_muon_bridge.md",
 )
 
@@ -1012,6 +1017,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "command": "python3 scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_slurm_plan.py",
         "produces": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/* and discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md",
         "paper_role": "No-side-effect chunked launch contract for completing the 164-setting tuned validation grid under server queue limits.",
+    },
+    {
+        "stage": "CIFAR-100-LT ResNet18 tuned benchmark guarded Slurm launch",
+        "command": "python3 scripts/e11_submit_cifar100_resnet_lt_tuned_benchmark_validation.py --submit",
+        "produces": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/* and discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md",
+        "paper_role": "Queue-aware execution audit for starting only the largest safe validation subchunk while preserving final-seed quarantine.",
     },
     {
         "stage": "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",

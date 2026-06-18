@@ -1228,11 +1228,18 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "queue_policy.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "config.json",
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md"),
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit") / "latest_launch_decision.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit") / "latest_selected_settings.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit") / "latest_queue_snapshot.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit") / "launch_history.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit") / "config.json",
+        Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md"),
         Path("scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_slurm_plan.py"),
+        Path("scripts/e11_submit_cifar100_resnet_lt_tuned_benchmark_validation.py"),
         Path("scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch"),
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv",
@@ -1595,6 +1602,8 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-selection # select final recipes from completed validation summaries without touching final seeds",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit # lock tuned final seed MDE, Holm family, and all-class guardrail before final outputs",
         "make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan # write a chunked no-side-effect Slurm launch plan for the 164-setting validation grid",
+        "make e11-cifar-resnet-lt-tuned-benchmark-launch-audit # compute the current queue-aware validation launch decision without submitting",
+        "make e11-cifar-resnet-lt-tuned-benchmark-safe-submit # submit the largest safe validation subchunk under MaxSubmitJobsPerUser",
         "make e11-muon-state-distribution-contract # generate the Muon state-distribution/practical-performance boundary contract",
         "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
         "make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates",
@@ -5804,16 +5813,54 @@ def main() -> None:
         or len(tuned_selection_gates) != 5
     ):
         raise AssertionError("CIFAR-100-LT tuned benchmark selection audit has the wrong row counts")
-    if set(tuned_selection_run_registry["validation_status"]) != {"missing_summary"}:
-        raise AssertionError("CIFAR-100-LT tuned benchmark selection should remain pending until validation summaries exist")
-    if set(tuned_selection_run_registry["occupancy_status"]) != {"missing_occupancy_trace"}:
-        raise AssertionError("CIFAR-100-LT tuned benchmark selection should remain pending until occupancy traces exist")
+    validation_statuses = set(tuned_selection_run_registry["validation_status"].astype(str))
+    occupancy_statuses = set(tuned_selection_run_registry["occupancy_status"].astype(str))
+    if not validation_statuses.issubset({"missing_summary", "complete"}):
+        raise AssertionError(f"CIFAR-100-LT tuned benchmark validation status drifted: {validation_statuses}")
+    if not occupancy_statuses.issubset({"missing_occupancy_trace", "complete"}):
+        raise AssertionError(f"CIFAR-100-LT tuned benchmark occupancy status drifted: {occupancy_statuses}")
+    tuned_validation_complete = tuned_selection_run_registry["validation_status"].eq("complete")
+    tuned_occupancy_complete = tuned_selection_run_registry["occupancy_status"].eq("complete")
+    tuned_validation_complete_count = int(tuned_validation_complete.sum())
+    tuned_occupancy_complete_count = int(tuned_occupancy_complete.sum())
+    if tuned_validation_complete_count == 164:
+        raise AssertionError("CIFAR-100-LT tuned benchmark validator needs an explicit final-selection audit update after 164/164 validation summaries complete")
     if not tuned_selection_run_registry["occupancy_trace_path"].astype(str).str.endswith("occupancy_trace.csv").all():
         raise AssertionError("CIFAR-100-LT tuned benchmark selection must carry occupancy trace paths")
-    if set(tuned_family_selection["selection_status"]) != {"not_ready"}:
-        raise AssertionError("CIFAR-100-LT tuned benchmark family selection must be not_ready before validation completes")
-    if set(tuned_final_plan["final_status"]) != {"not_ready"} or not tuned_final_plan["final_seed_set"].isna().all():
-        raise AssertionError("CIFAR-100-LT tuned benchmark final plan must keep final seeds blank before selection")
+    complete_by_family = tuned_selection_run_registry.groupby("recipe_family")["validation_status"].apply(
+        lambda values: int(values.eq("complete").sum())
+    )
+    expected_by_family = tuned_selection_run_registry.groupby("recipe_family").size()
+    for row in tuned_family_selection.itertuples(index=False):
+        family = str(row.recipe_family)
+        expected = int(expected_by_family.loc[family])
+        complete = int(complete_by_family.loc[family])
+        if int(row.expected_settings) != expected or int(row.complete_settings) != complete:
+            raise AssertionError(f"CIFAR-100-LT tuned benchmark family-selection counts drifted for {family}")
+        expected_status = "selected" if complete == expected else "not_ready"
+        if str(row.selection_status) != expected_status:
+            raise AssertionError(f"CIFAR-100-LT tuned benchmark family-selection status drifted for {family}")
+    final_by_family = tuned_final_plan.set_index("recipe_family")
+    for row in tuned_family_selection.itertuples(index=False):
+        family = str(row.recipe_family)
+        final_row = final_by_family.loc[family]
+        family_runs = tuned_selection_run_registry[tuned_selection_run_registry["recipe_family"].eq(family)]
+        family_occupancy_complete = bool(family_runs["occupancy_status"].eq("complete").all())
+        selected = str(row.selection_status) == "selected"
+        expected_final_status = (
+            "ready_for_final_run"
+            if selected and family_occupancy_complete
+            else "not_ready_missing_occupancy"
+            if selected
+            else "not_ready"
+        )
+        if str(final_row["final_status"]) != expected_final_status:
+            raise AssertionError(f"CIFAR-100-LT tuned benchmark final-plan status drifted for {family}")
+        final_seed = "" if pd.isna(final_row["final_seed_set"]) else str(final_row["final_seed_set"])
+        if selected and final_seed != "20..29":
+            raise AssertionError(f"CIFAR-100-LT tuned benchmark selected family {family} must map to final seeds 20..29")
+        if not selected and final_seed not in {"", "nan"}:
+            raise AssertionError(f"CIFAR-100-LT tuned benchmark unselected family {family} must keep final seeds blank")
     if set(tuned_selection_gates["gate_id"]) != {
         "TVS-1-validation-grid-complete",
         "TVS-2-family-selection",
@@ -5822,11 +5869,18 @@ def main() -> None:
         "TVS-5-occupancy-logging-complete",
     }:
         raise AssertionError("CIFAR-100-LT tuned benchmark selection gates changed unexpectedly")
-    if not (
-        tuned_selection_gates.set_index("gate_id").loc["TVS-3-final-seed-quarantine", "status"] == "pass"
-        and set(tuned_selection_gates["status"]) == {"not_ready", "pass"}
-    ):
-        raise AssertionError("CIFAR-100-LT tuned benchmark selection gates should pass quarantine and block final claim")
+    tuned_gate_status = tuned_selection_gates.set_index("gate_id")["status"].astype(str).to_dict()
+    expected_gate_status = {
+        "TVS-1-validation-grid-complete": "pass" if tuned_validation_complete_count == 164 else "not_ready",
+        "TVS-2-family-selection": "pass" if tuned_family_selection["selection_status"].eq("selected").all() else "not_ready",
+        "TVS-3-final-seed-quarantine": "pass",
+        "TVS-4-final-run-plan": "ready"
+        if tuned_final_plan["final_status"].eq("ready_for_final_run").all()
+        else "not_ready",
+        "TVS-5-occupancy-logging-complete": "pass" if tuned_occupancy_complete_count == 164 else "not_ready",
+    }
+    if tuned_gate_status != expected_gate_status:
+        raise AssertionError(f"CIFAR-100-LT tuned benchmark selection gates drifted: {tuned_gate_status}")
     tuned_selection_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md").read_text(
         encoding="utf-8"
     )
@@ -5836,8 +5890,8 @@ def main() -> None:
         [
             "E11 CIFAR-100-LT Tuned Benchmark Selection",
             "no-peeking bridge",
-            "Current status: `not_ready`",
-            "0/164",
+            f"{tuned_validation_complete_count}/164",
+            f"{tuned_occupancy_complete_count}/164",
             "trajectory occupancy traces complete",
             "final claim seed set is always `20..29`",
             "TVS-3-final-seed-quarantine",
@@ -5850,13 +5904,15 @@ def main() -> None:
     tuned_slurm_plan = pd.read_csv(tuned_slurm_dir / "chunk_plan.csv")
     tuned_slurm_policy = pd.read_csv(tuned_slurm_dir / "queue_policy.csv")
     tuned_slurm_config = json.loads((tuned_slurm_dir / "config.json").read_text(encoding="utf-8"))
+    tuned_missing_for_plan = int((~(tuned_validation_complete & tuned_occupancy_complete)).sum())
+    tuned_expected_plan_rows = max(1, math.ceil(tuned_missing_for_plan / 20))
     if (
-        len(tuned_slurm_plan) != 9
-        or int(tuned_slurm_plan["setting_count"].sum()) != 164
+        len(tuned_slurm_plan) != tuned_expected_plan_rows
+        or int(tuned_slurm_plan["setting_count"].sum()) != tuned_missing_for_plan
         or int(tuned_slurm_plan["setting_count"].max()) > 20
         or set(tuned_slurm_plan["submission_status"]) != {"not_submitted_static_plan"}
     ):
-        raise AssertionError("CIFAR-100-LT tuned benchmark Slurm plan must chunk all 164 settings without submission")
+        raise AssertionError("CIFAR-100-LT tuned benchmark Slurm plan must chunk missing settings without submission")
     if not tuned_slurm_plan["submit_command"].astype(str).str.contains(
         "sbatch --array=.*%1 scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
         regex=True,
@@ -5888,7 +5944,71 @@ def main() -> None:
             "MaxSubmitJobsPerUser",
             "summary.csv",
             "occupancy_trace.csv",
-            "sbatch --array=0-19%1",
+            "sbatch --array=",
+            "TVS-1",
+            "TVS-2",
+            "TVS-5",
+        ],
+    )
+    tuned_launch_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit")
+    tuned_launch_decision = pd.read_csv(tuned_launch_dir / "latest_launch_decision.csv")
+    tuned_launch_selected = pd.read_csv(tuned_launch_dir / "latest_selected_settings.csv")
+    tuned_launch_queue = pd.read_csv(tuned_launch_dir / "latest_queue_snapshot.csv")
+    tuned_launch_history = pd.read_csv(tuned_launch_dir / "launch_history.csv")
+    tuned_launch_config = json.loads((tuned_launch_dir / "config.json").read_text(encoding="utf-8"))
+    if len(tuned_launch_decision) != 1:
+        raise AssertionError("CIFAR-100-LT tuned benchmark launch audit must contain exactly one latest decision")
+    if len(tuned_launch_history) < 1 or str(tuned_launch_history.iloc[-1]["submission_status"]) != str(
+        tuned_launch_decision.iloc[0]["submission_status"]
+    ):
+        raise AssertionError("CIFAR-100-LT tuned benchmark launch history must end with the latest decision status")
+    launch_row = tuned_launch_decision.iloc[0]
+    launch_status = str(launch_row["submission_status"])
+    if launch_status not in {"dry_run", "submitted", "blocked_no_missing_settings", "blocked_no_queue_capacity", "sbatch_failed"}:
+        raise AssertionError(f"CIFAR-100-LT tuned benchmark launch status drifted: {launch_status}")
+    if launch_status == "sbatch_failed":
+        raise AssertionError("CIFAR-100-LT tuned benchmark launch audit recorded a failed sbatch call")
+    launch_planned_count = int(launch_row["planned_setting_count"])
+    launch_available = int(launch_row["available_submit_slots_before_submit"])
+    if launch_planned_count > min(20, launch_available, tuned_missing_for_plan):
+        raise AssertionError("CIFAR-100-LT tuned benchmark launch audit exceeded the guarded queue capacity")
+    if (
+        int(launch_row["current_queue_elements_before_submit"])
+        + launch_planned_count
+        + int(launch_row["reserved_submit_slots"])
+        > int(launch_row["max_submit_jobs_per_user"])
+    ):
+        raise AssertionError("CIFAR-100-LT tuned benchmark launch audit violates MaxSubmitJobsPerUser guard")
+    if launch_planned_count != len(tuned_launch_selected):
+        raise AssertionError("CIFAR-100-LT tuned benchmark launch selected-settings row count mismatch")
+    if launch_planned_count:
+        if set(tuned_launch_selected["phase"].astype(str)) != {"validation_tuning"}:
+            raise AssertionError("CIFAR-100-LT tuned benchmark launch must select validation_tuning rows only")
+        if set(tuned_launch_selected["seed_set"].astype(str)) != {"10..14"}:
+            raise AssertionError("CIFAR-100-LT tuned benchmark launch must select validation seeds 10..14 only")
+        command = str(launch_row["submit_command"])
+        if "sbatch --parsable --array=" not in command or "%1 scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch" not in command:
+            raise AssertionError(f"CIFAR-100-LT tuned benchmark launch command is not a bounded Slurm array: {command}")
+    if launch_status == "submitted" and not re.fullmatch(r"\d+", str(launch_row["slurm_job_id"])):
+        raise AssertionError("CIFAR-100-LT tuned benchmark submitted launch must record a numeric Slurm job id")
+    if int(tuned_launch_config.get("max_submit_jobs_per_user", -1)) != 30:
+        raise AssertionError("CIFAR-100-LT tuned benchmark launch config must preserve MaxSubmitJobsPerUser=30")
+    if int(tuned_launch_config.get("reserved_submit_slots", -1)) != 6:
+        raise AssertionError("CIFAR-100-LT tuned benchmark launch config must preserve six reserved submit slots")
+    if "job_id" not in tuned_launch_queue.columns or "job_name" not in tuned_launch_queue.columns:
+        raise AssertionError("CIFAR-100-LT tuned benchmark launch queue snapshot must include job_id and job_name")
+    tuned_launch_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark Slurm launch audit",
+        tuned_launch_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Slurm Launch Audit",
+            "queue-aware launch decision",
+            "MaxSubmitJobsPerUser",
+            "validation_tuning",
+            "final_claim",
             "TVS-1",
             "TVS-2",
             "TVS-5",
@@ -5904,8 +6024,10 @@ def main() -> None:
     tuned_power_config = json.loads((tuned_power_dir / "config.json").read_text(encoding="utf-8"))
     if len(tuned_power_design) != 6 or set(tuned_power_design["recipe_family"]) != expected_recipe_families:
         raise AssertionError("CIFAR-100-LT tuned benchmark power audit must cover the frozen recipe families")
-    if set(tuned_power_design["validation_selection_status"]) != {"not_ready"}:
-        raise AssertionError("CIFAR-100-LT tuned benchmark power audit must reflect validation-not-ready status")
+    power_selection_status = tuned_power_design.set_index("recipe_family")["validation_selection_status"].astype(str)
+    selection_status = tuned_family_selection.set_index("recipe_family")["selection_status"].astype(str)
+    if power_selection_status.to_dict() != selection_status.to_dict():
+        raise AssertionError("CIFAR-100-LT tuned benchmark power audit must mirror validation-selection status")
     if set(tuned_power_design["final_output_status"]) != {"absent"}:
         raise AssertionError("CIFAR-100-LT tuned benchmark power audit must not inspect final outputs")
     if int(tuned_power_config.get("final_seed_count", -1)) != 10:
@@ -8026,6 +8148,8 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-tuned-benchmark-selection" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-power-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-launch-audit" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-safe-submit" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-natural-head-tail-boundary-audit" not in readme
         or "make e11-natural-negative-search-protocol" not in readme

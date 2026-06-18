@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 431574,
-      "size": "421.5 KB"
+      "size_bytes": 432560,
+      "size": "422.4 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2756881,
+      "size_bytes": 2778170,
       "size": "2.6 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1691219,
+      "size_bytes": 1703332,
       "size": "1.6 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 287759441,
+      "size_bytes": 287769334,
       "size": "274.4 MB"
     },
     {
@@ -54,15 +54,15 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833088,
+      "size_bytes": 5833089,
       "size": "5.6 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 19647,
-      "size": "19.2 KB"
+      "size_bytes": 20148,
+      "size": "19.7 KB"
     },
     {
       "path": ".gitignore",
@@ -1521,6 +1521,26 @@
       "size": "879 B"
     },
     {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_launch_decision.csv",
+      "rows": 1,
+      "size": "832 B"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_selected_settings.csv",
+      "rows": 17,
+      "size": "6.1 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_queue_snapshot.csv",
+      "rows": 7,
+      "size": "614 B"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/launch_history.csv",
+      "rows": 2,
+      "size": "1.1 KB"
+    },
+    {
       "path": "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
       "rows": 240,
       "size": "257.6 KB"
@@ -1799,7 +1819,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "96.4 KB"
+      "size": "96.9 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1823,7 +1843,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "64.3 KB"
+      "size": "65.2 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -2136,6 +2156,10 @@
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md",
       "size": "6.8 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md",
+      "size": "10.5 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_practical_muon_bridge.md",

@@ -1,0 +1,8 @@
+job_id,state,job_name,reason_or_node,source
+1285,PD,cont-bank-seed2v1,(Dependency),squeue -h -r -u $USER -o %i|%t|%j|%R
+1284,PD,score-bank-seed2v1,(Dependency),squeue -h -r -u $USER -o %i|%t|%j|%R
+1246,PD,verl-branchgrpo-qwen3-4b,(Dependency),squeue -h -r -u $USER -o %i|%t|%j|%R
+1245,PD,verl-branchgrpo-qwen3-4b,(Dependency),squeue -h -r -u $USER -o %i|%t|%j|%R
+1286,R,llmc-quip-tinyllama,yumingz5-linux-ml,squeue -h -r -u $USER -o %i|%t|%j|%R
+1283,R,online-bank-seed2v1,yumingz5-linux-ml,squeue -h -r -u $USER -o %i|%t|%j|%R
+1244,R,verl-branchgrpo-qwen3-4b,yumingz5-linux-ml,squeue -h -r -u $USER -o %i|%t|%j|%R
