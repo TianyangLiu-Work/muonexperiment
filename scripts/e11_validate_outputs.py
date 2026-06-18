@@ -430,6 +430,8 @@ def assert_top_conference_gap_register(frame: pd.DataFrame) -> None:
     for phrase in [
         "discussion/e11_artifact_review_packet.md",
         "results/e11_artifact_review_packet/*",
+        "discussion/e11_camera_ready_package_audit.md",
+        "results/e11_camera_ready_package_audit/*",
         "serverREADME.md",
         "GPU-pending boundary",
     ]:
@@ -1506,6 +1508,12 @@ def main() -> None:
         Path("results/e11_artifact_review_packet") / "reviewer_response.csv",
         Path("results/e11_artifact_review_packet") / "config.json",
         Path("scripts/e11_write_artifact_review_packet.py"),
+        Path("discussion/e11_camera_ready_package_audit.md"),
+        Path("results/e11_camera_ready_package_audit") / "package_item_matrix.csv",
+        Path("results/e11_camera_ready_package_audit") / "submission_gate_matrix.csv",
+        Path("results/e11_camera_ready_package_audit") / "camera_ready_checklist.csv",
+        Path("results/e11_camera_ready_package_audit") / "config.json",
+        Path("scripts/e11_write_camera_ready_package_audit.py"),
         Path("scripts/e11_write_natural_head_tail_boundary_audit.py"),
         Path("scripts/e11_write_natural_negative_search_protocol.py"),
         Path("scripts/e11_run_natural_negative_search_phase1.py"),
@@ -1637,6 +1645,8 @@ def main() -> None:
         "scripts/e11_write_bold_conjecture_register.py",
         "e11-muon-state-distribution-contract:",
         "scripts/e11_write_muon_state_distribution_contract.py",
+        "e11-camera-ready-package-audit:",
+        "scripts/e11_write_camera_ready_package_audit.py",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -8995,6 +9005,7 @@ def main() -> None:
         or "make e11-submission-repro-audit" not in readme
         or "make e11-pdf-render-boundary-audit" not in readme
         or "make e11-artifact-review-packet" not in readme
+        or "make e11-camera-ready-package-audit" not in readme
         or "make e11-guardrail-assets" not in readme
         or "make e11-all-assets" not in readme
     ):
@@ -9007,6 +9018,7 @@ def main() -> None:
         "discussion/e11_reference_audit.md",
         "discussion/e11_submission_repro_audit.md",
         "discussion/e11_artifact_review_packet.md",
+        "discussion/e11_camera_ready_package_audit.md",
         "discussion/e11_pdf_render_boundary_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md",
@@ -9031,6 +9043,9 @@ def main() -> None:
         "results/e11_muon_state_distribution_contract/falsification_tests.csv",
         "results/e11_pdf_render_boundary_audit/pdf_inspection_tool_status.csv",
         "results/e11_pdf_render_boundary_audit/render_boundary_gates.csv",
+        "results/e11_camera_ready_package_audit/package_item_matrix.csv",
+        "results/e11_camera_ready_package_audit/submission_gate_matrix.csv",
+        "results/e11_camera_ready_package_audit/camera_ready_checklist.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/variance_prior_summary.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/mde_sensitivity_from_empirical_sd.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan/primary_comparison_family.csv",
@@ -9226,6 +9241,94 @@ def main() -> None:
     )
     if artifact_config.get("strongest_local_gate") != "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full":
         raise AssertionError("artifact review config must record the strongest local gate")
+    camera_ready_dir = Path("results/e11_camera_ready_package_audit")
+    camera_items = pd.read_csv(camera_ready_dir / "package_item_matrix.csv")
+    camera_gates = pd.read_csv(camera_ready_dir / "submission_gate_matrix.csv")
+    camera_checklist = pd.read_csv(camera_ready_dir / "camera_ready_checklist.csv")
+    camera_config = json.loads((camera_ready_dir / "config.json").read_text(encoding="utf-8"))
+    expected_camera_items = {
+        "CRP-1-source-bundle",
+        "CRP-2-rendered-pdf-binaries",
+        "CRP-3-claim-trace-clean",
+        "CRP-4-reviewer-command-path",
+        "CRP-5-local-attachment-excluded",
+        "CRP-6-preferred-latex-boundary",
+        "CRP-7-rendered-text-metadata-boundary",
+        "CRP-8-final-claim-quarantine",
+    }
+    expected_camera_gates = {
+        "CRG-1-current-server-package",
+        "CRG-2-venue-toolchain-package",
+        "CRG-3-claim-boundary-package",
+        "CRG-4-local-file-exclusion",
+    }
+    expected_camera_steps = {
+        "CRC-1-current-server-share",
+        "CRC-2-venue-clean-checkout",
+        "CRC-3-after-manuscript-edit",
+        "CRC-4-before-commit",
+    }
+    if not (
+        set(camera_items["item_id"]) == expected_camera_items
+        and set(camera_gates["gate_id"]) == expected_camera_gates
+        and set(camera_checklist["step_id"]) == expected_camera_steps
+    ):
+        raise AssertionError("camera-ready package audit must preserve fixed item, gate, and checklist IDs")
+    camera_item_status = camera_items.set_index("item_id")["status"].astype(str).to_dict()
+    camera_gate_status = camera_gates.set_index("gate_id")["status"].astype(str).to_dict()
+    if not (
+        camera_item_status["CRP-1-source-bundle"] == "pass"
+        and camera_item_status["CRP-2-rendered-pdf-binaries"] == "pass"
+        and camera_item_status["CRP-3-claim-trace-clean"] == "pass"
+        and camera_item_status["CRP-4-reviewer-command-path"] == "pass"
+        and camera_item_status["CRP-5-local-attachment-excluded"] == "pass"
+        and camera_item_status["CRP-6-preferred-latex-boundary"] in {"pass", "not_ready"}
+        and camera_item_status["CRP-7-rendered-text-metadata-boundary"] in {"pass", "not_ready"}
+        and camera_item_status["CRP-8-final-claim-quarantine"] == "pass"
+        and camera_gate_status["CRG-1-current-server-package"] == "pass"
+        and camera_gate_status["CRG-2-venue-toolchain-package"] in {"pass", "not_ready"}
+        and camera_gate_status["CRG-3-claim-boundary-package"] == "pass"
+        and camera_gate_status["CRG-4-local-file-exclusion"] == "pass"
+    ):
+        raise AssertionError("camera-ready package audit gates must preserve current server pass and venue-boundary states")
+    camera_text = " ".join(
+        camera_items.astype(str).to_numpy().ravel().tolist()
+        + camera_gates.astype(str).to_numpy().ravel().tolist()
+        + camera_checklist.astype(str).to_numpy().ravel().tolist()
+    )
+    for phrase in [
+        "serverREADME.md",
+        "claim_trace.csv anchors are present",
+        "blocked_phrase_audit.csv has no hits",
+        "pdflatex/bibtex/xelatex clean-checkout reproducibility",
+        "rendered-PDF text-layer or metadata verification",
+        "final-claim quarantine",
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full",
+        "no new benchmark, predictive-score, or natural-counterexample wording",
+    ]:
+        if phrase not in camera_text:
+            raise AssertionError(f"camera-ready package audit missing boundary phrase: {phrase}")
+    camera_discussion = Path("discussion/e11_camera_ready_package_audit.md").read_text(encoding="utf-8")
+    assert_required_phrases(
+        "camera-ready package audit",
+        camera_discussion,
+        [
+            "E11 Camera-Ready Package Audit",
+            "package-readiness boundary",
+            "Package Item Matrix",
+            "Submission Gate Matrix",
+            "Camera-Ready Checklist",
+            "CRG-1-current-server-package",
+            "CRG-2-venue-toolchain-package",
+            "Blocked now: claiming full venue-toolchain clean-checkout reproducibility",
+            "stronger benchmark and",
+        ],
+    )
+    if (
+        camera_config.get("current_server_gate") != "CRG-1-current-server-package"
+        or camera_config.get("venue_toolchain_gate") != "CRG-2-venue-toolchain-package"
+    ):
+        raise AssertionError("camera-ready package audit config must record current-server and venue-toolchain gates")
     mechanism_referee_dir = Path("results/e11_mechanism_referee_audit")
     alternative_matrix = pd.read_csv(mechanism_referee_dir / "alternative_explanation_matrix.csv")
     theory_contract = pd.read_csv(mechanism_referee_dir / "theory_measurement_contract.csv")

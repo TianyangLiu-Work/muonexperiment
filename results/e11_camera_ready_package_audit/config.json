@@ -1,0 +1,6 @@
+{
+  "purpose": "camera-ready package boundary audit for the current E11 evidence bundle",
+  "new_empirical_results": false,
+  "current_server_gate": "CRG-1-current-server-package",
+  "venue_toolchain_gate": "CRG-2-venue-toolchain-package"
+}

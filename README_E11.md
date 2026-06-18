@@ -294,6 +294,7 @@ make e11-natural-negative-search-phase2-power-audit
 make e11-heldout-generality-audit
 make e11-bold-conjecture-register
 make e11-muon-state-distribution-contract
+make e11-camera-ready-package-audit
 ```
 
 This submits `scripts/slurm/e11_cifar100_resnet_checkpoint_sweep.sbatch`, which
@@ -1113,6 +1114,7 @@ Do not claim:
 - `scripts/e11_write_clean_worktree_replay_audit.py`: clean detached worktree replay audit for `make e11-check`, excluding local untracked attachments such as `serverREADME.md`.
 - `scripts/e11_write_pdf_render_boundary_audit.py`: rendered-PDF inspection boundary audit that separates passing binary/hash/source-claim evidence from text-layer and page-metadata tool gaps.
 - `scripts/e11_write_artifact_review_packet.py`: artifact-review command, gate, local-state, and reviewer-response packet for reproducing the current bundle without expanding claims.
+- `scripts/e11_write_camera_ready_package_audit.py`: camera-ready package audit that ties source bundle, rendered PDFs, claim trace, reviewer commands, local attachment exclusion, and venue-toolchain boundaries into package gates.
 - `scripts/e11_write_mechanism_referee_audit.py`: adversarial mechanism/referee audit that maps alternative explanations, theory-to-measurement contracts, and falsification triggers to current evidence and forbidden wording.
 - `scripts/e11_run_cifar100_resnet_lt_standard_eval.py`: standard CIFAR-100-LT ResNet18 many/medium/few reporting baseline.
 - `scripts/e11_run_cifar100_resnet_lt_recipe_benchmark.py`: augmented CIFAR-100-LT ResNet18 recipe benchmark pilot with AdamW, class-balanced AdamW, SGD-momentum, and optional NS-Muon final-training recipes.

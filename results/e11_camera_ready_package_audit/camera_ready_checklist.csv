@@ -1,0 +1,5 @@
+step_id,command_or_action,required_gate,claim_boundary
+CRC-1-current-server-share,make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full,CRG-1-current-server-package=pass,server package only; preferred venue-toolchain remains separate if CRG-2 is not_ready
+CRC-2-venue-clean-checkout,"run e11-full in a clean checkout with pdflatex, bibtex, xelatex, pdftotext/pdfinfo or equivalent",CRG-2-venue-toolchain-package=pass,needed before claiming full venue-toolchain reproducibility
+CRC-3-after-manuscript-edit,regenerate e11-top-conference-claim-decision-audit and e11-manuscript-claim-trace,CRG-3-claim-boundary-package=pass,"no new benchmark, predictive-score, or natural-counterexample wording without matching gates"
+CRC-4-before-commit,git status --short --branch,CRG-4-local-file-exclusion=pass,serverREADME.md remains local and untracked
