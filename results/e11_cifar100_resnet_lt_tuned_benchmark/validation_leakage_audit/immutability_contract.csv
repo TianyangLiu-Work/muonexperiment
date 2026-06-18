@@ -1,0 +1,5 @@
+contract_id,artifact,required_anchor,status,evidence
+IMM-1-registry-cardinality,results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv,164 validation_tuning rows,pass,164 rows
+IMM-2-family-grid-coverage,results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv,six preregistered recipe families,pass,adamw_cb_loss_tuned;adamw_cb_sampler_tuned;adamw_ce_tuned;ns_muon_cb_tuned;ns_muon_matrix_tuned;sgd_momentum_ce_tuned
+IMM-3-selection-rule-anchor,results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/selection_rules.csv,Primary validation objective is few balanced accuracy,pass,rule text present
+IMM-4-final-seed-anchor,results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/seed_split_contract.csv,final_claim seed_set 20..29 tuning_allowed no,pass,validated by selection and protocol gates

@@ -1,0 +1,6 @@
+{
+  "claim_authority": "no_new_claims",
+  "final_seed_set": "20..29",
+  "scope": "selection_leakage_and_optional_stopping_guard",
+  "validation_surface": "validation_tuning_only"
+}

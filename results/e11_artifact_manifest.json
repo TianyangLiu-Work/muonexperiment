@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 433495,
-      "size": "423.3 KB"
+      "size_bytes": 433955,
+      "size": "423.8 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2808356,
+      "size_bytes": 2823910,
       "size": "2.7 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1795099,
+      "size_bytes": 1801548,
       "size": "1.7 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289150329,
+      "size_bytes": 289153243,
       "size": "275.8 MB"
     },
     {
@@ -54,15 +54,15 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833089,
+      "size_bytes": 5833090,
       "size": "5.6 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 20793,
-      "size": "20.3 KB"
+      "size_bytes": 21127,
+      "size": "20.6 KB"
     },
     {
       "path": ".gitignore",
@@ -1561,6 +1561,21 @@
       "size": "832 B"
     },
     {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv",
+      "rows": 6,
+      "size": "1.3 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/observed_surface.csv",
+      "rows": 3,
+      "size": "553 B"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/immutability_contract.csv",
+      "rows": 4,
+      "size": "821 B"
+    },
+    {
       "path": "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
       "rows": 240,
       "size": "257.6 KB"
@@ -2172,6 +2187,10 @@
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md",
       "size": "10.3 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md",
+      "size": "6.3 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",

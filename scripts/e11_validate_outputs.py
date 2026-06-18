@@ -1228,6 +1228,13 @@ def main() -> None:
         / "claim_boundary_gates.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit") / "config.json",
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md"),
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit")
+        / "leakage_guard_matrix.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit") / "observed_surface.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit")
+        / "immutability_contract.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit") / "config.json",
+        Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md"),
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "final_family_design.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "primary_comparison_plan.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "paired_diff_mde.csv",
@@ -1250,6 +1257,7 @@ def main() -> None:
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_interim_audit.py"),
+        Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_leakage_audit.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_slurm_plan.py"),
         Path("scripts/e11_submit_cifar100_resnet_lt_tuned_benchmark_validation.py"),
@@ -1462,6 +1470,8 @@ def main() -> None:
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py",
         "e11-cifar-resnet-lt-tuned-benchmark-interim-audit:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_interim_audit.py",
+        "e11-cifar-resnet-lt-tuned-benchmark-leakage-audit:",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_leakage_audit.py",
         "e11-cifar-resnet-lt-tuned-benchmark-power-audit:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
         "e11-cifar-resnet-imbalance-sweep-results:",
@@ -6014,6 +6024,58 @@ def main() -> None:
             "TVS-2",
             "TVS-5",
             "final claim seed set `20..29` remains blocked",
+        ],
+    )
+    tuned_leakage_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit")
+    tuned_leakage_guards = pd.read_csv(tuned_leakage_dir / "leakage_guard_matrix.csv")
+    tuned_leakage_surface = pd.read_csv(tuned_leakage_dir / "observed_surface.csv")
+    tuned_leakage_immutable = pd.read_csv(tuned_leakage_dir / "immutability_contract.csv")
+    tuned_leakage_config = json.loads((tuned_leakage_dir / "config.json").read_text(encoding="utf-8"))
+    expected_leakage_guards = {
+        "TLA-1-selection-rule-frozen",
+        "TLA-2-validation-only-input-surface",
+        "TLA-3-array-order-contiguous",
+        "TLA-4-partial-grid-selection-block",
+        "TLA-5-final-output-quarantine",
+        "TLA-6-launch-history-auditable",
+    }
+    if set(tuned_leakage_guards["guard_id"]) != expected_leakage_guards:
+        raise AssertionError("CIFAR-100-LT tuned leakage audit guard IDs changed unexpectedly")
+    leakage_statuses = set(tuned_leakage_guards["status"].astype(str))
+    if not leakage_statuses.issubset({"pass", "ready", "not_ready"}):
+        raise AssertionError(f"CIFAR-100-LT tuned leakage audit status drifted: {leakage_statuses}")
+    required_pass_guards = {
+        "TLA-1-selection-rule-frozen",
+        "TLA-2-validation-only-input-surface",
+        "TLA-3-array-order-contiguous",
+        "TLA-5-final-output-quarantine",
+    }
+    pass_status = tuned_leakage_guards.set_index("guard_id")["status"].astype(str).to_dict()
+    if any(pass_status.get(guard_id) != "pass" for guard_id in required_pass_guards):
+        raise AssertionError("CIFAR-100-LT tuned leakage audit must pass frozen-rule, validation-only, array, and final quarantine guards")
+    if len(tuned_leakage_surface) != 3 or set(tuned_leakage_surface["contains_final_seed_data"].astype(str)) != {"no"}:
+        raise AssertionError("CIFAR-100-LT tuned leakage observed-surface audit must exclude final seed data")
+    if len(tuned_leakage_immutable) != 4 or not tuned_leakage_immutable["status"].astype(str).eq("pass").all():
+        raise AssertionError("CIFAR-100-LT tuned leakage immutability contract must pass all anchors")
+    if tuned_leakage_config.get("claim_authority") != "no_new_claims" or tuned_leakage_config.get(
+        "validation_surface"
+    ) != "validation_tuning_only":
+        raise AssertionError("CIFAR-100-LT tuned leakage config must preserve no-new-claims validation scope")
+    tuned_leakage_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark leakage audit",
+        tuned_leakage_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Leakage Audit",
+            "selection leakage and optional-stopping risk",
+            "partial validation observations",
+            "Leakage Guard Matrix",
+            "Observed Surface",
+            "Immutability Contract",
+            "does not authorize a new recipe grid",
+            "fresh unspent validation/final splits",
         ],
     )
     tuned_slurm_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan")
