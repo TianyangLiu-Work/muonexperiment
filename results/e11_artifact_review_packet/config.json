@@ -1,8 +1,8 @@
 {
   "purpose": "Artifact-review response packet for the current E11 submission bundle.",
-  "git_commit": "a787ec57d57dbee4a21ec770eb7bae4e56239767",
+  "git_commit": "05519fc8ec20c0b748fa5c83d06f1fb292ef27ce",
   "git_branch": "codex/resnet-gpu-tail-results",
   "python_command": "/data/conda_envs/SpatialQuantization/bin/python",
   "strongest_local_gate": "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full",
-  "claim_boundary": "current evidence bundle only; finite phase1 natural-null candidate with caveats; no v5 final, optional-stopping, partial-grid, or optimizer-performance upgrade"
+  "claim_boundary": "current evidence bundle only; finite phase1 natural-null candidate with caveats; no v5 final, optional-stopping, partial-grid, final tuned benchmark, or optimizer-performance upgrade"
 }

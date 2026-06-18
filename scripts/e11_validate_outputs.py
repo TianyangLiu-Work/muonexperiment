@@ -9063,6 +9063,9 @@ def main() -> None:
         "AR-C6",
         "AR-C7",
         "AR-C8",
+        "AR-C9",
+        "AR-C10",
+        "AR-C11",
         "AR-G1",
         "AR-G2",
         "AR-G3",
@@ -9078,6 +9081,10 @@ def main() -> None:
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-cifar-resnet-lt-tuned-benchmark-leakage-audit",
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-clean-worktree-replay-audit",
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-pdf-render-boundary-audit",
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan",
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-cifar-resnet-lt-tuned-benchmark-final-eval",
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-cifar-resnet-lt-tuned-benchmark-final-launch-audit",
+        "blocked_final_launch_gates_not_ready",
         "GPU via Slurm",
         "Not required to reproduce current paper claims",
     ]:
@@ -9098,6 +9105,9 @@ def main() -> None:
         "Tuned validation leakage audit",
         "Clean worktree replay",
         "PDF render boundary audit",
+        "Tuned final execution gates",
+        "Tuned final evaluator",
+        "Tuned final launch audit",
         "v5 final layer tables",
         "GPU dependence",
     }
@@ -9110,6 +9120,9 @@ def main() -> None:
         "partial validation observations cannot change the registry",
         "tracked-source replay evidence",
         "rendered-PDF byte/header/hash and source-claim trace evidence",
+        "Do not run final-safe-submit until every FEP gate passes",
+        "current not_ready gates forbid final benchmark wording",
+        "empty submit_command and blocked_final_launch_gates_not_ready",
         "not_required_for_current_artifact_review",
     ]:
         if phrase not in artifact_local_text:
@@ -9125,6 +9138,8 @@ def main() -> None:
         "rendered text-layer and page-metadata inspection are not_ready",
         "Do not claim rendered-PDF text-layer or metadata verification",
         "partial validation observations are progress accounting only",
+        "final outputs are absent, no submit command is emitted, and final seeds 20..29 remain quarantined",
+        "Do not run final-safe-submit or claim optimizer-performance",
         "Do not use failed v5 finals, not_ready gates, partial-family, or finite phase1 outputs as broader positive evidence",
         "Do not infer broad optimizer-performance, accuracy, or general predictive-condition claims",
     ]:
@@ -9145,6 +9160,7 @@ def main() -> None:
             "v5 predictive-condition upgrade",
             "partial-validation optional-stopping",
             "rendered text-layer and page-metadata inspection",
+            "final tuned benchmark Slurm submission or final-performance claim",
             "unqualified natural-null",
             "broad optimizer-performance claim",
             "Machine-readable tables",

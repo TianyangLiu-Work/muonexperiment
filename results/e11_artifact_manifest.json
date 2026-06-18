@@ -12,7 +12,7 @@
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2981317,
+      "size_bytes": 2988346,
       "size": "2.8 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1890534,
+      "size_bytes": 1895309,
       "size": "1.8 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289227399,
+      "size_bytes": 289230179,
       "size": "275.8 MB"
     },
     {
@@ -892,8 +892,8 @@
     },
     {
       "path": "results/e11_artifact_review_packet/command_matrix.csv",
-      "rows": 11,
-      "size": "4.0 KB"
+      "rows": 14,
+      "size": "5.2 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/gate_matrix.csv",
@@ -902,13 +902,13 @@
     },
     {
       "path": "results/e11_artifact_review_packet/local_state_contract.csv",
-      "rows": 10,
-      "size": "2.8 KB"
+      "rows": 13,
+      "size": "3.8 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/reviewer_response.csv",
-      "rows": 9,
-      "size": "3.4 KB"
+      "rows": 10,
+      "size": "3.9 KB"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv",
@@ -2036,7 +2036,7 @@
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
-      "size": "25.6 KB"
+      "size": "30.3 KB"
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",

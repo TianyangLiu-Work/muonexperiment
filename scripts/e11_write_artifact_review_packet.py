@@ -18,6 +18,7 @@ OUTPUT_DIR = Path("results/e11_artifact_review_packet")
 OUTPUT_PATH = Path("discussion/e11_artifact_review_packet.md")
 SUBMISSION_REPRO_DIR = Path("results/e11_submission_repro_audit")
 PDF_RENDER_BOUNDARY_DIR = Path("results/e11_pdf_render_boundary_audit")
+FINAL_BENCHMARK_DIR = Path("results/e11_cifar100_resnet_lt_tuned_benchmark")
 PYTHON_CMD = "/data/conda_envs/SpatialQuantization/bin/python"
 
 
@@ -114,6 +115,30 @@ def command_matrix() -> pd.DataFrame:
             "claim_boundary": "Supports binary/hash/source-claim trace evidence now; rendered text-layer and metadata verification remain tool-gated.",
         },
         {
+            "command_id": "AR-C9",
+            "command": f"make PYTHON={PYTHON_CMD} e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan",
+            "purpose": "Regenerate the no-side-effect final-claim execution contract and gate-checked Slurm wrapper plan.",
+            "compute_mode": "CPU",
+            "expected_state": "refreshes final_execution_plan tables and discussion without submitting final jobs",
+            "claim_boundary": "Does not submit jobs or inspect final outputs; final submit remains blocked until every FEP gate passes.",
+        },
+        {
+            "command_id": "AR-C10",
+            "command": f"make PYTHON={PYTHON_CMD} e11-cifar-resnet-lt-tuned-benchmark-final-eval",
+            "purpose": "Regenerate the fixed final evaluator and final-claim gate report.",
+            "compute_mode": "CPU",
+            "expected_state": "currently reports not_ready until selected final recipe outputs are complete",
+            "claim_boundary": "Does not authorize benchmark wording when final rows are absent or final claim gates are not_ready.",
+        },
+        {
+            "command_id": "AR-C11",
+            "command": f"make PYTHON={PYTHON_CMD} e11-cifar-resnet-lt-tuned-benchmark-final-launch-audit",
+            "purpose": "Compute queue-aware final-claim launch readiness without submitting.",
+            "compute_mode": "CPU",
+            "expected_state": "currently records blocked_final_launch_gates_not_ready and emits no submit command",
+            "claim_boundary": "Dry-run audit only; use e11-cifar-resnet-lt-tuned-benchmark-final-safe-submit only after all final launch gates pass.",
+        },
+        {
             "command_id": "AR-G1",
             "command": f"make PYTHON={PYTHON_CMD} e11-cifar-resnet-condition-score-v5-architecture-results",
             "purpose": "Regenerate the registered ResNeXt50-32x4d final architecture split if a new run is explicitly needed.",
@@ -185,6 +210,10 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
     )
     clean_replay = read_csv(Path("results/e11_clean_worktree_replay_audit/run_summary.csv"))
     pdf_render_gates = read_csv(PDF_RENDER_BOUNDARY_DIR / "render_boundary_gates.csv")
+    final_execution_gates = read_csv(FINAL_BENCHMARK_DIR / "final_execution_plan/gate_matrix.csv")
+    final_eval_gates = read_csv(FINAL_BENCHMARK_DIR / "final_evaluation/claim_gate_report.csv")
+    final_launch_gates = read_csv(FINAL_BENCHMARK_DIR / "final_launch_audit/latest_gate_snapshot.csv")
+    final_launch_decision = read_csv(FINAL_BENCHMARK_DIR / "final_launch_audit/latest_final_launch_decision.csv")
     leakage_state = "missing"
     leakage_evidence = "validation_leakage_audit/leakage_guard_matrix.csv is absent"
     if not leakage_guards.empty and {"guard_id", "status"}.issubset(leakage_guards.columns):
@@ -209,6 +238,37 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
         pdf_render_evidence = (
             "Rendered PDF binary/hash/source-trace gates pass; text-layer and metadata gates are explicit "
             "pass/not_ready states: " + pdf_render_state
+        )
+    final_execution_state = "missing"
+    final_execution_evidence = "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/gate_matrix.csv is absent"
+    if not final_execution_gates.empty and {"gate_id", "status"}.issubset(final_execution_gates.columns):
+        final_execution_status = status_lookup(final_execution_gates, "gate_id", "status")
+        final_execution_state = "ready" if set(final_execution_status.values()) == {"pass"} else "not_ready"
+        final_execution_evidence = "; ".join(
+            f"{gate}={status}" for gate, status in final_execution_status.items()
+        )
+    final_eval_state = "missing"
+    final_eval_evidence = (
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation/claim_gate_report.csv is absent"
+    )
+    if not final_eval_gates.empty and {"gate_id", "status", "claim_state"}.issubset(final_eval_gates.columns):
+        final_eval_status = status_lookup(final_eval_gates, "gate_id", "status")
+        final_eval_claim = status_lookup(final_eval_gates, "gate_id", "claim_state")
+        final_eval_state = final_eval_claim.get("TFE-6-final-claim-state", "unknown")
+        final_eval_evidence = "; ".join(f"{gate}={status}" for gate, status in final_eval_status.items())
+    final_launch_state = "missing"
+    final_launch_evidence = (
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/final_launch_audit/latest_final_launch_decision.csv is absent"
+    )
+    if not final_launch_decision.empty and "submission_status" in final_launch_decision.columns:
+        final_launch_state = str(final_launch_decision["submission_status"].iloc[0])
+        launch_status = status_lookup(final_launch_gates, "gate_id", "status")
+        submit_command = ""
+        if "submit_command" in final_launch_decision.columns:
+            submit_command = str(final_launch_decision["submit_command"].fillna("").iloc[0])
+        final_launch_evidence = (
+            "; ".join(f"{gate}={status}" for gate, status in launch_status.items())
+            + f"; submit_command={submit_command or '<empty>'}"
         )
     server_readme_state = "present_untracked_local_file" if Path("serverREADME.md").exists() else "absent"
     final_arch_layer_summary = Path(
@@ -265,6 +325,24 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
             "state": pdf_render_state,
             "evidence": pdf_render_evidence,
             "reviewer_instruction": "Use this as rendered-PDF byte/header/hash and source-claim trace evidence; do not claim text-layer or metadata inspection until PRB-4/PRB-5 pass.",
+        },
+        {
+            "item": "Tuned final execution gates",
+            "state": final_execution_state,
+            "evidence": final_execution_evidence,
+            "reviewer_instruction": "Do not run final-safe-submit until every FEP gate passes; this CPU plan does not submit final jobs.",
+        },
+        {
+            "item": "Tuned final evaluator",
+            "state": final_eval_state,
+            "evidence": final_eval_evidence,
+            "reviewer_instruction": "Use this only after final outputs exist; current not_ready gates forbid final benchmark wording.",
+        },
+        {
+            "item": "Tuned final launch audit",
+            "state": final_launch_state,
+            "evidence": final_launch_evidence,
+            "reviewer_instruction": "Treat an empty submit_command and blocked_final_launch_gates_not_ready state as evidence that artifact review has not launched final claims.",
         },
         {
             "item": "v5 final layer tables",
@@ -331,6 +409,12 @@ def reviewer_response() -> pd.DataFrame:
             "forbidden_shortcut": "Do not use the partial leaderboard to change the recipe grid, selection rule, launch order, final seed plan, or benchmark wording.",
         },
         {
+            "objection": "Can final benchmark jobs or final-performance claims be triggered by artifact review?",
+            "answer": "No. The final execution plan, final evaluator, and final launch audit are CPU dry-run/not_ready gates: final outputs are absent, no submit command is emitted, and final seeds 20..29 remain quarantined until selection gates and queue capacity pass.",
+            "status": "final_benchmark_blocked",
+            "forbidden_shortcut": "Do not run final-safe-submit or claim optimizer-performance from partial validation, dry-run launch audits, or not_ready final evaluator gates.",
+        },
+        {
             "objection": "Why are v5 final and natural-negative claims still limited?",
             "answer": "The v5 final splits are complete and failed the registered P0 gate family. The natural-negative phase1 family is complete and supports only a finite registered null candidate with detectable-effect and tail-quality caveats.",
             "status": "claim_boundary_preserved",
@@ -364,13 +448,13 @@ def write_outputs(
         "git_branch": git_output("branch", "--show-current"),
         "python_command": PYTHON_CMD,
         "strongest_local_gate": f"make PYTHON={PYTHON_CMD} e11-full",
-        "claim_boundary": "current evidence bundle only; finite phase1 natural-null candidate with caveats; no v5 final, optional-stopping, partial-grid, or optimizer-performance upgrade",
+        "claim_boundary": "current evidence bundle only; finite phase1 natural-null candidate with caveats; no v5 final, optional-stopping, partial-grid, final tuned benchmark, or optimizer-performance upgrade",
     }
     (OUTPUT_DIR / "config.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
 
     text = f"""# E11 Artifact Review Packet
 
-This generated packet converts the submission reproducibility audit into an artifact-review response plan. It is intentionally conservative: it supports the current evidence bundle, records the CPU reviewer path, and keeps preferred LaTeX clean-checkout, v5 final, partial-validation optional-stopping, unqualified natural-null, and optimizer-performance claims outside the current artifact boundary.
+This generated packet converts the submission reproducibility audit into an artifact-review response plan. It is intentionally conservative: it supports the current evidence bundle, records the CPU reviewer path, and keeps preferred LaTeX clean-checkout, v5 final, partial-validation optional-stopping, unqualified natural-null, final tuned benchmark launch/claim gates, and optimizer-performance claims outside the current artifact boundary.
 
 ## Reviewer Command Matrix
 
@@ -392,7 +476,7 @@ This generated packet converts the submission reproducibility audit into an arti
 
 Allowed now: artifact reviewers can reproduce the current bundle with `make PYTHON={PYTHON_CMD} e11-full`, or inspect the narrower steps `make PYTHON={PYTHON_CMD} e11-paper-assets`, `make PYTHON={PYTHON_CMD} e11-paper-pdf`, and `make PYTHON={PYTHON_CMD} e11-check`.
 
-Blocked now: preferred pdflatex/bibtex/xelatex clean-checkout reproducibility, any v5 predictive-condition upgrade, partial-validation optional-stopping or recipe-selection authority, any unqualified natural-null or counterexample wording, and any broad optimizer-performance claim.
+Blocked now: preferred pdflatex/bibtex/xelatex clean-checkout reproducibility, any v5 predictive-condition upgrade, partial-validation optional-stopping or recipe-selection authority, final tuned benchmark Slurm submission or final-performance claim until final execution/evaluation/launch gates pass, any unqualified natural-null or counterexample wording, and any broad optimizer-performance claim.
 
 Machine-readable tables:
 - [command_matrix.csv](../results/e11_artifact_review_packet/command_matrix.csv)

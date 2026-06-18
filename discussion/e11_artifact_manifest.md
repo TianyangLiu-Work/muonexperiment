@@ -184,10 +184,10 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_submission_repro_audit/pdf_artifact_checks.csv                                                 |      2 | 313 B     |
 | results/e11_submission_repro_audit/source_package_manifest.csv                                             |     11 | 1.8 KB    |
 | results/e11_submission_repro_audit/build_gate_summary.csv                                                  |      6 | 1.1 KB    |
-| results/e11_artifact_review_packet/command_matrix.csv                                                      |     11 | 4.0 KB    |
+| results/e11_artifact_review_packet/command_matrix.csv                                                      |     14 | 5.2 KB    |
 | results/e11_artifact_review_packet/gate_matrix.csv                                                         |      6 | 1.6 KB    |
-| results/e11_artifact_review_packet/local_state_contract.csv                                                |     10 | 2.8 KB    |
-| results/e11_artifact_review_packet/reviewer_response.csv                                                   |      9 | 3.4 KB    |
+| results/e11_artifact_review_packet/local_state_contract.csv                                                |     13 | 3.8 KB    |
+| results/e11_artifact_review_packet/reviewer_response.csv                                                   |     10 | 3.9 KB    |
 | results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv                 |      7 | 2.7 KB    |
 | results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv                          |      5 | 692 B     |
 | results/e11_condition_score_v5_protocol/validation_score_freeze/validation_gate_report.csv                 |      6 | 838 B     |
@@ -428,7 +428,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_end_of_draft_self_review.md                                                  | 7.3 KB   |
 | discussion/e11_reference_audit.md                                                           | 6.1 KB   |
 | discussion/e11_submission_repro_audit.md                                                    | 9.2 KB   |
-| discussion/e11_artifact_review_packet.md                                                    | 25.6 KB  |
+| discussion/e11_artifact_review_packet.md                                                    | 30.3 KB  |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB  |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB  |
 | discussion/e11_top_conference_gap_register.md                                               | 61.0 KB  |
