@@ -221,7 +221,7 @@ Current launch status: `{status}`.
 
 ## Launch Decision
 
-{markdown_table(decision, ["timestamp_utc", "submission_status", "submit_command", "slurm_job_id", "current_queue_elements_before_submit", "available_submit_slots_before_submit", "planned_setting_count", "array_expression", "planned_recipe_families", "final_seed_status", "phase_guard"])}
+{markdown_table(decision, ["timestamp_utc", "submission_status", "submit_command", "slurm_job_id", "current_queue_elements_before_submit", "available_submit_slots_before_submit", "planned_setting_count", "array_expression", "planned_recipe_families", "completed_settings_before_submit", "missing_settings_not_inflight_before_submit", "inflight_validation_indices_before_submit", "final_seed_status", "phase_guard"])}
 
 ## Selected Validation Settings
 

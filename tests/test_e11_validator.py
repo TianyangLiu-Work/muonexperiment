@@ -16,6 +16,7 @@ from e11_condition_geometry.artifacts import (
     MAIN_EVIDENCE_STAGES,
     MAIN_RESULT_SCRIPTS,
     PAPER_ASSET_SCRIPTS,
+    ZERO_ROW_ALLOWED_TABLES,
 )
 
 
@@ -271,6 +272,7 @@ def valid_manifest() -> dict:
         "artifact_dirs": [{"path": item["path"]} for item in ARTIFACT_DIRS],
         "key_tables": [{"path": path, "rows": 1} for path in KEY_TABLES],
         "key_documents": [{"path": path} for path in KEY_DOCUMENTS],
+        "zero_row_allowed_tables": list(ZERO_ROW_ALLOWED_TABLES),
         "ignore_policy": [{"path_or_pattern": item["path_or_pattern"]} for item in IGNORE_POLICY],
     }
 
@@ -550,6 +552,15 @@ def test_artifact_manifest_schema_rejects_missing_key_table() -> None:
         validator.assert_valid_artifact_manifest(manifest)
 
 
+def test_artifact_manifest_schema_rejects_missing_zero_row_policy() -> None:
+    validator = load_validator_module()
+    manifest = valid_manifest()
+    manifest["zero_row_allowed_tables"] = []
+
+    with pytest.raises(AssertionError, match="missing zero-row allowed table policy"):
+        validator.assert_valid_artifact_manifest(manifest)
+
+
 def test_artifact_manifest_schema_rejects_nonpositive_rows() -> None:
     validator = load_validator_module()
     manifest = valid_manifest()
@@ -557,6 +568,15 @@ def test_artifact_manifest_schema_rejects_nonpositive_rows() -> None:
 
     with pytest.raises(AssertionError, match="non-positive row counts"):
         validator.assert_valid_artifact_manifest(manifest)
+
+
+def test_artifact_manifest_schema_allows_registered_zero_row_tables() -> None:
+    validator = load_validator_module()
+    manifest = valid_manifest()
+    by_path = {item["path"]: item for item in manifest["key_tables"]}
+    by_path[ZERO_ROW_ALLOWED_TABLES[-1]]["rows"] = 0
+
+    validator.assert_valid_artifact_manifest(manifest)
 
 
 def test_artifact_registry_has_unique_entries() -> None:

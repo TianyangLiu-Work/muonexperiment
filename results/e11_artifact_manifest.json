@@ -5,35 +5,35 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 432560,
-      "size": "422.4 KB"
+      "size_bytes": 432919,
+      "size": "422.8 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2788600,
+      "size_bytes": 2789148,
       "size": "2.7 MB"
     },
     {
       "path": "tests",
       "role": "Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.",
       "commit_policy": "commit",
-      "size_bytes": 66592,
-      "size": "65.0 KB"
+      "size_bytes": 67362,
+      "size": "65.8 KB"
     },
     {
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1789835,
+      "size_bytes": 1791197,
       "size": "1.7 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289146651,
+      "size_bytes": 289158434,
       "size": "275.8 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833089,
+      "size_bytes": 5833090,
       "size": "5.6 MB"
     },
     {
@@ -888,7 +888,7 @@
     {
       "path": "results/e11_submission_repro_audit/build_gate_summary.csv",
       "rows": 6,
-      "size": "994 B"
+      "size": "1.1 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/command_matrix.csv",
@@ -1523,22 +1523,22 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_launch_decision.csv",
       "rows": 1,
-      "size": "832 B"
+      "size": "685 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_selected_settings.csv",
-      "rows": 17,
-      "size": "6.1 KB"
+      "rows": 0,
+      "size": "112 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_queue_snapshot.csv",
-      "rows": 7,
-      "size": "614 B"
+      "rows": 24,
+      "size": "1.9 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/launch_history.csv",
-      "rows": 2,
-      "size": "1.1 KB"
+      "rows": 4,
+      "size": "1.4 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
@@ -1867,7 +1867,7 @@
     },
     {
       "path": "discussion/e11_submission_repro_audit.md",
-      "size": "8.3 KB"
+      "size": "8.8 KB"
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
@@ -2159,12 +2159,17 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md",
-      "size": "10.5 KB"
+      "size": "4.2 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_practical_muon_bridge.md",
       "size": "5.7 KB"
     }
+  ],
+  "zero_row_allowed_tables": [
+    "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/remaining_work.csv",
+    "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/seed_level_primary_ratios.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_selected_settings.csv"
   ],
   "ignore_policy": [
     {

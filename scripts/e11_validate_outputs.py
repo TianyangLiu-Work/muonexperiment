@@ -21,6 +21,7 @@ from e11_condition_geometry.artifacts import (
     KEY_DOCUMENTS,
     KEY_TABLES,
     MAIN_RESULT_SCRIPTS,
+    ZERO_ROW_ALLOWED_TABLES,
 )
 import pandas as pd
 
@@ -261,10 +262,12 @@ def assert_valid_artifact_manifest(manifest_json: dict) -> None:
     manifest_tables = {item.get("path") for item in manifest_json.get("key_tables", [])}
     if not required_manifest_tables.issubset(manifest_tables):
         raise AssertionError(f"artifact manifest missing key tables: {required_manifest_tables - manifest_tables}")
-    zero_row_allowed_tables = {
-        "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/remaining_work.csv",
-        "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/seed_level_primary_ratios.csv",
-    }
+    zero_row_allowed_tables = set(ZERO_ROW_ALLOWED_TABLES)
+    manifest_zero_allowed = set(manifest_json.get("zero_row_allowed_tables", []))
+    if not zero_row_allowed_tables.issubset(manifest_zero_allowed):
+        raise AssertionError(
+            f"artifact manifest missing zero-row allowed table policy: {zero_row_allowed_tables - manifest_zero_allowed}"
+        )
     bad_manifest_tables = [
         item.get("path")
         for item in manifest_json.get("key_tables", [])

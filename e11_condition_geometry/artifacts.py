@@ -410,6 +410,12 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_head_tail_alignment_ablation/summary.csv",
 )
 
+ZERO_ROW_ALLOWED_TABLES: tuple[str, ...] = (
+    "results/e11_natural_negative_search_protocol/phase1_interim_synthesis/remaining_work.csv",
+    "results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation/seed_level_primary_ratios.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_selected_settings.csv",
+)
+
 
 KEY_DOCUMENTS: tuple[str, ...] = (
     "README_E11.md",
