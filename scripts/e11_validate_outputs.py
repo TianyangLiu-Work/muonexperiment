@@ -488,6 +488,8 @@ def assert_top_conference_claim_decision_audit(
         "unqualified absence of natural counterexamples outside the registered phase1/phase2 spaces",
         "quality-failed or head-gain-failed rows validate the mechanism",
         "Muon or spectral training is competitive on long-tail benchmarks",
+        "local Muon drift compatibility implies benchmark superiority",
+        "sampled bridge states represent the full training trajectory distribution",
         "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server",
     ]:
         if phrase not in joined_blocked:
@@ -501,6 +503,10 @@ def assert_top_conference_claim_decision_audit(
         "phase2_observed=8/8",
         "phase2_head_gain_gate_fail_rows=8",
         "TVS-1-validation-grid-complete=not_ready",
+        "MSD-T1-local-response-integrand=local_integrand_supported_on_sampled_states",
+        "MSD-T2-state-occupancy-measure=occupancy_measure_missing_for_final_training",
+        "MSD-T4-terminal-risk-functional=final_performance_negative_boundary",
+        "MSG-4-top-tier-practical-claim=blocked_until_state_distribution_and_final_gates_pass",
         "R3-preferred-latex-toolchain=not_ready",
     ]:
         if phrase not in evidence_text:
@@ -520,6 +526,7 @@ def assert_top_conference_claim_decision_audit(
         "using any final row to refit or reselect the score",
         "claiming a universal finite null or natural counterexample without adjusted primary evidence",
         "turning lower local drift into a final tail-accuracy claim",
+        "treating sampled bridge states as the full training trajectory distribution",
     ]:
         if phrase not in forbidden_shortcuts:
             raise AssertionError(f"top-conference reviewer objection matrix missing forbidden shortcut: {phrase}")
@@ -534,6 +541,9 @@ def assert_top_conference_claim_decision_audit(
         "26/26 phase1 observed, 8/8 phase2 observed",
         "finite-null-candidate wording only with detectable-effect, head-gain, and quality caveats",
         "quarantine benchmark claims",
+        "discussion/e11_muon_state_distribution_contract.md",
+        "local compatibility can coexist with poor final performance",
+        "occupancy logging",
         "preferred-LaTeX clean-checkout completion",
     ]:
         if phrase not in rebuttal_text:
@@ -555,6 +565,8 @@ def assert_top_conference_claim_decision_audit(
         "frozen completed negative boundary",
         "finite registered null candidates with detectable-effect, head-gain, and quality caveats",
         "quarantine all competitive optimizer wording",
+        "state-distribution contract",
+        "state-distribution occupancy summaries",
         "preferred-LaTeX clean-checkout gap",
     ]:
         if phrase not in manuscript_text:
@@ -7705,6 +7717,12 @@ def main() -> None:
             "quality_gate_fail_rows=23",
             "using any final row to refit or reselect the score",
             "quarantine benchmark claims",
+            "discussion/e11_muon_state_distribution_contract.md",
+            "state-distribution transport contract",
+            "MSD-T1-local-response-integrand=local_integrand_supported_on_sampled_states",
+            "MSD-T2-state-occupancy-measure=occupancy_measure_missing_for_final_training",
+            "MSG-4-top-tier-practical-claim=blocked_until_state_distribution_and_final_gates_pass",
+            "local compatibility can coexist with poor final performance",
             "worst-case-vs-realized distinction",
             "finite-null-candidate wording only with detectable-effect, head-gain, and quality caveats",
         ],

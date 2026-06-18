@@ -35,6 +35,8 @@ SOURCE_FILES = {
     "tuned_benchmark_gates": Path(
         "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv"
     ),
+    "muon_state_terms": Path("results/e11_muon_state_distribution_contract/state_distribution_terms.csv"),
+    "muon_claim_gates": Path("results/e11_muon_state_distribution_contract/claim_gate_ladder.csv"),
     "submission_build_gates": Path("results/e11_submission_repro_audit/build_gate_summary.csv"),
     "gap_register": Path("results/e11_top_conference_gap_register/gap_register.csv"),
 }
@@ -64,6 +66,8 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
     phase2_gates = sources["natural_phase2_gates"]
     phase2_decisions = sources["natural_phase2_decisions"]
     tuned_gates = sources["tuned_benchmark_gates"]
+    muon_terms = sources["muon_state_terms"]
+    muon_gates = sources["muon_claim_gates"]
     submission_gates = sources["submission_build_gates"]
 
     pto1 = one(proof, "obligation_id", "PTO-1-local-linearization")
@@ -78,6 +82,10 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
     benchmark_scope = one(scopes, "claim_scope", "optimizer_benchmark")
     natural_all = one(natural_summary, "scope", "all_observed")
     v5_p0 = one(v5_gates, "gate_id", "v5_p0_predictive_condition_claim")
+    msd_t1 = one(muon_terms, "term_id", "MSD-T1-local-response-integrand")
+    msd_t2 = one(muon_terms, "term_id", "MSD-T2-state-occupancy-measure")
+    msd_t4 = one(muon_terms, "term_id", "MSD-T4-terminal-risk-functional")
+    msg_4 = one(muon_gates, "gate_id", "MSG-4-top-tier-practical-claim")
     natural_complete = int(natural_all["missing_primary_rows"]) == 0
     natural_finite_null = "finite_null_candidate" in set(natural_claims["current_status"].astype(str))
     phase2_gate_lookup = phase2_gates.set_index("gate_id")["status"].astype(str).to_dict()
@@ -159,12 +167,35 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
                 "claim_id": "TCD-5-optimizer-performance-benchmark",
                 "paper_section": "practical optimizer scope",
                 "current_decision": "blocked_protocol_pending",
-                "evidence_status": f"{pto6['current_status']}; {status_line(tuned_gates, 'gate_id')}",
-                "author_allowed_wording": benchmark_scope["allowed_claim"],
-                "author_blocked_wording": benchmark_scope["blocked_claim"],
-                "decisive_gate": benchmark_scope["decisive_gate"],
-                "required_next_action": pto6["required_upgrade"],
-                "source_artifacts": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md; discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
+                "evidence_status": (
+                    f"{pto6['current_status']}; {status_line(tuned_gates, 'gate_id')}; "
+                    f"{msd_t1['term_id']}={msd_t1['careful_status']}; "
+                    f"{msd_t2['term_id']}={msd_t2['careful_status']}; "
+                    f"{msd_t4['term_id']}={msd_t4['careful_status']}; "
+                    f"{msg_4['gate_id']}={msg_4['current_status']}"
+                ),
+                "author_allowed_wording": (
+                    f"{benchmark_scope['allowed_claim']}; state-distribution transport contract "
+                    "allows sampled-state local compatibility and negative final pilot boundary only"
+                ),
+                "author_blocked_wording": (
+                    f"{benchmark_scope['blocked_claim']}; local Muon drift compatibility implies "
+                    "benchmark superiority; sampled bridge states represent the full training trajectory distribution"
+                ),
+                "decisive_gate": (
+                    f"{benchmark_scope['decisive_gate']} plus state-distribution occupancy logging "
+                    "and MSG-4 top-tier practical gate"
+                ),
+                "required_next_action": (
+                    f"{pto6['required_upgrade']} plus record trajectory occupancy summaries during "
+                    "tuned validation and final seeds"
+                ),
+                "source_artifacts": (
+                    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md; "
+                    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md; "
+                    "discussion/e11_muon_state_distribution_contract.md; "
+                    "results/e11_muon_state_distribution_contract/claim_gate_ladder.csv"
+                ),
             },
             {
                 "claim_id": "TCD-6-artifact-reproducibility",
@@ -217,10 +248,18 @@ def build_reviewer_objection_matrix(claims: pd.DataFrame) -> pd.DataFrame:
             {
                 "objection_id": "RO-4-muon-overclaim",
                 "likely_objection": "The manuscript implies practical Muon benchmark superiority.",
-                "current_response": "TCD-5 blocks benchmark wording and keeps Muon as motivation/local compatibility until tuned validation and final seeds finish.",
+                "current_response": (
+                    "TCD-5 blocks benchmark wording; the Muon state-distribution contract separates "
+                    "sampled-state local compatibility from trajectory occupancy and notes local "
+                    "compatibility can coexist with poor final performance until tuned validation, "
+                    "occupancy logging, and final seeds finish."
+                ),
                 "response_status": lookup.loc["TCD-5-optimizer-performance-benchmark", "current_decision"],
                 "missing_gate": lookup.loc["TCD-5-optimizer-performance-benchmark", "decisive_gate"],
-                "forbidden_shortcut": "turning lower local drift into a final tail-accuracy claim",
+                "forbidden_shortcut": (
+                    "turning lower local drift into a final tail-accuracy claim or treating sampled "
+                    "bridge states as the full training trajectory distribution"
+                ),
             },
             {
                 "objection_id": "RO-5-artifact-reproducibility",
@@ -264,8 +303,12 @@ def build_paper_sequence(claims: pd.DataFrame) -> pd.DataFrame:
             {
                 "sequence_step": 5,
                 "claim_id": "TCD-5-optimizer-performance-benchmark",
-                "paper_move": "Keep practical Muon training results in scope-control unless the tuned benchmark protocol completes.",
-                "writing_rule": "Do not let local drift diagnostics imply benchmark superiority.",
+                "paper_move": (
+                    "Keep practical Muon training results in scope-control and route them through "
+                    "the state-distribution transport contract unless tuned benchmark protocol and "
+                    "occupancy logging complete."
+                ),
+                "writing_rule": "Do not let sampled local drift diagnostics imply benchmark superiority or state occupancy.",
             },
             {
                 "sequence_step": 6,
@@ -323,8 +366,19 @@ def build_rebuttal_response_pack(claims: pd.DataFrame, objections: pd.DataFrame)
                 "response_posture": claim_lookup.loc[
                     "TCD-5-optimizer-performance-benchmark", "current_decision"
                 ],
-                "evidence_to_cite": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md; discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md; discussion/e11_quantitative_claim_ledger.md",
-                "manuscript_edit": "Keep Muon as motivation and selected-state/local compatibility; quarantine benchmark claims until validation selection and untouched final seeds finish.",
+                "evidence_to_cite": (
+                    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md; "
+                    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md; "
+                    "discussion/e11_muon_state_distribution_contract.md; "
+                    "results/e11_muon_state_distribution_contract/claim_gate_ladder.csv; "
+                    "discussion/e11_quantitative_claim_ledger.md"
+                ),
+                "manuscript_edit": (
+                    "Keep Muon as motivation, selected-state/local compatibility, and a "
+                    "state-distribution transport contract: local compatibility can coexist with poor "
+                    "final performance; quarantine benchmark claims until validation selection, "
+                    "occupancy logging, and untouched final seeds finish."
+                ),
                 "missing_gate": objection_lookup.loc["RO-4-muon-overclaim", "missing_gate"],
                 "forbidden_rebuttal": objection_lookup.loc["RO-4-muon-overclaim", "forbidden_shortcut"],
             },
@@ -395,8 +449,14 @@ def build_manuscript_edit_queue(claims: pd.DataFrame, gaps: pd.DataFrame) -> pd.
                 "edit_id": "MEQ-5-performance-benchmark-quarantine",
                 "target_section": "Practical Muon / limitations",
                 "claim_id": "TCD-5-optimizer-performance-benchmark",
-                "edit_action": "Keep standard/recipe/negative NS-Muon pilots as benchmark context and quarantine all competitive optimizer wording.",
-                "acceptance_check": gap_lookup.loc["P0-StandardBenchmark", "acceptance_gate"],
+                "edit_action": (
+                    "Keep standard/recipe/negative NS-Muon pilots as benchmark context, cite the "
+                    "state-distribution contract, and quarantine all competitive optimizer wording."
+                ),
+                "acceptance_check": (
+                    f"{gap_lookup.loc['P0-StandardBenchmark', 'acceptance_gate']} Also require "
+                    "state-distribution occupancy summaries for selected recipes before practical-performance wording."
+                ),
                 "current_decision": claim_lookup.loc[
                     "TCD-5-optimizer-performance-benchmark", "current_decision"
                 ],
@@ -429,8 +489,8 @@ This generated audit is the paper-level claim contract. It is stricter than the
 quantitative claim ledger: each row says whether a top-conference manuscript can
 write a claim now, must present it as a registered pending or completed negative
 boundary, or must block the wording until a named gate completes. It is generated from existing
-proof-obligation, v5 final-evaluator, natural-negative, tuned-benchmark, and
-submission-reproducibility tables; it does not add new empirical results.
+proof-obligation, v5 final-evaluator, natural-negative, tuned-benchmark,
+Muon state-distribution, and submission-reproducibility tables; it does not add new empirical results.
 
 ## Readiness Summary
 

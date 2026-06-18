@@ -264,14 +264,14 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_muon_state_distribution_contract/falsification_tests.csv                                       |      5 | 2.3 KB    |
 | results/e11_muon_state_distribution_contract/claim_gate_ladder.csv                                         |      4 | 1.1 KB    |
 | results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 24.6 KB   |
-| results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv                                  |      6 | 4.8 KB    |
-| results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv                              |      5 | 2.1 KB    |
-| results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv                                 |      5 | 3.4 KB    |
-| results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv                                  |      6 | 2.9 KB    |
-| results/e11_top_conference_claim_decision_audit/paper_sequence.csv                                         |      6 | 1.6 KB    |
+| results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv                                  |      6 | 5.7 KB    |
+| results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv                              |      5 | 2.4 KB    |
+| results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv                                 |      5 | 3.7 KB    |
+| results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv                                  |      6 | 3.0 KB    |
+| results/e11_top_conference_claim_decision_audit/paper_sequence.csv                                         |      6 | 1.7 KB    |
 | results/e11_top_conference_claim_decision_audit/readiness_summary.csv                                      |      6 | 237 B     |
 | results/e11_manuscript_claim_trace/claim_trace.csv                                                         |      6 | 2.5 KB    |
-| results/e11_manuscript_claim_trace/blocked_phrase_audit.csv                                                |      8 | 904 B     |
+| results/e11_manuscript_claim_trace/blocked_phrase_audit.csv                                                |     10 | 1.1 KB    |
 | results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv                                     |      9 | 5.8 KB    |
 | results/e11_mechanism_referee_audit/theory_measurement_contract.csv                                        |      6 | 3.4 KB    |
 | results/e11_mechanism_referee_audit/falsification_trigger_matrix.csv                                       |      6 | 2.8 KB    |
@@ -380,13 +380,13 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_completion_audit.md                                                          | 5.3 KB  |
 | discussion/e11_end_of_draft_self_review.md                                                  | 7.3 KB  |
 | discussion/e11_reference_audit.md                                                           | 6.1 KB  |
-| discussion/e11_submission_repro_audit.md                                                    | 8.5 KB  |
+| discussion/e11_submission_repro_audit.md                                                    | 8.6 KB  |
 | discussion/e11_artifact_review_packet.md                                                    | 14.9 KB |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB |
 | discussion/e11_top_conference_gap_register.md                                               | 55.3 KB |
-| discussion/e11_top_conference_claim_decision_audit.md                                       | 32.0 KB |
-| discussion/e11_manuscript_claim_trace.md                                                    | 7.5 KB  |
+| discussion/e11_top_conference_claim_decision_audit.md                                       | 35.2 KB |
+| discussion/e11_manuscript_claim_trace.md                                                    | 7.9 KB  |
 | discussion/e11_mechanism_referee_audit.md                                                   | 30.5 KB |
 | discussion/e11_bold_conjecture_register.md                                                  | 14.5 KB |
 | discussion/e11_muon_state_distribution_contract.md                                          | 13.8 KB |
