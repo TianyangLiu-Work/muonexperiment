@@ -97,6 +97,14 @@ def command_matrix() -> pd.DataFrame:
             "claim_boundary": "Only audits partial validation visibility; it does not authorize recipe selection or final-performance wording.",
         },
         {
+            "command_id": "AR-C7",
+            "command": f"make PYTHON={PYTHON_CMD} e11-clean-worktree-replay-audit",
+            "purpose": "Replay e11-check from a detached clean Git worktree.",
+            "compute_mode": "CPU",
+            "expected_state": "records run_summary.csv, gate_matrix.csv, and command_log_tail.txt for the tracked-source replay",
+            "claim_boundary": "Checks tracked-source artifact replay only; preferred LaTeX clean-checkout reproducibility remains separate.",
+        },
+        {
             "command_id": "AR-G1",
             "command": f"make PYTHON={PYTHON_CMD} e11-cifar-resnet-condition-score-v5-architecture-results",
             "purpose": "Regenerate the registered ResNeXt50-32x4d final architecture split if a new run is explicitly needed.",
@@ -166,12 +174,23 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
     leakage_guards = read_csv(
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv")
     )
+    clean_replay = read_csv(Path("results/e11_clean_worktree_replay_audit/run_summary.csv"))
     leakage_state = "missing"
     leakage_evidence = "validation_leakage_audit/leakage_guard_matrix.csv is absent"
     if not leakage_guards.empty and {"guard_id", "status"}.issubset(leakage_guards.columns):
         status_by_guard = status_lookup(leakage_guards, "guard_id", "status")
         leakage_state = "pass" if set(status_by_guard.values()) == {"pass"} else "check_required"
         leakage_evidence = "; ".join(f"{guard}={status}" for guard, status in status_by_guard.items())
+    clean_replay_state = "missing"
+    clean_replay_evidence = "results/e11_clean_worktree_replay_audit/run_summary.csv is absent"
+    if not clean_replay.empty and {"status", "command", "server_readme_present_in_worktree"}.issubset(
+        clean_replay.columns
+    ):
+        clean_replay_state = str(clean_replay["status"].iloc[0])
+        clean_replay_evidence = (
+            f"{clean_replay['command'].iloc[0]}; "
+            f"serverREADME.md in clean worktree={clean_replay['server_readme_present_in_worktree'].iloc[0]}"
+        )
     server_readme_state = "present_untracked_local_file" if Path("serverREADME.md").exists() else "absent"
     final_arch_layer_summary = Path(
         "results/e11_condition_score_v5_protocol/final_architecture_resnext50_32x4d/layer_summary.csv"
@@ -217,6 +236,12 @@ def local_state_contract(toolchain: pd.DataFrame, build_gates: pd.DataFrame) -> 
             "reviewer_instruction": "Use this audit to show partial validation observations cannot change the registry, selection rule, launch order, or final seed quarantine.",
         },
         {
+            "item": "Clean worktree replay",
+            "state": clean_replay_state,
+            "evidence": clean_replay_evidence,
+            "reviewer_instruction": "Use this as tracked-source replay evidence that e11-check does not depend on local untracked attachments.",
+        },
+        {
             "item": "v5 final layer tables",
             "state": (
                 "present"
@@ -255,6 +280,12 @@ def reviewer_response() -> pd.DataFrame:
             "answer": "No. serverREADME.md is a user-provided local attachment kept in the working directory but intentionally untracked and uncommitted.",
             "status": "local_file_excluded",
             "forbidden_shortcut": "Do not stage serverREADME.md with evidence artifacts.",
+        },
+        {
+            "objection": "Does the CPU artifact gate replay from tracked files only?",
+            "answer": "Yes. The clean-worktree replay audit creates a detached Git worktree, confirms serverREADME.md is absent, runs make e11-check, observes pytest and git diff --check, and confirms the replay worktree stays clean.",
+            "status": "tracked_source_replay_supported",
+            "forbidden_shortcut": "Do not treat this as preferred pdflatex/bibtex/xelatex clean-checkout reproducibility.",
         },
         {
             "objection": "Do reviewers need GPUs to check the current paper?",

@@ -6,7 +6,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 424.8 KB |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 425.4 KB |
 | scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 2.7 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 65.8 KB  |
 | discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 1.7 MB   |
@@ -14,7 +14,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 33.4 MB  |
 | configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
 | paper                  | Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.   | commit source and selected rendered PDFs | 5.6 MB   |
-| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 20.6 KB  |
+| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 20.8 KB  |
 | .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.            | commit                                   | 479 B    |
 | .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.        | commit                                   | 667 B    |
 
@@ -184,10 +184,10 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_submission_repro_audit/pdf_artifact_checks.csv                                                 |      2 | 313 B     |
 | results/e11_submission_repro_audit/source_package_manifest.csv                                             |     11 | 1.8 KB    |
 | results/e11_submission_repro_audit/build_gate_summary.csv                                                  |      6 | 1.1 KB    |
-| results/e11_artifact_review_packet/command_matrix.csv                                                      |      9 | 3.3 KB    |
+| results/e11_artifact_review_packet/command_matrix.csv                                                      |     10 | 3.6 KB    |
 | results/e11_artifact_review_packet/gate_matrix.csv                                                         |      6 | 1.6 KB    |
-| results/e11_artifact_review_packet/local_state_contract.csv                                                |      8 | 1.8 KB    |
-| results/e11_artifact_review_packet/reviewer_response.csv                                                   |      7 | 2.5 KB    |
+| results/e11_artifact_review_packet/local_state_contract.csv                                                |      9 | 2.1 KB    |
+| results/e11_artifact_review_packet/reviewer_response.csv                                                   |      8 | 2.9 KB    |
 | results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv                 |      7 | 2.7 KB    |
 | results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv                          |      5 | 692 B     |
 | results/e11_condition_score_v5_protocol/validation_score_freeze/validation_gate_report.csv                 |      6 | 838 B     |
@@ -272,6 +272,8 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_top_conference_claim_decision_audit/readiness_summary.csv                                      |      6 | 237 B     |
 | results/e11_manuscript_claim_trace/claim_trace.csv                                                         |      6 | 2.6 KB    |
 | results/e11_manuscript_claim_trace/blocked_phrase_audit.csv                                                |     11 | 1.2 KB    |
+| results/e11_clean_worktree_replay_audit/run_summary.csv                                                    |      1 | 430 B     |
+| results/e11_clean_worktree_replay_audit/gate_matrix.csv                                                    |      6 | 810 B     |
 | results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv                                     |      9 | 5.8 KB    |
 | results/e11_mechanism_referee_audit/theory_measurement_contract.csv                                        |      6 | 3.4 KB    |
 | results/e11_mechanism_referee_audit/falsification_trigger_matrix.csv                                       |      6 | 2.8 KB    |
@@ -389,7 +391,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                                                        | size    |
 |:--------------------------------------------------------------------------------------------|:--------|
-| README_E11.md                                                                               | 96.9 KB |
+| README_E11.md                                                                               | 97.4 KB |
 | discussion/e11_paper_skeleton.md                                                            | 10.9 KB |
 | discussion/e11_main_paper_package.md                                                        | 22.8 KB |
 | discussion/e11_main_figure_captions.md                                                      | 6.5 KB  |
@@ -401,13 +403,14 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_completion_audit.md                                                          | 5.3 KB  |
 | discussion/e11_end_of_draft_self_review.md                                                  | 7.3 KB  |
 | discussion/e11_reference_audit.md                                                           | 6.1 KB  |
-| discussion/e11_submission_repro_audit.md                                                    | 9.1 KB  |
-| discussion/e11_artifact_review_packet.md                                                    | 19.1 KB |
+| discussion/e11_submission_repro_audit.md                                                    | 9.2 KB  |
+| discussion/e11_artifact_review_packet.md                                                    | 20.6 KB |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB |
 | discussion/e11_top_conference_gap_register.md                                               | 55.3 KB |
 | discussion/e11_top_conference_claim_decision_audit.md                                       | 45.4 KB |
 | discussion/e11_manuscript_claim_trace.md                                                    | 8.3 KB  |
+| discussion/e11_clean_worktree_replay_audit.md                                               | 3.2 KB  |
 | discussion/e11_mechanism_referee_audit.md                                                   | 30.5 KB |
 | discussion/e11_bold_conjecture_register.md                                                  | 14.5 KB |
 | discussion/e11_muon_state_distribution_contract.md                                          | 14.8 KB |

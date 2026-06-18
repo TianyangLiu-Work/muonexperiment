@@ -1,0 +1,65 @@
+Preparing worktree (detached HEAD dbcc73b)
+HEAD is now at dbcc73b Anchor partial validation leakage boundary in manuscript
+Updating files:  66% (875/1321)
+Updating files:  67% (886/1321)
+Updating files:  68% (899/1321)
+Updating files:  69% (912/1321)
+Updating files:  70% (925/1321)
+Updating files:  71% (938/1321)
+Updating files:  72% (952/1321)
+Updating files:  73% (965/1321)
+Updating files:  74% (978/1321)
+Updating files:  75% (991/1321)
+Updating files:  76% (1004/1321)
+Updating files:  77% (1018/1321)
+Updating files:  78% (1031/1321)
+Updating files:  79% (1044/1321)
+Updating files:  80% (1057/1321)
+Updating files:  81% (1071/1321)
+Updating files:  82% (1084/1321)
+Updating files:  83% (1097/1321)
+Updating files:  84% (1110/1321)
+Updating files:  85% (1123/1321)
+Updating files:  86% (1137/1321)
+Updating files:  87% (1150/1321)
+Updating files:  88% (1163/1321)
+Updating files:  89% (1176/1321)
+Updating files:  90% (1189/1321)
+Updating files:  91% (1203/1321)
+Updating files:  92% (1216/1321)
+Updating files:  93% (1229/1321)
+Updating files:  94% (1242/1321)
+Updating files:  95% (1255/1321)
+Updating files:  96% (1269/1321)
+Updating files:  97% (1282/1321)
+Updating files:  98% (1295/1321)
+Updating files:  99% (1308/1321)
+Updating files: 100% (1321/1321)
+Updating files: 100% (1321/1321), done.
+
+make[1]: Entering directory '/tmp/e11_clean_worktree_mx8xdf9v/worktree'
+/data/conda_envs/SpatialQuantization/bin/python scripts/e11_validate_outputs.py
+E11 outputs validated
+runs=330, step_rows=2880, families=['MatrixFactorizationInput', 'MatrixSensing', 'SmallMLPDigits']
+equal_update_runs=330, max_relative_update_gap=5e-16
+overlap_followup_runs=180, max_relative_update_gap=3.33e-16
+mlp_width_runs=300, max_relative_update_gap=3.89e-16
+mlp_hybrid_runs=200, max_relative_update_gap=3.05e-16
+hyperparam_raw_runs=360, hyperparam_equal_runs=360, max_relative_update_gap=6.11e-16
+target_update_runs=360, max_target_gap=3.89e-16
+mlp_per_layer_control_runs=100, max_layer_target_gap=2.08e-16
+spectral_allocation_probe_rows=720
+singular_vector_gradient_rows=800, update_rows=725
+singular_vector_swap_rows=320
+natural_update_swap_rows=4800
+optimizer_switch_rows=360
+optimizer_switch_reset_rows=540
+optimizer_switch_horizon_rows=480
+optimizer_switch_lr_rows=360
+stateless_direction_rows=1890
+stateless_optimizer_trajectory_rows=840
+/data/conda_envs/SpatialQuantization/bin/python -m pytest tests -q
+.......................................................................  [100%]
+71 passed in 33.18s
+git diff --check
+make[1]: Leaving directory '/tmp/e11_clean_worktree_mx8xdf9v/worktree'

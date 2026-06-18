@@ -1371,6 +1371,12 @@ def main() -> None:
         Path("results/e11_manuscript_claim_trace") / "blocked_phrase_audit.csv",
         Path("results/e11_manuscript_claim_trace") / "config.json",
         Path("scripts/e11_write_manuscript_claim_trace.py"),
+        Path("discussion/e11_clean_worktree_replay_audit.md"),
+        Path("results/e11_clean_worktree_replay_audit") / "run_summary.csv",
+        Path("results/e11_clean_worktree_replay_audit") / "gate_matrix.csv",
+        Path("results/e11_clean_worktree_replay_audit") / "command_log_tail.txt",
+        Path("results/e11_clean_worktree_replay_audit") / "config.json",
+        Path("scripts/e11_write_clean_worktree_replay_audit.py"),
         Path("discussion/e11_mechanism_referee_audit.md"),
         Path("results/e11_mechanism_referee_audit") / "alternative_explanation_matrix.csv",
         Path("results/e11_mechanism_referee_audit") / "theory_measurement_contract.csv",
@@ -1460,6 +1466,8 @@ def main() -> None:
         "e11-natural-negative-search-phase1-interim-synthesis:",
         "scripts/e11_write_natural_negative_phase1_interim_synthesis.py",
         "e11-submission-repro-audit:",
+        "e11-clean-worktree-replay-audit:",
+        "scripts/e11_write_clean_worktree_replay_audit.py",
         "scripts/e11_write_submission_repro_audit.py",
         "e11-artifact-review-packet:",
         "scripts/e11_write_artifact_review_packet.py",
@@ -1786,6 +1794,7 @@ def main() -> None:
         "make e11-guardrail-assets  # regenerate legacy condition-geometry guardrail notes",
         "make e11-all-assets        # regenerate current paper artifacts plus legacy guardrail notes",
         "make e11-submission-repro-audit # audit toolchain availability, PDF hashes, source hashes, and clean-checkout gates",
+        "make e11-clean-worktree-replay-audit # replay e11-check from a detached clean tracked-source worktree",
         "make e11-artifact-review-packet # regenerate the artifact-review command, gate, local-state, and reviewer-response packet",
         "make e11-paper-pdf         # rebuild paper/specgrad_activation_paper/main.pdf and two_page.pdf",
         "`diagnostic_A_definition == full_layer_input_activation`",
@@ -1803,6 +1812,10 @@ def main() -> None:
         "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
         "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
         "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv",
+        "discussion/e11_clean_worktree_replay_audit.md",
+        "results/e11_clean_worktree_replay_audit/run_summary.csv",
+        "results/e11_clean_worktree_replay_audit/gate_matrix.csv",
+        "scripts/e11_write_clean_worktree_replay_audit.py",
         "discussion/e11_mechanism_referee_audit.md",
         "results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv",
         "results/e11_mechanism_referee_audit/theory_measurement_contract.csv",
@@ -8185,6 +8198,54 @@ def main() -> None:
             "Every `supportable` decision must have a local scoped manuscript anchor",
         ],
     )
+    clean_replay_dir = Path("results/e11_clean_worktree_replay_audit")
+    clean_replay_summary = pd.read_csv(clean_replay_dir / "run_summary.csv")
+    clean_replay_gates = pd.read_csv(clean_replay_dir / "gate_matrix.csv")
+    clean_replay_config = json.loads((clean_replay_dir / "config.json").read_text(encoding="utf-8"))
+    clean_replay_log = (clean_replay_dir / "command_log_tail.txt").read_text(encoding="utf-8")
+    expected_clean_replay_gates = {
+        "CWR-1-detached-worktree-created",
+        "CWR-2-local-attachment-excluded",
+        "CWR-3-e11-check-passes",
+        "CWR-4-pytest-pass-observed",
+        "CWR-5-git-diff-check-observed",
+        "CWR-6-worktree-clean-after-check",
+    }
+    if set(clean_replay_gates["gate_id"]) != expected_clean_replay_gates:
+        raise AssertionError("clean worktree replay audit gate IDs changed unexpectedly")
+    if not clean_replay_gates["status"].astype(str).eq("pass").all():
+        raise AssertionError("clean worktree replay audit gates must all pass")
+    if len(clean_replay_summary) != 1:
+        raise AssertionError("clean worktree replay audit must contain one run summary row")
+    clean_replay_row = clean_replay_summary.iloc[0].astype(str).to_dict()
+    if clean_replay_row.get("status") != "pass":
+        raise AssertionError("clean worktree replay summary must pass")
+    if clean_replay_row.get("server_readme_present_in_worktree") != "no":
+        raise AssertionError("clean worktree replay must exclude serverREADME.md")
+    if "e11-check" not in clean_replay_row.get("command", ""):
+        raise AssertionError("clean worktree replay must run e11-check")
+    if clean_replay_row.get("post_status_short") != "clean" or clean_replay_row.get("post_untracked") != "none":
+        raise AssertionError("clean worktree replay must leave the replay worktree clean")
+    if clean_replay_config.get("status") != "pass" or clean_replay_config.get(
+        "server_readme_policy"
+    ) != "must_be_absent_from_clean_worktree":
+        raise AssertionError("clean worktree replay config must record pass and serverREADME exclusion policy")
+    for phrase in ["71 passed", "git diff --check"]:
+        if phrase not in clean_replay_log:
+            raise AssertionError(f"clean worktree replay log missing phrase: {phrase}")
+    clean_replay_text = Path("discussion/e11_clean_worktree_replay_audit.md").read_text(encoding="utf-8")
+    assert_required_phrases(
+        "clean worktree replay audit",
+        clean_replay_text,
+        [
+            "E11 Clean Worktree Replay Audit",
+            "detached clean Git worktree",
+            "serverREADME.md",
+            "CWR-3-e11-check-passes",
+            "CWR-6-worktree-clean-after-check",
+            "does not close the preferred `pdflatex`/`bibtex`/`xelatex` clean-checkout gate",
+        ],
+    )
     heldout_generality_dir = Path("results/e11_heldout_generality_audit")
     heldout_generality_evidence = pd.read_csv(heldout_generality_dir / "generality_evidence_matrix.csv")
     heldout_generality_gates = pd.read_csv(heldout_generality_dir / "generality_claim_gate.csv")
@@ -8480,6 +8541,7 @@ def main() -> None:
         "AR-C4",
         "AR-C5",
         "AR-C6",
+        "AR-C7",
         "AR-G1",
         "AR-G2",
         "AR-G3",
@@ -8493,6 +8555,7 @@ def main() -> None:
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-paper-pdf",
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-check",
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-cifar-resnet-lt-tuned-benchmark-leakage-audit",
+        "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-clean-worktree-replay-audit",
         "GPU via Slurm",
         "Not required to reproduce current paper claims",
     ]:
@@ -8511,6 +8574,7 @@ def main() -> None:
         "Rendered PDFs",
         "Full artifact validation",
         "Tuned validation leakage audit",
+        "Clean worktree replay",
         "v5 final layer tables",
         "GPU dependence",
     }
@@ -8521,6 +8585,7 @@ def main() -> None:
         "Do not stage or commit this file",
         "Both frozen final split layer tables are present",
         "partial validation observations cannot change the registry",
+        "tracked-source replay evidence",
         "not_required_for_current_artifact_review",
     ]:
         if phrase not in artifact_local_text:
@@ -8530,6 +8595,8 @@ def main() -> None:
         "preferred venue-toolchain reproducibility",
         "serverREADME.md",
         "including the completed v5 final boundary readout",
+        "detached Git worktree",
+        "serverREADME.md is absent",
         "optional-stopping leakage",
         "partial validation observations are progress accounting only",
         "Do not use failed v5 finals, not_ready gates, partial-family, or finite phase1 outputs as broader positive evidence",

@@ -1,0 +1,11 @@
+{
+  "command": "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-check",
+  "new_empirical_results": false,
+  "purpose": "clean detached worktree replay of the CPU-side E11 artifact gate",
+  "python_command": "/data/conda_envs/SpatialQuantization/bin/python",
+  "replayed_revision": "dbcc73bc92b05b0a5299a45c97f3f58f6d9b4610",
+  "revision_arg": "HEAD",
+  "server_readme_policy": "must_be_absent_from_clean_worktree",
+  "status": "pass",
+  "timeout_seconds": 900
+}

@@ -1,0 +1,7 @@
+gate_id,status,evidence,claim_effect
+CWR-1-detached-worktree-created,pass,git worktree add --detach completed,tracked-source replay is available
+CWR-2-local-attachment-excluded,pass,serverREADME.md absent from clean worktree,local attachment is not part of the submitted evidence bundle
+CWR-3-e11-check-passes,pass,make e11-check exit_code=0,"validator, pytest, and whitespace checks replay from tracked files"
+CWR-4-pytest-pass-observed,pass,clean worktree log contains `71 passed`,test suite pass is visible in replay log
+CWR-5-git-diff-check-observed,pass,clean worktree log contains `git diff --check`,whitespace check is part of the replayed gate
+CWR-6-worktree-clean-after-check,pass,git status --short and untracked list are empty after e11-check,the replay check does not mutate tracked evidence files

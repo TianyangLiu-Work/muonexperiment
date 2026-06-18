@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 434988,
-      "size": "424.8 KB"
+      "size_bytes": 435565,
+      "size": "425.4 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2830675,
+      "size_bytes": 2845941,
       "size": "2.7 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1819124,
+      "size_bytes": 1824343,
       "size": "1.7 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289158065,
+      "size_bytes": 289163733,
       "size": "275.8 MB"
     },
     {
@@ -61,8 +61,8 @@
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 21127,
-      "size": "20.6 KB"
+      "size_bytes": 21302,
+      "size": "20.8 KB"
     },
     {
       "path": ".gitignore",
@@ -892,8 +892,8 @@
     },
     {
       "path": "results/e11_artifact_review_packet/command_matrix.csv",
-      "rows": 9,
-      "size": "3.3 KB"
+      "rows": 10,
+      "size": "3.6 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/gate_matrix.csv",
@@ -902,13 +902,13 @@
     },
     {
       "path": "results/e11_artifact_review_packet/local_state_contract.csv",
-      "rows": 8,
-      "size": "1.8 KB"
+      "rows": 9,
+      "size": "2.1 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/reviewer_response.csv",
-      "rows": 7,
-      "size": "2.5 KB"
+      "rows": 8,
+      "size": "2.9 KB"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/validation_score_freeze/score_formula_registry.csv",
@@ -1329,6 +1329,16 @@
       "path": "results/e11_manuscript_claim_trace/blocked_phrase_audit.csv",
       "rows": 11,
       "size": "1.2 KB"
+    },
+    {
+      "path": "results/e11_clean_worktree_replay_audit/run_summary.csv",
+      "rows": 1,
+      "size": "430 B"
+    },
+    {
+      "path": "results/e11_clean_worktree_replay_audit/gate_matrix.csv",
+      "rows": 6,
+      "size": "810 B"
     },
     {
       "path": "results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv",
@@ -1854,7 +1864,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "96.9 KB"
+      "size": "97.4 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1902,11 +1912,11 @@
     },
     {
       "path": "discussion/e11_submission_repro_audit.md",
-      "size": "9.1 KB"
+      "size": "9.2 KB"
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
-      "size": "19.1 KB"
+      "size": "20.6 KB"
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
@@ -1927,6 +1937,10 @@
     {
       "path": "discussion/e11_manuscript_claim_trace.md",
       "size": "8.3 KB"
+    },
+    {
+      "path": "discussion/e11_clean_worktree_replay_audit.md",
+      "size": "3.2 KB"
     },
     {
       "path": "discussion/e11_mechanism_referee_audit.md",

@@ -1,0 +1,2 @@
+audit_id,status,replayed_revision,source_branch_at_generation,revision_arg,command,elapsed_seconds,check_exit_code,server_readme_present_in_worktree,pre_status_short,pre_untracked,post_status_short,post_untracked
+clean_worktree_e11_check_replay,pass,dbcc73bc92b05b0a5299a45c97f3f58f6d9b4610,codex/resnet-gpu-tail-results,HEAD,make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-check,41.739,0,no,clean,none,clean,none
