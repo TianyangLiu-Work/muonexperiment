@@ -8146,6 +8146,18 @@ def main() -> None:
     trace_decision_by_claim = manuscript_trace.set_index("claim_id")["current_decision"].to_dict()
     if trace_decision_by_claim != decision_by_claim:
         raise AssertionError("manuscript claim trace decisions must match the top-conference decision matrix")
+    expected_blocked_pairs = {
+        (str(row["claim_id"]), phrase.strip())
+        for row in claim_decision_frame.to_dict("records")
+        for phrase in str(row["author_blocked_wording"]).split(";")
+        if phrase.strip()
+    }
+    observed_blocked_pairs = {
+        (str(row["claim_id"]), str(row["blocked_phrase"]))
+        for row in blocked_phrase_audit.to_dict("records")
+    }
+    if observed_blocked_pairs != expected_blocked_pairs:
+        raise AssertionError("manuscript blocked-phrase audit must mirror the top-conference blocked wording set")
     if not (
         manuscript_trace["missing_anchors"].eq("none").all()
         and manuscript_trace["blocked_phrase_audit"].eq("pass").all()
@@ -8167,6 +8179,8 @@ def main() -> None:
             "present_as_completed_negative_boundary",
             "present_as_finite_null_candidate_with_caveats",
             "present_as_blocked_protocol_context",
+            "partial tuned-validation observations are progress accounting only",
+            "using partial validation leaderboard to change selection, launch order, or final seed plan",
             "preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server",
             "Every `supportable` decision must have a local scoped manuscript anchor",
         ],

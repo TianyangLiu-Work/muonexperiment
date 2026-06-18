@@ -69,6 +69,8 @@ CLAIM_ANCHORS: dict[str, dict[str, object]] = {
             "negative benchmark boundary",
             "not evidence for an optimizer-performance advantage",
             "not a complete long-tailed classification optimizer benchmark",
+            "partial tuned-validation observations are progress accounting only",
+            "selection rule, launch order, and final seed quarantine remain frozen",
         ],
         "trace_status": "present_as_blocked_protocol_context",
     },

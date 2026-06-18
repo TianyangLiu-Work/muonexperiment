@@ -2,7 +2,7 @@
   "main_tex": "paper/specgrad_activation_paper/main.tex",
   "claim_decision_source": "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
   "claim_count": 6,
-  "blocked_phrase_checks": 10,
+  "blocked_phrase_checks": 11,
   "all_anchors_present": true,
   "blocked_phrases_absent": true
 }

@@ -1,5 +1,5 @@
 path,exists,size_bytes,sha256,role,audit_status
-paper/specgrad_activation_paper/main.tex,yes,112036,80fe1188f25d4e1f7e6108f21df8fb67d61656f5bc4f0f52a5ab8ef8bc7ec0ce,paper source or root reproduction entrypoint,pass
+paper/specgrad_activation_paper/main.tex,yes,112290,55d38c954d9e799908224ecb679342aece5e8723b069348d6fddfabc4aca0664,paper source or root reproduction entrypoint,pass
 paper/specgrad_activation_paper/two_page.tex,yes,13228,f1e3bff2a16a58c6b6ae373307149578e96633d46acf2c819beacb2e8302cca9,paper source or root reproduction entrypoint,pass
 paper/specgrad_activation_paper/references.bib,yes,4906,64c7430cdd52637a545554f05e4e48575e0dd955877bc81db576b05fbcf52f48,paper source or root reproduction entrypoint,pass
 paper/specgrad_activation_paper/Makefile,yes,817,b19b4b3fdf5d4fec90db0de6af2d86b107956c8f9c9c7a5341d03c4f103996b2,paper source or root reproduction entrypoint,pass
