@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 2075952,
+      "size_bytes": 2081060,
       "size": "2.0 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289703398,
-      "size": "276.3 MB"
+      "size_bytes": 289785949,
+      "size": "276.4 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 35516219,
-      "size": "33.9 MB"
+      "size_bytes": 35603916,
+      "size": "34.0 MB"
     },
     {
       "path": "configs",
@@ -1498,7 +1498,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
       "rows": 164,
-      "size": "77.3 KB"
+      "size": "77.5 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/family_selection.csv",
@@ -1547,8 +1547,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/validation_setting_variance.csv",
-      "rows": 88,
-      "size": "21.5 KB"
+      "rows": 92,
+      "size": "22.5 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/spent_pilot_paired_variance.csv",
@@ -1687,8 +1687,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv",
-      "rows": 22,
-      "size": "5.1 KB"
+      "rows": 23,
+      "size": "5.4 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/family_progress.csv",
@@ -1698,7 +1698,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/occupancy_interim_summary.csv",
       "rows": 6,
-      "size": "653 B"
+      "size": "651 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/partial_grid_guardrail.csv",
