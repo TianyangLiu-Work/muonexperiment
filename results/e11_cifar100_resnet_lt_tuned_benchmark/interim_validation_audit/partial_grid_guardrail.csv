@@ -1,6 +1,6 @@
 guard_id,status,evidence,claim_authority,blocked_action
-IPG-1-completed-prefix-auditable,pass,completed array indices span 0..27; next missing array index 28,progress accounting only,cherry-picking non-contiguous validation settings
+IPG-1-completed-prefix-auditable,pass,completed array indices span 0..28; next missing array index 29,progress accounting only,cherry-picking non-contiguous validation settings
 IPG-2-family-coverage-incomplete,not_ready,3/6 recipe families observed; 2/6 recipe families complete,within-family progress only until all families complete,cross-family optimizer selection claim
-IPG-3-occupancy-paired-with-validation,pass,28/28 completed settings have occupancy traces with positive probe rows; min probe rows 30,paired occupancy progress readout,trajectory occupancy claim before full grid
-IPG-4-missing-work-blocks-final-readout,not_ready,136/164 settings still lack validation summaries,no final-performance benchmark result,final seed launch or benchmark result wording
+IPG-3-occupancy-paired-with-validation,pass,29/29 completed settings have occupancy traces with positive probe rows; min probe rows 30,paired occupancy progress readout,trajectory occupancy claim before full grid
+IPG-4-missing-work-blocks-final-readout,not_ready,135/164 settings still lack validation summaries,no final-performance benchmark result,final seed launch or benchmark result wording
 IPG-5-final-seed-quarantine-mirrored,pass,TVS-3-final-seed-quarantine=pass,final seeds remain untouched,retuned final seed claim
