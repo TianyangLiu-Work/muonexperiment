@@ -96,9 +96,9 @@ def build_state_distribution_terms(inputs: dict[str, object]) -> pd.DataFrame:
                 "term_id": "MSD-T2-state-occupancy-measure",
                 "theory_object": "nu_R(s): recipe-dependent distribution over checkpoints, tail quality, gradients, momentum alignment, and class exposure",
                 "measurable_proxy": "per-recipe trajectory-state occupancy table with tail quality, head gain, gradient-momentum cosine, and local drift probes",
-                "current_evidence": "sampled warmup/tail-rich bridge states exist, but final-training occupancy for tuned recipes is absent",
+                "current_evidence": f"sampled warmup/tail-rich bridge states exist; tuned runner registers occupancy_trace.csv paths; TVS-5={gates['TVS-5-occupancy-logging-complete']}; final-training occupancy for selected recipes is absent",
                 "careful_status": "occupancy_measure_missing_for_final_training",
-                "missing_for_upgrade": "record occupancy summaries during tuned validation and final seeds",
+                "missing_for_upgrade": "complete occupancy_trace.csv summaries during tuned validation and final seeds",
             },
             {
                 "term_id": "MSD-T3-transition-and-schedule-operator",
@@ -175,8 +175,11 @@ def build_evidence_links(inputs: dict[str, object]) -> pd.DataFrame:
             {
                 "evidence_id": "MSE-4-tuned-grid-registered",
                 "source_artifact": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv",
-                "observed_readout": f"TVS-1 evidence: {gates['TVS-1-validation-grid-complete']}",
-                "interpretation": "unspent tuned validation/final protocol exists but has not produced selection evidence",
+                "observed_readout": (
+                    f"TVS-1 evidence: {gates['TVS-1-validation-grid-complete']}; "
+                    f"TVS-5 evidence: {gates['TVS-5-occupancy-logging-complete']}"
+                ),
+                "interpretation": "unspent tuned validation/final protocol and occupancy logging paths exist but have not produced selection evidence",
                 "claim_boundary": "do not select from spent pilot rows",
             },
             {
@@ -196,7 +199,7 @@ def build_falsification_tests() -> pd.DataFrame:
             {
                 "test_id": "MSF-1-occupancy-logging",
                 "hypothesis": "Recipes with favorable terminal few-class accuracy occupy states where local NS(M_t) drift ratios stay below Fro/GD under matched head gain.",
-                "required_protocol": "log trajectory-state tail quality, head gain, gradient-momentum cosine, and local drift probes during tuned validation and final seeds",
+                "required_protocol": "log occupancy_trace.csv rows with trajectory-state tail quality, head gain, gradient-momentum cosine, and local drift probes during tuned validation and final seeds",
                 "pass_to_upgrade": "occupancy-weighted local drift predicts selected final recipe ordering without using final labels for tuning",
                 "fail_response": "local mechanism remains true only at sampled states; no practical Muon claim",
                 "compute_mode": "GPU via Slurm plus CPU aggregation",
@@ -253,7 +256,7 @@ def build_claim_gates(inputs: dict[str, object]) -> pd.DataFrame:
                 "current_status": "not_ready",
                 "allowed_claim": "state-distribution transport is the registered missing term between local geometry and final performance",
                 "blocked_claim": "the sampled bridge states represent the full training trajectory distribution",
-                "evidence_required": "trajectory occupancy logging across validation-selected and final recipes",
+                "evidence_required": "trajectory occupancy_trace.csv logging across validation-selected and final recipes",
             },
             {
                 "gate_id": "MSG-3-tuned-final-performance",

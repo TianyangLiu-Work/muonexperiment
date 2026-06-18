@@ -209,9 +209,9 @@ def build_outcome_state_machine() -> pd.DataFrame:
         [
             {
                 "state_id": "TB-PWR-S1-not-ready",
-                "trigger": "selection gates TVS-1/TVS-2/TVS-4 are not_ready",
+                "trigger": "selection gates TVS-1/TVS-2/TVS-4/TVS-5 are not_ready",
                 "claim_state": "not_ready",
-                "required_action": "run validation grid and selection audit before final seeds",
+                "required_action": "run validation grid, occupancy logging, and selection audit before final seeds",
             },
             {
                 "state_id": "TB-PWR-S2-final-quarantine-broken",

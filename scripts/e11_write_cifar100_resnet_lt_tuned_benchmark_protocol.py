@@ -303,6 +303,11 @@ def build_selection_rules() -> pd.DataFrame:
                 "rule": "Publish the tuned result as a boundary if Muon fails tuned baselines.",
                 "forbidden_action": "Suppressing negative tuned Muon outcomes while keeping local-drift motivation.",
             },
+            {
+                "rule_id": "SEL-6-state-distribution-logging",
+                "rule": "Every validation and final recipe run writes a trajectory occupancy trace with class exposure, tail quality, gradient-momentum cosine, and matched-head-gain local drift probes.",
+                "forbidden_action": "Using local Muon drift compatibility as a practical-performance explanation without state-distribution occupancy evidence.",
+            },
         ]
     )
 
@@ -345,6 +350,12 @@ def build_acceptance_gates() -> pd.DataFrame:
                 "claim_unblocked": "Mechanism and final-performance evidence can coexist without contradiction.",
                 "pass_rule": "Paper separates matched-head-gain local drift from long-horizon final training, including negative tuned outcomes.",
                 "failure_claim": "mechanism-only paper path remains",
+            },
+            {
+                "gate_id": "TB-7-state-distribution-occupancy",
+                "claim_unblocked": "Practical Muon mechanism wording can discuss why a selected recipe did or did not transfer to final performance.",
+                "pass_rule": "Every selected validation and final run includes occupancy_trace.csv rows with class exposure, tail quality, gradient-momentum cosine, and matched-head-gain NS-vs-Fro local drift ratio.",
+                "failure_claim": "local compatibility remains sampled-state evidence only",
             },
         ]
     )
@@ -398,7 +409,7 @@ The existing pilots are useful for risk assessment, but they cannot select final
 
 ## Executable Validation Registry
 
-The validation grid is materialized by `scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py --settings-only`, which writes `results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv` and `execution_status.csv`. GPU validation cells are submitted with `scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch`; each Slurm array cell runs one registered validation setting on seeds `10..14`. The final claim split `20..29` remains untouched until validation selects recipes.
+The validation grid is materialized by `scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py --settings-only`, which writes `results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv` and `execution_status.csv`. The registry includes `planned_occupancy_trace_path` for each setting, and each completed validation cell must write `occupancy_trace.csv` next to `summary.csv`. GPU validation cells are submitted with `scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch`; each Slurm array cell runs one registered validation setting on seeds `10..14`. The final claim split `20..29` remains untouched until validation selects recipes and the selected settings have trajectory occupancy traces.
 
 The frozen selection rule is materialized by `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py`. It writes `results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/*` and `discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md`, selecting one recipe per family only after every registered validation setting in that family has a summary.
 

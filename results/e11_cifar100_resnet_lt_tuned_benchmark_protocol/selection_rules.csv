@@ -4,3 +4,4 @@ SEL-2-primary-metric,Primary validation objective is few balanced accuracy; ties
 SEL-3-paired-final,Run final_claim seeds pairwise for every selected recipe and tuned baseline.,Reporting unpaired recipe seeds or dropping failed seeds.
 SEL-4-familywise-error,Treat final comparisons to tuned AdamW and tuned SGD as one family and report Holm-adjusted decisions.,Claiming the best-looking pair without multiplicity adjustment.
 SEL-5-negative-results,Publish the tuned result as a boundary if Muon fails tuned baselines.,Suppressing negative tuned Muon outcomes while keeping local-drift motivation.
+SEL-6-state-distribution-logging,"Every validation and final recipe run writes a trajectory occupancy trace with class exposure, tail quality, gradient-momentum cosine, and matched-head-gain local drift probes.",Using local Muon drift compatibility as a practical-performance explanation without state-distribution occupancy evidence.

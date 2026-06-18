@@ -503,6 +503,7 @@ def assert_top_conference_claim_decision_audit(
         "phase2_observed=8/8",
         "phase2_head_gain_gate_fail_rows=8",
         "TVS-1-validation-grid-complete=not_ready",
+        "TVS-5-occupancy-logging-complete=not_ready",
         "MSD-T1-local-response-integrand=local_integrand_supported_on_sampled_states",
         "MSD-T2-state-occupancy-measure=occupancy_measure_missing_for_final_training",
         "MSD-T4-terminal-risk-functional=final_performance_negative_boundary",
@@ -5678,8 +5679,8 @@ def main() -> None:
         or len(tuned_scope) != 2
         or len(tuned_seed_split) != 4
         or len(tuned_recipe_grid) != 6
-        or len(tuned_selection_rules) != 5
-        or len(tuned_acceptance_gates) != 6
+        or len(tuned_selection_rules) != 6
+        or len(tuned_acceptance_gates) != 7
     ):
         raise AssertionError(
             "CIFAR-100-LT tuned benchmark protocol must register pilot context, scope, seed splits, recipe grid, selection rules, and gates"
@@ -5713,6 +5714,21 @@ def main() -> None:
         raise AssertionError("CIFAR-100-LT tuned benchmark protocol must require a class-balanced sampler baseline")
     if "Holm-adjusted" not in " ".join(tuned_acceptance_gates["pass_rule"].astype(str)):
         raise AssertionError("CIFAR-100-LT tuned benchmark protocol must require adjusted final comparisons")
+    protocol_contract_text = " ".join(
+        [
+            " ".join(tuned_selection_rules.astype(str).to_numpy().ravel()),
+            " ".join(tuned_acceptance_gates.astype(str).to_numpy().ravel()),
+        ]
+    )
+    for phrase in [
+        "SEL-6-state-distribution-logging",
+        "TB-7-state-distribution-occupancy",
+        "occupancy_trace.csv",
+        "gradient-momentum cosine",
+        "matched-head-gain NS-vs-Fro local drift ratio",
+    ]:
+        if phrase not in protocol_contract_text:
+            raise AssertionError(f"CIFAR-100-LT tuned benchmark protocol missing occupancy contract: {phrase}")
     tuned_protocol_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md").read_text(
         encoding="utf-8"
     )
@@ -5727,6 +5743,8 @@ def main() -> None:
             "Recipe Grid",
             "Executable Validation Registry",
             "scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py --settings-only",
+            "planned_occupancy_trace_path",
+            "occupancy_trace.csv",
             "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
             "Acceptance Gates",
             "not_ready",
@@ -5737,6 +5755,10 @@ def main() -> None:
     tuned_execution_status = pd.read_csv("results/e11_cifar100_resnet_lt_tuned_benchmark/execution_status.csv")
     if len(tuned_registry) != 164:
         raise AssertionError("CIFAR-100-LT tuned benchmark validation registry must contain 164 settings")
+    if "planned_occupancy_trace_path" not in tuned_registry.columns:
+        raise AssertionError("CIFAR-100-LT tuned benchmark registry must include planned occupancy trace paths")
+    if not tuned_registry["planned_occupancy_trace_path"].astype(str).str.endswith("occupancy_trace.csv").all():
+        raise AssertionError("CIFAR-100-LT tuned benchmark registry occupancy paths must end with occupancy_trace.csv")
     if sorted(tuned_registry["array_index"].astype(int).tolist()) != list(range(164)):
         raise AssertionError("CIFAR-100-LT tuned benchmark validation registry must have contiguous Slurm array indices")
     if set(tuned_registry["phase"]) != {"validation_tuning"} or set(tuned_registry["seed_set"]) != {"10..14"}:
@@ -5773,11 +5795,15 @@ def main() -> None:
         len(tuned_selection_run_registry) != 164
         or len(tuned_family_selection) != 6
         or len(tuned_final_plan) != 6
-        or len(tuned_selection_gates) != 4
+        or len(tuned_selection_gates) != 5
     ):
         raise AssertionError("CIFAR-100-LT tuned benchmark selection audit has the wrong row counts")
     if set(tuned_selection_run_registry["validation_status"]) != {"missing_summary"}:
         raise AssertionError("CIFAR-100-LT tuned benchmark selection should remain pending until validation summaries exist")
+    if set(tuned_selection_run_registry["occupancy_status"]) != {"missing_occupancy_trace"}:
+        raise AssertionError("CIFAR-100-LT tuned benchmark selection should remain pending until occupancy traces exist")
+    if not tuned_selection_run_registry["occupancy_trace_path"].astype(str).str.endswith("occupancy_trace.csv").all():
+        raise AssertionError("CIFAR-100-LT tuned benchmark selection must carry occupancy trace paths")
     if set(tuned_family_selection["selection_status"]) != {"not_ready"}:
         raise AssertionError("CIFAR-100-LT tuned benchmark family selection must be not_ready before validation completes")
     if set(tuned_final_plan["final_status"]) != {"not_ready"} or not tuned_final_plan["final_seed_set"].isna().all():
@@ -5787,6 +5813,7 @@ def main() -> None:
         "TVS-2-family-selection",
         "TVS-3-final-seed-quarantine",
         "TVS-4-final-run-plan",
+        "TVS-5-occupancy-logging-complete",
     }:
         raise AssertionError("CIFAR-100-LT tuned benchmark selection gates changed unexpectedly")
     if not (
@@ -5805,8 +5832,11 @@ def main() -> None:
             "no-peeking bridge",
             "Current status: `not_ready`",
             "0/164",
+            "trajectory occupancy traces complete",
             "final claim seed set is always `20..29`",
             "TVS-3-final-seed-quarantine",
+            "TVS-5-occupancy-logging-complete",
+            "Occupancy Logging Status",
             "The current result is not a final-performance benchmark result",
         ],
     )
@@ -6033,6 +6063,8 @@ def main() -> None:
             "0.7247 [0.676, 0.777]",
             "best_tested_few_diff=-0.08767 [-0.09948, -0.07585]",
             "TVS-1=not_ready",
+            "TVS-5=not_ready",
+            "occupancy_trace.csv",
             "Local compatibility can coexist with poor final performance",
             "blocked_until_state_distribution_and_final_gates_pass",
         ],
@@ -7673,6 +7705,8 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-selection",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit",
         "164-setting validation registry",
+        "planned_occupancy_trace_path",
+        "occupancy_trace.csv",
         "discussion/e11_muon_state_distribution_contract.md",
         "state-distribution transport contract",
         "MSD-T1 local-response integrand",

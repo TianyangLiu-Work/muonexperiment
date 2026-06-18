@@ -55,6 +55,7 @@ class TunedBenchmarkSetting:
     planned_output_dir: Path
     planned_figure_dir: Path
     planned_discussion_path: Path
+    planned_occupancy_trace_path: Path
 
 
 def _setting_id(family: str, parts: list[str]) -> str:
@@ -101,6 +102,7 @@ def _make_setting(
         planned_output_dir=RESULT_ROOT / "validation_tuning" / setting_id,
         planned_figure_dir=FIGURE_ROOT / "validation_tuning" / setting_id,
         planned_discussion_path=DISCUSSION_ROOT / f"{setting_id}.md",
+        planned_occupancy_trace_path=RESULT_ROOT / "validation_tuning" / setting_id / "occupancy_trace.csv",
     )
 
 
@@ -227,7 +229,12 @@ def settings_frame(settings: list[TunedBenchmarkSetting]) -> pd.DataFrame:
     for index, setting in enumerate(settings):
         row = asdict(setting)
         row["array_index"] = int(index)
-        for key in ("planned_output_dir", "planned_figure_dir", "planned_discussion_path"):
+        for key in (
+            "planned_output_dir",
+            "planned_figure_dir",
+            "planned_discussion_path",
+            "planned_occupancy_trace_path",
+        ):
             row[key] = Path(row[key]).as_posix()
         rows.append(row)
     return pd.DataFrame(rows)
@@ -348,9 +355,10 @@ def run_setting(
             device=device,
             download=download,
         )
-    trace, class_metrics, group_metrics, summary, pair_summary = recipe_benchmark.run_recipe_benchmark(
+    trace, class_metrics, group_metrics, summary, pair_summary, occupancy_trace = recipe_benchmark.run_recipe_benchmark(
         config,
         progress=progress,
+        collect_occupancy=True,
     )
     output_dir = setting.planned_output_dir
     figure_dir = setting.planned_figure_dir
@@ -361,10 +369,16 @@ def run_setting(
     group_metrics.to_csv(output_dir / "group_metrics.csv", index=False)
     summary.to_csv(output_dir / "summary.csv", index=False)
     pair_summary.to_csv(output_dir / "pair_summary.csv", index=False)
+    occupancy_trace.to_csv(output_dir / "occupancy_trace.csv", index=False)
     config_payload = asdict(config)
     config_payload["recipe"] = asdict(recipe_from_setting(setting))
     config_payload["setting"] = asdict(setting)
-    for key in ("planned_output_dir", "planned_figure_dir", "planned_discussion_path"):
+    for key in (
+        "planned_output_dir",
+        "planned_figure_dir",
+        "planned_discussion_path",
+        "planned_occupancy_trace_path",
+    ):
         config_payload["setting"][key] = Path(config_payload["setting"][key]).as_posix()
     (output_dir / "config.json").write_text(json.dumps(config_payload, indent=2, sort_keys=True) + "\n")
     pd.DataFrame([config_payload["setting"]]).to_csv(output_dir / "setting_metadata.csv", index=False)

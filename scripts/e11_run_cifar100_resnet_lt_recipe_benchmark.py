@@ -18,15 +18,26 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from e11_condition_geometry.cifar100_resnet_tail import (
+    alignment as matrix_alignment,
+    apply_direction as apply_matrix_direction,
     batch,
     build_cifar_resnet18,
     dtype_from_name,
+    full_metrics,
     load_cifar100_images,
     matrix_named_parameters,
     resolve_device,
+    restore,
+    snapshot,
+    update_norms,
 )
 from e11_condition_geometry.long_tail_digits import make_generator, margins, sample_indices
-from e11_condition_geometry.long_tail_muon_bridge import newton_schulz_directions
+from e11_condition_geometry.long_tail_muon_bridge import (
+    direction_cosine,
+    frobenius_grad_direction,
+    newton_schulz_directions,
+    tensor_fro_norm,
+)
 from e11_condition_geometry.reporting import fmt, markdown_table
 from e11_condition_geometry.statistics import ci95
 
@@ -83,6 +94,8 @@ class RecipeBenchmarkConfig:
     device: str = "auto"
     data_root: str = "data/torchvision"
     download: bool = True
+    occupancy_probe_examples_per_group: int = 64
+    occupancy_probe_head_gain_fraction: float = 0.005
 
 
 def recipe_from_name(name: str) -> Recipe:
@@ -230,6 +243,297 @@ def class_balanced_weights(
     for class_id, value in values:
         weights[class_id] = float(value / max(normalizer, 1e-12))
     return weights
+
+
+def _class_ids_by_frequency_group(
+    counts: dict[int, int],
+    config: RecipeBenchmarkConfig,
+) -> dict[str, list[int]]:
+    groups = {"many": [], "medium": [], "few": []}
+    for class_id, train_count in sorted(counts.items()):
+        groups[frequency_group(int(train_count), config)].append(int(class_id))
+    return groups
+
+
+def _sample_pool(
+    pool: torch.Tensor,
+    *,
+    max_examples: int,
+    generator: torch.Generator,
+) -> torch.Tensor:
+    if pool.numel() <= int(max_examples):
+        return pool
+    perm = torch.randperm(pool.numel(), generator=generator, device=pool.device)[: int(max_examples)]
+    return pool[perm]
+
+
+def _train_pool_from_classes(
+    indices_by_class: dict[int, torch.Tensor],
+    class_ids: list[int],
+    *,
+    device: torch.device,
+) -> torch.Tensor:
+    pieces = [
+        indices_by_class[int(class_id)]
+        for class_id in class_ids
+        if int(class_id) in indices_by_class and indices_by_class[int(class_id)].numel() > 0
+    ]
+    if pieces:
+        return torch.cat(pieces)
+    return torch.empty(0, dtype=torch.long, device=device)
+
+
+def _label_pool_from_classes(
+    labels: torch.Tensor,
+    class_ids: list[int],
+    *,
+    device: torch.device,
+) -> torch.Tensor:
+    pieces = [
+        torch.nonzero(labels == int(class_id), as_tuple=False).flatten()
+        for class_id in class_ids
+    ]
+    pieces = [piece for piece in pieces if piece.numel() > 0]
+    if pieces:
+        return torch.cat(pieces)
+    return torch.empty(0, dtype=torch.long, device=device)
+
+
+def make_occupancy_probe_indices(
+    train_indices_by_class: dict[int, torch.Tensor],
+    test_y: torch.Tensor,
+    counts: dict[int, int],
+    config: RecipeBenchmarkConfig,
+    *,
+    seed: int,
+    device: torch.device,
+) -> dict[str, object]:
+    groups = _class_ids_by_frequency_group(counts, config)
+    all_classes = sorted(int(class_id) for class_id in counts)
+    head_classes = groups["many"] or groups["medium"] or groups["few"] or all_classes
+    tail_classes = groups["few"] or groups["medium"] or groups["many"] or all_classes
+    head_group = "many" if groups["many"] else "medium" if groups["medium"] else "few" if groups["few"] else "all"
+    tail_group = "few" if groups["few"] else "medium" if groups["medium"] else "many" if groups["many"] else "all"
+    head_pool = _train_pool_from_classes(train_indices_by_class, head_classes, device=device)
+    if head_pool.numel() == 0:
+        head_pool = torch.cat(list(train_indices_by_class.values()))
+        head_group = "all"
+    tail_pool = _label_pool_from_classes(test_y, tail_classes, device=device)
+    if tail_pool.numel() == 0:
+        tail_pool = torch.arange(test_y.numel(), dtype=torch.long, device=device)
+        tail_group = "all"
+    generator = make_generator(seed + 64000, device)
+    max_examples = max(int(config.occupancy_probe_examples_per_group), 1)
+    return {
+        "head_group": head_group,
+        "tail_group": tail_group,
+        "head_probe_indices": _sample_pool(head_pool, max_examples=max_examples, generator=generator),
+        "tail_probe_indices": _sample_pool(tail_pool, max_examples=max_examples, generator=generator),
+    }
+
+
+def batch_exposure_summary(
+    labels: torch.Tensor,
+    counts: dict[int, int],
+    config: RecipeBenchmarkConfig,
+) -> dict[str, float | int]:
+    group_counts = {"many": 0, "medium": 0, "few": 0}
+    label_values = [int(label) for label in labels.detach().cpu().tolist()]
+    for label in label_values:
+        if label in counts:
+            group_counts[frequency_group(int(counts[label]), config)] += 1
+    total = max(len(label_values), 1)
+    probabilities = [count / total for count in group_counts.values() if count > 0]
+    entropy = -sum(probability * math.log(probability) for probability in probabilities)
+    return {
+        "batch_many_examples": int(group_counts["many"]),
+        "batch_medium_examples": int(group_counts["medium"]),
+        "batch_few_examples": int(group_counts["few"]),
+        "batch_many_fraction": float(group_counts["many"] / total),
+        "batch_medium_fraction": float(group_counts["medium"] / total),
+        "batch_few_fraction": float(group_counts["few"] / total),
+        "batch_unique_classes": int(len(set(label_values))),
+        "batch_frequency_entropy": float(entropy),
+    }
+
+
+def _matrix_probe_gradients(
+    model: torch.nn.Module,
+    named_params: list[tuple[str, torch.nn.Parameter]],
+    x: torch.Tensor,
+    y: torch.Tensor,
+    indices: torch.Tensor,
+    *,
+    loss_weight: torch.Tensor | None,
+) -> tuple[float, list[torch.Tensor]]:
+    model.zero_grad(set_to_none=True)
+    logits = model(x[indices])
+    loss = F.cross_entropy(logits, y[indices], weight=loss_weight)
+    loss.backward()
+    grads = [
+        torch.zeros_like(param) if param.grad is None else param.grad.detach().clone()
+        for _name, param in named_params
+    ]
+    return float(loss.detach().cpu()), grads
+
+
+def _matched_head_gain_tail_drift(
+    model: torch.nn.Module,
+    named_params: list[tuple[str, torch.nn.Parameter]],
+    before: list[torch.Tensor],
+    directions: list[torch.Tensor],
+    test_x: torch.Tensor,
+    tail_probe: torch.Tensor,
+    base_tail_logits: torch.Tensor,
+    *,
+    target_gain: float,
+) -> dict[str, float]:
+    alignment_value = matrix_alignment(named_params, directions)
+    if alignment_value <= 0.0 or not math.isfinite(alignment_value):
+        return {
+            "alignment": float(alignment_value),
+            "step_size": math.nan,
+            "update_fro_norm": math.nan,
+            "update_op_norm": math.nan,
+            "tail_output_drift_fro": math.nan,
+            "tail_output_drift_rms": math.nan,
+        }
+    step_size = float(target_gain) / max(float(alignment_value), 1e-300)
+    update_fro, update_op = update_norms(directions, step_size)
+    apply_matrix_direction(named_params, before, directions, step_size)
+    try:
+        with torch.no_grad():
+            tail_logits = model(test_x[tail_probe]).detach()
+    finally:
+        restore(named_params, before)
+    output_delta = tail_logits - base_tail_logits
+    return {
+        "alignment": float(alignment_value),
+        "step_size": float(step_size),
+        "update_fro_norm": float(update_fro),
+        "update_op_norm": float(update_op),
+        "tail_output_drift_fro": float(torch.linalg.norm(output_delta).detach().cpu()),
+        "tail_output_drift_rms": float(torch.sqrt(torch.mean(output_delta.square())).detach().cpu()),
+    }
+
+
+def collect_occupancy_probe(
+    model: torch.nn.Module,
+    train_x: torch.Tensor,
+    train_y: torch.Tensor,
+    test_x: torch.Tensor,
+    test_y: torch.Tensor,
+    counts: dict[int, int],
+    config: RecipeBenchmarkConfig,
+    recipe: Recipe,
+    probes: dict[str, object],
+    batch_y: torch.Tensor,
+    muon_momentum: list[torch.Tensor],
+    *,
+    seed: int,
+    step: int,
+    current_lr: float,
+    loss: torch.Tensor,
+    batch_accuracy: float,
+    loss_weight: torch.Tensor | None,
+) -> dict[str, object]:
+    was_training = bool(model.training)
+    model.eval()
+    named_params = matrix_named_parameters(model)
+    head_probe = probes["head_probe_indices"]
+    tail_probe = probes["tail_probe_indices"]
+    exposure = batch_exposure_summary(batch_y, counts, config)
+    try:
+        with torch.no_grad():
+            base_tail_logits = model(test_x[tail_probe]).detach()
+        head_metrics = full_metrics(model, train_x, train_y, head_probe)
+        tail_metrics = full_metrics(model, test_x, test_y, tail_probe)
+        head_loss, grads = _matrix_probe_gradients(
+            model,
+            named_params,
+            train_x,
+            train_y,
+            head_probe,
+            loss_weight=loss_weight,
+        )
+        before = snapshot(named_params)
+        target_gain = float(config.occupancy_probe_head_gain_fraction) * max(abs(head_loss), 1e-12)
+        fro_directions = frobenius_grad_direction(grads)
+        fro = _matched_head_gain_tail_drift(
+            model,
+            named_params,
+            before,
+            fro_directions,
+            test_x,
+            tail_probe,
+            base_tail_logits,
+            target_gain=target_gain,
+        )
+        has_muon_momentum = (
+            recipe.optimizer == "ns_muon"
+            and len(muon_momentum) == len(grads)
+            and tensor_fro_norm(muon_momentum) > 0.0
+        )
+        ns_source_tensors = [tensor.detach().clone() for tensor in muon_momentum] if has_muon_momentum else grads
+        ns_source = "muon_momentum" if has_muon_momentum else "current_gradient"
+        grad_momentum_cosine = direction_cosine(grads, ns_source_tensors) if has_muon_momentum else math.nan
+        ns_directions = newton_schulz_directions(ns_source_tensors, steps=recipe.newton_schulz_steps)
+        ns = _matched_head_gain_tail_drift(
+            model,
+            named_params,
+            before,
+            ns_directions,
+            test_x,
+            tail_probe,
+            base_tail_logits,
+            target_gain=target_gain,
+        )
+        fro_drift_sq = fro["tail_output_drift_fro"] ** 2 if math.isfinite(fro["tail_output_drift_fro"]) else math.nan
+        ns_drift_sq = ns["tail_output_drift_fro"] ** 2 if math.isfinite(ns["tail_output_drift_fro"]) else math.nan
+        drift_ratio = ns_drift_sq / max(fro_drift_sq, 1e-300) if math.isfinite(ns_drift_sq) and math.isfinite(fro_drift_sq) else math.nan
+        return {
+            "seed": int(seed),
+            "recipe": recipe.name,
+            "optimizer": recipe.optimizer,
+            "step": int(step),
+            "step_fraction": float(step) / max(float(config.train_steps), 1.0),
+            "lr": float(current_lr),
+            "batch_loss": float(loss.detach().cpu()),
+            "batch_accuracy": float(batch_accuracy),
+            **exposure,
+            "head_probe_group": str(probes["head_group"]),
+            "tail_probe_group": str(probes["tail_group"]),
+            "head_probe_examples": int(head_probe.numel()),
+            "tail_probe_examples": int(tail_probe.numel()),
+            "head_probe_loss": float(head_metrics["loss"]),
+            "head_probe_accuracy": float(head_metrics["accuracy"]),
+            "tail_probe_loss": float(tail_metrics["loss"]),
+            "tail_probe_accuracy": float(tail_metrics["accuracy"]),
+            "tail_probe_mean_margin": float(tail_metrics["mean_margin"]),
+            "target_head_gain": float(target_gain),
+            "matrix_grad_fro_norm": float(tensor_fro_norm(grads)),
+            "ns_direction_source": ns_source,
+            "muon_momentum_fro_norm": float(tensor_fro_norm(muon_momentum)) if has_muon_momentum else math.nan,
+            "gradient_momentum_cosine": float(grad_momentum_cosine) if math.isfinite(grad_momentum_cosine) else math.nan,
+            "fro_alignment": float(fro["alignment"]),
+            "fro_step_size": float(fro["step_size"]),
+            "fro_update_fro_norm": float(fro["update_fro_norm"]),
+            "fro_update_op_norm": float(fro["update_op_norm"]),
+            "fro_tail_output_drift_fro": float(fro["tail_output_drift_fro"]),
+            "fro_tail_output_drift_rms": float(fro["tail_output_drift_rms"]),
+            "ns_alignment": float(ns["alignment"]),
+            "ns_step_size": float(ns["step_size"]),
+            "ns_update_fro_norm": float(ns["update_fro_norm"]),
+            "ns_update_op_norm": float(ns["update_op_norm"]),
+            "ns_tail_output_drift_fro": float(ns["tail_output_drift_fro"]),
+            "ns_tail_output_drift_rms": float(ns["tail_output_drift_rms"]),
+            "ns_tail_output_drift_sq_ratio_vs_fro": float(drift_ratio),
+            "occupancy_probe_status": "matched_head_gain_probe_recorded",
+        }
+    finally:
+        model.zero_grad(set_to_none=True)
+        if was_training:
+            model.train()
 
 
 def augment_batch(
@@ -516,7 +820,11 @@ def run_recipe_benchmark(
     config: RecipeBenchmarkConfig,
     *,
     progress: bool,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    collect_occupancy: bool = False,
+) -> (
+    tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]
+    | tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]
+):
     random.seed(0)
     torch.manual_seed(0)
     device = resolve_device(config.device)
@@ -524,6 +832,7 @@ def run_recipe_benchmark(
     counts = long_tail_counts(config)
     recipes = [recipe_from_name(name) for name in config.recipe_names]
     trace_rows: list[dict] = []
+    occupancy_rows: list[dict] = []
     class_frames: list[pd.DataFrame] = []
 
     train_x, train_y = load_cifar100_images(
@@ -543,6 +852,18 @@ def run_recipe_benchmark(
     for seed in config.seeds:
         train_indices = make_train_indices(train_y, counts, seed=seed, device=device)
         train_indices_by_class = class_index_map(train_y, train_indices, counts)
+        occupancy_probes = (
+            make_occupancy_probe_indices(
+                train_indices_by_class,
+                test_y,
+                counts,
+                config,
+                seed=int(seed),
+                device=device,
+            )
+            if collect_occupancy
+            else None
+        )
         for recipe in recipes:
             if progress:
                 print(f"[resnet-lt-recipe] seed={seed} recipe={recipe.name}: training", flush=True)
@@ -627,6 +948,30 @@ def run_recipe_benchmark(
                             "dtype": str(dtype).replace("torch.", ""),
                         }
                     )
+                    if collect_occupancy:
+                        if occupancy_probes is None:
+                            raise AssertionError("occupancy probes must be initialized when collection is enabled")
+                        occupancy_rows.append(
+                            collect_occupancy_probe(
+                                model,
+                                train_x,
+                                train_y,
+                                test_x,
+                                test_y,
+                                counts,
+                                config,
+                                recipe,
+                                occupancy_probes,
+                                batch_y,
+                                muon_momentum,
+                                seed=int(seed),
+                                step=int(step),
+                                current_lr=float(current_lr),
+                                loss=loss,
+                                batch_accuracy=batch_accuracy,
+                                loss_weight=recipe_loss_weight,
+                            )
+                        )
                     if progress:
                         print(
                             f"[resnet-lt-recipe] seed={seed} recipe={recipe.name} "
@@ -647,6 +992,8 @@ def run_recipe_benchmark(
     summary = summarize_over_seeds(group_metrics)
     pair_summary = summarize_recipe_differences(group_metrics, baseline_recipe=config.baseline_recipe)
     trace = pd.DataFrame(trace_rows)
+    if collect_occupancy:
+        return trace, class_metrics, group_metrics, summary, pair_summary, pd.DataFrame(occupancy_rows)
     return trace, class_metrics, group_metrics, summary, pair_summary
 
 

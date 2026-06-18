@@ -1,5 +1,5 @@
 state_id,trigger,claim_state,required_action
-TB-PWR-S1-not-ready,selection gates TVS-1/TVS-2/TVS-4 are not_ready,not_ready,run validation grid and selection audit before final seeds
+TB-PWR-S1-not-ready,selection gates TVS-1/TVS-2/TVS-4/TVS-5 are not_ready,not_ready,"run validation grid, occupancy logging, and selection audit before final seeds"
 TB-PWR-S2-final-quarantine-broken,any final output exists before validation family selection is complete,protocol_violation,do not use those final rows for a tuned-performance claim
 TB-PWR-S3-final-family-complete-positive,all selected recipes have 10 paired final seeds and primary/guardrail gates pass,cifar100lt_resnet18_benchmark_claim_eligible,"report adjusted comparisons, per-group metrics, CIs, and exact scope"
 TB-PWR-S4-final-family-complete-underpowered,primary comparisons fail but observed effect scale is below audited MDE,underpowered_tuned_boundary,state MDE floor and add a larger preregistered final family before broad claims
