@@ -27,6 +27,8 @@ This generated trace links the paper-level top-conference claim decisions to exp
 | TCD-5-optimizer-performance-benchmark       | local Muon drift compatibility implies benchmark superiority                                | no                    | pass           |
 | TCD-5-optimizer-performance-benchmark       | sampled bridge states represent the full training trajectory distribution                   | no                    | pass           |
 | TCD-5-optimizer-performance-benchmark       | using partial validation leaderboard to change selection, launch order, or final seed plan  | no                    | pass           |
+| TCD-5-optimizer-performance-benchmark       | running final-safe-submit before FEP/TFE/FLA gates pass                                     | no                    | pass           |
+| TCD-5-optimizer-performance-benchmark       | claiming final benchmark performance from not_ready final evaluator gates                   | no                    | pass           |
 | TCD-6-artifact-reproducibility              | preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server | no                    | pass           |
 
 ## Operating Rule

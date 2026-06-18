@@ -12,8 +12,8 @@
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2988346,
-      "size": "2.8 MB"
+      "size_bytes": 2993571,
+      "size": "2.9 MB"
     },
     {
       "path": "tests",
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1895309,
+      "size_bytes": 1915268,
       "size": "1.8 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289230179,
+      "size_bytes": 289233467,
       "size": "275.8 MB"
     },
     {
@@ -1293,27 +1293,27 @@
     {
       "path": "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
       "rows": 6,
-      "size": "6.4 KB"
+      "size": "7.9 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv",
       "rows": 5,
-      "size": "2.6 KB"
+      "size": "2.8 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
       "rows": 5,
-      "size": "4.1 KB"
+      "size": "4.7 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv",
       "rows": 6,
-      "size": "3.1 KB"
+      "size": "3.2 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/paper_sequence.csv",
       "rows": 6,
-      "size": "1.8 KB"
+      "size": "1.9 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/readiness_summary.csv",
@@ -1327,8 +1327,8 @@
     },
     {
       "path": "results/e11_manuscript_claim_trace/blocked_phrase_audit.csv",
-      "rows": 11,
-      "size": "1.2 KB"
+      "rows": 13,
+      "size": "1.5 KB"
     },
     {
       "path": "results/e11_clean_worktree_replay_audit/run_summary.csv",
@@ -2052,11 +2052,11 @@
     },
     {
       "path": "discussion/e11_top_conference_claim_decision_audit.md",
-      "size": "45.4 KB"
+      "size": "64.5 KB"
     },
     {
       "path": "discussion/e11_manuscript_claim_trace.md",
-      "size": "8.3 KB"
+      "size": "8.7 KB"
     },
     {
       "path": "discussion/e11_clean_worktree_replay_audit.md",
