@@ -1,0 +1,7 @@
+recipe_family,claim_role,optimizer,setting_count,setting_fraction,lr_count,weight_decay_count,warmup_count,newton_schulz_count,class_reweighting,sampler,validation_seed_set,budget_interpretation
+adamw_cb_loss_tuned,class-balanced AdamW baseline,adamw,24,0.14634146341463414,3,2,2,1,effective-number class-balanced loss beta=0.999;0.9999,long-tail natural sampler,10..14,tuned_baseline_surface
+adamw_cb_sampler_tuned,sampler baseline required before any practical claim,adamw,8,0.04878048780487805,2,2,2,1,cross entropy,class-balanced sampler,10..14,tuned_baseline_surface
+adamw_ce_tuned,tuned AdamW baseline,adamw,12,0.07317073170731707,3,2,2,1,none,long-tail natural sampler,10..14,tuned_baseline_surface
+ns_muon_cb_tuned,candidate practical Muon class-balanced recipe,ns_muon,36,0.21951219512195122,3,2,2,3,effective-number class-balanced loss beta=0.9999,long-tail natural sampler,10..14,candidate_search_budget_disclose_not_final_advantage
+ns_muon_matrix_tuned,candidate practical Muon recipe,ns_muon,72,0.43902439024390244,4,2,3,3,none,long-tail natural sampler,10..14,candidate_search_budget_disclose_not_final_advantage
+sgd_momentum_ce_tuned,tuned SGD baseline,sgd,12,0.07317073170731707,3,2,2,1,none,long-tail natural sampler,10..14,tuned_baseline_surface

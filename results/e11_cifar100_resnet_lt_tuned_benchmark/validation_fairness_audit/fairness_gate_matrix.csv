@@ -1,0 +1,6 @@
+gate_id,status,evidence,claim_effect
+TBF-1-registered-family-coverage,pass,6 recipe families; 164 registered settings,benchmark scope names every tuned family rather than a hand-picked subset
+TBF-2-baseline-tuning-surface,pass,AdamW CE=12; SGD CE=12; class-balanced loss and sampler baselines present,Muon cannot be compared only to undertuned vanilla baselines
+TBF-3-candidate-budget-disclosure,pass_with_disclosure,Muon candidate settings=108; baseline settings=56,larger Muon validation budget must be disclosed and cannot count as final evidence
+TBF-4-seed-metric-reporting-parity,pass,"validation seeds, final seeds, primary metric, Holm family, and reporting surface are shared",final paired comparison uses one rule set for every optimizer family
+TBF-5-final-gates-still-blocked,pass,TVS-1=not_ready; TVS-3=pass,fairness audit does not authorize final-performance wording from partial validation

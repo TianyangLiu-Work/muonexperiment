@@ -1,0 +1,9 @@
+{
+  "claim_authority": "fairness_disclosure_only_until_final_gates_pass",
+  "gate_report": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv",
+  "recipe_grid": "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/recipe_grid.csv",
+  "registered_settings": 164,
+  "scope": "validation_budget_and_comparison_fairness",
+  "selection_rules": "results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/selection_rules.csv",
+  "settings_registry": "results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv"
+}

@@ -1,0 +1,4 @@
+contract_id,status,required_wording,forbidden_wording
+TBF-C1-validation-budget-disclosure,active,report baseline validation budget=56 settings and Muon candidate validation budget=108 settings,describing validation leaderboard rank as final benchmark performance
+TBF-C2-final-evidence-parity,active,final claims require paired seed set 20..29 for every selected family,using a larger validation search budget as evidence of a final optimizer advantage
+TBF-C3-baseline-strength-boundary,active,"compare against tuned AdamW, tuned SGD, and class-balanced AdamW baselines",claiming practical Muon superiority against only the weak reporting baseline or pilots

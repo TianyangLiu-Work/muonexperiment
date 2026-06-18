@@ -6,15 +6,15 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 434.1 KB |
-| scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 2.9 MB   |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 435.2 KB |
+| scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 3.0 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 66.0 KB  |
 | discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 1.9 MB   |
 | results                | Generated CSV evidence used by the paper table, discussion artifacts, and validator.  | commit current E11 evidence set          | 275.9 MB |
 | figures                | Static figures used by the paper draft and paper-facing Markdown artifacts.           | commit static E11 figures                | 33.5 MB  |
 | configs                | Experiment configuration snapshots.                                                   | commit                                   | 316 B    |
 | paper                  | Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.   | commit source and selected rendered PDFs | 5.6 MB   |
-| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 23.4 KB  |
+| Makefile               | Thin reproducibility entrypoint for E11 artifact generation and validation commands.  | commit                                   | 23.7 KB  |
 | .gitignore             | Keeps local caches, datasets, and generated videos out of default commits.            | commit                                   | 479 B    |
 | .gitattributes         | Marks generated evidence artifacts and binary files for cleaner GitHub review.        | commit                                   | 667 B    |
 
@@ -185,7 +185,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_submission_repro_audit/source_package_manifest.csv                                             |     11 | 1.8 KB    |
 | results/e11_submission_repro_audit/build_gate_summary.csv                                                  |      6 | 1.0 KB    |
 | results/e11_artifact_review_packet/command_matrix.csv                                                      |     14 | 5.2 KB    |
-| results/e11_artifact_review_packet/gate_matrix.csv                                                         |      6 | 1.6 KB    |
+| results/e11_artifact_review_packet/gate_matrix.csv                                                         |      6 | 1.5 KB    |
 | results/e11_artifact_review_packet/local_state_contract.csv                                                |     13 | 3.8 KB    |
 | results/e11_artifact_review_packet/reviewer_response.csv                                                   |     10 | 3.9 KB    |
 | results/e11_camera_ready_package_audit/package_item_matrix.csv                                             |      8 | 2.0 KB    |
@@ -266,15 +266,15 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_muon_state_distribution_contract/evidence_link_matrix.csv                                      |      5 | 1.5 KB    |
 | results/e11_muon_state_distribution_contract/falsification_tests.csv                                       |      5 | 2.3 KB    |
 | results/e11_muon_state_distribution_contract/claim_gate_ladder.csv                                         |      4 | 1.2 KB    |
-| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 30.2 KB   |
-| results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv                                  |      6 | 9.9 KB    |
-| results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv                              |      5 | 3.1 KB    |
-| results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv                                 |      5 | 5.7 KB    |
-| results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv                                  |      6 | 3.3 KB    |
+| results/e11_top_conference_gap_register/gap_register.csv                                                   |      7 | 30.9 KB   |
+| results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv                                  |      6 | 10.7 KB   |
+| results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv                              |      5 | 3.2 KB    |
+| results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv                                 |      5 | 6.0 KB    |
+| results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv                                  |      6 | 3.4 KB    |
 | results/e11_top_conference_claim_decision_audit/paper_sequence.csv                                         |      6 | 1.9 KB    |
 | results/e11_top_conference_claim_decision_audit/readiness_summary.csv                                      |      6 | 237 B     |
 | results/e11_manuscript_claim_trace/claim_trace.csv                                                         |      6 | 2.6 KB    |
-| results/e11_manuscript_claim_trace/blocked_phrase_audit.csv                                                |     15 | 1.7 KB    |
+| results/e11_manuscript_claim_trace/blocked_phrase_audit.csv                                                |     16 | 1.8 KB    |
 | results/e11_clean_worktree_replay_audit/run_summary.csv                                                    |      1 | 430 B     |
 | results/e11_clean_worktree_replay_audit/gate_matrix.csv                                                    |      6 | 810 B     |
 | results/e11_pdf_render_boundary_audit/pdf_inspection_tool_status.csv                                       |      8 | 447 B     |
@@ -358,6 +358,10 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/exposure_boundary.csv              |      1 | 415 B     |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/immutability_matrix.csv            |      5 | 1.4 KB    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/seal_gate_matrix.csv               |      5 | 665 B     |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/validation_fairness_audit/family_budget_matrix.csv          |      6 | 1.2 KB    |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/validation_fairness_audit/seed_metric_parity.csv            |      5 | 764 B     |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/validation_fairness_audit/fairness_gate_matrix.csv          |      5 | 903 B     |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/validation_fairness_audit/budget_disclosure_contract.csv    |      3 | 657 B     |
 | results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv                                              |    240 | 257.6 KB  |
 | results/e11_cifar100_resnet_practical_muon_bridge/paired_metrics.csv                                       |    180 | 69.1 KB   |
 | results/e11_cifar100_resnet_practical_muon_bridge/summary.csv                                              |      6 | 5.2 KB    |
@@ -426,26 +430,26 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                                                                                        | size     |
 |:--------------------------------------------------------------------------------------------|:---------|
-| README_E11.md                                                                               | 101.5 KB |
+| README_E11.md                                                                               | 102.0 KB |
 | discussion/e11_paper_skeleton.md                                                            | 10.9 KB  |
 | discussion/e11_main_paper_package.md                                                        | 22.8 KB  |
 | discussion/e11_main_figure_captions.md                                                      | 6.5 KB   |
 | discussion/e11_notation_glossary.md                                                         | 8.7 KB   |
 | discussion/e11_quantitative_claim_ledger.md                                                 | 21.7 KB  |
-| discussion/e11_reproduction_checklist.md                                                    | 72.1 KB  |
+| discussion/e11_reproduction_checklist.md                                                    | 72.6 KB  |
 | discussion/e11_reviewer_risk_audit.md                                                       | 24.1 KB  |
 | discussion/e11_pasted_review_audit.md                                                       | 8.3 KB   |
 | discussion/e11_completion_audit.md                                                          | 5.3 KB   |
 | discussion/e11_end_of_draft_self_review.md                                                  | 7.3 KB   |
 | discussion/e11_reference_audit.md                                                           | 6.1 KB   |
-| discussion/e11_submission_repro_audit.md                                                    | 8.5 KB   |
-| discussion/e11_artifact_review_packet.md                                                    | 29.6 KB  |
+| discussion/e11_submission_repro_audit.md                                                    | 8.3 KB   |
+| discussion/e11_artifact_review_packet.md                                                    | 29.4 KB  |
 | discussion/e11_camera_ready_package_audit.md                                                | 7.5 KB   |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB  |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB  |
-| discussion/e11_top_conference_gap_register.md                                               | 71.7 KB  |
-| discussion/e11_top_conference_claim_decision_audit.md                                       | 90.6 KB  |
-| discussion/e11_manuscript_claim_trace.md                                                    | 9.3 KB   |
+| discussion/e11_top_conference_gap_register.md                                               | 77.1 KB  |
+| discussion/e11_top_conference_claim_decision_audit.md                                       | 100.5 KB |
+| discussion/e11_manuscript_claim_trace.md                                                    | 9.5 KB   |
 | discussion/e11_clean_worktree_replay_audit.md                                               | 3.2 KB   |
 | discussion/e11_pdf_render_boundary_audit.md                                                 | 3.5 KB   |
 | discussion/e11_mechanism_referee_audit.md                                                   | 30.5 KB  |
@@ -516,6 +520,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md                          | 6.3 KB   |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md                       | 5.9 KB   |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md                          | 12.3 KB  |
+| discussion/e11_cifar100_resnet_lt_tuned_benchmark_fairness_audit.md                         | 7.9 KB   |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md                            | 16.9 KB  |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md                   | 9.5 KB   |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md                    | 15.1 KB  |

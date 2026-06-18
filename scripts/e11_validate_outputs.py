@@ -523,6 +523,10 @@ def assert_top_conference_claim_decision_audit(
         "TPS-current-post-exposure-boundary=post_partial_validation_exposure_sealed",
         "TPS-1-hash-manifest-complete=pass",
         "TPS-5-post-exposure-claim-authority=pass",
+        "TBF-1-registered-family-coverage=pass",
+        "TBF-3-candidate-budget-disclosure=pass_with_disclosure",
+        "validation_budget_baselines=56",
+        "validation_budget_muon_candidates=108",
         "FEP-1-selection-gates-ready=not_ready",
         "FEP-5-all-families-ready=not_ready",
         "TFE-6-final-claim-state=not_ready",
@@ -557,6 +561,7 @@ def assert_top_conference_claim_decision_audit(
         "partial validation leaderboard to change selection, launch order, or final seed plan",
         "violating the validation refresh firewall forbidden-action matrix",
         "changing sealed protocol surfaces after partial exposure without a fresh protocol",
+        "hiding validation-budget asymmetry",
         "running final-safe-submit before FEP/TFE/FLA gates pass",
     ]:
         if phrase not in forbidden_shortcuts:
@@ -575,6 +580,7 @@ def assert_top_conference_claim_decision_audit(
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_fairness_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_launch_audit.md",
@@ -582,6 +588,7 @@ def assert_top_conference_claim_decision_audit(
         "leakage guards",
         "validation refresh firewall transitions",
         "protocol-seal gates",
+        "fairness gates",
         "discussion/e11_muon_state_distribution_contract.md",
         "local compatibility can coexist with poor final performance",
         "occupancy logging",
@@ -609,9 +616,10 @@ def assert_top_conference_claim_decision_audit(
         "tuned leakage audit",
         "validation refresh firewall",
         "protocol hash seal",
+        "fairness audit",
         "final execution/evaluator/launch gates",
         "state-distribution contract",
-        "state-distribution occupancy summaries, passing leakage guards, passing refresh-firewall transitions, and passing protocol-seal gates",
+        "state-distribution occupancy summaries, passing leakage guards, passing refresh-firewall transitions, passing protocol-seal gates, and disclosed fairness-budget gates",
         "passing final execution/evaluator/launch gates before practical-performance wording",
         "preferred-LaTeX clean-checkout gap",
     ]:
@@ -1902,7 +1910,10 @@ def main() -> None:
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/hash_manifest.csv",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_fairness_audit.md",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_fairness_audit/fairness_gate_matrix.csv",
         "protocol hash seal",
+        "fairness audit",
         "validation/final seed splits",
         "tuned AdamW/SGD/class-balanced baselines",
         "phase1 GPU entrypoint is now implemented",
@@ -6506,6 +6517,95 @@ def main() -> None:
             "validation rows are visible",
         ],
     )
+    tuned_fairness_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_fairness_audit")
+    tuned_fairness_budget = pd.read_csv(tuned_fairness_dir / "family_budget_matrix.csv")
+    tuned_fairness_parity = pd.read_csv(tuned_fairness_dir / "seed_metric_parity.csv")
+    tuned_fairness_gates = pd.read_csv(tuned_fairness_dir / "fairness_gate_matrix.csv")
+    tuned_fairness_contract = pd.read_csv(tuned_fairness_dir / "budget_disclosure_contract.csv")
+    tuned_fairness_config = json.loads((tuned_fairness_dir / "config.json").read_text(encoding="utf-8"))
+    expected_fairness_families = {
+        "adamw_ce_tuned",
+        "sgd_momentum_ce_tuned",
+        "adamw_cb_loss_tuned",
+        "adamw_cb_sampler_tuned",
+        "ns_muon_matrix_tuned",
+        "ns_muon_cb_tuned",
+    }
+    expected_fairness_parity_ids = {
+        "TBF-P1-validation-seed-parity",
+        "TBF-P2-final-seed-parity",
+        "TBF-P3-primary-metric-parity",
+        "TBF-P4-multiplicity-parity",
+        "TBF-P5-reporting-surface-parity",
+    }
+    expected_fairness_gate_ids = {
+        "TBF-1-registered-family-coverage",
+        "TBF-2-baseline-tuning-surface",
+        "TBF-3-candidate-budget-disclosure",
+        "TBF-4-seed-metric-reporting-parity",
+        "TBF-5-final-gates-still-blocked",
+    }
+    expected_fairness_contract_ids = {
+        "TBF-C1-validation-budget-disclosure",
+        "TBF-C2-final-evidence-parity",
+        "TBF-C3-baseline-strength-boundary",
+    }
+    if (
+        set(tuned_fairness_budget["recipe_family"]) != expected_fairness_families
+        or int(tuned_fairness_budget["setting_count"].sum()) != len(tuned_selection_run_registry)
+    ):
+        raise AssertionError("CIFAR-100-LT tuned fairness audit must summarize every registered recipe family")
+    fairness_budget_by_family = tuned_fairness_budget.set_index("recipe_family")["setting_count"].astype(int)
+    expected_fairness_counts = {
+        "adamw_ce_tuned": 12,
+        "sgd_momentum_ce_tuned": 12,
+        "adamw_cb_loss_tuned": 24,
+        "adamw_cb_sampler_tuned": 8,
+        "ns_muon_matrix_tuned": 72,
+        "ns_muon_cb_tuned": 36,
+    }
+    if fairness_budget_by_family.to_dict() != expected_fairness_counts:
+        raise AssertionError(f"CIFAR-100-LT tuned fairness budget counts drifted: {fairness_budget_by_family.to_dict()}")
+    if set(tuned_fairness_parity["parity_id"]) != expected_fairness_parity_ids or not tuned_fairness_parity[
+        "status"
+    ].astype(str).eq("pass").all():
+        raise AssertionError("CIFAR-100-LT tuned fairness seed/metric parity must pass")
+    observed_fairness_gate_status = tuned_fairness_gates.set_index("gate_id")["status"].astype(str).to_dict()
+    expected_fairness_gate_status = {
+        "TBF-1-registered-family-coverage": "pass",
+        "TBF-2-baseline-tuning-surface": "pass",
+        "TBF-3-candidate-budget-disclosure": "pass_with_disclosure",
+        "TBF-4-seed-metric-reporting-parity": "pass",
+        "TBF-5-final-gates-still-blocked": "pass",
+    }
+    if set(tuned_fairness_gates["gate_id"]) != expected_fairness_gate_ids or observed_fairness_gate_status != expected_fairness_gate_status:
+        raise AssertionError(f"CIFAR-100-LT tuned fairness gates drifted: {observed_fairness_gate_status}")
+    if set(tuned_fairness_contract["contract_id"]) != expected_fairness_contract_ids or not tuned_fairness_contract[
+        "forbidden_wording"
+    ].astype(str).str.contains("validation|final|Muon|baseline", regex=True).all():
+        raise AssertionError("CIFAR-100-LT tuned fairness budget disclosure contract must block unfair wording")
+    if tuned_fairness_config.get("scope") != "validation_budget_and_comparison_fairness" or tuned_fairness_config.get(
+        "claim_authority"
+    ) != "fairness_disclosure_only_until_final_gates_pass":
+        raise AssertionError("CIFAR-100-LT tuned fairness audit config must preserve claim authority")
+    tuned_fairness_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_fairness_audit.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark fairness audit",
+        tuned_fairness_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Fairness Audit",
+            "validation-budget and comparison-parity audit",
+            "Family Budget Matrix",
+            "Seed And Metric Parity",
+            "Fairness Gate Matrix",
+            "Budget Disclosure Contract",
+            "larger Muon validation search budget",
+            "not final evidence",
+            "tuned AdamW and tuned SGD",
+        ],
+    )
     tuned_slurm_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan")
     tuned_slurm_plan = pd.read_csv(tuned_slurm_dir / "chunk_plan.csv")
     tuned_slurm_policy = pd.read_csv(tuned_slurm_dir / "queue_policy.csv")
@@ -8823,6 +8923,7 @@ def main() -> None:
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_fairness_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
@@ -8830,6 +8931,7 @@ def main() -> None:
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol_seal.py",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_fairness_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.py",
@@ -8845,6 +8947,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-selection",
         "make e11-cifar-resnet-lt-tuned-benchmark-refresh-firewall",
         "make e11-cifar-resnet-lt-tuned-benchmark-protocol-seal",
+        "make e11-cifar-resnet-lt-tuned-benchmark-fairness-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan",
@@ -8857,9 +8960,12 @@ def main() -> None:
         "validation refresh firewall",
         "protocol hash seal",
         "post-partial-exposure boundary",
-        "next legal refresh boundary at array index 17",
+        "fairness audit",
+        "Muon candidate-budget disclosure",
+        "shared validation/final seed rules",
+        f"next legal refresh boundary at array index {refresh_next_missing}",
         "forbidden metric-dependent launch/order/selection/final-submit actions",
-        "passing leakage, validation-refresh firewall, and protocol-seal guards",
+        "passing leakage, validation-refresh firewall, protocol-seal, and fairness-budget guards",
         "discussion/e11_muon_state_distribution_contract.md",
         "state-distribution transport contract",
         "MSD-T1 local-response integrand",
@@ -8918,9 +9024,13 @@ def main() -> None:
             "TPS-current-post-exposure-boundary=post_partial_validation_exposure_sealed",
             "TPS-1-hash-manifest-complete=pass",
             "TPS-5-post-exposure-claim-authority=pass",
+            "TBF-1-registered-family-coverage=pass",
+            "TBF-3-candidate-budget-disclosure=pass_with_disclosure",
+            "validation_budget_muon_candidates=108",
             "using partial validation leaderboard to change selection, launch order, or final seed plan",
             "validation refresh firewall forbidden-action matrix",
             "changing sealed protocol surfaces after partial validation exposure without a fresh preregistered protocol",
+            "hiding validation-budget asymmetry",
             "FEP-1-selection-gates-ready=not_ready",
             "TFE-6-final-claim-state=not_ready",
             "FLA-5-submit-flag=dry_run",
@@ -9264,6 +9374,7 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-tuned-benchmark-validation-results" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-selection" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-protocol-seal" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-fairness-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-power-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan" not in readme
@@ -9349,6 +9460,9 @@ def main() -> None:
         "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/hash_manifest.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/seal_gate_matrix.csv",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_fairness_audit/fairness_gate_matrix.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_fairness_audit/family_budget_matrix.csv",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_fairness_audit.md",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:

@@ -1,0 +1,6 @@
+parity_id,status,evidence,forbidden_asymmetry
+TBF-P1-validation-seed-parity,pass,all validation rows use seed_set 10..14,changing validation seeds by optimizer family
+TBF-P2-final-seed-parity,pass,final_claim seed_set 20..29 tuning_allowed=no,letting one optimizer family tune on final seeds
+TBF-P3-primary-metric-parity,pass,selection_rules.csv fixes few balanced accuracy for every family,using a different validation objective for Muon and baselines
+TBF-P4-multiplicity-parity,pass,final comparisons to tuned AdamW and tuned SGD are one Holm-adjusted family,claiming only the best-looking unadjusted comparison
+TBF-P5-reporting-surface-parity,pass,acceptance gates require many/medium/few/all reporting,reporting tail-only gains while hiding all-class collapse
