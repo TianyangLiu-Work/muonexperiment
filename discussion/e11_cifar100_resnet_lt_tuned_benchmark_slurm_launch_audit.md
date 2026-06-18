@@ -5,47 +5,43 @@ It is separate from the static no-side-effect chunk plan: this file records the
 actual queue state, the guarded capacity calculation, and whether `sbatch` was
 called.
 
-Current launch status: `blocked_no_queue_capacity`.
+Current launch status: `submitted`.
 
 ## Launch Decision
 
-| timestamp_utc             | submission_status         | submit_command   | slurm_job_id   |   current_queue_elements_before_submit |   available_submit_slots_before_submit |   planned_setting_count | array_expression   | planned_recipe_families   |   completed_settings_before_submit |   missing_settings_not_inflight_before_submit | inflight_validation_indices_before_submit   | final_seed_status   | phase_guard            |
-|:--------------------------|:--------------------------|:-----------------|:---------------|---------------------------------------:|---------------------------------------:|------------------------:|:-------------------|:--------------------------|-----------------------------------:|----------------------------------------------:|:--------------------------------------------|:--------------------|:-----------------------|
-| 2026-06-18T13:24:05+00:00 | blocked_no_queue_capacity |                  |                |                                     24 |                                      0 |                       0 |                    |                           |                                 17 |                                           136 | 17;18;19;20;21;22;23;24;25;26;27            | not_touched         | validation_tuning_only |
+| timestamp_utc             | submission_status   | submit_command                                                                                           |   slurm_job_id |   current_queue_elements_before_submit |   available_submit_slots_before_submit |   planned_setting_count | array_expression   | planned_recipe_families   |   completed_settings_before_submit |   missing_settings_not_inflight_before_submit | inflight_validation_indices_before_submit   | final_seed_status   | phase_guard            |
+|:--------------------------|:--------------------|:---------------------------------------------------------------------------------------------------------|---------------:|---------------------------------------:|---------------------------------------:|------------------------:|:-------------------|:--------------------------|-----------------------------------:|----------------------------------------------:|:--------------------------------------------|:--------------------|:-----------------------|
+| 2026-06-18T21:12:37+00:00 | submitted           | sbatch --parsable --array=28-47%1 scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch |           1359 |                                      0 |                                     24 |                      20 | 28-47              | adamw_cb_loss_tuned       |                                 28 |                                           136 |                                             | not_touched         | validation_tuning_only |
 
 ## Selected Validation Settings
 
-| array_index   | setting_id   | phase   | seed_set   | recipe_family   | recipe_name   | planned_output_dir   | planned_occupancy_trace_path   |
-|---------------|--------------|---------|------------|-----------------|---------------|----------------------|--------------------------------|
+|   array_index | setting_id                                               | phase             | seed_set   | recipe_family       | recipe_name                                          | planned_output_dir                                                                                                        | planned_occupancy_trace_path                                                                                                                  |
+|--------------:|:---------------------------------------------------------|:------------------|:-----------|:--------------------|:-----------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------|
+|            28 | TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd1e-4-warm0    | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p999_lr3e-4_wd1e-4_warm0    | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd1e-4-warm0    | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd1e-4-warm0/occupancy_trace.csv    |
+|            29 | TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd1e-4-warm500  | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p999_lr3e-4_wd1e-4_warm500  | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd1e-4-warm500  | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd1e-4-warm500/occupancy_trace.csv  |
+|            30 | TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd5e-4-warm0    | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p999_lr3e-4_wd5e-4_warm0    | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd5e-4-warm0    | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd5e-4-warm0/occupancy_trace.csv    |
+|            31 | TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd5e-4-warm500  | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p999_lr3e-4_wd5e-4_warm500  | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd5e-4-warm500  | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr3e-4-wd5e-4-warm500/occupancy_trace.csv  |
+|            32 | TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd1e-4-warm0    | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p999_lr1e-3_wd1e-4_warm0    | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd1e-4-warm0    | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd1e-4-warm0/occupancy_trace.csv    |
+|            33 | TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd1e-4-warm500  | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p999_lr1e-3_wd1e-4_warm500  | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd1e-4-warm500  | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd1e-4-warm500/occupancy_trace.csv  |
+|            34 | TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd5e-4-warm0    | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p999_lr1e-3_wd5e-4_warm0    | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd5e-4-warm0    | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd5e-4-warm0/occupancy_trace.csv    |
+|            35 | TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd5e-4-warm500  | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p999_lr1e-3_wd5e-4_warm500  | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd5e-4-warm500  | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p999-lr1e-3-wd5e-4-warm500/occupancy_trace.csv  |
+|            36 | TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd1e-4-warm0   | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr1e-4_wd1e-4_warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd1e-4-warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd1e-4-warm0/occupancy_trace.csv   |
+|            37 | TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd1e-4-warm500 | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr1e-4_wd1e-4_warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd1e-4-warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd1e-4-warm500/occupancy_trace.csv |
+|            38 | TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd5e-4-warm0   | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr1e-4_wd5e-4_warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd5e-4-warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd5e-4-warm0/occupancy_trace.csv   |
+|            39 | TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd5e-4-warm500 | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr1e-4_wd5e-4_warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd5e-4-warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-4-wd5e-4-warm500/occupancy_trace.csv |
+|            40 | TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd1e-4-warm0   | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr3e-4_wd1e-4_warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd1e-4-warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd1e-4-warm0/occupancy_trace.csv   |
+|            41 | TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd1e-4-warm500 | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr3e-4_wd1e-4_warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd1e-4-warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd1e-4-warm500/occupancy_trace.csv |
+|            42 | TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd5e-4-warm0   | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr3e-4_wd5e-4_warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd5e-4-warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd5e-4-warm0/occupancy_trace.csv   |
+|            43 | TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd5e-4-warm500 | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr3e-4_wd5e-4_warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd5e-4-warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr3e-4-wd5e-4-warm500/occupancy_trace.csv |
+|            44 | TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd1e-4-warm0   | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr1e-3_wd1e-4_warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd1e-4-warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd1e-4-warm0/occupancy_trace.csv   |
+|            45 | TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd1e-4-warm500 | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr1e-3_wd1e-4_warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd1e-4-warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd1e-4-warm500/occupancy_trace.csv |
+|            46 | TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd5e-4-warm0   | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr1e-3_wd5e-4_warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd5e-4-warm0   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd5e-4-warm0/occupancy_trace.csv   |
+|            47 | TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd5e-4-warm500 | validation_tuning | 10..14     | adamw_cb_loss_tuned | adamw_cb_loss_tuned_beta0p9999_lr1e-3_wd5e-4_warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd5e-4-warm500 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd5e-4-warm500/occupancy_trace.csv |
 
 ## Queue Snapshot Before Submit
 
-|   job_id | state   | job_name                 | reason_or_node    |
-|---------:|:--------|:-------------------------|:------------------|
-|     1332 | PD      | online-bank-seed7v1      | (Resources)       |
-|     1324 | PD      | score-bank-seed4v1       | (Priority)        |
-|  1342_17 | PD      | e11-lt-tuned-val         | (Priority)        |
-|  1342_18 | PD      | e11-lt-tuned-val         | (Priority)        |
-|  1342_19 | PD      | e11-lt-tuned-val         | (Priority)        |
-|  1342_20 | PD      | e11-lt-tuned-val         | (Priority)        |
-|  1342_21 | PD      | e11-lt-tuned-val         | (Priority)        |
-|  1342_22 | PD      | e11-lt-tuned-val         | (Priority)        |
-|  1342_23 | PD      | e11-lt-tuned-val         | (Priority)        |
-|  1342_24 | PD      | e11-lt-tuned-val         | (Priority)        |
-|  1342_25 | PD      | e11-lt-tuned-val         | (Priority)        |
-|  1342_26 | PD      | e11-lt-tuned-val         | (Priority)        |
-|  1342_27 | PD      | e11-lt-tuned-val         | (Priority)        |
-|     1334 | PD      | cont-bank-seed7v1        | (Dependency)      |
-|     1333 | PD      | score-bank-seed7v1       | (Dependency)      |
-|     1331 | PD      | cont-bank-seed6v1        | (Dependency)      |
-|     1330 | PD      | score-bank-seed6v1       | (Dependency)      |
-|     1328 | PD      | cont-bank-seed5v1        | (Dependency)      |
-|     1327 | PD      | score-bank-seed5v1       | (Dependency)      |
-|     1325 | PD      | cont-bank-seed4v1        | (Dependency)      |
-|     1246 | PD      | verl-branchgrpo-qwen3-4b | (Dependency)      |
-|     1329 | R       | online-bank-seed6v1      | yumingz5-linux-ml |
-|     1326 | R       | online-bank-seed5v1      | yumingz5-linux-ml |
-|     1245 | R       | verl-branchgrpo-qwen3-4b | yumingz5-linux-ml |
+| job_id   | state   | job_name   | reason_or_node   |
+|----------|---------|------------|------------------|
 
 ## Operating Rule
 
@@ -54,7 +50,7 @@ The launch guard preserves `MaxSubmitJobsPerUser` by enforcing
 max_submit_jobs_per_user`. The submitted command, when non-empty, is:
 
 ```bash
-
+sbatch --parsable --array=28-47%1 scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch
 ```
 
 Only `validation_tuning` rows with seed set `10..14` are eligible. The untouched
