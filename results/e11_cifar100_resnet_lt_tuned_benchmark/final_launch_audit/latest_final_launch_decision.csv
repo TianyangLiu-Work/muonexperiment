@@ -1,0 +1,2 @@
+timestamp_utc,submission_status,submit_command,slurm_job_id,sbatch_exit_code,sbatch_stdout,sbatch_stderr,current_queue_elements_before_submit,max_submit_jobs_per_user,reserved_submit_slots,available_submit_slots_before_submit,planned_final_array_elements,array_expression,planned_recipe_families,inflight_final_indices_before_submit,final_seed_status,phase_guard
+2026-06-18T15:11:14+00:00,blocked_final_launch_gates_not_ready,,,,,,23,30,6,1,0,,,,eligible_only_after_fep_gates_pass,final_claim_only

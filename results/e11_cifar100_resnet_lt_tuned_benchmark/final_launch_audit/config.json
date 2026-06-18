@@ -1,0 +1,10 @@
+{
+  "final_array_elements": 6,
+  "final_evaluation": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation",
+  "final_execution_plan": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan",
+  "max_submit_jobs_per_user": 30,
+  "reserved_submit_slots": 6,
+  "sbatch_wrapper": "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_final.sbatch",
+  "submit_flag": false,
+  "submits_jobs_when_submit_flag_is_set_and_gates_pass": true
+}

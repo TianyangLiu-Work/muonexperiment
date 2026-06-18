@@ -1,0 +1,7 @@
+final_index,recipe_family,run_status,selected_setting_id,selected_recipe_name,final_seed_set,planned_output_dir
+0,adamw_cb_loss_tuned,blocked_until_family_selected,,,,
+1,adamw_cb_sampler_tuned,blocked_until_family_selected,,,,
+2,adamw_ce_tuned,blocked_until_selection_gates_pass,TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0,adamw_ce_tuned_lr1e-3_wd5e-4_warm0,20..29,results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim/adamw_ce_tuned
+3,ns_muon_cb_tuned,blocked_until_family_selected,,,,
+4,ns_muon_matrix_tuned,blocked_until_family_selected,,,,
+5,sgd_momentum_ce_tuned,blocked_until_family_selected,,,,

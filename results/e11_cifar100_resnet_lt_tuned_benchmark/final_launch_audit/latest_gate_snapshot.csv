@@ -1,0 +1,6 @@
+gate_id,status,evidence,blocks_submit
+FLA-1-final-execution-gates-ready,not_ready,FEP-1-selection-gates-ready=not_ready; FEP-2-final-analysis-plan-linked=pass; FEP-3-runner-contract-present=pass; FEP-4-final-output-quarantine=pass; FEP-5-all-families-ready=not_ready,yes
+FLA-2-final-evaluator-implemented,pass,TFE-1-evaluator-implemented=pass,yes
+FLA-3-no-final-job-duplicate,pass,no final Slurm array elements inflight,yes
+FLA-4-queue-capacity,not_ready,available_submit_slots=1; required_final_array_elements=6; current_queue_elements=23,yes
+FLA-5-submit-flag,dry_run,no --submit flag; audit only,no

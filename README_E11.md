@@ -193,6 +193,8 @@ make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit # calibrate tuned 
 make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan # pre-register final paired tests, Holm adjustment, reporting schema, and claim states
 make e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan # write a no-side-effect final-claim execution contract and gate-checked Slurm wrapper plan
 make e11-cifar-resnet-lt-tuned-benchmark-final-eval # evaluate final paired seeds with fixed Holm tests and claim gates after final outputs exist
+make e11-cifar-resnet-lt-tuned-benchmark-final-launch-audit # compute queue-aware final-claim launch readiness without submitting
+make e11-cifar-resnet-lt-tuned-benchmark-final-safe-submit # submit final-claim jobs only if every final launch gate passes
 make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan # write a chunked no-side-effect Slurm launch plan for the 164-setting validation grid
 make e11-cifar-resnet-lt-tuned-benchmark-launch-audit # compute the current queue-aware validation launch decision without submitting
 make e11-cifar-resnet-lt-tuned-benchmark-safe-submit # submit the largest safe validation subchunk under MaxSubmitJobsPerUser
@@ -273,6 +275,8 @@ make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit
 make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan
 make e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan
 make e11-cifar-resnet-lt-tuned-benchmark-final-eval
+make e11-cifar-resnet-lt-tuned-benchmark-final-launch-audit
+make e11-cifar-resnet-lt-tuned-benchmark-final-safe-submit
 make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan
 make e11-cifar-resnet-lt-tuned-benchmark-launch-audit
 make e11-cifar-resnet-lt-tuned-benchmark-safe-submit
@@ -1121,6 +1125,7 @@ Do not claim:
 - `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.py`: pre-final statistical analysis plan that fixes paired tests, Holm adjustment, reporting schema, and claim states before final outputs exist.
 - `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.py`: no-side-effect final-claim execution plan that links the gate-checked final runner, Slurm wrapper, selected recipe families, and seed `20..29` without submitting jobs.
 - `scripts/e11_evaluate_cifar100_resnet_lt_tuned_benchmark_final.py`: fixed final evaluator for selected recipe families, paired seed metrics, Holm-adjusted primary comparisons, all-class guardrails, occupancy summaries, and final claim gates.
+- `scripts/e11_submit_cifar100_resnet_lt_tuned_benchmark_final.py`: queue-aware final-claim launcher/audit that emits a final Slurm command only after FEP gates pass and records the launch decision.
 - `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_slurm_plan.py`: chunked no-side-effect Slurm launch plan for the registered 164-setting tuned validation grid under the server MaxSubmitJobs policy.
 - `scripts/e11_submit_cifar100_resnet_lt_tuned_benchmark_validation.py`: queue-aware Slurm launcher/audit that submits only a safe validation subchunk and records the launch decision.
 - `scripts/e11_write_top_conference_claim_decision_audit.py`: paper-level claim decision and rebuttal-readiness contract that separates supportable theorem/diagnostic wording from completed-negative-boundary and blocked predictive, natural-negative, benchmark, and toolchain claims.
