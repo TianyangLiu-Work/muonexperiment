@@ -1,0 +1,10 @@
+{
+  "claim_authority": "robustness_plan_only_until_final_outputs_exist",
+  "final_claim_plan": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/final_claim_plan.csv",
+  "final_outputs_inspected": false,
+  "primary_comparison_count": 4,
+  "primary_comparison_family": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan/primary_comparison_family.csv",
+  "resampling_seed": 20260211,
+  "robustness_test_rows": 16,
+  "scope": "pre_final_statistical_robustness_plan"
+}

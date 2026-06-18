@@ -1,0 +1,5 @@
+policy_id,status,rule,violation_response
+RBP-1-no-dropped-seed-claim,active,no primary performance claim if any selected recipe lacks one of final seeds 20..29,report incomplete final progress only and rerun missing seeds before claims
+RBP-2-paired-unit-lock,active,all primary and robustness tests use seed as the pairing unit,block unpaired or partially paired comparisons from the main claim
+RBP-3-failed-run-reporting,active,failed final runs must be counted in the run registry with failure reason before rerun,publish a missingness table and keep the final claim not_ready
+RBP-4-fixed-resampling-seed,active,bootstrap and permutation code must use a fixed evaluator seed recorded in config,rerun robustness artifacts with the fixed seed before citing sensitivity results

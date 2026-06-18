@@ -1,0 +1,6 @@
+gate_id,status,evidence,blocks_claim
+RBP-G1-final-output-quarantine,pass,no final_claim files exist,yes
+RBP-G2-primary-family-linked,pass,4 primary comparisons inherited from final_analysis_plan,yes
+RBP-G3-robustness-tests-registered,pass,16 robustness rows for 4 primary comparisons,yes
+RBP-G4-missing-seed-policy-active,pass,"dropped-seed, pairing, failed-run, and fixed-resampling policies active",yes
+RBP-G5-final-execution-readiness,not_ready,1/6 recipe families ready for final run,yes

@@ -1,0 +1,6 @@
+sensitivity_state,trigger,allowed_wording,blocked_wording
+robust_positive,"primary Holm gate passes, sign-flip sensitivity is directionally compatible, bootstrap CI excludes zero, and all-class guardrail passes",robust CIFAR-100-LT ResNet18 tuned final-performance improvement under the registered protocol,broad long-tail optimizer superiority
+parametric_only_positive,primary Holm gate passes but sign-flip or bootstrap sensitivity is weak,parametric positive with robustness caveat,robust optimizer-performance improvement
+heterogeneous_seed_effect,aggregate mean is positive but sign-count shows mixed seed directions,seed-heterogeneous final result with aggregate estimate,uniform recipe improvement
+negative_or_underpowered,primary and robustness tests do not support a positive claim,negative or underpowered tuned benchmark boundary,suppressing negative tuned outcomes
+incomplete_or_unpaired,any selected recipe lacks complete paired seed rows,incomplete final-run progress only,final-performance claim

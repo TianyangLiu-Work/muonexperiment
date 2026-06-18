@@ -527,6 +527,10 @@ def assert_top_conference_claim_decision_audit(
         "TBF-3-candidate-budget-disclosure=pass_with_disclosure",
         "validation_budget_baselines=56",
         "validation_budget_muon_candidates=108",
+        "RBP-G1-final-output-quarantine=pass",
+        "RBP-G3-robustness-tests-registered=pass",
+        "RBP-G5-final-execution-readiness=not_ready",
+        "robustness_test_rows=16",
         "FEP-1-selection-gates-ready=not_ready",
         "FEP-5-all-families-ready=not_ready",
         "TFE-6-final-claim-state=not_ready",
@@ -562,6 +566,7 @@ def assert_top_conference_claim_decision_audit(
         "violating the validation refresh firewall forbidden-action matrix",
         "changing sealed protocol surfaces after partial exposure without a fresh protocol",
         "hiding validation-budget asymmetry",
+        "claiming robust final performance without sign-flip/bootstrap sensitivity",
         "running final-safe-submit before FEP/TFE/FLA gates pass",
     ]:
         if phrase not in forbidden_shortcuts:
@@ -581,6 +586,7 @@ def assert_top_conference_claim_decision_audit(
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_fairness_audit.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_robustness_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_launch_audit.md",
@@ -589,6 +595,7 @@ def assert_top_conference_claim_decision_audit(
         "validation refresh firewall transitions",
         "protocol-seal gates",
         "fairness gates",
+        "robustness gates",
         "discussion/e11_muon_state_distribution_contract.md",
         "local compatibility can coexist with poor final performance",
         "occupancy logging",
@@ -617,9 +624,10 @@ def assert_top_conference_claim_decision_audit(
         "validation refresh firewall",
         "protocol hash seal",
         "fairness audit",
+        "final robustness plan",
         "final execution/evaluator/launch gates",
         "state-distribution contract",
-        "state-distribution occupancy summaries, passing leakage guards, passing refresh-firewall transitions, passing protocol-seal gates, and disclosed fairness-budget gates",
+        "state-distribution occupancy summaries, passing leakage guards, passing refresh-firewall transitions, passing protocol-seal gates, disclosed fairness-budget gates, and passing robustness sensitivity gates",
         "passing final execution/evaluator/launch gates before practical-performance wording",
         "preferred-LaTeX clean-checkout gap",
     ]:
@@ -6917,6 +6925,70 @@ def main() -> None:
             "Blocked now: running final analysis, changing the primary comparison family",
         ],
     )
+    tuned_robust_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_robustness_plan")
+    tuned_robust_tests = pd.read_csv(tuned_robust_dir / "robustness_test_matrix.csv")
+    tuned_robust_policy = pd.read_csv(tuned_robust_dir / "missing_seed_policy.csv")
+    tuned_robust_ladder = pd.read_csv(tuned_robust_dir / "claim_sensitivity_ladder.csv")
+    tuned_robust_gates = pd.read_csv(tuned_robust_dir / "gate_matrix.csv")
+    tuned_robust_config = json.loads((tuned_robust_dir / "config.json").read_text(encoding="utf-8"))
+    expected_robust_gate_ids = {
+        "RBP-G1-final-output-quarantine",
+        "RBP-G2-primary-family-linked",
+        "RBP-G3-robustness-tests-registered",
+        "RBP-G4-missing-seed-policy-active",
+        "RBP-G5-final-execution-readiness",
+    }
+    expected_robust_policy_ids = {
+        "RBP-1-no-dropped-seed-claim",
+        "RBP-2-paired-unit-lock",
+        "RBP-3-failed-run-reporting",
+        "RBP-4-fixed-resampling-seed",
+    }
+    if (
+        len(tuned_robust_tests) != len(tuned_final_comparisons) * 4
+        or set(tuned_robust_tests["comparison_id"]) != set(tuned_final_comparisons["comparison_id"])
+        or set(tuned_robust_tests["test_family"])
+        != {"primary_parametric", "nonparametric_sensitivity", "interval_sensitivity", "direction_sensitivity"}
+    ):
+        raise AssertionError("CIFAR-100-LT tuned robustness plan must register four sensitivity rows per primary comparison")
+    observed_robust_gates = tuned_robust_gates.set_index("gate_id")["status"].astype(str).to_dict()
+    expected_robust_gates = {
+        "RBP-G1-final-output-quarantine": "pass",
+        "RBP-G2-primary-family-linked": "pass",
+        "RBP-G3-robustness-tests-registered": "pass",
+        "RBP-G4-missing-seed-policy-active": "pass",
+        "RBP-G5-final-execution-readiness": "not_ready",
+    }
+    if set(tuned_robust_gates["gate_id"]) != expected_robust_gate_ids or observed_robust_gates != expected_robust_gates:
+        raise AssertionError(f"CIFAR-100-LT tuned robustness gates drifted: {observed_robust_gates}")
+    if set(tuned_robust_policy["policy_id"]) != expected_robust_policy_ids or not tuned_robust_policy[
+        "status"
+    ].astype(str).eq("active").all():
+        raise AssertionError("CIFAR-100-LT tuned robustness missing-seed policy must be active")
+    if "parametric_only_positive" not in set(tuned_robust_ladder["sensitivity_state"]):
+        raise AssertionError("CIFAR-100-LT tuned robustness ladder must include parametric-only downgrade state")
+    if tuned_robust_config.get("scope") != "pre_final_statistical_robustness_plan" or bool(
+        tuned_robust_config.get("final_outputs_inspected", True)
+    ):
+        raise AssertionError("CIFAR-100-LT tuned robustness plan must be pre-final and not inspect final outputs")
+    tuned_robust_text = Path(
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_robustness_plan.md"
+    ).read_text(encoding="utf-8")
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark final robustness plan",
+        tuned_robust_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Final Robustness Plan",
+            "pre-registers robustness checks",
+            "exact sign-flip",
+            "bootstrap",
+            "sign-count",
+            "Missing Seed Policy",
+            "Claim Sensitivity Ladder",
+            "parametric gate",
+            "downgrade to a sensitivity caveat",
+        ],
+    )
     tuned_final_exec_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan")
     tuned_final_exec_gates = pd.read_csv(tuned_final_exec_dir / "gate_matrix.csv")
     tuned_final_exec_runs = pd.read_csv(tuned_final_exec_dir / "final_family_run_plan.csv")
@@ -8925,6 +8997,7 @@ def main() -> None:
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_fairness_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_robustness_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_launch_audit.md",
@@ -8934,6 +9007,7 @@ def main() -> None:
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_fairness_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.py",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_robustness_plan.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.py",
         "scripts/e11_evaluate_cifar100_resnet_lt_tuned_benchmark_final.py",
         "scripts/e11_submit_cifar100_resnet_lt_tuned_benchmark_final.py",
@@ -8951,6 +9025,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan",
+        "make e11-cifar-resnet-lt-tuned-benchmark-final-robustness-plan",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-eval",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-launch-audit",
@@ -8963,9 +9038,11 @@ def main() -> None:
         "fairness audit",
         "Muon candidate-budget disclosure",
         "shared validation/final seed rules",
+        "exact sign-flip, bootstrap CI, sign-count sensitivity checks",
+        "robustness-sensitivity guards",
         f"next legal refresh boundary at array index {refresh_next_missing}",
         "forbidden metric-dependent launch/order/selection/final-submit actions",
-        "passing leakage, validation-refresh firewall, protocol-seal, and fairness-budget guards",
+        "passing leakage, validation-refresh firewall, protocol-seal, fairness-budget, and robustness-sensitivity guards",
         "discussion/e11_muon_state_distribution_contract.md",
         "state-distribution transport contract",
         "MSD-T1 local-response integrand",
@@ -9027,10 +9104,14 @@ def main() -> None:
             "TBF-1-registered-family-coverage=pass",
             "TBF-3-candidate-budget-disclosure=pass_with_disclosure",
             "validation_budget_muon_candidates=108",
+            "RBP-G1-final-output-quarantine=pass",
+            "RBP-G3-robustness-tests-registered=pass",
+            "robustness_test_rows=16",
             "using partial validation leaderboard to change selection, launch order, or final seed plan",
             "validation refresh firewall forbidden-action matrix",
             "changing sealed protocol surfaces after partial validation exposure without a fresh preregistered protocol",
             "hiding validation-budget asymmetry",
+            "claiming robust final performance without sign-flip/bootstrap sensitivity",
             "FEP-1-selection-gates-ready=not_ready",
             "TFE-6-final-claim-state=not_ready",
             "FLA-5-submit-flag=dry_run",
@@ -9378,6 +9459,7 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-tuned-benchmark-power-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-final-robustness-plan" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-final-eval" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-final-launch-audit" not in readme
@@ -9423,6 +9505,7 @@ def main() -> None:
         "discussion/e11_pdf_render_boundary_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_robustness_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_launch_audit.md",
@@ -9451,6 +9534,8 @@ def main() -> None:
         "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/mde_sensitivity_from_empirical_sd.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan/primary_comparison_family.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan/reporting_schema.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/final_robustness_plan/robustness_test_matrix.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/final_robustness_plan/gate_matrix.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/gate_matrix.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/final_family_run_plan.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation/primary_decisions.csv",
