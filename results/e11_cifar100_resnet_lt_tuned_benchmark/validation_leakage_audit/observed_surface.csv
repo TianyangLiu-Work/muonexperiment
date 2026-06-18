@@ -1,4 +1,4 @@
 observed_surface,observed_rows,completed_rows,contains_final_seed_data,allowed_use,blocked_use
-validation_selection/run_registry.csv,164,23,no,progress accounting and complete-family selection only,final-performance claim or partial-family selection
-interim_validation_audit/completed_setting_leaderboard.csv,23,23,no,reviewer-facing partial-grid readout,"changing validation grid, launch order, or frozen selection rule"
+validation_selection/run_registry.csv,164,24,no,progress accounting and complete-family selection only,final-performance claim or partial-family selection
+interim_validation_audit/completed_setting_leaderboard.csv,24,24,no,reviewer-facing partial-grid readout,"changing validation grid, launch order, or frozen selection rule"
 slurm_launch_audit/latest_queue_snapshot.csv,24,3,no,queue-capacity and inflight-array audit,metric-dependent scheduling decisions

@@ -4,4 +4,4 @@ adamw_cb_sampler_tuned,not_ready,,,,,no
 adamw_ce_tuned,ready_for_final_run,TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0,adamw_ce_tuned_lr1e-3_wd5e-4_warm0,20..29,results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim/adamw_ce_tuned,no
 ns_muon_cb_tuned,not_ready,,,,,no
 ns_muon_matrix_tuned,not_ready,,,,,no
-sgd_momentum_ce_tuned,not_ready,,,,,no
+sgd_momentum_ce_tuned,ready_for_final_run,TBV-sgd_momentum_ce_tuned-lr0p3-wd1e-3-warm500,sgd_momentum_ce_tuned_lr0p3_wd1e-3_warm500,20..29,results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim/sgd_momentum_ce_tuned,no

@@ -26,21 +26,21 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 2081060,
+      "size_bytes": 2086424,
       "size": "2.0 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289785949,
+      "size_bytes": 289871679,
       "size": "276.4 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 35603916,
+      "size_bytes": 35695970,
       "size": "34.0 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833551,
+      "size_bytes": 5833548,
       "size": "5.6 MB"
     },
     {
@@ -1498,17 +1498,17 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
       "rows": 164,
-      "size": "77.5 KB"
+      "size": "77.6 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/family_selection.csv",
       "rows": 6,
-      "size": "900 B"
+      "size": "1020 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/final_claim_plan.csv",
       "rows": 6,
-      "size": "498 B"
+      "size": "682 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv",
@@ -1547,8 +1547,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/validation_setting_variance.csv",
-      "rows": 92,
-      "size": "22.5 KB"
+      "rows": 96,
+      "size": "23.6 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/spent_pilot_paired_variance.csv",
@@ -1573,7 +1573,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan/analysis_input_contract.csv",
       "rows": 6,
-      "size": "1.5 KB"
+      "size": "1.6 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan/metric_contract.csv",
@@ -1613,7 +1613,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/final_family_run_plan.csv",
       "rows": 6,
-      "size": "846 B"
+      "size": "1.2 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/slurm_submit_plan.csv",
@@ -1657,8 +1657,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/chunk_plan.csv",
-      "rows": 8,
-      "size": "2.8 KB"
+      "rows": 7,
+      "size": "2.5 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/queue_policy.csv",
@@ -1687,8 +1687,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv",
-      "rows": 23,
-      "size": "5.4 KB"
+      "rows": 24,
+      "size": "5.6 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/family_progress.csv",
@@ -1698,7 +1698,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/occupancy_interim_summary.csv",
       "rows": 6,
-      "size": "651 B"
+      "size": "648 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/partial_grid_guardrail.csv",
@@ -2419,7 +2419,7 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
-      "size": "74.8 KB"
+      "size": "75.1 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md",
@@ -2451,7 +2451,7 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md",
-      "size": "15.1 KB"
+      "size": "15.2 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_robustness_plan.md",
@@ -2459,7 +2459,7 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
-      "size": "7.3 KB"
+      "size": "7.5 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
@@ -2471,7 +2471,7 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md",
-      "size": "6.4 KB"
+      "size": "6.1 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md",
