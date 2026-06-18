@@ -189,6 +189,7 @@ make e11-cifar-resnet-lt-tuned-benchmark-settings # write the executable 164-set
 make e11-cifar-resnet-lt-tuned-benchmark-validation-results # submit the tuned validation grid via Slurm array
 make e11-cifar-resnet-lt-tuned-benchmark-selection # select final recipes from completed validation summaries without touching final seeds
 make e11-cifar-resnet-lt-tuned-benchmark-power-audit # lock tuned final seed MDE, Holm family, and all-class guardrail before final outputs
+make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan # write a chunked no-side-effect Slurm launch plan for the 164-setting validation grid
 make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practical Muon/AdamW trajectory bridge via Slurm
 make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases
 make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates
@@ -260,6 +261,7 @@ make e11-cifar-resnet-lt-tuned-benchmark-settings
 make e11-cifar-resnet-lt-tuned-benchmark-validation-results
 make e11-cifar-resnet-lt-tuned-benchmark-selection
 make e11-cifar-resnet-lt-tuned-benchmark-power-audit
+make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan
 make e11-cifar-resnet-practical-muon-bridge-results
 make e11-natural-head-tail-boundary-audit
 make e11-natural-negative-search-protocol
@@ -1099,6 +1101,7 @@ Do not claim:
 - `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py`: paper-asset-safe wrapper that regenerates the tuned validation-grid registry without launching GPU training.
 - `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py`: validation-only selection audit that chooses final recipes after completed validation summaries and keeps final seeds quarantined.
 - `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py`: pre-output tuned final-performance power audit that locks the final MDE, Holm family, all-class guardrail, and outcome state machine before final outputs exist.
+- `scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_slurm_plan.py`: chunked no-side-effect Slurm launch plan for the registered 164-setting tuned validation grid under the server MaxSubmitJobs policy.
 - `scripts/e11_write_top_conference_claim_decision_audit.py`: paper-level claim decision and rebuttal-readiness contract that separates supportable theorem/diagnostic wording from completed-negative-boundary and blocked predictive, natural-negative, benchmark, and toolchain claims.
 - `scripts/e11_write_manuscript_claim_trace.py`: manuscript-level trace that maps each top-conference claim decision to `main.tex` anchors and checks that blocked positive wording is absent.
 - `scripts/e11_write_bold_conjecture_register.py`: bold-conjecture/careful-verification ledger that links theory bets to falsifiers, unspent tests, and forbidden claim shortcuts.

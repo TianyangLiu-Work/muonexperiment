@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 430760,
-      "size": "420.7 KB"
+      "size_bytes": 431574,
+      "size": "421.5 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 2745041,
+      "size_bytes": 2756881,
       "size": "2.6 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1683455,
+      "size_bytes": 1691219,
       "size": "1.6 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 287754529,
+      "size_bytes": 287759441,
       "size": "274.4 MB"
     },
     {
@@ -54,15 +54,15 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833090,
+      "size_bytes": 5833088,
       "size": "5.6 MB"
     },
     {
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 19406,
-      "size": "19.0 KB"
+      "size_bytes": 19647,
+      "size": "19.2 KB"
     },
     {
       "path": ".gitignore",
@@ -888,7 +888,7 @@
     {
       "path": "results/e11_submission_repro_audit/build_gate_summary.csv",
       "rows": 6,
-      "size": "1.0 KB"
+      "size": "994 B"
     },
     {
       "path": "results/e11_artifact_review_packet/command_matrix.csv",
@@ -903,7 +903,7 @@
     {
       "path": "results/e11_artifact_review_packet/local_state_contract.csv",
       "rows": 7,
-      "size": "1.4 KB"
+      "size": "1.5 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/reviewer_response.csv",
@@ -1511,6 +1511,16 @@
       "size": "1.0 KB"
     },
     {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/chunk_plan.csv",
+      "rows": 9,
+      "size": "3.2 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/queue_policy.csv",
+      "rows": 4,
+      "size": "879 B"
+    },
+    {
       "path": "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
       "rows": 240,
       "size": "257.6 KB"
@@ -1789,7 +1799,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "96.0 KB"
+      "size": "96.4 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -1813,7 +1823,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "63.6 KB"
+      "size": "64.3 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -1837,11 +1847,11 @@
     },
     {
       "path": "discussion/e11_submission_repro_audit.md",
-      "size": "8.5 KB"
+      "size": "8.3 KB"
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
-      "size": "14.8 KB"
+      "size": "14.7 KB"
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
@@ -2122,6 +2132,10 @@
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",
       "size": "16.9 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md",
+      "size": "6.8 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_practical_muon_bridge.md",

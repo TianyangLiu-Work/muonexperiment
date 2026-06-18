@@ -21,8 +21,8 @@ gate remains `not_ready` when those tools are absent on the server.
 
 | path                                         | exists   |   size_bytes | sha256                                                           | header_is_pdf   | audit_status   |
 |:---------------------------------------------|:---------|-------------:|:-----------------------------------------------------------------|:----------------|:---------------|
-| paper/specgrad_activation_paper/main.pdf     | yes      |      2597001 | 7218f34f3bfe77ecd77501d853a3698401ae889d0920fc00a22bdfeb0bb220f6 | yes             | pass           |
-| paper/specgrad_activation_paper/two_page.pdf | yes      |        62048 | 6f9754fbd7db689a798ec455f7b65b702576c3c43b08d555b8ce9b1002e5e31d | yes             | pass           |
+| paper/specgrad_activation_paper/main.pdf     | yes      |      2597001 | 97978ceb6ea00c7a317a441df23cc5528453f6bd997ef9473edfe87e55f4edd3 | yes             | pass           |
+| paper/specgrad_activation_paper/two_page.pdf | yes      |        62047 | d83dbd86777d2ca1e6b321b3602aed4489e8b802b3c72ee8a0e33b5d5b5638ea | yes             | pass           |
 
 ## Source Package Manifest
 
@@ -36,20 +36,20 @@ gate remains `not_ready` when those tools are absent on the server.
 | paper/specgrad_activation_paper/tables/e11_paper_numbers.tex           | yes      |        55974 | 70b0130ae2d7fb538f3316745d01387f714464b53e1597ec6286032aa488f227 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/head_tail_empirical_results.tex | yes      |         4934 | 1264d8923f3cfff52ae9af90f44b10bd29710c949ed93fc3d2eda5dff7b30471 | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/tables/local_linearization_errors.tex  | yes      |          961 | 12c108dd5bfdfd2d1ad219904a4f82f1d10e01ab6d6de4cd86a9252cb298a5ef | paper source or root reproduction entrypoint | pass           |
-| Makefile                                                               | yes      |        19406 | c56fc2edcf2fb2fd5bac293d4b43253b380ae36a9e01da932328fb7b58f60abc | paper source or root reproduction entrypoint | pass           |
-| README_E11.md                                                          | yes      |        98277 | ba84570ab34fd0dcad5cf06960f60228cbbabd7a59a86235f97d14dc7a927028 | paper source or root reproduction entrypoint | pass           |
+| Makefile                                                               | yes      |        19647 | 0072c5feae1351c3fbaa96607d46d41d1e50f6a9eddc3e7a62a7fc3345197a7d | paper source or root reproduction entrypoint | pass           |
+| README_E11.md                                                          | yes      |        98673 | d4e91088c7e13737af04b0fdbf93028f219d58e14e09e96df380dae9d3199fce | paper source or root reproduction entrypoint | pass           |
 | paper/specgrad_activation_paper/figures                                | yes      |      2923280 | 21 png files                                                     | paper-local figure bundle                    | pass           |
 
 ## Build Gate Summary
 
-| gate_id                        | status    | evidence                                                                                                                            | required_next_action                                                                                   |
-|:-------------------------------|:----------|:------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------|
-| R1-source-revision             | pass      | the commit containing this audit is the source revision                                                                             | record the pushed commit in the final run summary                                                      |
-| R2-working-tree-scope          | info      | audit generated during an intentional evidence update; final git status is checked before commit                                    | keep serverREADME.md untracked and stage only intentional evidence files                               |
-| R3-preferred-latex-toolchain   | not_ready | pdflatex/bibtex/xelatex not all available                                                                                           | run a clean checkout with pdflatex/bibtex/xelatex before claiming full venue-toolchain reproducibility |
-| R4-tectonic-fallback-toolchain | pass      | tectonic available                                                                                                                  | use make e11-paper-pdf or paper/specgrad_activation_paper make tectonic on this server                 |
-| R5-rendered-pdfs               | pass      | main.pdf and two_page.pdf have PDF headers and expected sizes                                                                       | rebuild paper PDFs if either rendered artifact fails                                                   |
-| R6-full-artifact-validation    | pass      | make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full passed on 2026-06-17 after tuned occupancy logging integration | record the make e11-full result in the commit/push summary                                             |
+| gate_id                        | status    | evidence                                                                                                     | required_next_action                                                                                   |
+|:-------------------------------|:----------|:-------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------|
+| R1-source-revision             | pass      | the commit containing this audit is the source revision                                                      | record the pushed commit in the final run summary                                                      |
+| R2-working-tree-scope          | info      | audit generated during an intentional evidence update; final git status is checked before commit             | keep serverREADME.md untracked and stage only intentional evidence files                               |
+| R3-preferred-latex-toolchain   | not_ready | pdflatex/bibtex/xelatex not all available                                                                    | run a clean checkout with pdflatex/bibtex/xelatex before claiming full venue-toolchain reproducibility |
+| R4-tectonic-fallback-toolchain | pass      | tectonic available                                                                                           | use make e11-paper-pdf or paper/specgrad_activation_paper make tectonic on this server                 |
+| R5-rendered-pdfs               | pass      | main.pdf and two_page.pdf have PDF headers and expected sizes                                                | rebuild paper PDFs if either rendered artifact fails                                                   |
+| R6-full-artifact-validation    | pass      | make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full passed after the Slurm-plan wording fix | record the make e11-full result in the commit/push summary                                             |
 
 ## Boundary
 

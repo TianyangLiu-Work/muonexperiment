@@ -1,0 +1,5 @@
+policy_id,rule,evidence
+SLURM-1-gpu-only-through-slurm,"GPU validation jobs are submitted through Slurm, never as direct local CUDA processes.",serverREADME.md states gpu_rogue_kill enforces Slurm-only GPU use.
+SLURM-2-submit-limit,"Submit at most 20 validation array elements per chunk, leaving 6 slots below MaxSubmitJobsPerUser=30.",The static plan chunks 164 settings into bounded sbatch arrays.
+SLURM-3-concurrency,Use array concurrency %1 for this validation grid unless the queue is explicitly checked before submission.,The server allows limited concurrent GPU jobs per user; serialized chunks avoid starving the queue.
+SLURM-4-no-final-unblinding,Only validation_tuning seed set 10..14 is eligible for this plan; final_claim seeds 20..29 remain untouched.,The sbatch wrapper calls the validation runner by array index and every registry row has phase=validation_tuning.

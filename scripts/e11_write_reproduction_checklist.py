@@ -168,6 +168,7 @@ make e11-cifar-resnet-lt-tuned-benchmark-protocol # register validation/final sp
 make e11-cifar-resnet-lt-tuned-benchmark-settings # write the executable tuned validation grid registry
 make e11-cifar-resnet-lt-tuned-benchmark-validation-results # submit the tuned validation grid via Slurm array
 make e11-cifar-resnet-lt-tuned-benchmark-selection # select final recipes from completed validation summaries
+make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan # write a chunked no-side-effect Slurm launch plan for the 164-setting validation grid
 make e11-cifar-resnet-practical-muon-bridge-results # submit the ResNet practical Muon/AdamW trajectory bridge via Slurm
 make e11-natural-negative-search-phase1-power-audit # keep the 26-setting natural-negative detectable-effect boundary current
 make e11-natural-negative-search-phase1-results # submit the registered phase1 natural-negative GPU jobs via Slurm

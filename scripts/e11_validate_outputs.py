@@ -1224,10 +1224,15 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "outcome_state_machine.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "config.json",
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md"),
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "chunk_plan.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "queue_policy.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "config.json",
+        Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md"),
         Path("scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py"),
+        Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_slurm_plan.py"),
         Path("scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch"),
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "metrics.csv",
         Path("results/e11_cifar100_resnet_practical_muon_bridge") / "paired_metrics.csv",
@@ -1589,6 +1594,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-validation-results # submit the tuned validation grid via Slurm array",
         "make e11-cifar-resnet-lt-tuned-benchmark-selection # select final recipes from completed validation summaries without touching final seeds",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit # lock tuned final seed MDE, Holm family, and all-class guardrail before final outputs",
+        "make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan # write a chunked no-side-effect Slurm launch plan for the 164-setting validation grid",
         "make e11-muon-state-distribution-contract # generate the Muon state-distribution/practical-performance boundary contract",
         "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
         "make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates",
@@ -5840,6 +5846,54 @@ def main() -> None:
             "The current result is not a final-performance benchmark result",
         ],
     )
+    tuned_slurm_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan")
+    tuned_slurm_plan = pd.read_csv(tuned_slurm_dir / "chunk_plan.csv")
+    tuned_slurm_policy = pd.read_csv(tuned_slurm_dir / "queue_policy.csv")
+    tuned_slurm_config = json.loads((tuned_slurm_dir / "config.json").read_text(encoding="utf-8"))
+    if (
+        len(tuned_slurm_plan) != 9
+        or int(tuned_slurm_plan["setting_count"].sum()) != 164
+        or int(tuned_slurm_plan["setting_count"].max()) > 20
+        or set(tuned_slurm_plan["submission_status"]) != {"not_submitted_static_plan"}
+    ):
+        raise AssertionError("CIFAR-100-LT tuned benchmark Slurm plan must chunk all 164 settings without submission")
+    if not tuned_slurm_plan["submit_command"].astype(str).str.contains(
+        "sbatch --array=.*%1 scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
+        regex=True,
+    ).all():
+        raise AssertionError("CIFAR-100-LT tuned benchmark Slurm plan must use bounded sbatch array commands")
+    if set(tuned_slurm_policy["policy_id"]) != {
+        "SLURM-1-gpu-only-through-slurm",
+        "SLURM-2-submit-limit",
+        "SLURM-3-concurrency",
+        "SLURM-4-no-final-unblinding",
+    }:
+        raise AssertionError("CIFAR-100-LT tuned benchmark Slurm plan must preserve queue policy rows")
+    if not (
+        tuned_slurm_config.get("side_effects") is False
+        and tuned_slurm_config.get("submits_jobs") is False
+        and int(tuned_slurm_config.get("chunk_size", -1)) == 20
+        and int(tuned_slurm_config.get("array_concurrency", -1)) == 1
+    ):
+        raise AssertionError(f"CIFAR-100-LT tuned benchmark Slurm plan config drifted: {tuned_slurm_config}")
+    tuned_slurm_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark Slurm plan",
+        tuned_slurm_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Slurm Plan",
+            "no-side-effect launch contract",
+            "MaxSubmitJobsPerUser",
+            "summary.csv",
+            "occupancy_trace.csv",
+            "sbatch --array=0-19%1",
+            "TVS-1",
+            "TVS-2",
+            "TVS-5",
+        ],
+    )
     tuned_power_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit")
     tuned_power_design = pd.read_csv(tuned_power_dir / "final_family_design.csv")
     tuned_power_comparisons = pd.read_csv(tuned_power_dir / "primary_comparison_plan.csv")
@@ -7971,6 +8025,7 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-tuned-benchmark-validation-results" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-selection" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-power-audit" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan" not in readme
         or "make e11-cifar-resnet-practical-muon-bridge-results" not in readme
         or "make e11-natural-head-tail-boundary-audit" not in readme
         or "make e11-natural-negative-search-protocol" not in readme

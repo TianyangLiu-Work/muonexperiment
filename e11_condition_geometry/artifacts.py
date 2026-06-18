@@ -347,6 +347,8 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit/all_class_guardrail_mde.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit/interpretation_ladder.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit/outcome_state_machine.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/chunk_plan.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/queue_policy.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/paired_metrics.csv",
     "results/e11_cifar100_resnet_practical_muon_bridge/summary.csv",
@@ -490,6 +492,7 @@ KEY_DOCUMENTS: tuple[str, ...] = (
     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md",
     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",
+    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md",
     "discussion/e11_cifar100_resnet_practical_muon_bridge.md",
 )
 
@@ -1005,6 +1008,12 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "paper_role": "Pre-output detectable-effect and multiplicity audit for the untouched tuned final-performance seeds.",
     },
     {
+        "stage": "CIFAR-100-LT ResNet18 tuned benchmark Slurm plan",
+        "command": "python3 scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_slurm_plan.py",
+        "produces": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/* and discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md",
+        "paper_role": "No-side-effect chunked launch contract for completing the 164-setting tuned validation grid under server queue limits.",
+    },
+    {
         "stage": "CIFAR-100-LT ResNet18 practical Muon trajectory bridge",
         "command": "sbatch scripts/slurm/e11_cifar100_resnet_practical_muon_bridge.sbatch",
         "produces": "results/e11_cifar100_resnet_practical_muon_bridge/* and figures/e11_cifar100_resnet_practical_muon_bridge/*",
@@ -1185,6 +1194,7 @@ PAPER_ASSET_SCRIPTS: tuple[str, ...] = (
     "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_settings.py",
     "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_selection.py",
     "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
+    "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_slurm_plan.py",
     "scripts/e11_write_muon_state_distribution_contract.py",
     "scripts/e11_write_head_tail_paper_results.py",
     "scripts/e11_write_local_linearization_table.py",
