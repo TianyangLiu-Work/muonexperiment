@@ -1329,6 +1329,13 @@ def main() -> None:
         Path("results/e11_bold_conjecture_register") / "claim_upgrade_ladder.csv",
         Path("results/e11_bold_conjecture_register") / "config.json",
         Path("scripts/e11_write_bold_conjecture_register.py"),
+        Path("discussion/e11_muon_state_distribution_contract.md"),
+        Path("results/e11_muon_state_distribution_contract") / "state_distribution_terms.csv",
+        Path("results/e11_muon_state_distribution_contract") / "evidence_link_matrix.csv",
+        Path("results/e11_muon_state_distribution_contract") / "falsification_tests.csv",
+        Path("results/e11_muon_state_distribution_contract") / "claim_gate_ladder.csv",
+        Path("results/e11_muon_state_distribution_contract") / "config.json",
+        Path("scripts/e11_write_muon_state_distribution_contract.py"),
         Path("scripts/e11_write_condition_score_ablation.py"),
         Path("discussion/e11_condition_score_ablation.md"),
         Path("results/e11_condition_score_ablation") / "score_ablation_summary.csv",
@@ -1470,6 +1477,8 @@ def main() -> None:
         "scripts/e11_write_condition_score_v5_direction_guardrail_failure_audit.py",
         "e11-bold-conjecture-register:",
         "scripts/e11_write_bold_conjecture_register.py",
+        "e11-muon-state-distribution-contract:",
+        "scripts/e11_write_muon_state_distribution_contract.py",
         "e11-guardrail-assets:",
         "scripts/e11_write_legacy_guardrail_artifacts.py",
         "e11-all-assets: e11-paper-assets e11-guardrail-assets",
@@ -1567,6 +1576,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-validation-results # submit the tuned validation grid via Slurm array",
         "make e11-cifar-resnet-lt-tuned-benchmark-selection # select final recipes from completed validation summaries without touching final seeds",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit # lock tuned final seed MDE, Holm family, and all-class guardrail before final outputs",
+        "make e11-muon-state-distribution-contract # generate the Muon state-distribution/practical-performance boundary contract",
         "make e11-natural-head-tail-boundary-audit # scan committed natural matched-head-gain sweeps for primary drift and secondary boundary cases",
         "make e11-natural-negative-search-protocol # register fresh natural negative-search space, metrics, stopping rules, and claim gates",
         "make e11-natural-negative-search-phase1-power-audit # compute the phase1 detectable-effect and interpretation boundary",
@@ -1603,6 +1613,10 @@ def main() -> None:
         "results/e11_bold_conjecture_register/conjecture_register.csv",
         "results/e11_bold_conjecture_register/stress_test_matrix.csv",
         "bold-conjecture/careful-verification ledger",
+        "discussion/e11_muon_state_distribution_contract.md",
+        "results/e11_muon_state_distribution_contract/state_distribution_terms.csv",
+        "results/e11_muon_state_distribution_contract/falsification_tests.csv",
+        "state-distribution transport contract",
         "scripts/e11_evaluate_condition_score_fresh_protocol.py",
         "scripts/e11_write_condition_score_theory_bridge.py",
         "scripts/e11_write_condition_score_fresh_protocol.py",
@@ -1723,6 +1737,7 @@ def main() -> None:
         "scripts/e11_evaluate_natural_negative_search_phase1.py",
         "scripts/e11_write_top_conference_claim_decision_audit.py",
         "scripts/e11_write_bold_conjecture_register.py",
+        "scripts/e11_write_muon_state_distribution_contract.py",
         "discussion/e11_top_conference_claim_decision_audit.md",
         "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
         "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
@@ -5937,6 +5952,79 @@ def main() -> None:
             raise AssertionError(
                 f"CIFAR-100-LT ResNet18 practical Muon bridge must preserve lower local NS(M_t) drift on {source}"
             )
+    muon_contract_dir = Path("results/e11_muon_state_distribution_contract")
+    muon_contract_terms = pd.read_csv(muon_contract_dir / "state_distribution_terms.csv")
+    muon_contract_evidence = pd.read_csv(muon_contract_dir / "evidence_link_matrix.csv")
+    muon_contract_falsifiers = pd.read_csv(muon_contract_dir / "falsification_tests.csv")
+    muon_contract_gates = pd.read_csv(muon_contract_dir / "claim_gate_ladder.csv")
+    muon_contract_config = json.loads((muon_contract_dir / "config.json").read_text(encoding="utf-8"))
+    if set(muon_contract_terms["term_id"]) != {
+        "MSD-T1-local-response-integrand",
+        "MSD-T2-state-occupancy-measure",
+        "MSD-T3-transition-and-schedule-operator",
+        "MSD-T4-terminal-risk-functional",
+        "MSD-T5-claim-composition-rule",
+    }:
+        raise AssertionError("Muon state-distribution contract must preserve the fixed theory terms")
+    if set(muon_contract_evidence["evidence_id"]) != {
+        "MSE-1-local-adamw-state",
+        "MSE-2-local-ns-muon-state",
+        "MSE-3-final-pilot-negative",
+        "MSE-4-tuned-grid-registered",
+        "MSE-5-bold-conjecture-boundary",
+    }:
+        raise AssertionError("Muon state-distribution contract must preserve the fixed evidence links")
+    if set(muon_contract_falsifiers["test_id"]) != {
+        "MSF-1-occupancy-logging",
+        "MSF-2-schedule-transport",
+        "MSF-3-terminal-risk-separation",
+        "MSF-4-baseline-dominance",
+        "MSF-5-state-distribution-counterexample",
+    }:
+        raise AssertionError("Muon state-distribution contract must preserve the fixed falsification tests")
+    if set(muon_contract_gates["gate_id"]) != {
+        "MSG-1-local-compatibility",
+        "MSG-2-state-distribution-transport",
+        "MSG-3-tuned-final-performance",
+        "MSG-4-top-tier-practical-claim",
+    }:
+        raise AssertionError("Muon state-distribution contract must preserve the fixed claim gates")
+    if muon_contract_config != {
+        "term_rows": 5,
+        "evidence_rows": 5,
+        "falsification_rows": 5,
+        "claim_gate_rows": 4,
+        "current_claim_boundary": "local Muon-style drift compatibility only",
+        "performance_upgrade_boundary": "state-distribution plus tuned validation/final evidence required",
+    }:
+        raise AssertionError(f"Muon state-distribution config drifted: {muon_contract_config}")
+    muon_contract_text = " ".join(
+        [
+            Path("discussion/e11_muon_state_distribution_contract.md").read_text(encoding="utf-8"),
+            " ".join(muon_contract_terms.astype(str).to_numpy().ravel()),
+            " ".join(muon_contract_evidence.astype(str).to_numpy().ravel()),
+            " ".join(muon_contract_falsifiers.astype(str).to_numpy().ravel()),
+            " ".join(muon_contract_gates.astype(str).to_numpy().ravel()),
+        ]
+    )
+    assert_required_phrases(
+        "Muon state-distribution contract",
+        muon_contract_text,
+        [
+            "state-distribution transport contract",
+            "local_integrand_supported_on_sampled_states",
+            "occupancy_measure_missing_for_final_training",
+            "schedule_transport_registered_not_evaluated",
+            "final_performance_negative_boundary",
+            "mechanism_only_until_all_components_pass",
+            "0.8628 [0.8154, 0.913]",
+            "0.7247 [0.676, 0.777]",
+            "best_tested_few_diff=-0.08767 [-0.09948, -0.07585]",
+            "TVS-1=not_ready",
+            "Local compatibility can coexist with poor final performance",
+            "blocked_until_state_distribution_and_final_gates_pass",
+        ],
+    )
     imbalance_steps = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "step_metrics.csv")
     imbalance_summary = pd.read_csv(Path("results/e11_long_tail_imbalance_ablation") / "summary.csv")
     if len(imbalance_steps) != 160:
@@ -7573,6 +7661,11 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-selection",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit",
         "164-setting validation registry",
+        "discussion/e11_muon_state_distribution_contract.md",
+        "state-distribution transport contract",
+        "MSD-T1 local-response integrand",
+        "MSD-T2 state-occupancy measure",
+        "MSD-T4 terminal risk",
         "discussion/e11_submission_repro_audit.md",
         "discussion/e11_artifact_review_packet.md",
         "artifact-review packet",
@@ -7840,6 +7933,7 @@ def main() -> None:
         or "make e11-natural-negative-search-phase2-power-audit" not in readme
         or "make e11-heldout-generality-audit" not in readme
         or "make e11-bold-conjecture-register" not in readme
+        or "make e11-muon-state-distribution-contract" not in readme
         or "make e11-top-conference-claim-decision-audit" not in readme
         or "make e11-manuscript-claim-trace" not in readme
         or "make e11-mechanism-referee-audit" not in readme
@@ -7859,6 +7953,7 @@ def main() -> None:
         "discussion/e11_artifact_review_packet.md",
         "discussion/e11_mechanism_referee_audit.md",
         "discussion/e11_bold_conjecture_register.md",
+        "discussion/e11_muon_state_distribution_contract.md",
         "discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md",
         "discussion/e11_natural_negative_search_phase2_evaluation.md",
         "discussion/e11_natural_negative_search_phase2_power_audit.md",
@@ -7870,6 +7965,8 @@ def main() -> None:
         "results/e11_heldout_generality_audit/generality_claim_gate.csv",
         "results/e11_bold_conjecture_register/conjecture_register.csv",
         "results/e11_bold_conjecture_register/stress_test_matrix.csv",
+        "results/e11_muon_state_distribution_contract/state_distribution_terms.csv",
+        "results/e11_muon_state_distribution_contract/falsification_tests.csv",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:
@@ -8129,6 +8226,7 @@ def main() -> None:
             Path("discussion/e11_mechanism_referee_audit.md"),
             Path("discussion/e11_heldout_generality_audit.md"),
             Path("discussion/e11_bold_conjecture_register.md"),
+            Path("discussion/e11_muon_state_distribution_contract.md"),
             Path("discussion/e11_natural_head_tail_boundary.md"),
             Path("discussion/e11_natural_negative_search_protocol.md"),
             Path("discussion/e11_paper_skeleton.md"),

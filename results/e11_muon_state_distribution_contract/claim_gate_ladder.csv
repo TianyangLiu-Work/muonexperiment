@@ -1,0 +1,5 @@
+gate_id,current_status,allowed_claim,blocked_claim,evidence_required
+MSG-1-local-compatibility,pass,Muon-style finite Newton-Schulz momentum can reduce local matched-head-gain tail-logit drift at sampled ResNet trajectory states.,This local compatibility proves final optimizer superiority.,existing practical bridge ratios with CI upper endpoints below one for sampled states
+MSG-2-state-distribution-transport,not_ready,state-distribution transport is the registered missing term between local geometry and final performance,the sampled bridge states represent the full training trajectory distribution,trajectory occupancy logging across validation-selected and final recipes
+MSG-3-tuned-final-performance,not_ready,negative pilot boundary and unspent tuned benchmark protocol,competitive CIFAR-100-LT ResNet18 optimizer-performance claim,"complete validation grid, selected recipes, and untouched 10-seed final comparisons"
+MSG-4-top-tier-practical-claim,blocked_until_state_distribution_and_final_gates_pass,mechanism paper with explicit practical-performance boundary,broad long-tail Muon optimizer claim,"MSG-1, MSG-2, MSG-3 plus no-overclaim manuscript audit all pass"

@@ -1,0 +1,8 @@
+{
+  "term_rows": 5,
+  "evidence_rows": 5,
+  "falsification_rows": 5,
+  "claim_gate_rows": 4,
+  "current_claim_boundary": "local Muon-style drift compatibility only",
+  "performance_upgrade_boundary": "state-distribution plus tuned validation/final evidence required"
+}
