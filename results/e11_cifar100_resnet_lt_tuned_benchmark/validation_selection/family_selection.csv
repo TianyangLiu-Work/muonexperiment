@@ -1,7 +1,7 @@
 recipe_family,selection_status,expected_settings,complete_settings,selected_setting_id,selected_recipe_name,primary_few_balanced_accuracy,tie_break_all_balanced_accuracy,selection_rule
 adamw_cb_loss_tuned,not_ready,24,0,,,,,wait for every registered validation setting in the family
 adamw_cb_sampler_tuned,not_ready,8,0,,,,,wait for every registered validation setting in the family
-adamw_ce_tuned,not_ready,12,6,,,,,wait for every registered validation setting in the family
+adamw_ce_tuned,not_ready,12,7,,,,,wait for every registered validation setting in the family
 ns_muon_cb_tuned,not_ready,36,0,,,,,wait for every registered validation setting in the family
 ns_muon_matrix_tuned,not_ready,72,0,,,,,wait for every registered validation setting in the family
 sgd_momentum_ce_tuned,not_ready,12,0,,,,,wait for every registered validation setting in the family
