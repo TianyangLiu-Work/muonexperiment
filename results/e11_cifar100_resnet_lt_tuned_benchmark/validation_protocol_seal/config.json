@@ -1,6 +1,6 @@
 {
   "claim_authority": "progress_accounting_only_until_full_validation_and_final_gates_pass",
-  "completed_validation_settings": 34,
+  "completed_validation_settings": 35,
   "refresh_state": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/refresh_state.csv",
   "run_registry": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
   "scope": "post_exposure_tuned_protocol_hash_seal",
