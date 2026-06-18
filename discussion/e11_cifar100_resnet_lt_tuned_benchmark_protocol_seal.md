@@ -6,7 +6,7 @@ This generated protocol seal records the frozen surfaces of the tuned benchmark 
 
 | boundary_id                        | status                                  |   completed_validation_settings |   total_validation_settings |   completed_occupancy_traces | completed_array_prefix   |   next_missing_array_index | prefix_contiguous   | refresh_status               |   final_output_files | claim_authority                                                     |
 |:-----------------------------------|:----------------------------------------|--------------------------------:|----------------------------:|-----------------------------:|:-------------------------|---------------------------:|:--------------------|:-----------------------------|---------------------:|:--------------------------------------------------------------------|
-| TPS-current-post-exposure-boundary | post_partial_validation_exposure_sealed |                              20 |                         164 |                           20 | 0..19                    |                         20 | yes                 | partial_grid_no_claim_change |                    0 | progress_accounting_only_until_full_validation_and_final_gates_pass |
+| TPS-current-post-exposure-boundary | post_partial_validation_exposure_sealed |                              21 |                         164 |                           21 | 0..20                    |                         21 | yes                 | partial_grid_no_claim_change |                    0 | progress_accounting_only_until_full_validation_and_final_gates_pass |
 
 ## Seal Gate Matrix
 
@@ -16,7 +16,7 @@ This generated protocol seal records the frozen surfaces of the tuned benchmark 
 | TPS-2-validation-registry-sealed    | pass     | 164 registry rows; seed sets=10..14                                         | post-exposure grid or array-order drift            |
 | TPS-3-selection-rule-sealed         | pass     | primary objective anchor present                                            | metric-dependent selection objective rewrite       |
 | TPS-4-final-seed-quarantine-sealed  | pass     | final_claim seed_set 20..29 tuning_allowed=no; no final_claim outputs exist | final-seed unblinding before TVS/FEP/TFE/FLA gates |
-| TPS-5-post-exposure-claim-authority | pass     | 20/164 validation settings exposed                                          | benchmark wording from partial validation exposure |
+| TPS-5-post-exposure-claim-authority | pass     | 21/164 validation settings exposed                                          | benchmark wording from partial validation exposure |
 
 ## Immutability Matrix
 
