@@ -1,0 +1,2 @@
+plan_id,submission_status,array_expression,submit_command,expected_outputs,post_run_action,submits_jobs
+FEP-SLURM-1-final-family-array,not_ready,,,train_trace.csv; class_metrics.csv; group_metrics.csv; summary.csv; pair_summary.csv; occupancy_trace.csv; config.json; setting_metadata.csv,run final statistical evaluator and e11-check before any benchmark claim,no

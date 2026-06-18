@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, fields, replace
 from pathlib import Path
 
 import pandas as pd
@@ -20,6 +20,8 @@ RESULT_ROOT = Path("results/e11_cifar100_resnet_lt_tuned_benchmark")
 FIGURE_ROOT = Path("figures/e11_cifar100_resnet_lt_tuned_benchmark")
 DISCUSSION_ROOT = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark")
 PROTOCOL_PATH = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md")
+SELECTION_DIR = RESULT_ROOT / "validation_selection"
+PROTOCOL_DIR = Path("results/e11_cifar100_resnet_lt_tuned_benchmark_protocol")
 
 
 FLOAT_GRIDS = {
@@ -261,6 +263,80 @@ def write_settings_registry(settings: list[TunedBenchmarkSetting]) -> Path:
     return path
 
 
+def _final_seed_set() -> str:
+    seed_split_path = PROTOCOL_DIR / "seed_split_contract.csv"
+    if not seed_split_path.exists():
+        return "20..29"
+    seed_split = pd.read_csv(seed_split_path)
+    final_rows = seed_split[seed_split["split_id"].astype(str).eq("final_claim")]
+    if final_rows.empty:
+        raise AssertionError(f"missing final_claim seed split in {seed_split_path}")
+    return str(final_rows["seed_set"].iloc[0])
+
+
+def _selection_gates_ready(gate_report: pd.DataFrame) -> tuple[bool, str]:
+    lookup = gate_report.set_index("gate_id")["status"].astype(str).to_dict()
+    required = {
+        "TVS-1-validation-grid-complete": "pass",
+        "TVS-2-family-selection": "pass",
+        "TVS-5-occupancy-logging-complete": "pass",
+        "TVS-3-final-seed-quarantine": "pass",
+        "TVS-4-final-run-plan": "ready",
+    }
+    evidence = "; ".join(
+        f"{gate_id}={lookup.get(gate_id, 'missing')}" for gate_id in required
+    )
+    return all(lookup.get(gate_id) == status for gate_id, status in required.items()), evidence
+
+
+def final_settings_from_selection(
+    validation_settings: list[TunedBenchmarkSetting],
+    *,
+    require_ready: bool,
+) -> list[TunedBenchmarkSetting]:
+    final_plan_path = SELECTION_DIR / "final_claim_plan.csv"
+    gate_report_path = SELECTION_DIR / "gate_report.csv"
+    if not final_plan_path.exists() or not gate_report_path.exists():
+        raise FileNotFoundError(
+            "missing tuned benchmark validation selection outputs; run "
+            "make e11-cifar-resnet-lt-tuned-benchmark-selection first"
+        )
+    final_plan = pd.read_csv(final_plan_path)
+    gate_report = pd.read_csv(gate_report_path)
+    gates_ready, gate_evidence = _selection_gates_ready(gate_report)
+    if require_ready and not gates_ready:
+        raise RuntimeError(
+            "final_claim execution is blocked until validation selection gates pass: "
+            f"{gate_evidence}"
+        )
+    by_setting_id = {setting.setting_id: setting for setting in validation_settings}
+    final_seed_set = _final_seed_set()
+    rows = final_plan[final_plan["selected_setting_id"].astype(str).ne("")]
+    settings: list[TunedBenchmarkSetting] = []
+    for row in rows.itertuples(index=False):
+        selected_id = str(row.selected_setting_id)
+        if selected_id not in by_setting_id:
+            raise AssertionError(f"final plan references unknown validation setting: {selected_id}")
+        source = by_setting_id[selected_id]
+        family = str(row.recipe_family)
+        output_dir = RESULT_ROOT / "final_claim" / family
+        settings.append(
+            replace(
+                source,
+                setting_id=f"TBF-{family}",
+                phase="final_claim",
+                split_id="final_claim",
+                seed_set=final_seed_set,
+                protocol_reference=PROTOCOL_PATH.as_posix(),
+                planned_output_dir=output_dir,
+                planned_figure_dir=FIGURE_ROOT / "final_claim" / family,
+                planned_discussion_path=DISCUSSION_ROOT / f"TBF-{family}.md",
+                planned_occupancy_trace_path=output_dir / "occupancy_trace.csv",
+            )
+        )
+    return sorted(settings, key=lambda setting: setting.recipe_family)
+
+
 def recipe_from_setting(setting: TunedBenchmarkSetting) -> recipe_benchmark.Recipe:
     return recipe_benchmark.Recipe(
         name=setting.recipe_name,
@@ -317,6 +393,24 @@ def select_setting(
     return settings[int(array_index)]
 
 
+def select_final_setting(
+    settings: list[TunedBenchmarkSetting],
+    *,
+    final_family: str | None,
+    final_index: int | None,
+) -> TunedBenchmarkSetting | None:
+    if final_family is None and final_index is None:
+        return None
+    if final_family is not None:
+        matches = [setting for setting in settings if setting.recipe_family == final_family]
+        if len(matches) != 1:
+            raise ValueError(f"unknown or ambiguous final recipe family: {final_family}")
+        return matches[0]
+    if final_index is None or not (0 <= int(final_index) < len(settings)):
+        raise ValueError(f"final index must be in [0, {len(settings) - 1}]")
+    return settings[int(final_index)]
+
+
 def _group_line(summary: pd.DataFrame, recipe_name: str, group: str) -> str:
     row = summary[summary["recipe"].eq(recipe_name) & summary["frequency_group"].eq(group)].iloc[0]
     return (
@@ -335,6 +429,7 @@ def write_tuned_validation_discussion(
     output_dir: Path,
     discussion_path: Path,
 ) -> None:
+    is_final = setting.phase == "final_claim"
     occupancy_summary = pd.DataFrame(
         [
             {
@@ -351,17 +446,40 @@ def write_tuned_validation_discussion(
         ]
     )
     array_index = next(
-        index for index, candidate in enumerate(all_settings()) if candidate.setting_id == setting.setting_id
+        (
+            index
+            for index, candidate in enumerate(all_settings())
+            if candidate.setting_id == setting.setting_id
+        ),
+        "",
+    )
+    final_index_note = "" if not is_final else f"- Final family index: `{setting.recipe_family}`"
+    title = (
+        "# E11 CIFAR-100-LT ResNet18 Tuned Benchmark Final Claim Setting"
+        if is_final
+        else "# E11 CIFAR-100-LT ResNet18 Tuned Benchmark Validation Setting"
+    )
+    phase_note = (
+        [
+            "This run is one cell of the preregistered untouched final-claim",
+            "evaluation. It is executable only after the validation selection",
+            "gates pass, and it uses the frozen recipe selected for its family.",
+        ]
+        if is_final
+        else [
+            "This run is one cell of the preregistered 164-setting tuned validation grid.",
+            "It uses validation seeds only and cannot select or report the untouched",
+            "final-claim seeds by itself.",
+        ]
     )
     lines = [
-        "# E11 CIFAR-100-LT ResNet18 Tuned Benchmark Validation Setting",
+        title,
         "",
-        "This run is one cell of the preregistered 164-setting tuned validation grid.",
-        "It uses validation seeds only and cannot select or report the untouched",
-        "final-claim seeds by itself.",
+        *phase_note,
         "",
         f"- Setting id: `{setting.setting_id}`",
         f"- Array index: {array_index}",
+        final_index_note,
         f"- Recipe family: `{setting.recipe_family}`",
         f"- Recipe: `{setting.recipe_name}`",
         f"- Phase / seed set: `{setting.phase}` / `{setting.seed_set}`",
@@ -437,12 +555,22 @@ def write_tuned_validation_discussion(
             )
     lines.extend(
         [
-            "",
-            "Interpretation: this is validation evidence for the frozen tuned benchmark",
-            "selection rule only. It may update `TVS-1` and `TVS-5`, but it does not",
-            "unblock a final-performance or broad optimizer claim until all registered",
-            "validation settings complete, one recipe per family is selected without",
-            "peeking, and final seeds `20..29` are run pairwise.",
+        "",
+        "Interpretation: this is an untouched final-claim training/evaluation cell."
+        if is_final
+        else "Interpretation: this is validation evidence for the frozen tuned benchmark",
+        "It can enter the final statistical analysis only through the pre-registered"
+        if is_final
+        else "selection rule only. It may update `TVS-1` and `TVS-5`, but it does not",
+        "paired-seed, Holm-adjusted final-analysis pipeline; no recipe tuning is allowed."
+        if is_final
+        else "unblock a final-performance or broad optimizer claim until all registered",
+        ""
+        if is_final
+        else "validation settings complete, one recipe per family is selected without",
+        ""
+        if is_final
+        else "peeking, and final seeds `20..29` are run pairwise.",
             "",
             "Artifacts:",
             f"- [train_trace.csv](../{(output_dir / 'train_trace.csv').as_posix()})",
@@ -587,8 +715,11 @@ def refresh_completed_discussions(settings: list[TunedBenchmarkSetting]) -> None
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--phase", choices=("validation_tuning", "final_claim"), default="validation_tuning")
     parser.add_argument("--setting-id", default=None)
     parser.add_argument("--array-index", type=int, default=None)
+    parser.add_argument("--final-family", default=None)
+    parser.add_argument("--final-index", type=int, default=None)
     parser.add_argument("--max-settings", type=int, default=None)
     parser.add_argument("--settings-only", action="store_true")
     parser.add_argument("--list-settings", action="store_true")
@@ -602,19 +733,46 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    settings = all_settings()
+    validation_settings = all_settings()
+    settings = validation_settings
     if args.max_settings is not None:
+        if args.phase != "validation_tuning":
+            raise ValueError("--max-settings is only valid for validation_tuning")
         if args.max_settings <= 0:
             raise ValueError("--max-settings must be positive")
         settings = settings[: args.max_settings]
     registry_path = write_settings_registry(settings)
+    if args.phase == "final_claim":
+        settings = final_settings_from_selection(validation_settings, require_ready=True)
     if args.refresh_discussions:
+        if args.phase != "validation_tuning":
+            raise ValueError("--refresh-discussions is only supported for validation_tuning")
         refresh_completed_discussions(settings)
         print(f"saved tuned benchmark settings registry to {registry_path}")
         return
     if args.list_settings:
-        print(settings_frame(settings)[["array_index", "setting_id", "recipe_family", "recipe_name"]].to_string(index=False))
-    selected = select_setting(settings, setting_id=args.setting_id, array_index=args.array_index)
+        if args.phase == "final_claim":
+            print(
+                pd.DataFrame(
+                    [
+                        {
+                            "final_index": index,
+                            "setting_id": setting.setting_id,
+                            "recipe_family": setting.recipe_family,
+                            "recipe_name": setting.recipe_name,
+                            "seed_set": setting.seed_set,
+                        }
+                        for index, setting in enumerate(settings)
+                    ]
+                ).to_string(index=False)
+            )
+        else:
+            print(settings_frame(settings)[["array_index", "setting_id", "recipe_family", "recipe_name"]].to_string(index=False))
+    selected = (
+        select_final_setting(settings, final_family=args.final_family, final_index=args.final_index)
+        if args.phase == "final_claim"
+        else select_setting(settings, setting_id=args.setting_id, array_index=args.array_index)
+    )
     if args.settings_only or selected is None:
         print(f"saved tuned benchmark settings registry to {registry_path}")
         return

@@ -1276,6 +1276,14 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan") / "config.json",
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md"),
         Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.py"),
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan") / "gate_matrix.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan")
+        / "final_family_run_plan.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan") / "slurm_submit_plan.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan") / "config.json",
+        Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md"),
+        Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.py"),
+        Path("scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_final.sbatch"),
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "chunk_plan.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "queue_policy.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "config.json",
@@ -1526,6 +1534,9 @@ def main() -> None:
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.py",
         "e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.py",
+        "e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan:",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.py",
+        "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_final.sbatch",
         "e11-cifar-resnet-imbalance-sweep-results:",
         "e11-cifar-resnet-condition-score-heldout-architecture-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch",
@@ -1680,6 +1691,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit # lock tuned final seed MDE, Holm family, and all-class guardrail before final outputs",
         "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit # calibrate tuned benchmark MDE assumptions from validation and spent-pilot variance",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan # pre-register final paired tests, Holm adjustment, reporting schema, and claim states",
+        "make e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan # write a no-side-effect final-claim execution contract and gate-checked Slurm wrapper plan",
         "make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan # write a chunked no-side-effect Slurm launch plan for the 164-setting validation grid",
         "make e11-cifar-resnet-lt-tuned-benchmark-launch-audit # compute the current queue-aware validation launch decision without submitting",
         "make e11-cifar-resnet-lt-tuned-benchmark-safe-submit # submit the largest safe validation subchunk under MaxSubmitJobsPerUser",
@@ -6453,6 +6465,83 @@ def main() -> None:
             "Blocked now: running final analysis, changing the primary comparison family",
         ],
     )
+    tuned_final_exec_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan")
+    tuned_final_exec_gates = pd.read_csv(tuned_final_exec_dir / "gate_matrix.csv")
+    tuned_final_exec_runs = pd.read_csv(tuned_final_exec_dir / "final_family_run_plan.csv")
+    tuned_final_exec_sbatch = pd.read_csv(tuned_final_exec_dir / "slurm_submit_plan.csv")
+    tuned_final_exec_config = json.loads((tuned_final_exec_dir / "config.json").read_text(encoding="utf-8"))
+    expected_final_exec_gates = {
+        "FEP-1-selection-gates-ready",
+        "FEP-2-final-analysis-plan-linked",
+        "FEP-3-runner-contract-present",
+        "FEP-4-final-output-quarantine",
+        "FEP-5-all-families-ready",
+    }
+    if set(tuned_final_exec_gates["gate_id"]) != expected_final_exec_gates:
+        raise AssertionError("CIFAR-100-LT tuned final-execution gate IDs changed unexpectedly")
+    if not set(tuned_final_exec_gates["status"].astype(str)).issubset({"pass", "not_ready", "fail"}):
+        raise AssertionError("CIFAR-100-LT tuned final-execution gates must use pass/not_ready/fail statuses")
+    final_exec_lookup = tuned_final_exec_gates.set_index("gate_id")["status"].astype(str).to_dict()
+    if final_exec_lookup["FEP-3-runner-contract-present"] != "pass":
+        raise AssertionError("CIFAR-100-LT tuned final-execution runner contract must be present")
+    if final_exec_lookup["FEP-4-final-output-quarantine"] != "pass":
+        raise AssertionError("CIFAR-100-LT tuned final-execution plan must keep final outputs absent")
+    if len(tuned_final_exec_runs) != 6 or set(tuned_final_exec_runs["recipe_family"]) != expected_recipe_families:
+        raise AssertionError("CIFAR-100-LT tuned final-execution plan must cover all recipe families")
+    allowed_final_seed_sets = {"", "20..29"}
+    observed_seed_sets = set(tuned_final_exec_runs["final_seed_set"].fillna("").astype(str))
+    if not observed_seed_sets.issubset(allowed_final_seed_sets):
+        raise AssertionError("CIFAR-100-LT tuned final-execution plan must use only final seed set 20..29")
+    if not tuned_final_exec_runs["tuning_allowed"].astype(str).eq("no").all():
+        raise AssertionError("CIFAR-100-LT tuned final-execution plan must forbid tuning")
+    if str(tuned_final_exec_sbatch["submits_jobs"].iloc[0]) != "no":
+        raise AssertionError("CIFAR-100-LT tuned final-execution plan must be no-side-effect")
+    if bool(tuned_final_exec_config.get("side_effects", True)) or bool(
+        tuned_final_exec_config.get("submits_jobs", True)
+    ) or bool(tuned_final_exec_config.get("inspects_final_outputs", True)):
+        raise AssertionError("CIFAR-100-LT tuned final-execution config must not submit or inspect final outputs")
+    tuned_runner_text = Path("scripts/e11_run_cifar100_resnet_lt_tuned_benchmark.py").read_text(encoding="utf-8")
+    tuned_final_sbatch_text = Path(
+        "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_final.sbatch"
+    ).read_text(encoding="utf-8")
+    assert_required_phrases(
+        "CIFAR-100-LT tuned final runner contract",
+        tuned_runner_text,
+        [
+            "--phase",
+            "final_claim",
+            "--final-index",
+            "final_settings_from_selection",
+            "validation selection gates pass",
+        ],
+    )
+    assert_required_phrases(
+        "CIFAR-100-LT tuned final Slurm wrapper",
+        tuned_final_sbatch_text,
+        [
+            "#SBATCH --job-name=e11-lt-tuned-final",
+            "#SBATCH --array=0-5%1",
+            "--phase final_claim",
+            "--final-index",
+            "--device cuda",
+            "--no-download",
+        ],
+    )
+    tuned_final_exec_text = Path(
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md"
+    ).read_text(encoding="utf-8")
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark final execution plan",
+        tuned_final_exec_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Final Execution Plan",
+            "no-side-effect execution contract",
+            "Final Family Run Plan",
+            "Slurm Submit Plan",
+            "premature final submission fails closed",
+            "Holm-adjusted final-analysis plan",
+        ],
+    )
     tuned_final_claim_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim")
     final_outputs = sorted(tuned_final_claim_dir.rglob("*")) if tuned_final_claim_dir.exists() else []
     if final_outputs:
@@ -8238,16 +8327,21 @@ def main() -> None:
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.py",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.py",
+        "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_final.sbatch",
         "completed validation-only seed variability and spent-pilot paired-diff variability",
         "paired tests, Holm adjustment, reporting schema, and claim states",
+        "gate-checked final runner, Slurm wrapper, selected recipe families, and seed 20..29",
         "final seeds 20..29 quarantined",
         "make e11-cifar-resnet-lt-tuned-benchmark-selection",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan",
+        "make e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan",
         "164-setting validation registry",
         "planned_occupancy_trace_path",
         "occupancy_trace.csv",
@@ -8638,6 +8732,7 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-tuned-benchmark-power-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-final-execution-plan" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-launch-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-safe-submit" not in readme
@@ -8677,6 +8772,7 @@ def main() -> None:
         "discussion/e11_pdf_render_boundary_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
         "discussion/e11_mechanism_referee_audit.md",
         "discussion/e11_bold_conjecture_register.md",
         "discussion/e11_muon_state_distribution_contract.md",
@@ -8699,6 +8795,8 @@ def main() -> None:
         "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/mde_sensitivity_from_empirical_sd.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan/primary_comparison_family.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_analysis_plan/reporting_schema.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/gate_matrix.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/final_family_run_plan.csv",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:
