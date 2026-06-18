@@ -520,6 +520,9 @@ def assert_top_conference_claim_decision_audit(
         "VRF-A4-final-submit-handoff=not_ready",
         "VRF-F3-partial-family-selection=active",
         "VRF-F5-validation-leaderboard-performance-claim=active",
+        "TPS-current-post-exposure-boundary=post_partial_validation_exposure_sealed",
+        "TPS-1-hash-manifest-complete=pass",
+        "TPS-5-post-exposure-claim-authority=pass",
         "FEP-1-selection-gates-ready=not_ready",
         "FEP-5-all-families-ready=not_ready",
         "TFE-6-final-claim-state=not_ready",
@@ -553,6 +556,7 @@ def assert_top_conference_claim_decision_audit(
         "treating sampled bridge states as the full training trajectory distribution",
         "partial validation leaderboard to change selection, launch order, or final seed plan",
         "violating the validation refresh firewall forbidden-action matrix",
+        "changing sealed protocol surfaces after partial exposure without a fresh protocol",
         "running final-safe-submit before FEP/TFE/FLA gates pass",
     ]:
         if phrase not in forbidden_shortcuts:
@@ -570,12 +574,14 @@ def assert_top_conference_claim_decision_audit(
         "quarantine benchmark claims",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_launch_audit.md",
         "final execution/evaluation/launch gates",
         "leakage guards",
         "validation refresh firewall transitions",
+        "protocol-seal gates",
         "discussion/e11_muon_state_distribution_contract.md",
         "local compatibility can coexist with poor final performance",
         "occupancy logging",
@@ -602,9 +608,10 @@ def assert_top_conference_claim_decision_audit(
         "quarantine all competitive optimizer wording",
         "tuned leakage audit",
         "validation refresh firewall",
+        "protocol hash seal",
         "final execution/evaluator/launch gates",
         "state-distribution contract",
-        "state-distribution occupancy summaries, passing leakage guards, and passing refresh-firewall transitions",
+        "state-distribution occupancy summaries, passing leakage guards, passing refresh-firewall transitions, and passing protocol-seal gates",
         "passing final execution/evaluator/launch gates before practical-performance wording",
         "preferred-LaTeX clean-checkout gap",
     ]:
@@ -1893,6 +1900,9 @@ def main() -> None:
         "results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/hash_manifest.csv",
+        "protocol hash seal",
         "validation/final seed splits",
         "tuned AdamW/SGD/class-balanced baselines",
         "phase1 GPU entrypoint is now implemented",
@@ -6422,6 +6432,80 @@ def main() -> None:
             "TVS-5",
         ],
     )
+    tuned_seal_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal")
+    tuned_seal_hashes = pd.read_csv(tuned_seal_dir / "hash_manifest.csv")
+    tuned_seal_boundary = pd.read_csv(tuned_seal_dir / "exposure_boundary.csv")
+    tuned_seal_immutability = pd.read_csv(tuned_seal_dir / "immutability_matrix.csv")
+    tuned_seal_gates = pd.read_csv(tuned_seal_dir / "seal_gate_matrix.csv")
+    tuned_seal_config = json.loads((tuned_seal_dir / "config.json").read_text(encoding="utf-8"))
+    expected_seal_gates = {
+        "TPS-1-hash-manifest-complete",
+        "TPS-2-validation-registry-sealed",
+        "TPS-3-selection-rule-sealed",
+        "TPS-4-final-seed-quarantine-sealed",
+        "TPS-5-post-exposure-claim-authority",
+    }
+    expected_immutability_ids = {
+        "TPS-IMM-1-protocol-csvs",
+        "TPS-IMM-2-validation-registry",
+        "TPS-IMM-3-final-seed-contract",
+        "TPS-IMM-4-selection-and-final-gate-code",
+        "TPS-IMM-5-progress-audit-code",
+    }
+    if (
+        len(tuned_seal_hashes) != 18
+        or not tuned_seal_hashes["exists"].astype(str).eq("yes").all()
+        or not tuned_seal_hashes["sha256"].astype(str).str.fullmatch(r"[0-9a-f]{64}").all()
+    ):
+        raise AssertionError("CIFAR-100-LT tuned protocol seal must hash every sealed artifact")
+    if set(tuned_seal_gates["gate_id"]) != expected_seal_gates or not tuned_seal_gates["status"].astype(str).eq(
+        "pass"
+    ).all():
+        raise AssertionError("CIFAR-100-LT tuned protocol seal gates must all pass")
+    if set(tuned_seal_immutability["immutability_id"]) != expected_immutability_ids:
+        raise AssertionError("CIFAR-100-LT tuned protocol seal immutability IDs changed unexpectedly")
+    if not tuned_seal_immutability["required_response_if_changed"].astype(str).str.contains(
+        "fresh|downgrade|progress", regex=True
+    ).all():
+        raise AssertionError("CIFAR-100-LT tuned protocol seal must define strict change responses")
+    if len(tuned_seal_boundary) != 1:
+        raise AssertionError("CIFAR-100-LT tuned protocol seal must have one exposure boundary row")
+    seal_boundary_row = tuned_seal_boundary.iloc[0]
+    if not (
+        str(seal_boundary_row["boundary_id"]) == "TPS-current-post-exposure-boundary"
+        and str(seal_boundary_row["status"]) == "post_partial_validation_exposure_sealed"
+        and int(seal_boundary_row["completed_validation_settings"]) == tuned_validation_complete_count
+        and int(seal_boundary_row["total_validation_settings"]) == len(tuned_selection_run_registry)
+        and int(seal_boundary_row["completed_occupancy_traces"]) == tuned_occupancy_complete_count
+        and str(seal_boundary_row["next_missing_array_index"]) == refresh_next_missing
+        and str(seal_boundary_row["prefix_contiguous"]) == ("yes" if refresh_prefix_is_contiguous else "no")
+        and int(seal_boundary_row["final_output_files"]) == 0
+        and str(seal_boundary_row["claim_authority"])
+        == "progress_accounting_only_until_full_validation_and_final_gates_pass"
+    ):
+        raise AssertionError("CIFAR-100-LT tuned protocol seal exposure boundary drifted from validation state")
+    if tuned_seal_config.get("scope") != "post_exposure_tuned_protocol_hash_seal" or tuned_seal_config.get(
+        "claim_authority"
+    ) != "progress_accounting_only_until_full_validation_and_final_gates_pass":
+        raise AssertionError("CIFAR-100-LT tuned protocol seal config must preserve post-exposure scope")
+    tuned_seal_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md").read_text(
+        encoding="utf-8"
+    )
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark protocol seal",
+        tuned_seal_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Protocol Seal",
+            "post-exposure protocol hash seal",
+            "Exposure Boundary",
+            "Seal Gate Matrix",
+            "Immutability Matrix",
+            "Hash Manifest",
+            "progress accounting",
+            "fresh preregistered protocol",
+            "validation rows are visible",
+        ],
+    )
     tuned_slurm_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan")
     tuned_slurm_plan = pd.read_csv(tuned_slurm_dir / "chunk_plan.csv")
     tuned_slurm_policy = pd.read_csv(tuned_slurm_dir / "queue_policy.csv")
@@ -8738,12 +8822,14 @@ def main() -> None:
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_launch_audit.md",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.py",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_protocol_seal.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_analysis_plan.py",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.py",
@@ -8758,6 +8844,7 @@ def main() -> None:
         "final seeds 20..29 quarantined",
         "make e11-cifar-resnet-lt-tuned-benchmark-selection",
         "make e11-cifar-resnet-lt-tuned-benchmark-refresh-firewall",
+        "make e11-cifar-resnet-lt-tuned-benchmark-protocol-seal",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit",
         "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan",
@@ -8768,9 +8855,11 @@ def main() -> None:
         "planned_occupancy_trace_path",
         "occupancy_trace.csv",
         "validation refresh firewall",
+        "protocol hash seal",
+        "post-partial-exposure boundary",
         "next legal refresh boundary at array index 17",
         "forbidden metric-dependent launch/order/selection/final-submit actions",
-        "passing leakage and validation-refresh firewall guards",
+        "passing leakage, validation-refresh firewall, and protocol-seal guards",
         "discussion/e11_muon_state_distribution_contract.md",
         "state-distribution transport contract",
         "MSD-T1 local-response integrand",
@@ -8818,6 +8907,7 @@ def main() -> None:
             "quarantine benchmark claims",
             "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md",
             "discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md",
+            "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
             "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md",
             "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md",
             "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_launch_audit.md",
@@ -8825,8 +8915,12 @@ def main() -> None:
             "VRF-current-validation-prefix=partial_grid_no_claim_change",
             "VRF-A1-prefix-result-refresh=pass",
             "VRF-F5-validation-leaderboard-performance-claim=active",
+            "TPS-current-post-exposure-boundary=post_partial_validation_exposure_sealed",
+            "TPS-1-hash-manifest-complete=pass",
+            "TPS-5-post-exposure-claim-authority=pass",
             "using partial validation leaderboard to change selection, launch order, or final seed plan",
             "validation refresh firewall forbidden-action matrix",
+            "changing sealed protocol surfaces after partial validation exposure without a fresh preregistered protocol",
             "FEP-1-selection-gates-ready=not_ready",
             "TFE-6-final-claim-state=not_ready",
             "FLA-5-submit-flag=dry_run",
@@ -9169,6 +9263,7 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-tuned-benchmark-settings" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-validation-results" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-selection" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-protocol-seal" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-power-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-final-analysis-plan" not in readme
@@ -9251,6 +9346,9 @@ def main() -> None:
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation/claim_gate_report.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_launch_audit/latest_final_launch_decision.csv",
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_launch_audit/latest_gate_snapshot.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/hash_manifest.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/seal_gate_matrix.csv",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:

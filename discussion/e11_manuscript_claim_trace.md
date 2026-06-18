@@ -15,22 +15,23 @@ This generated trace links the paper-level top-conference claim decisions to exp
 
 ## Blocked Phrase Audit
 
-| claim_id                                    | blocked_phrase                                                                              | present_in_main_tex   | audit_status   |
-|:--------------------------------------------|:--------------------------------------------------------------------------------------------|:----------------------|:---------------|
-| TCD-1-main-mechanism-theorem                | global convergence or optimizer superiority                                                 | no                    | pass           |
-| TCD-2-natural-drift-diagnostic              | tail accuracy necessarily improves                                                          | no                    | pass           |
-| TCD-3-predictive-condition-generalization   | the v5 score predicts unseen real-task residual risk                                        | no                    | pass           |
-| TCD-4-natural-counterexample-or-finite-null | fresh natural primary counterexample                                                        | no                    | pass           |
-| TCD-4-natural-counterexample-or-finite-null | unqualified absence of natural counterexamples outside the registered phase1/phase2 spaces  | no                    | pass           |
-| TCD-4-natural-counterexample-or-finite-null | quality-failed or head-gain-failed rows validate the mechanism                              | no                    | pass           |
-| TCD-5-optimizer-performance-benchmark       | Muon or spectral training is competitive on long-tail benchmarks                            | no                    | pass           |
-| TCD-5-optimizer-performance-benchmark       | local Muon drift compatibility implies benchmark superiority                                | no                    | pass           |
-| TCD-5-optimizer-performance-benchmark       | sampled bridge states represent the full training trajectory distribution                   | no                    | pass           |
-| TCD-5-optimizer-performance-benchmark       | using partial validation leaderboard to change selection, launch order, or final seed plan  | no                    | pass           |
-| TCD-5-optimizer-performance-benchmark       | violating the validation refresh firewall forbidden-action matrix                           | no                    | pass           |
-| TCD-5-optimizer-performance-benchmark       | running final-safe-submit before FEP/TFE/FLA gates pass                                     | no                    | pass           |
-| TCD-5-optimizer-performance-benchmark       | claiming final benchmark performance from not_ready final evaluator gates                   | no                    | pass           |
-| TCD-6-artifact-reproducibility              | preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server | no                    | pass           |
+| claim_id                                    | blocked_phrase                                                                                             | present_in_main_tex   | audit_status   |
+|:--------------------------------------------|:-----------------------------------------------------------------------------------------------------------|:----------------------|:---------------|
+| TCD-1-main-mechanism-theorem                | global convergence or optimizer superiority                                                                | no                    | pass           |
+| TCD-2-natural-drift-diagnostic              | tail accuracy necessarily improves                                                                         | no                    | pass           |
+| TCD-3-predictive-condition-generalization   | the v5 score predicts unseen real-task residual risk                                                       | no                    | pass           |
+| TCD-4-natural-counterexample-or-finite-null | fresh natural primary counterexample                                                                       | no                    | pass           |
+| TCD-4-natural-counterexample-or-finite-null | unqualified absence of natural counterexamples outside the registered phase1/phase2 spaces                 | no                    | pass           |
+| TCD-4-natural-counterexample-or-finite-null | quality-failed or head-gain-failed rows validate the mechanism                                             | no                    | pass           |
+| TCD-5-optimizer-performance-benchmark       | Muon or spectral training is competitive on long-tail benchmarks                                           | no                    | pass           |
+| TCD-5-optimizer-performance-benchmark       | local Muon drift compatibility implies benchmark superiority                                               | no                    | pass           |
+| TCD-5-optimizer-performance-benchmark       | sampled bridge states represent the full training trajectory distribution                                  | no                    | pass           |
+| TCD-5-optimizer-performance-benchmark       | using partial validation leaderboard to change selection, launch order, or final seed plan                 | no                    | pass           |
+| TCD-5-optimizer-performance-benchmark       | violating the validation refresh firewall forbidden-action matrix                                          | no                    | pass           |
+| TCD-5-optimizer-performance-benchmark       | changing sealed protocol surfaces after partial validation exposure without a fresh preregistered protocol | no                    | pass           |
+| TCD-5-optimizer-performance-benchmark       | running final-safe-submit before FEP/TFE/FLA gates pass                                                    | no                    | pass           |
+| TCD-5-optimizer-performance-benchmark       | claiming final benchmark performance from not_ready final evaluator gates                                  | no                    | pass           |
+| TCD-6-artifact-reproducibility              | preferred pdflatex/bibtex/xelatex clean-checkout reproducibility is complete on this server                | no                    | pass           |
 
 ## Operating Rule
 

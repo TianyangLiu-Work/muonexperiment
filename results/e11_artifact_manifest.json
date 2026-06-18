@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 443375,
-      "size": "433.0 KB"
+      "size_bytes": 444498,
+      "size": "434.1 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 3053880,
+      "size_bytes": 3080913,
       "size": "2.9 MB"
     },
     {
@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1963519,
+      "size_bytes": 2001092,
       "size": "1.9 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 289250029,
+      "size_bytes": 289346699,
       "size": "275.9 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 35064331,
-      "size": "33.4 MB"
+      "size_bytes": 35154205,
+      "size": "33.5 MB"
     },
     {
       "path": "configs",
@@ -61,8 +61,8 @@
       "path": "Makefile",
       "role": "Thin reproducibility entrypoint for E11 artifact generation and validation commands.",
       "commit_policy": "commit",
-      "size_bytes": 23636,
-      "size": "23.1 KB"
+      "size_bytes": 23970,
+      "size": "23.4 KB"
     },
     {
       "path": ".gitignore",
@@ -888,7 +888,7 @@
     {
       "path": "results/e11_submission_repro_audit/build_gate_summary.csv",
       "rows": 6,
-      "size": "994 B"
+      "size": "1.0 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/command_matrix.csv",
@@ -898,12 +898,12 @@
     {
       "path": "results/e11_artifact_review_packet/gate_matrix.csv",
       "rows": 6,
-      "size": "1.5 KB"
+      "size": "1.6 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/local_state_contract.csv",
       "rows": 13,
-      "size": "3.9 KB"
+      "size": "3.8 KB"
     },
     {
       "path": "results/e11_artifact_review_packet/reviewer_response.csv",
@@ -1303,22 +1303,22 @@
     {
       "path": "results/e11_top_conference_gap_register/gap_register.csv",
       "rows": 7,
-      "size": "29.6 KB"
+      "size": "30.2 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/claim_decision_matrix.csv",
       "rows": 6,
-      "size": "9.0 KB"
+      "size": "9.9 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/reviewer_objection_matrix.csv",
       "rows": 5,
-      "size": "3.0 KB"
+      "size": "3.1 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/rebuttal_response_pack.csv",
       "rows": 5,
-      "size": "5.2 KB"
+      "size": "5.7 KB"
     },
     {
       "path": "results/e11_top_conference_claim_decision_audit/manuscript_edit_queue.csv",
@@ -1342,8 +1342,8 @@
     },
     {
       "path": "results/e11_manuscript_claim_trace/blocked_phrase_audit.csv",
-      "rows": 14,
-      "size": "1.6 KB"
+      "rows": 15,
+      "size": "1.7 KB"
     },
     {
       "path": "results/e11_clean_worktree_replay_audit/run_summary.csv",
@@ -1498,7 +1498,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
       "rows": 164,
-      "size": "76.5 KB"
+      "size": "76.7 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/family_selection.csv",
@@ -1547,8 +1547,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/validation_setting_variance.csv",
-      "rows": 68,
-      "size": "16.5 KB"
+      "rows": 72,
+      "size": "17.5 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/spent_pilot_paired_variance.csv",
@@ -1687,8 +1687,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv",
-      "rows": 17,
-      "size": "4.0 KB"
+      "rows": 18,
+      "size": "4.2 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/family_progress.csv",
@@ -1698,7 +1698,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/occupancy_interim_summary.csv",
       "rows": 6,
-      "size": "652 B"
+      "size": "650 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/partial_grid_guardrail.csv",
@@ -1739,6 +1739,26 @@
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/forbidden_action_matrix.csv",
       "rows": 6,
       "size": "1.2 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/hash_manifest.csv",
+      "rows": 18,
+      "size": "4.4 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/exposure_boundary.csv",
+      "rows": 1,
+      "size": "415 B"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/immutability_matrix.csv",
+      "rows": 5,
+      "size": "1.4 KB"
+    },
+    {
+      "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/seal_gate_matrix.csv",
+      "rows": 5,
+      "size": "665 B"
     },
     {
       "path": "results/e11_cifar100_resnet_practical_muon_bridge/metrics.csv",
@@ -2019,7 +2039,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "100.9 KB"
+      "size": "101.5 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -2043,7 +2063,7 @@
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
-      "size": "71.5 KB"
+      "size": "72.1 KB"
     },
     {
       "path": "discussion/e11_reviewer_risk_audit.md",
@@ -2067,11 +2087,11 @@
     },
     {
       "path": "discussion/e11_submission_repro_audit.md",
-      "size": "8.3 KB"
+      "size": "8.5 KB"
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
-      "size": "29.4 KB"
+      "size": "29.6 KB"
     },
     {
       "path": "discussion/e11_camera_ready_package_audit.md",
@@ -2087,15 +2107,15 @@
     },
     {
       "path": "discussion/e11_top_conference_gap_register.md",
-      "size": "66.5 KB"
+      "size": "71.7 KB"
     },
     {
       "path": "discussion/e11_top_conference_claim_decision_audit.md",
-      "size": "78.6 KB"
+      "size": "90.6 KB"
     },
     {
       "path": "discussion/e11_manuscript_claim_trace.md",
-      "size": "8.8 KB"
+      "size": "9.3 KB"
     },
     {
       "path": "discussion/e11_clean_worktree_replay_audit.md",
@@ -2368,6 +2388,14 @@
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md",
       "size": "6.3 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md",
+      "size": "5.9 KB"
+    },
+    {
+      "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md",
+      "size": "12.3 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",

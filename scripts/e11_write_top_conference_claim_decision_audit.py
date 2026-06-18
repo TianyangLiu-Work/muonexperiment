@@ -47,6 +47,15 @@ SOURCE_FILES = {
     "tuned_refresh_forbidden": Path(
         "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/forbidden_action_matrix.csv"
     ),
+    "tuned_protocol_seal_boundary": Path(
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/exposure_boundary.csv"
+    ),
+    "tuned_protocol_seal_gates": Path(
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/seal_gate_matrix.csv"
+    ),
+    "tuned_protocol_seal_immutability": Path(
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/immutability_matrix.csv"
+    ),
     "tuned_final_execution_gates": Path(
         "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/gate_matrix.csv"
     ),
@@ -94,6 +103,9 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
     tuned_refresh_state = sources["tuned_refresh_state"]
     tuned_refresh_allowed = sources["tuned_refresh_allowed"]
     tuned_refresh_forbidden = sources["tuned_refresh_forbidden"]
+    tuned_seal_boundary = sources["tuned_protocol_seal_boundary"]
+    tuned_seal_gates = sources["tuned_protocol_seal_gates"]
+    tuned_seal_immutability = sources["tuned_protocol_seal_immutability"]
     tuned_final_execution_gates = sources["tuned_final_execution_gates"]
     tuned_final_eval_gates = sources["tuned_final_eval_gates"]
     tuned_final_launch_gates = sources["tuned_final_launch_gates"]
@@ -208,6 +220,8 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
                     f"{status_line(tuned_refresh_state, 'state_id')}; "
                     f"{status_line(tuned_refresh_allowed, 'transition_id')}; "
                     f"{status_line(tuned_refresh_forbidden, 'forbidden_id')}; "
+                    f"{status_line(tuned_seal_boundary, 'boundary_id')}; "
+                    f"{status_line(tuned_seal_gates, 'gate_id')}; "
                     f"{status_line(tuned_final_execution_gates, 'gate_id')}; "
                     f"{status_line(tuned_final_eval_gates, 'gate_id')}; "
                     f"{status_line(tuned_final_launch_gates, 'gate_id')}; "
@@ -222,26 +236,29 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
                     "allows sampled-state local compatibility and negative final pilot boundary only; "
                     "validation leakage audit permits progress accounting only while selection rule, "
                     "array order, and final seed quarantine remain frozen; the validation refresh firewall "
-                    "permits only sequential progress accounting from the contiguous prefix; final execution, evaluator, "
-                    "and launch audits are dry-run/not_ready boundaries until final rows exist"
+                    "permits only sequential progress accounting from the contiguous prefix; the protocol hash seal "
+                    "freezes registry, seed split, selection objective, runner, and final-gate surfaces after partial "
+                    "validation exposure; final execution, evaluator, and launch audits are dry-run/not_ready "
+                    "boundaries until final rows exist"
                 ),
                 "author_blocked_wording": (
                     f"{benchmark_scope['blocked_claim']}; local Muon drift compatibility implies "
                     "benchmark superiority; sampled bridge states represent the full training trajectory distribution; "
                     "using partial validation leaderboard to change selection, launch order, or final seed plan; "
                     "violating the validation refresh firewall forbidden-action matrix; "
+                    "changing sealed protocol surfaces after partial validation exposure without a fresh preregistered protocol; "
                     "running final-safe-submit before FEP/TFE/FLA gates pass; claiming final benchmark "
                     "performance from not_ready final evaluator gates"
                 ),
                 "decisive_gate": (
                     f"{benchmark_scope['decisive_gate']} plus final execution/evaluation/launch gates, "
                     "state-distribution occupancy logging, and MSG-4 top-tier practical gate, with TLA "
-                    "leakage guards and VRF refresh-firewall transitions still passing"
+                    "leakage guards, VRF refresh-firewall transitions, and TPS protocol-seal gates still passing"
                 ),
                 "required_next_action": (
                     f"{pto6['required_upgrade']} plus record trajectory occupancy summaries during "
                     "tuned validation and final seeds; rerun the leakage/optional-stopping audit, "
-                    "validation refresh firewall, and "
+                    "validation refresh firewall, protocol seal, and "
                     "final execution/evaluation/launch audits after each validation refresh; submit final "
                     "jobs only after FEP/TFE/FLA gates pass"
                 ),
@@ -250,6 +267,7 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md; "
+                    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_launch_audit.md; "
@@ -257,6 +275,9 @@ def build_claim_decision_matrix(sources: dict[str, pd.DataFrame]) -> pd.DataFram
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/refresh_state.csv; "
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/allowed_transition_matrix.csv; "
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/forbidden_action_matrix.csv; "
+                    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/exposure_boundary.csv; "
+                    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/seal_gate_matrix.csv; "
+                    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/immutability_matrix.csv; "
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/gate_matrix.csv; "
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation/claim_gate_report.csv; "
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/final_launch_audit/latest_final_launch_decision.csv; "
@@ -319,8 +340,9 @@ def build_reviewer_objection_matrix(claims: pd.DataFrame) -> pd.DataFrame:
                     "TCD-5 blocks benchmark wording; the Muon state-distribution contract separates "
                     "sampled-state local compatibility from trajectory occupancy and notes local "
                     "compatibility can coexist with poor final performance until tuned validation, "
-                    "occupancy logging, and final seeds finish. The tuned leakage audit and final "
-                    "validation refresh firewall plus final execution/evaluator/launch audits separately block optional-stopping moves, "
+                    "occupancy logging, and final seeds finish. The tuned leakage audit, validation "
+                    "refresh firewall, protocol hash seal, and final execution/evaluator/launch audits "
+                    "separately block optional-stopping moves, protocol drift after partial exposure, "
                     "premature final-safe-submit, and final-performance claims from partial validation."
                 ),
                 "response_status": lookup.loc["TCD-5-optimizer-performance-benchmark", "current_decision"],
@@ -329,7 +351,8 @@ def build_reviewer_objection_matrix(claims: pd.DataFrame) -> pd.DataFrame:
                     "turning lower local drift into a final tail-accuracy claim or treating sampled "
                     "bridge states as the full training trajectory distribution or using partial validation "
                     "leaderboard to change selection, launch order, or final seed plan or violating the "
-                    "validation refresh firewall forbidden-action matrix or running "
+                    "validation refresh firewall forbidden-action matrix or changing sealed protocol surfaces "
+                    "after partial exposure without a fresh protocol or running "
                     "final-safe-submit before FEP/TFE/FLA gates pass"
                 ),
             },
@@ -444,6 +467,7 @@ def build_rebuttal_response_pack(claims: pd.DataFrame, objections: pd.DataFrame)
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md; "
+                    "discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_execution_plan.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md; "
                     "discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_launch_audit.md; "
@@ -451,6 +475,9 @@ def build_rebuttal_response_pack(claims: pd.DataFrame, objections: pd.DataFrame)
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/refresh_state.csv; "
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/allowed_transition_matrix.csv; "
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/forbidden_action_matrix.csv; "
+                    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/hash_manifest.csv; "
+                    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/seal_gate_matrix.csv; "
+                    "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_protocol_seal/exposure_boundary.csv; "
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/final_execution_plan/gate_matrix.csv; "
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/final_evaluation/claim_gate_report.csv; "
                     "results/e11_cifar100_resnet_lt_tuned_benchmark/final_launch_audit/latest_final_launch_decision.csv; "
@@ -462,7 +489,7 @@ def build_rebuttal_response_pack(claims: pd.DataFrame, objections: pd.DataFrame)
                     "Keep Muon as motivation, selected-state/local compatibility, and a "
                     "state-distribution transport contract: local compatibility can coexist with poor "
                     "final performance; quarantine benchmark claims until validation selection, "
-                    "occupancy logging, leakage guards, validation refresh firewall transitions, final execution/evaluation/launch gates, and "
+                    "occupancy logging, leakage guards, validation refresh firewall transitions, protocol-seal gates, final execution/evaluation/launch gates, and "
                     "untouched final seeds finish."
                 ),
                 "missing_gate": objection_lookup.loc["RO-4-muon-overclaim", "missing_gate"],
@@ -537,12 +564,12 @@ def build_manuscript_edit_queue(claims: pd.DataFrame, gaps: pd.DataFrame) -> pd.
                 "claim_id": "TCD-5-optimizer-performance-benchmark",
                 "edit_action": (
                     "Keep standard/recipe/negative NS-Muon pilots as benchmark context, cite the "
-                    "state-distribution contract, tuned leakage audit, and validation refresh firewall, and quarantine all competitive "
+                    "state-distribution contract, tuned leakage audit, validation refresh firewall, and protocol hash seal, and quarantine all competitive "
                     "optimizer wording until final execution/evaluator/launch gates pass."
                 ),
                 "acceptance_check": (
                     f"{gap_lookup.loc['P0-StandardBenchmark', 'acceptance_gate']} Also require "
-                    "state-distribution occupancy summaries, passing leakage guards, and passing refresh-firewall transitions for selected recipes "
+                    "state-distribution occupancy summaries, passing leakage guards, passing refresh-firewall transitions, and passing protocol-seal gates for selected recipes "
                     "plus passing final execution/evaluator/launch gates before practical-performance wording."
                 ),
                 "current_decision": claim_lookup.loc[
