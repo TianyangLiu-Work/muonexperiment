@@ -1,0 +1,9 @@
+{
+  "assumed_paired_diff_sd": 0.03,
+  "claim_boundary": "variance-prior sensitivity only; no recipe selection or final-performance claim",
+  "final_outputs_present": false,
+  "final_power_audit": "results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit",
+  "final_seed_outputs_inspected": false,
+  "purpose": "pre-final empirical variance-prior audit for tuned benchmark MDE assumptions",
+  "result_root": "results/e11_cifar100_resnet_lt_tuned_benchmark"
+}

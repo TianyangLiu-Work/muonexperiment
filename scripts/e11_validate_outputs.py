@@ -1251,6 +1251,18 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "outcome_state_machine.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit") / "config.json",
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md"),
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit")
+        / "validation_setting_variance.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit")
+        / "spent_pilot_paired_variance.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit")
+        / "variance_prior_summary.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit")
+        / "mde_sensitivity_from_empirical_sd.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit") / "gate_matrix.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit") / "config.json",
+        Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md"),
+        Path("scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.py"),
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "chunk_plan.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "queue_policy.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan") / "config.json",
@@ -1497,6 +1509,8 @@ def main() -> None:
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_leakage_audit.py",
         "e11-cifar-resnet-lt-tuned-benchmark-power-audit:",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
+        "e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit:",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.py",
         "e11-cifar-resnet-imbalance-sweep-results:",
         "e11-cifar-resnet-condition-score-heldout-architecture-results:",
         "scripts/slurm/e11_cifar100_resnet_condition_score_heldout_architecture.sbatch",
@@ -1649,6 +1663,7 @@ def main() -> None:
         "make e11-cifar-resnet-lt-tuned-benchmark-validation-results # submit the tuned validation grid via Slurm array",
         "make e11-cifar-resnet-lt-tuned-benchmark-selection # select final recipes from completed validation summaries without touching final seeds",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit # lock tuned final seed MDE, Holm family, and all-class guardrail before final outputs",
+        "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit # calibrate tuned benchmark MDE assumptions from validation and spent-pilot variance",
         "make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan # write a chunked no-side-effect Slurm launch plan for the 164-setting validation grid",
         "make e11-cifar-resnet-lt-tuned-benchmark-launch-audit # compute the current queue-aware validation launch decision without submitting",
         "make e11-cifar-resnet-lt-tuned-benchmark-safe-submit # submit the largest safe validation subchunk under MaxSubmitJobsPerUser",
@@ -6301,6 +6316,55 @@ def main() -> None:
             "Outcome State Machine",
         ],
     )
+    tuned_variance_dir = Path("results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit")
+    tuned_validation_variance = pd.read_csv(tuned_variance_dir / "validation_setting_variance.csv")
+    tuned_pilot_variance = pd.read_csv(tuned_variance_dir / "spent_pilot_paired_variance.csv")
+    tuned_variance_summary = pd.read_csv(tuned_variance_dir / "variance_prior_summary.csv")
+    tuned_mde_sensitivity = pd.read_csv(tuned_variance_dir / "mde_sensitivity_from_empirical_sd.csv")
+    tuned_variance_gates = pd.read_csv(tuned_variance_dir / "gate_matrix.csv")
+    tuned_variance_config = json.loads((tuned_variance_dir / "config.json").read_text(encoding="utf-8"))
+    expected_variance_gates = {
+        "EVPA-1-final-seed-quarantine",
+        "EVPA-2-validation-sd-surface",
+        "EVPA-3-spent-pilot-paired-sd-surface",
+        "EVPA-4-primary-few-sd-anchor",
+        "EVPA-5-mde-sensitivity-grid",
+        "EVPA-6-claim-boundary",
+    }
+    if set(tuned_variance_gates["gate_id"]) != expected_variance_gates:
+        raise AssertionError("CIFAR-100-LT tuned variance-prior gate IDs changed unexpectedly")
+    if not tuned_variance_gates["status"].astype(str).eq("pass").all():
+        raise AssertionError("CIFAR-100-LT tuned variance-prior audit gates must pass")
+    if len(tuned_validation_variance) < 68:
+        raise AssertionError("CIFAR-100-LT tuned variance-prior audit must cover completed validation frequency groups")
+    if not {"few", "all"}.issubset(set(tuned_pilot_variance["frequency_group"])):
+        raise AssertionError("CIFAR-100-LT tuned variance-prior audit must include few/all spent-pilot paired rows")
+    if set(tuned_variance_summary["source_id"]) != {"validation_within_setting", "spent_pilot_paired_diff"}:
+        raise AssertionError("CIFAR-100-LT tuned variance-prior summary must separate validation and spent-pilot priors")
+    if not {"p50", "p80", "p95", "max", "assumed_0p03"}.issubset(
+        set(tuned_mde_sensitivity["sd_reference"].astype(str))
+    ):
+        raise AssertionError("CIFAR-100-LT tuned variance-prior MDE sensitivity missing empirical references")
+    if bool(tuned_variance_config.get("final_seed_outputs_inspected", True)):
+        raise AssertionError("CIFAR-100-LT tuned variance-prior audit must not inspect final seed outputs")
+    if tuned_variance_config.get("assumed_paired_diff_sd") != 0.03:
+        raise AssertionError("CIFAR-100-LT tuned variance-prior audit must preserve the 0.03 assumed SD reference")
+    tuned_variance_text = Path(
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md"
+    ).read_text(encoding="utf-8")
+    assert_required_phrases(
+        "CIFAR-100-LT tuned benchmark variance-prior audit",
+        tuned_variance_text,
+        [
+            "E11 CIFAR-100-LT Tuned Benchmark Variance Prior Audit",
+            "pre-final evidence",
+            "completed validation summaries and spent pilot paired comparisons only",
+            "Variance Prior Summary",
+            "MDE Sensitivity Snapshot",
+            "assumed_0p03",
+            "Blocked now: using validation variability, spent pilot variability, or the assumed SD grid",
+        ],
+    )
     final_outputs = sorted(
         path
         for path in Path("results/e11_cifar100_resnet_lt_tuned_benchmark").glob("final*")
@@ -8087,10 +8151,14 @@ def main() -> None:
         "scripts/slurm/e11_cifar100_resnet_lt_tuned_benchmark_validation.sbatch",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
         "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md",
         "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_power_audit.py",
+        "scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.py",
+        "completed validation-only seed variability and spent-pilot paired-diff variability",
         "final seeds 20..29 quarantined",
         "make e11-cifar-resnet-lt-tuned-benchmark-selection",
         "make e11-cifar-resnet-lt-tuned-benchmark-power-audit",
+        "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit",
         "164-setting validation registry",
         "planned_occupancy_trace_path",
         "occupancy_trace.csv",
@@ -8479,6 +8547,7 @@ def main() -> None:
         or "make e11-cifar-resnet-lt-tuned-benchmark-validation-results" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-selection" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-power-audit" not in readme
+        or "make e11-cifar-resnet-lt-tuned-benchmark-variance-prior-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-slurm-plan" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-launch-audit" not in readme
         or "make e11-cifar-resnet-lt-tuned-benchmark-safe-submit" not in readme
@@ -8516,6 +8585,7 @@ def main() -> None:
         "discussion/e11_submission_repro_audit.md",
         "discussion/e11_artifact_review_packet.md",
         "discussion/e11_pdf_render_boundary_audit.md",
+        "discussion/e11_cifar100_resnet_lt_tuned_benchmark_variance_prior_audit.md",
         "discussion/e11_mechanism_referee_audit.md",
         "discussion/e11_bold_conjecture_register.md",
         "discussion/e11_muon_state_distribution_contract.md",
@@ -8534,6 +8604,8 @@ def main() -> None:
         "results/e11_muon_state_distribution_contract/falsification_tests.csv",
         "results/e11_pdf_render_boundary_audit/pdf_inspection_tool_status.csv",
         "results/e11_pdf_render_boundary_audit/render_boundary_gates.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/variance_prior_summary.csv",
+        "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/mde_sensitivity_from_empirical_sd.csv",
         "Ignored Local Artifacts",
         "results/e11_artifact_manifest.json",
     ]:

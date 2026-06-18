@@ -1,0 +1,9 @@
+source_id,frequency_group,row_count,sd_p50,sd_p80,sd_p95,sd_max,assumed_paired_diff_sd,p80_within_assumed_0p03,interpretation
+validation_within_setting,all,17,0.005539675080724472,0.007287514261663802,0.00839932994129123,0.0086768657935916,0.03,yes,within-setting seed SD is a loose variance prior
+validation_within_setting,few,17,0.005697952848757752,0.006524994358465702,0.00671353037374214,0.006841052550594816,0.03,yes,within-setting seed SD is a loose variance prior
+validation_within_setting,many,17,0.009779194908642812,0.011077210669700792,0.013937329409495759,0.014891443920614835,0.03,yes,within-setting seed SD is a loose variance prior
+validation_within_setting,medium,17,0.008153126356665577,0.010586884956147718,0.013020486320654938,0.013568571127756219,0.03,yes,within-setting seed SD is a loose variance prior
+spent_pilot_paired_diff,all,4,0.0033177492793271747,0.004920186144884198,0.005144031015779019,0.005218645972743959,0.03,yes,spent pilot paired-diff SD is the closest available pre-final paired-diff prior
+spent_pilot_paired_diff,few,4,0.00666035108624596,0.009330462879728994,0.010679929893391544,0.011129752231279062,0.03,yes,spent pilot paired-diff SD is the closest available pre-final paired-diff prior
+spent_pilot_paired_diff,many,4,0.0038058081116522143,0.007168282425444754,0.010047562283501482,0.011007322236187061,0.03,yes,spent pilot paired-diff SD is the closest available pre-final paired-diff prior
+spent_pilot_paired_diff,medium,4,0.004416870332926368,0.007420671504412991,0.008773529778599316,0.009224482536661426,0.03,yes,spent pilot paired-diff SD is the closest available pre-final paired-diff prior
