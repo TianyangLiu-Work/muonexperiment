@@ -385,6 +385,7 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/family_progress.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/occupancy_interim_summary.csv",
+    "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/partial_grid_guardrail.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/claim_boundary_gates.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv",
     "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/observed_surface.csv",
@@ -1080,7 +1081,7 @@ MAIN_EVIDENCE_STAGES: tuple[dict[str, str], ...] = (
         "stage": "CIFAR-100-LT ResNet18 tuned benchmark interim audit",
         "command": "python3 scripts/e11_write_cifar100_resnet_lt_tuned_benchmark_interim_audit.py",
         "produces": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/* and discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md",
-        "paper_role": "Reviewer-facing progress audit for completed validation settings and occupancy coverage, without selection authority for partial families.",
+        "paper_role": "Reviewer-facing progress audit for completed validation settings, partial-grid guardrails, and occupancy coverage, without selection authority for partial families.",
     },
     {
         "stage": "CIFAR-100-LT ResNet18 tuned benchmark leakage audit",

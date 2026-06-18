@@ -167,6 +167,90 @@ def build_occupancy_interim_summary(run_registry: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def build_partial_grid_guardrail(
+    run_registry: pd.DataFrame,
+    family_progress: pd.DataFrame,
+    gate_report: pd.DataFrame,
+) -> pd.DataFrame:
+    gate_status = gate_report.set_index("gate_id")["status"].astype(str).to_dict()
+    complete = run_registry[run_registry["validation_status"].eq("complete")].copy()
+    completed_count = int(len(complete))
+    total = int(len(run_registry))
+    completed_indices = sorted(complete["array_index"].astype(int).tolist())
+    expected_prefix = list(range(completed_count))
+    prefix_is_contiguous = completed_indices == expected_prefix
+    missing_indices = sorted(
+        set(run_registry["array_index"].astype(int).tolist()).difference(completed_indices)
+    )
+    completed_span = (
+        f"{completed_indices[0]}..{completed_indices[-1]}" if completed_indices else "none"
+    )
+    next_missing = str(missing_indices[0]) if missing_indices else "none"
+    observed_families = int(complete["recipe_family"].nunique()) if not complete.empty else 0
+    complete_families = int(family_progress["family_status"].eq("complete").sum())
+    total_families = int(run_registry["recipe_family"].nunique())
+    occupancy_paired = complete[
+        complete["occupancy_status"].eq("complete")
+        & complete["occupancy_probe_rows"].fillna(0).astype(float).gt(0)
+    ]
+    min_probe_rows = (
+        int(occupancy_paired["occupancy_probe_rows"].astype(float).min())
+        if not occupancy_paired.empty
+        else 0
+    )
+    missing_count = total - completed_count
+    return pd.DataFrame(
+        [
+            {
+                "guard_id": "IPG-1-completed-prefix-auditable",
+                "status": "pass" if prefix_is_contiguous else "not_ready",
+                "evidence": (
+                    f"completed array indices span {completed_span}; next missing array index {next_missing}"
+                ),
+                "claim_authority": "progress accounting only",
+                "blocked_action": "cherry-picking non-contiguous validation settings",
+            },
+            {
+                "guard_id": "IPG-2-family-coverage-incomplete",
+                "status": "ready" if complete_families == total_families else "not_ready",
+                "evidence": (
+                    f"{observed_families}/{total_families} recipe families observed; "
+                    f"{complete_families}/{total_families} recipe families complete"
+                ),
+                "claim_authority": "within-family progress only until all families complete",
+                "blocked_action": "cross-family optimizer selection claim",
+            },
+            {
+                "guard_id": "IPG-3-occupancy-paired-with-validation",
+                "status": "pass" if len(occupancy_paired) == completed_count else "not_ready",
+                "evidence": (
+                    f"{len(occupancy_paired)}/{completed_count} completed settings have occupancy traces "
+                    f"with positive probe rows; min probe rows {min_probe_rows}"
+                ),
+                "claim_authority": "paired occupancy progress readout",
+                "blocked_action": "trajectory occupancy claim before full grid",
+            },
+            {
+                "guard_id": "IPG-4-missing-work-blocks-final-readout",
+                "status": "ready" if missing_count == 0 else "not_ready",
+                "evidence": f"{missing_count}/{total} settings still lack validation summaries",
+                "claim_authority": "no final-performance benchmark result",
+                "blocked_action": "final seed launch or benchmark result wording",
+            },
+            {
+                "guard_id": "IPG-5-final-seed-quarantine-mirrored",
+                "status": gate_status.get("TVS-3-final-seed-quarantine", "missing"),
+                "evidence": (
+                    f"TVS-3-final-seed-quarantine="
+                    f"{gate_status.get('TVS-3-final-seed-quarantine', 'missing')}"
+                ),
+                "claim_authority": "final seeds remain untouched",
+                "blocked_action": "retuned final seed claim",
+            },
+        ]
+    )
+
+
 def build_claim_boundary_gates(
     run_registry: pd.DataFrame,
     family_progress: pd.DataFrame,
@@ -221,6 +305,7 @@ def write_discussion(
     leaderboard: pd.DataFrame,
     family_progress: pd.DataFrame,
     occupancy_summary: pd.DataFrame,
+    partial_guardrail: pd.DataFrame,
     claim_gates: pd.DataFrame,
 ) -> None:
     total = int(family_progress["expected_settings"].sum())
@@ -255,6 +340,10 @@ Current progress: `{completed}/{total}` validation settings complete. {best_sent
 
 {markdown_table(claim_gates, ["gate_id", "status", "evidence", "allowed_wording", "blocked_wording"])}
 
+## Partial Grid Guardrail
+
+{markdown_table(partial_guardrail, ["guard_id", "status", "evidence", "claim_authority", "blocked_action"])}
+
 ## Family Progress
 
 {markdown_table(display_family, ["recipe_family", "expected_settings", "complete_settings", "complete_fraction", "family_status", "best_completed_setting_id", "best_completed_few_balanced_accuracy", "best_completed_all_balanced_accuracy", "ci_relation_to_current_global_best", "selection_status"])}
@@ -281,21 +370,24 @@ def main() -> None:
     leaderboard = build_completed_leaderboard(run_registry)
     family_progress = build_family_progress(run_registry, leaderboard)
     occupancy_summary = build_occupancy_interim_summary(run_registry)
+    partial_guardrail = build_partial_grid_guardrail(run_registry, family_progress, gate_report)
     claim_gates = build_claim_boundary_gates(run_registry, family_progress, gate_report)
     leaderboard.to_csv(OUTPUT_DIR / "completed_setting_leaderboard.csv", index=False)
     family_progress.to_csv(OUTPUT_DIR / "family_progress.csv", index=False)
     occupancy_summary.to_csv(OUTPUT_DIR / "occupancy_interim_summary.csv", index=False)
+    partial_guardrail.to_csv(OUTPUT_DIR / "partial_grid_guardrail.csv", index=False)
     claim_gates.to_csv(OUTPUT_DIR / "claim_boundary_gates.csv", index=False)
     config = {
         "run_registry": (SELECTION_DIR / "run_registry.csv").as_posix(),
         "gate_report": (SELECTION_DIR / "gate_report.csv").as_posix(),
+        "partial_grid_guardrail": (OUTPUT_DIR / "partial_grid_guardrail.csv").as_posix(),
         "scope": "validation_tuning_only",
         "final_seed_set": "20..29",
         "final_seed_status": "not_touched",
         "claim_authority": "progress_accounting_only",
     }
     (OUTPUT_DIR / "config.json").write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
-    write_discussion(leaderboard, family_progress, occupancy_summary, claim_gates)
+    write_discussion(leaderboard, family_progress, occupancy_summary, partial_guardrail, claim_gates)
     print(f"saved tuned benchmark interim audit to {OUTPUT_DIR} and {DISCUSSION_PATH}")
 
 

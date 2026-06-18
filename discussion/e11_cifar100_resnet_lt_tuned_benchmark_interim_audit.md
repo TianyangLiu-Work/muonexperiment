@@ -14,6 +14,16 @@ Current progress: `17/164` validation settings complete. The current completed-s
 | IVA-4-occupancy-coverage             | not_ready | 17/164 occupancy traces complete                                                 | interim occupancy coverage                                | trajectory state-distribution claim       |
 | IVA-5-final-seed-quarantine          | pass      | mirrors TVS-3-final-seed-quarantine                                              | final seeds remain untouched                              | final seed result or retuned final claim  |
 
+## Partial Grid Guardrail
+
+| guard_id                                | status    | evidence                                                                                   | claim_authority                                         | blocked_action                                    |
+|:----------------------------------------|:----------|:-------------------------------------------------------------------------------------------|:--------------------------------------------------------|:--------------------------------------------------|
+| IPG-1-completed-prefix-auditable        | pass      | completed array indices span 0..16; next missing array index 17                            | progress accounting only                                | cherry-picking non-contiguous validation settings |
+| IPG-2-family-coverage-incomplete        | not_ready | 2/6 recipe families observed; 1/6 recipe families complete                                 | within-family progress only until all families complete | cross-family optimizer selection claim            |
+| IPG-3-occupancy-paired-with-validation  | pass      | 17/17 completed settings have occupancy traces with positive probe rows; min probe rows 30 | paired occupancy progress readout                       | trajectory occupancy claim before full grid       |
+| IPG-4-missing-work-blocks-final-readout | not_ready | 147/164 settings still lack validation summaries                                           | no final-performance benchmark result                   | final seed launch or benchmark result wording     |
+| IPG-5-final-seed-quarantine-mirrored    | pass      | TVS-3-final-seed-quarantine=pass                                                           | final seeds remain untouched                            | retuned final seed claim                          |
+
 ## Family Progress
 
 | recipe_family          |   expected_settings |   complete_settings |   complete_fraction | family_status   | best_completed_setting_id                     |   best_completed_few_balanced_accuracy |   best_completed_all_balanced_accuracy | ci_relation_to_current_global_best                   | selection_status           |

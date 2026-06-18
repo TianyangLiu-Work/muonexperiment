@@ -23,10 +23,13 @@ DISCUSSION_PATH = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakag
 
 
 def _final_outputs() -> list[str]:
+    final_claim_dir = RESULT_ROOT / "final_claim"
+    if not final_claim_dir.exists():
+        return []
     return sorted(
         path.as_posix()
-        for path in RESULT_ROOT.glob("final*")
-        if path.name != "final_power_audit"
+        for path in final_claim_dir.rglob("*")
+        if path.is_file()
     )
 
 

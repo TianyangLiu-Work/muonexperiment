@@ -6,6 +6,7 @@ final-claim seeds by itself.
 
 - Setting id: `TBV-sgd_momentum_ce_tuned-lr0p03-wd5e-4-warm500`
 - Array index: 13
+
 - Recipe family: `sgd_momentum_ce_tuned`
 - Recipe: `sgd_momentum_ce_tuned_lr0p03_wd5e-4_warm500`
 - Phase / seed set: `validation_tuning` / `10..14`

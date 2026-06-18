@@ -1252,6 +1252,8 @@ def main() -> None:
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit")
         / "occupancy_interim_summary.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit")
+        / "partial_grid_guardrail.csv",
+        Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit")
         / "claim_boundary_gates.csv",
         Path("results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit") / "config.json",
         Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md"),
@@ -6126,6 +6128,7 @@ def main() -> None:
     tuned_interim_leaderboard = pd.read_csv(tuned_interim_dir / "completed_setting_leaderboard.csv")
     tuned_interim_family = pd.read_csv(tuned_interim_dir / "family_progress.csv")
     tuned_interim_occupancy = pd.read_csv(tuned_interim_dir / "occupancy_interim_summary.csv")
+    tuned_interim_guardrail = pd.read_csv(tuned_interim_dir / "partial_grid_guardrail.csv")
     tuned_interim_gates = pd.read_csv(tuned_interim_dir / "claim_boundary_gates.csv")
     tuned_interim_config = json.loads((tuned_interim_dir / "config.json").read_text(encoding="utf-8"))
     if len(tuned_interim_leaderboard) != tuned_validation_complete_count:
@@ -6151,6 +6154,44 @@ def main() -> None:
         sorted_scores = tuned_interim_leaderboard["few_balanced_accuracy"].astype(float).tolist()
         if sorted_scores != sorted(sorted_scores, reverse=True):
             raise AssertionError("CIFAR-100-LT tuned interim leaderboard must sort by few balanced accuracy")
+    expected_guard_ids = {
+        "IPG-1-completed-prefix-auditable",
+        "IPG-2-family-coverage-incomplete",
+        "IPG-3-occupancy-paired-with-validation",
+        "IPG-4-missing-work-blocks-final-readout",
+        "IPG-5-final-seed-quarantine-mirrored",
+    }
+    if set(tuned_interim_guardrail["guard_id"]) != expected_guard_ids:
+        raise AssertionError("CIFAR-100-LT tuned interim partial-grid guardrail IDs changed unexpectedly")
+    complete_rows = tuned_selection_run_registry[
+        tuned_selection_run_registry["validation_status"].eq("complete")
+    ].copy()
+    completed_indices = sorted(complete_rows["array_index"].astype(int).tolist())
+    prefix_is_contiguous = completed_indices == list(range(len(completed_indices)))
+    guardrail_occupancy = complete_rows[
+        complete_rows["occupancy_status"].eq("complete")
+        & complete_rows["occupancy_probe_rows"].fillna(0).astype(float).gt(0)
+    ]
+    expected_guard_status = {
+        "IPG-1-completed-prefix-auditable": "pass" if prefix_is_contiguous else "not_ready",
+        "IPG-2-family-coverage-incomplete": "ready"
+        if tuned_interim_family["family_status"].eq("complete").all()
+        else "not_ready",
+        "IPG-3-occupancy-paired-with-validation": "pass"
+        if len(guardrail_occupancy) == tuned_validation_complete_count
+        else "not_ready",
+        "IPG-4-missing-work-blocks-final-readout": "ready"
+        if tuned_validation_complete_count == len(tuned_selection_run_registry)
+        else "not_ready",
+        "IPG-5-final-seed-quarantine-mirrored": expected_gate_status["TVS-3-final-seed-quarantine"],
+    }
+    observed_guard_status = tuned_interim_guardrail.set_index("guard_id")["status"].astype(str).to_dict()
+    if observed_guard_status != expected_guard_status:
+        raise AssertionError(f"CIFAR-100-LT tuned interim partial-grid guardrail drifted: {observed_guard_status}")
+    if not tuned_interim_guardrail["blocked_action"].astype(str).str.contains(
+        "selection|claim|final|trajectory|cherry-picking"
+    ).all():
+        raise AssertionError("CIFAR-100-LT tuned interim partial-grid guardrail must block unsafe actions")
     expected_interim_gates = {
         "IVA-1-validation-readout-scope",
         "IVA-2-partial-grid-blocks-selection",
@@ -6166,6 +6207,10 @@ def main() -> None:
         "final_seed_status"
     ) != "not_touched":
         raise AssertionError("CIFAR-100-LT tuned interim config must preserve validation-only scope")
+    if tuned_interim_config.get("partial_grid_guardrail") != (
+        tuned_interim_dir / "partial_grid_guardrail.csv"
+    ).as_posix():
+        raise AssertionError("CIFAR-100-LT tuned interim config must point to the partial-grid guardrail")
     tuned_interim_text = Path("discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md").read_text(
         encoding="utf-8"
     )
@@ -6177,9 +6222,11 @@ def main() -> None:
             "interim, no-peeking progress readout",
             "does not authorize final seed runs",
             "Claim Boundary Gates",
+            "Partial Grid Guardrail",
             "Completed-Setting Leaderboard",
             "Interim Occupancy Summary",
             f"{tuned_validation_complete_count}/{len(tuned_selection_run_registry)}",
+            "progress accounting only",
             "TVS-1",
             "TVS-2",
             "TVS-5",

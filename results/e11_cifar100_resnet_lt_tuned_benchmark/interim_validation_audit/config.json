@@ -3,6 +3,7 @@
   "final_seed_set": "20..29",
   "final_seed_status": "not_touched",
   "gate_report": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv",
+  "partial_grid_guardrail": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/partial_grid_guardrail.csv",
   "run_registry": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
   "scope": "validation_tuning_only"
 }

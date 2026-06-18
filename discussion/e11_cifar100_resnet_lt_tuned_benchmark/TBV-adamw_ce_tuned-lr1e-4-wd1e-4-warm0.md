@@ -6,6 +6,7 @@ final-claim seeds by itself.
 
 - Setting id: `TBV-adamw_ce_tuned-lr1e-4-wd1e-4-warm0`
 - Array index: 0
+
 - Recipe family: `adamw_ce_tuned`
 - Recipe: `adamw_ce_tuned_lr1e-4_wd1e-4_warm0`
 - Phase / seed set: `validation_tuning` / `10..14`
