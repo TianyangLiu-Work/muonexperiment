@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 1757926,
+      "size_bytes": 1763930,
       "size": "1.7 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 288647048,
-      "size": "275.3 MB"
+      "size_bytes": 288727771,
+      "size": "275.4 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 34527019,
-      "size": "32.9 MB"
+      "size_bytes": 34615556,
+      "size": "33.0 MB"
     },
     {
       "path": "configs",
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833088,
+      "size_bytes": 5833089,
       "size": "5.6 MB"
     },
     {
@@ -1463,17 +1463,17 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
       "rows": 164,
-      "size": "75.5 KB"
+      "size": "75.7 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/family_selection.csv",
       "rows": 6,
-      "size": "771 B"
+      "size": "899 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/final_claim_plan.csv",
       "rows": 6,
-      "size": "337 B"
+      "size": "498 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv",
@@ -1513,7 +1513,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/chunk_plan.csv",
       "rows": 8,
-      "size": "2.9 KB"
+      "size": "2.8 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/queue_policy.csv",
@@ -2147,7 +2147,7 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md",
-      "size": "73.8 KB"
+      "size": "74.8 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_power_audit.md",
@@ -2155,7 +2155,7 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md",
-      "size": "6.4 KB"
+      "size": "6.3 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md",

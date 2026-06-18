@@ -2,7 +2,7 @@
 
 This generated selection report is the no-peeking bridge between the tuned benchmark validation grid and the untouched final claim seeds. It reads only validation summaries under `results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/*`.
 
-Current status: `not_ready` with `11/164` validation summaries complete and `11/164` trajectory occupancy traces complete.
+Current status: `not_ready` with `12/164` validation summaries complete and `12/164` trajectory occupancy traces complete.
 
 ## Selection Rule
 
@@ -12,22 +12,22 @@ For each recipe family, select the validation setting with maximum few-class bal
 
 | gate_id                          | status    | evidence                                                                                    | blocks_final_claim   |
 |:---------------------------------|:----------|:--------------------------------------------------------------------------------------------|:---------------------|
-| TVS-1-validation-grid-complete   | not_ready | 11/164 validation settings complete                                                         | yes                  |
-| TVS-2-family-selection           | not_ready | 0/6 recipe families selected                                                                | yes                  |
-| TVS-5-occupancy-logging-complete | not_ready | 11/164 occupancy traces complete                                                            | yes                  |
+| TVS-1-validation-grid-complete   | not_ready | 12/164 validation settings complete                                                         | yes                  |
+| TVS-2-family-selection           | not_ready | 1/6 recipe families selected                                                                | yes                  |
+| TVS-5-occupancy-logging-complete | not_ready | 12/164 occupancy traces complete                                                            | yes                  |
 | TVS-3-final-seed-quarantine      | pass      | no final_claim outputs exist before validation selection                                    | yes                  |
 | TVS-4-final-run-plan             | not_ready | final seed set 20..29 assigned only after validation family selection and occupancy logging | yes                  |
 
 ## Family Selection
 
-| recipe_family          | selection_status   |   expected_settings |   complete_settings | selected_setting_id   | selected_recipe_name   | primary_few_balanced_accuracy   | tie_break_all_balanced_accuracy   | selection_rule                                             |
-|:-----------------------|:-------------------|--------------------:|--------------------:|:----------------------|:-----------------------|:--------------------------------|:----------------------------------|:-----------------------------------------------------------|
-| adamw_cb_loss_tuned    | not_ready          |                  24 |                   0 |                       |                        |                                 |                                   | wait for every registered validation setting in the family |
-| adamw_cb_sampler_tuned | not_ready          |                   8 |                   0 |                       |                        |                                 |                                   | wait for every registered validation setting in the family |
-| adamw_ce_tuned         | not_ready          |                  12 |                  11 |                       |                        |                                 |                                   | wait for every registered validation setting in the family |
-| ns_muon_cb_tuned       | not_ready          |                  36 |                   0 |                       |                        |                                 |                                   | wait for every registered validation setting in the family |
-| ns_muon_matrix_tuned   | not_ready          |                  72 |                   0 |                       |                        |                                 |                                   | wait for every registered validation setting in the family |
-| sgd_momentum_ce_tuned  | not_ready          |                  12 |                   0 |                       |                        |                                 |                                   | wait for every registered validation setting in the family |
+| recipe_family          | selection_status   |   expected_settings |   complete_settings | selected_setting_id                    | selected_recipe_name               |   primary_few_balanced_accuracy |   tie_break_all_balanced_accuracy | selection_rule                                                                |
+|:-----------------------|:-------------------|--------------------:|--------------------:|:---------------------------------------|:-----------------------------------|--------------------------------:|----------------------------------:|:------------------------------------------------------------------------------|
+| adamw_cb_loss_tuned    | not_ready          |                  24 |                   0 |                                        |                                    |                                 |                                   | wait for every registered validation setting in the family                    |
+| adamw_cb_sampler_tuned | not_ready          |                   8 |                   0 |                                        |                                    |                                 |                                   | wait for every registered validation setting in the family                    |
+| adamw_ce_tuned         | selected           |                  12 |                  12 | TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0 | adamw_ce_tuned_lr1e-3_wd5e-4_warm0 |                          0.1121 |                            0.4151 | maximize validation few balanced accuracy, tie-break by all balanced accuracy |
+| ns_muon_cb_tuned       | not_ready          |                  36 |                   0 |                                        |                                    |                                 |                                   | wait for every registered validation setting in the family                    |
+| ns_muon_matrix_tuned   | not_ready          |                  72 |                   0 |                                        |                                    |                                 |                                   | wait for every registered validation setting in the family                    |
+| sgd_momentum_ce_tuned  | not_ready          |                  12 |                   0 |                                        |                                    |                                 |                                   | wait for every registered validation setting in the family                    |
 
 ## Occupancy Logging Status
 
@@ -44,7 +44,7 @@ For each recipe family, select the validation setting with maximum few-class bal
 | TBV-adamw_ce_tuned-lr1e-3-wd1e-4-warm0                     | adamw_ce_tuned         | complete            | complete                | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_ce_tuned-lr1e-3-wd1e-4-warm0/summary.csv                     | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_ce_tuned-lr1e-3-wd1e-4-warm0/occupancy_trace.csv                     |
 | TBV-adamw_ce_tuned-lr1e-3-wd1e-4-warm500                   | adamw_ce_tuned         | complete            | complete                | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_ce_tuned-lr1e-3-wd1e-4-warm500/summary.csv                   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_ce_tuned-lr1e-3-wd1e-4-warm500/occupancy_trace.csv                   |
 | TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0                     | adamw_ce_tuned         | complete            | complete                | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0/summary.csv                     | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0/occupancy_trace.csv                     |
-| TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm500                   | adamw_ce_tuned         | missing_summary     | missing_occupancy_trace | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm500/summary.csv                   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm500/occupancy_trace.csv                   |
+| TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm500                   | adamw_ce_tuned         | complete            | complete                | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm500/summary.csv                   | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm500/occupancy_trace.csv                   |
 | TBV-sgd_momentum_ce_tuned-lr0p03-wd5e-4-warm0              | sgd_momentum_ce_tuned  | missing_summary     | missing_occupancy_trace | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p03-wd5e-4-warm0/summary.csv              | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p03-wd5e-4-warm0/occupancy_trace.csv              |
 | TBV-sgd_momentum_ce_tuned-lr0p03-wd5e-4-warm500            | sgd_momentum_ce_tuned  | missing_summary     | missing_occupancy_trace | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p03-wd5e-4-warm500/summary.csv            | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p03-wd5e-4-warm500/occupancy_trace.csv            |
 | TBV-sgd_momentum_ce_tuned-lr0p03-wd1e-3-warm0              | sgd_momentum_ce_tuned  | missing_summary     | missing_occupancy_trace | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p03-wd1e-3-warm0/summary.csv              | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_tuning/TBV-sgd_momentum_ce_tuned-lr0p03-wd1e-3-warm0/occupancy_trace.csv              |
@@ -200,14 +200,14 @@ For each recipe family, select the validation setting with maximum few-class bal
 
 ## Final Claim Plan
 
-| recipe_family          | final_status   | selected_setting_id   | selected_recipe_name   | final_seed_set   | planned_output_dir   | tuning_allowed   |
-|:-----------------------|:---------------|:----------------------|:-----------------------|:-----------------|:---------------------|:-----------------|
-| adamw_cb_loss_tuned    | not_ready      |                       |                        |                  |                      | no               |
-| adamw_cb_sampler_tuned | not_ready      |                       |                        |                  |                      | no               |
-| adamw_ce_tuned         | not_ready      |                       |                        |                  |                      | no               |
-| ns_muon_cb_tuned       | not_ready      |                       |                        |                  |                      | no               |
-| ns_muon_matrix_tuned   | not_ready      |                       |                        |                  |                      | no               |
-| sgd_momentum_ce_tuned  | not_ready      |                       |                        |                  |                      | no               |
+| recipe_family          | final_status        | selected_setting_id                    | selected_recipe_name               | final_seed_set   | planned_output_dir                                                        | tuning_allowed   |
+|:-----------------------|:--------------------|:---------------------------------------|:-----------------------------------|:-----------------|:--------------------------------------------------------------------------|:-----------------|
+| adamw_cb_loss_tuned    | not_ready           |                                        |                                    |                  |                                                                           | no               |
+| adamw_cb_sampler_tuned | not_ready           |                                        |                                    |                  |                                                                           | no               |
+| adamw_ce_tuned         | ready_for_final_run | TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0 | adamw_ce_tuned_lr1e-3_wd5e-4_warm0 | 20..29           | results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim/adamw_ce_tuned | no               |
+| ns_muon_cb_tuned       | not_ready           |                                        |                                    |                  |                                                                           | no               |
+| ns_muon_matrix_tuned   | not_ready           |                                        |                                    |                  |                                                                           | no               |
+| sgd_momentum_ce_tuned  | not_ready           |                                        |                                    |                  |                                                                           | no               |
 
 ## Claim Boundary
 
