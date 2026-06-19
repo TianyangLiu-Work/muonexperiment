@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 446817,
-      "size": "436.3 KB"
+      "size_bytes": 446925,
+      "size": "436.5 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 3141187,
+      "size_bytes": 3149858,
       "size": "3.0 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 2165430,
+      "size_bytes": 2167430,
       "size": "2.1 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 290874753,
+      "size_bytes": 290875878,
       "size": "277.4 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833548,
+      "size_bytes": 5833552,
       "size": "5.6 MB"
     },
     {
@@ -971,6 +971,11 @@
       "size": "998 B"
     },
     {
+      "path": "results/e11_condition_score_v5_protocol/final_interpretation_plan/current_interpretation_summary.csv",
+      "rows": 1,
+      "size": "965 B"
+    },
+    {
       "path": "results/e11_condition_score_v5_protocol/final_interpretation_plan/final_split_status.csv",
       "rows": 2,
       "size": "802 B"
@@ -983,7 +988,7 @@
     {
       "path": "results/e11_condition_score_v5_protocol/final_interpretation_plan/outcome_interpretation_ladder.csv",
       "rows": 7,
-      "size": "2.0 KB"
+      "size": "2.1 KB"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/final_interpretation_plan/leakage_lock.csv",
@@ -2391,7 +2396,7 @@
     },
     {
       "path": "discussion/e11_condition_score_v5_final_interpretation_plan.md",
-      "size": "8.9 KB"
+      "size": "10.9 KB"
     },
     {
       "path": "discussion/e11_condition_score_v5_reviewer_failure_response.md",

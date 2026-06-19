@@ -1147,6 +1147,8 @@ def main() -> None:
         Path("discussion/e11_condition_score_v5_final_evaluation.md"),
         Path("scripts/e11_evaluate_condition_score_v5_finals.py"),
         Path("scripts/e11_write_condition_score_v5_final_evaluation.py"),
+        Path("results/e11_condition_score_v5_protocol/final_interpretation_plan")
+        / "current_interpretation_summary.csv",
         Path("results/e11_condition_score_v5_protocol/final_interpretation_plan") / "final_split_status.csv",
         Path("results/e11_condition_score_v5_protocol/final_interpretation_plan") / "final_gate_contract.csv",
         Path("results/e11_condition_score_v5_protocol/final_interpretation_plan") / "outcome_interpretation_ladder.csv",
@@ -5027,6 +5029,7 @@ def main() -> None:
         ],
     )
     v5_interpret_dir = Path("results/e11_condition_score_v5_protocol/final_interpretation_plan")
+    v5_interpret_current = pd.read_csv(v5_interpret_dir / "current_interpretation_summary.csv")
     v5_interpret_status = pd.read_csv(v5_interpret_dir / "final_split_status.csv")
     v5_interpret_gate_contract = pd.read_csv(v5_interpret_dir / "final_gate_contract.csv")
     v5_interpret_ladder = pd.read_csv(v5_interpret_dir / "outcome_interpretation_ladder.csv")
@@ -5057,7 +5060,8 @@ def main() -> None:
         "baseline_gate",
     }
     if not (
-        set(v5_interpret_status["split_id"]) == expected_v5_final_split_ids
+        len(v5_interpret_current) == 1
+        and set(v5_interpret_status["split_id"]) == expected_v5_final_split_ids
         and v5_interpret_status["claim_gate_group"].eq("required_for_p0").all()
         and v5_interpret_status["can_be_replaced"].eq("no").all()
         and v5_interpret_status["can_be_dropped_after_result"].eq("no").all()
@@ -5066,27 +5070,58 @@ def main() -> None:
         and set(v5_interpret_leakage["locked_item"]) == expected_v5_interpret_locked_items
         and v5_interpret_config["primary_score"]
         == "condition_score_v5_transport_normalized_amplitude_minus_direction"
+        and v5_interpret_config["current_claim_state"] == "completed_final_failed_boundary"
         and "no final-row tuning" in str(v5_interpret_config["analysis_scope"])
+        and "post-output" in str(v5_interpret_config["analysis_scope"])
     ):
         raise AssertionError("condition-score v5 final interpretation plan must lock split, gate, outcome, and leakage policies")
     if not (
-        v5_interpret_ladder["forbidden_interpretation"].astype(str).str.len().gt(20).all()
+        v5_interpret_current["current_claim_state"].eq("completed_final_failed_boundary").all()
+        and v5_interpret_current["active_ladder_states"]
+        .astype(str)
+        .str.contains("data_transport_boundary")
+        .all()
+        and v5_interpret_current["active_ladder_states"]
+        .astype(str)
+        .str.contains("direction_guardrail_failure")
+        .all()
+        and v5_interpret_current["active_ladder_states"].astype(str).str.contains("local_mechanism_only").all()
+        and v5_interpret_current["blocking_gate_ids"]
+        .astype(str)
+        .str.contains("v5_final_heldout_architecture_direction_threshold_accuracy")
+        .all()
+        and v5_interpret_current["blocking_gate_ids"]
+        .astype(str)
+        .str.contains("v5_final_heldout_data_partition_residual_spearman")
+        .all()
+        and v5_interpret_current["forbidden_current_interpretation"]
+        .astype(str)
+        .str.contains("unseen-task predictive condition")
+        .all()
+        and v5_interpret_ladder["forbidden_interpretation"].astype(str).str.len().gt(20).all()
         and v5_interpret_ladder["required_paper_action"].astype(str).str.len().gt(30).all()
         and v5_interpret_leakage["forbidden_after_final_outputs"]
         .astype(str)
         .str.contains("changing|dropping|using|lowering|omitting", regex=True)
         .all()
     ):
-        raise AssertionError("condition-score v5 final interpretation plan must contain substantive forbidden actions and reporting actions")
+        raise AssertionError(
+            "condition-score v5 final interpretation plan must contain the completed final boundary, forbidden actions, and reporting actions"
+        )
     v5_interpret_text = Path("discussion/e11_condition_score_v5_final_interpretation_plan.md").read_text(
         encoding="utf-8"
     )
+    if "before their layer tables are available" in v5_interpret_text:
+        raise AssertionError("condition-score v5 final interpretation plan contains stale pre-output table wording")
     assert_required_phrases(
         "condition-score v5 final interpretation plan",
         v5_interpret_text,
         [
             "E11 Condition-Score V5 Final Interpretation Plan",
-            "pre-output interpretation lock",
+            "post-output interpretation lock",
+            "Current Interpretation Summary",
+            "completed negative boundary",
+            "completed_final_failed_boundary",
             "outcome-to-claim state machine",
             "direction-guardrail failures",
             "baseline-dominance failures",
@@ -8838,7 +8873,9 @@ def main() -> None:
     ).read_text(encoding="utf-8")
     required_condition_score_v5_interpret_phrases = [
         "Condition-Score V5 Final Interpretation Plan",
-        "pre-output interpretation lock",
+        "post-output interpretation lock",
+        "Current Interpretation Summary",
+        "completed_final_failed_boundary",
         "outcome-to-claim state machine",
         "Leakage Lock",
         "p0_claim_eligible",
@@ -8953,6 +8990,7 @@ def main() -> None:
         "completed frozen final evaluator",
         "discussion/e11_condition_score_v5_final_interpretation_plan.md",
         "outcome-to-claim state machine",
+        "current_interpretation_summary.csv",
         "discussion/e11_bold_conjecture_register.md",
         "bold-conjecture",
         "careful-verification",

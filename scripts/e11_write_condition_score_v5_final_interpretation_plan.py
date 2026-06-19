@@ -24,6 +24,13 @@ def load_final_splits() -> list[dict[str, object]]:
     return list(config["final_splits"])
 
 
+def load_final_gates() -> pd.DataFrame:
+    path = FINAL_EVAL_DIR / "final_gate_report.csv"
+    if not path.exists():
+        return pd.DataFrame(columns=["gate_id", "scope", "status", "evidence"])
+    return pd.read_csv(path)
+
+
 def selected_score() -> str:
     freeze = pd.read_csv(FREEZE_DIR / "freeze_status.csv").set_index("item")
     status = str(freeze.loc["v5 transport-normalized residual score", "status"])
@@ -102,11 +109,11 @@ def build_outcome_ladder() -> pd.DataFrame:
     return pd.DataFrame(
         [
             {
-                "outcome_pattern": "both final splits missing or incomplete",
+                "outcome_pattern": "both final splits missing or incomplete (pre-output branch)",
                 "claim_state": "not_ready",
-                "allowed_interpretation": "registered final evaluation is pending",
+                "allowed_interpretation": "registered final evaluation is pending only while outputs are missing",
                 "forbidden_interpretation": "any predictive-condition or generality claim",
-                "required_paper_action": "report pending Slurm/output status and rerun the frozen evaluator after outputs exist",
+                "required_paper_action": "before outputs exist, report pending Slurm/output status; after outputs exist, use current_interpretation_summary.csv",
             },
             {
                 "outcome_pattern": "both final splits pass all P0 gates",
@@ -154,6 +161,106 @@ def build_outcome_ladder() -> pd.DataFrame:
     )
 
 
+def build_current_interpretation(status: pd.DataFrame, final_gates: pd.DataFrame) -> pd.DataFrame:
+    outputs_generated = bool(status["current_output_status"].eq("generated").all())
+    generated_count = int(status["current_output_status"].eq("generated").sum())
+    total_count = int(len(status))
+    if not outputs_generated:
+        return pd.DataFrame(
+            [
+                {
+                    "output_state": "pending_outputs",
+                    "current_claim_state": "not_ready",
+                    "active_ladder_states": "not_ready",
+                    "blocking_gate_ids": "V5-FINAL-G2-output-completeness",
+                    "evidence": f"{generated_count}/{total_count} registered final splits generated",
+                    "allowed_current_interpretation": "registered final evaluation is pending",
+                    "forbidden_current_interpretation": "any predictive-condition or generality claim",
+                    "required_paper_action": "report output status and rerun the frozen evaluator after outputs exist",
+                }
+            ]
+        )
+    if final_gates.empty:
+        return pd.DataFrame(
+            [
+                {
+                    "output_state": "generated_without_gate_report",
+                    "current_claim_state": "not_ready",
+                    "active_ladder_states": "control_reporting_failure",
+                    "blocking_gate_ids": "final_gate_report.csv",
+                    "evidence": f"{generated_count}/{total_count} registered final splits generated but final_gate_report.csv is missing",
+                    "allowed_current_interpretation": "generated final tables require the frozen gate report before interpretation",
+                    "forbidden_current_interpretation": "reading split results without the committed final gate report",
+                    "required_paper_action": "rerun the same frozen final evaluator without changing score, split, threshold, or baseline rules",
+                }
+            ]
+        )
+    gate_lookup = final_gates.set_index("gate_id")["status"].astype(str).to_dict()
+    evidence_lookup = final_gates.set_index("gate_id")["evidence"].astype(str).to_dict()
+    p0_status = gate_lookup.get("v5_p0_predictive_condition_claim", "missing")
+    non_p0 = final_gates[~final_gates["gate_id"].eq("v5_p0_predictive_condition_claim")].copy()
+    blocking = non_p0[~non_p0["status"].astype(str).eq("pass")]
+    blocking_ids = blocking["gate_id"].astype(str).tolist()
+    active_states: list[str] = []
+    if gate_lookup.get("v5_final_heldout_architecture_residual_spearman") == "pass" and (
+        gate_lookup.get("v5_final_heldout_data_partition_residual_spearman") == "fail"
+    ):
+        active_states.append("data_transport_boundary")
+    if gate_lookup.get("v5_final_heldout_data_partition_residual_spearman") == "pass" and (
+        gate_lookup.get("v5_final_heldout_architecture_residual_spearman") == "fail"
+    ):
+        active_states.append("architecture_transport_boundary")
+    if any("direction_threshold_accuracy" in gate_id for gate_id in blocking_ids):
+        active_states.append("direction_guardrail_failure")
+    if any("baseline_dominance" in gate_id for gate_id in blocking_ids):
+        active_states.append("nuisance_proxy_boundary")
+    arch_failed = any(
+        gate_id.startswith("v5_final_heldout_architecture_") and status_value != "pass"
+        for gate_id, status_value in gate_lookup.items()
+    )
+    data_failed = any(
+        gate_id.startswith("v5_final_heldout_data_partition_") and status_value != "pass"
+        for gate_id, status_value in gate_lookup.items()
+    )
+    if arch_failed and data_failed:
+        active_states.append("local_mechanism_only")
+    active_states = list(dict.fromkeys(active_states))
+    if p0_status == "pass":
+        current_claim_state = "p0_claim_eligible"
+        active_ladder_states = "p0_claim_eligible"
+        allowed = "the frozen transport-normalized score predicts residual layer risk on the two registered final splits"
+        forbidden = "optimizer-performance or broad dataset/architecture claims"
+        required = "report both final split summaries, controls, confidence intervals, and the no-retuning boundary"
+        evidence = "v5_p0_predictive_condition_claim=pass"
+    else:
+        current_claim_state = "completed_final_failed_boundary"
+        active_ladder_states = "; ".join(active_states) if active_states else "not_ready"
+        allowed = "completed final negative boundary; local mechanism only under the v5 protocol"
+        forbidden = "the v5 frozen score is an unseen-task predictive condition"
+        required = "preserve failed gates, do not repair on final rows, and open a new unspent protocol for any score revision"
+        evidence_parts = [
+            f"{gate_id}={gate_lookup[gate_id]} ({evidence_lookup.get(gate_id, 'no evidence')})"
+            for gate_id in blocking_ids
+        ]
+        evidence_parts.append(f"v5_p0_predictive_condition_claim={p0_status}")
+        evidence = "; ".join(evidence_parts)
+        blocking_ids.append("v5_p0_predictive_condition_claim")
+    return pd.DataFrame(
+        [
+            {
+                "output_state": "generated",
+                "current_claim_state": current_claim_state,
+                "active_ladder_states": active_ladder_states,
+                "blocking_gate_ids": "; ".join(blocking_ids) if blocking_ids else "none",
+                "evidence": evidence,
+                "allowed_current_interpretation": allowed,
+                "forbidden_current_interpretation": forbidden,
+                "required_paper_action": required,
+            }
+        ]
+    )
+
+
 def build_leakage_lock(score: str) -> pd.DataFrame:
     return pd.DataFrame(
         [
@@ -193,6 +300,7 @@ def build_leakage_lock(score: str) -> pd.DataFrame:
 
 def write_discussion(
     status: pd.DataFrame,
+    current_interpretation: pd.DataFrame,
     gate_contract: pd.DataFrame,
     outcome_ladder: pd.DataFrame,
     leakage_lock: pd.DataFrame,
@@ -200,14 +308,18 @@ def write_discussion(
 ) -> None:
     text = f"""# E11 Condition-Score V5 Final Interpretation Plan
 
-This generated artifact is a pre-output interpretation lock for the v5 final
-splits. It fixes the outcome-to-claim state machine for the submitted
-ResNeXt50-32x4d architecture final and CIFAR-10 cross-partition final before
-their layer tables are available. It uses the validation-frozen score `{score}`
-and forbids changing the score, split set, thresholds, or baseline comparisons
-after final outputs exist. The locked ladder explicitly separates positive P0
-eligibility from data/architecture transport boundaries, direction-guardrail failures,
+This generated artifact is the post-output interpretation lock for the v5 final
+splits. The outcome-to-claim state machine was fixed before final rows were used;
+now that both registered final split tables are generated, this artifact records
+the current completed negative boundary while it still forbids changing the
+validation-frozen score `{score}`, split set, thresholds, or baseline
+comparisons. The locked ladder explicitly separates positive P0 eligibility from
+data/architecture transport boundaries, direction-guardrail failures,
 baseline-dominance failures, and local-mechanism-only outcomes.
+
+## Current Interpretation Summary
+
+{markdown_table(current_interpretation, ["output_state", "current_claim_state", "active_ladder_states", "blocking_gate_ids", "allowed_current_interpretation", "forbidden_current_interpretation", "required_paper_action"])}
 
 ## Final Split Status
 
@@ -226,6 +338,7 @@ baseline-dominance failures, and local-mechanism-only outcomes.
 {markdown_table(leakage_lock, ["locked_item", "locked_value", "forbidden_after_final_outputs", "allowed_after_final_outputs"])}
 
 Artifacts:
+- [current_interpretation_summary.csv](../{(OUTPUT_DIR / 'current_interpretation_summary.csv').as_posix()})
 - [final_split_status.csv](../{(OUTPUT_DIR / 'final_split_status.csv').as_posix()})
 - [final_gate_contract.csv](../{(OUTPUT_DIR / 'final_gate_contract.csv').as_posix()})
 - [outcome_interpretation_ladder.csv](../{(OUTPUT_DIR / 'outcome_interpretation_ladder.csv').as_posix()})
@@ -240,10 +353,13 @@ def main() -> None:
     splits = load_final_splits()
     score = selected_score()
     status = build_final_split_status(splits)
+    final_gates = load_final_gates()
+    current_interpretation = build_current_interpretation(status, final_gates)
     gate_contract = build_gate_contract(score)
     outcome_ladder = build_outcome_ladder()
     leakage_lock = build_leakage_lock(score)
 
+    current_interpretation.to_csv(OUTPUT_DIR / "current_interpretation_summary.csv", index=False)
     status.to_csv(OUTPUT_DIR / "final_split_status.csv", index=False)
     gate_contract.to_csv(OUTPUT_DIR / "final_gate_contract.csv", index=False)
     outcome_ladder.to_csv(OUTPUT_DIR / "outcome_interpretation_ladder.csv", index=False)
@@ -255,7 +371,8 @@ def main() -> None:
                 "freeze_status_path": (FREEZE_DIR / "freeze_status.csv").as_posix(),
                 "final_evaluator_config": (FINAL_EVAL_DIR / "config.json").as_posix(),
                 "final_outputs_generated": bool(status["current_output_status"].eq("generated").all()),
-                "analysis_scope": "pre-output v5 final interpretation lock; no final-row tuning",
+                "current_claim_state": str(current_interpretation["current_claim_state"].iloc[0]),
+                "analysis_scope": "post-output v5 final interpretation lock; no final-row tuning",
             },
             indent=2,
             sort_keys=True,
@@ -263,7 +380,7 @@ def main() -> None:
         + "\n",
         encoding="utf-8",
     )
-    write_discussion(status, gate_contract, outcome_ladder, leakage_lock, score)
+    write_discussion(status, current_interpretation, gate_contract, outcome_ladder, leakage_lock, score)
     print(f"saved v5 final interpretation plan to {OUTPUT_DIR} and {DISCUSSION_PATH}")
     print(status.to_string(index=False))
 

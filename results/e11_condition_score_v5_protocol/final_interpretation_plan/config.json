@@ -1,5 +1,6 @@
 {
-  "analysis_scope": "pre-output v5 final interpretation lock; no final-row tuning",
+  "analysis_scope": "post-output v5 final interpretation lock; no final-row tuning",
+  "current_claim_state": "completed_final_failed_boundary",
   "final_evaluator_config": "results/e11_condition_score_v5_protocol/final_score_evaluation/config.json",
   "final_outputs_generated": true,
   "freeze_status_path": "results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv",

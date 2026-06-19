@@ -239,6 +239,7 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_condition_score_v5_protocol/final_power_audit/mean_spearman_mde.csv",
     "results/e11_condition_score_v5_protocol/final_power_audit/interpretation_ladder.csv",
     "results/e11_condition_score_v5_protocol/final_power_audit/outcome_state_machine.csv",
+    "results/e11_condition_score_v5_protocol/final_interpretation_plan/current_interpretation_summary.csv",
     "results/e11_condition_score_v5_protocol/final_interpretation_plan/final_split_status.csv",
     "results/e11_condition_score_v5_protocol/final_interpretation_plan/final_gate_contract.csv",
     "results/e11_condition_score_v5_protocol/final_interpretation_plan/outcome_interpretation_ladder.csv",

@@ -6,7 +6,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 
 | path                   | role                                                                                  | commit_policy                            | size     |
 |:-----------------------|:--------------------------------------------------------------------------------------|:-----------------------------------------|:---------|
-| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 436.3 KB |
+| e11_condition_geometry | Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.    | commit                                   | 436.5 KB |
 | scripts                | Experiment runners, artifact writers, and validation scripts.                         | commit E11 scripts                       | 3.0 MB   |
 | tests                  | Smoke tests, diagnostics tests, reporting tests, and validator guardrail tests.       | commit                                   | 66.0 KB  |
 | discussion             | Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes. | commit                                   | 2.1 MB   |
@@ -200,9 +200,10 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_condition_score_v5_protocol/final_power_audit/mean_spearman_mde.csv                            |      6 | 1.2 KB    |
 | results/e11_condition_score_v5_protocol/final_power_audit/interpretation_ladder.csv                        |      5 | 1.3 KB    |
 | results/e11_condition_score_v5_protocol/final_power_audit/outcome_state_machine.csv                        |      5 | 998 B     |
+| results/e11_condition_score_v5_protocol/final_interpretation_plan/current_interpretation_summary.csv       |      1 | 965 B     |
 | results/e11_condition_score_v5_protocol/final_interpretation_plan/final_split_status.csv                   |      2 | 802 B     |
 | results/e11_condition_score_v5_protocol/final_interpretation_plan/final_gate_contract.csv                  |      6 | 1.2 KB    |
-| results/e11_condition_score_v5_protocol/final_interpretation_plan/outcome_interpretation_ladder.csv        |      7 | 2.0 KB    |
+| results/e11_condition_score_v5_protocol/final_interpretation_plan/outcome_interpretation_ladder.csv        |      7 | 2.1 KB    |
 | results/e11_condition_score_v5_protocol/final_interpretation_plan/leakage_lock.csv                         |      5 | 998 B     |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/final_split_output_status.csv            |      2 | 773 B     |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/current_gate_snapshot.csv                |      9 | 1.6 KB    |
@@ -513,7 +514,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_condition_score_v5_validation_freeze.md                                      | 13.0 KB  |
 | discussion/e11_condition_score_v5_final_evaluation.md                                       | 6.8 KB   |
 | discussion/e11_condition_score_v5_final_power_audit.md                                      | 10.3 KB  |
-| discussion/e11_condition_score_v5_final_interpretation_plan.md                              | 8.9 KB   |
+| discussion/e11_condition_score_v5_final_interpretation_plan.md                              | 10.9 KB  |
 | discussion/e11_condition_score_v5_reviewer_failure_response.md                              | 19.6 KB  |
 | discussion/e11_condition_score_v5_direction_guardrail_failure_audit.md                      | 14.5 KB  |
 | discussion/e11_cifar100_resnet_lt_standard_eval.md                                          | 3.3 KB   |

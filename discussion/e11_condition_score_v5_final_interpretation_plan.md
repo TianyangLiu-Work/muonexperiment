@@ -1,13 +1,19 @@
 # E11 Condition-Score V5 Final Interpretation Plan
 
-This generated artifact is a pre-output interpretation lock for the v5 final
-splits. It fixes the outcome-to-claim state machine for the submitted
-ResNeXt50-32x4d architecture final and CIFAR-10 cross-partition final before
-their layer tables are available. It uses the validation-frozen score `condition_score_v5_transport_normalized_amplitude_minus_direction`
-and forbids changing the score, split set, thresholds, or baseline comparisons
-after final outputs exist. The locked ladder explicitly separates positive P0
-eligibility from data/architecture transport boundaries, direction-guardrail failures,
+This generated artifact is the post-output interpretation lock for the v5 final
+splits. The outcome-to-claim state machine was fixed before final rows were used;
+now that both registered final split tables are generated, this artifact records
+the current completed negative boundary while it still forbids changing the
+validation-frozen score `condition_score_v5_transport_normalized_amplitude_minus_direction`, split set, thresholds, or baseline
+comparisons. The locked ladder explicitly separates positive P0 eligibility from
+data/architecture transport boundaries, direction-guardrail failures,
 baseline-dominance failures, and local-mechanism-only outcomes.
+
+## Current Interpretation Summary
+
+| output_state   | current_claim_state             | active_ladder_states                                                       | blocking_gate_ids                                                                                                                               | allowed_current_interpretation                                                | forbidden_current_interpretation                           | required_paper_action                                                                                      |
+|:---------------|:--------------------------------|:---------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------|:-----------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------|
+| generated      | completed_final_failed_boundary | data_transport_boundary; direction_guardrail_failure; local_mechanism_only | v5_final_heldout_architecture_direction_threshold_accuracy; v5_final_heldout_data_partition_residual_spearman; v5_p0_predictive_condition_claim | completed final negative boundary; local mechanism only under the v5 protocol | the v5 frozen score is an unseen-task predictive condition | preserve failed gates, do not repair on final rows, and open a new unspent protocol for any score revision |
 
 ## Final Split Status
 
@@ -29,15 +35,15 @@ baseline-dominance failures, and local-mechanism-only outcomes.
 
 ## Outcome Ladder
 
-| outcome_pattern                                              | claim_state                     | allowed_interpretation                                                                                            | forbidden_interpretation                                                      | required_paper_action                                                                       |
-|:-------------------------------------------------------------|:--------------------------------|:------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------|
-| both final splits missing or incomplete                      | not_ready                       | registered final evaluation is pending                                                                            | any predictive-condition or generality claim                                  | report pending Slurm/output status and rerun the frozen evaluator after outputs exist       |
-| both final splits pass all P0 gates                          | p0_claim_eligible               | the frozen transport-normalized score predicts residual layer risk on the registered architecture and data finals | claiming final optimizer performance or broader dataset/architecture coverage | report both split summaries, controls, confidence intervals, and the no-retuning boundary   |
-| architecture split passes, data split fails residual ranking | data_transport_boundary         | architecture transfer survived, but data-partition transport remains unresolved                                   | broad data-family predictive-condition claim                                  | preserve the negative CIFAR-10 cross-partition result and analyze partition transport terms |
-| data split passes, architecture split fails residual ranking | architecture_transport_boundary | data-family transfer survived, but ResNeXt architecture transport remains unresolved                              | broad architecture-family predictive-condition claim                          | preserve the negative ResNeXt50-32x4d result and analyze parameterization transport terms   |
-| either final split fails direction guardrail                 | direction_guardrail_failure     | the local spectral/Frobenius direction comparison failed to transport to the final split                          | residual-risk predictor claim, even if residual ranking is positive elsewhere | separate direction failure from scalar residual-score failure                               |
-| either final split fails baseline dominance                  | nuisance_proxy_boundary         | the frozen score did not add enough information beyond the early-layer nuisance baseline                          | theory-derived measurable score claim                                         | report early_layer_prior comparison as a failed ablation gate                               |
-| both final splits fail any P0 gate                           | local_mechanism_only            | the paper retains local drift-mechanism and falsification evidence only                                           | predictive-condition claim on unseen real tasks                               | keep failed finals in the main evidence ledger and do not retune on them                    |
+| outcome_pattern                                              | claim_state                     | allowed_interpretation                                                                                            | forbidden_interpretation                                                      | required_paper_action                                                                                                 |
+|:-------------------------------------------------------------|:--------------------------------|:------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------|
+| both final splits missing or incomplete (pre-output branch)  | not_ready                       | registered final evaluation is pending only while outputs are missing                                             | any predictive-condition or generality claim                                  | before outputs exist, report pending Slurm/output status; after outputs exist, use current_interpretation_summary.csv |
+| both final splits pass all P0 gates                          | p0_claim_eligible               | the frozen transport-normalized score predicts residual layer risk on the registered architecture and data finals | claiming final optimizer performance or broader dataset/architecture coverage | report both split summaries, controls, confidence intervals, and the no-retuning boundary                             |
+| architecture split passes, data split fails residual ranking | data_transport_boundary         | architecture transfer survived, but data-partition transport remains unresolved                                   | broad data-family predictive-condition claim                                  | preserve the negative CIFAR-10 cross-partition result and analyze partition transport terms                           |
+| data split passes, architecture split fails residual ranking | architecture_transport_boundary | data-family transfer survived, but ResNeXt architecture transport remains unresolved                              | broad architecture-family predictive-condition claim                          | preserve the negative ResNeXt50-32x4d result and analyze parameterization transport terms                             |
+| either final split fails direction guardrail                 | direction_guardrail_failure     | the local spectral/Frobenius direction comparison failed to transport to the final split                          | residual-risk predictor claim, even if residual ranking is positive elsewhere | separate direction failure from scalar residual-score failure                                                         |
+| either final split fails baseline dominance                  | nuisance_proxy_boundary         | the frozen score did not add enough information beyond the early-layer nuisance baseline                          | theory-derived measurable score claim                                         | report early_layer_prior comparison as a failed ablation gate                                                         |
+| both final splits fail any P0 gate                           | local_mechanism_only            | the paper retains local drift-mechanism and falsification evidence only                                           | predictive-condition claim on unseen real tasks                               | keep failed finals in the main evidence ledger and do not retune on them                                              |
 
 ## Leakage Lock
 
@@ -50,6 +56,7 @@ baseline-dominance failures, and local-mechanism-only outcomes.
 | baseline_gate  | primary beats early_layer_prior on residual ranking and top-k overlap | omitting the early-layer nuisance comparison                  | downgrade to nuisance-proxy boundary if baseline wins     |
 
 Artifacts:
+- [current_interpretation_summary.csv](../results/e11_condition_score_v5_protocol/final_interpretation_plan/current_interpretation_summary.csv)
 - [final_split_status.csv](../results/e11_condition_score_v5_protocol/final_interpretation_plan/final_split_status.csv)
 - [final_gate_contract.csv](../results/e11_condition_score_v5_protocol/final_interpretation_plan/final_gate_contract.csv)
 - [outcome_interpretation_ladder.csv](../results/e11_condition_score_v5_protocol/final_interpretation_plan/outcome_interpretation_ladder.csv)
