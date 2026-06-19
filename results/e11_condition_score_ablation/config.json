@@ -2,6 +2,6 @@
   "artifact": "condition_score_ablation",
   "uses_new_gpu_results": false,
   "uses_spent_final_rows_for_tuning": false,
-  "claim_status": "diagnostic_only_until_v5_finals_pass",
+  "claim_status": "completed_final_failed_boundary",
   "discussion": "discussion/e11_condition_score_ablation.md"
 }

@@ -80,6 +80,14 @@ def load_inputs() -> dict[str, pd.DataFrame]:
             "results/e11_condition_score_v5_protocol/validation_score_freeze/"
             "score_formula_registry.csv"
         ),
+        "v5_final": pd.read_csv(
+            "results/e11_condition_score_v5_protocol/final_score_evaluation/"
+            "final_score_summary.csv"
+        ),
+        "v5_final_gates": pd.read_csv(
+            "results/e11_condition_score_v5_protocol/final_score_evaluation/"
+            "final_gate_report.csv"
+        ),
     }
 
 
@@ -170,12 +178,46 @@ def normalize_v5(frame: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def normalize_v5_final(frame: pd.DataFrame) -> pd.DataFrame:
+    rows: list[dict[str, object]] = []
+    for _, row in frame.iterrows():
+        score = str(row["score"])
+        if score == "condition_score_v5_transport_normalized_amplitude_minus_direction":
+            claim_use = "completed frozen final score; failed P0 gate family"
+        elif score == "condition_score_v5_direction_axis_scaled_jvp_ratio":
+            claim_use = "completed direction readout; one endpoint can pass while P0 remains blocked"
+        elif score == "source_observed_drift_positive_control":
+            claim_use = "completed positive control; not claim eligible"
+        else:
+            claim_use = "completed diagnostic or baseline axis"
+        rows.append(
+            {
+                "generation": "v5 completed final evaluation",
+                "split_id": row["split_id"],
+                "split_role": row["split_role"],
+                "score_id": score,
+                "score_role": row["score_role"],
+                "transfer_pairs": int(row["final_transfer_pairs"]),
+                "residual_spearman": float(row["mean_spearman_score_vs_target_residual"]),
+                "spearman_ci95_low": float(row["spearman_ci95_low"]),
+                "spearman_ci95_high": float(row["spearman_ci95_high"]),
+                "residual_status": residual_status(row),
+                "threshold_accuracy": row.get("mean_threshold_below_one_accuracy"),
+                "threshold_status": threshold_status(row),
+                "leakage_status": "completed_final_row_diagnostic_only",
+                "claim_use": claim_use,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def build_score_ablation_summary(inputs: dict[str, pd.DataFrame]) -> pd.DataFrame:
     frames = [
         normalize_v2_v3(inputs["v2"], "v2 registered held-out"),
         normalize_v2_v3(inputs["v3"], "v3 fresh held-out"),
         normalize_v4(inputs["v4_axis"]),
         normalize_v5(inputs["v5_validation"]),
+        normalize_v5_final(inputs["v5_final"]),
     ]
     return pd.concat([frame.dropna(axis=1, how="all") for frame in frames], ignore_index=True)
 
@@ -227,6 +269,18 @@ def build_term_failure_ladder(summary: pd.DataFrame) -> pd.DataFrame:
         generation="v5 validation freeze",
         score_id="condition_score_v5_transport_defect_penalty",
     )
+    v5_final_arch_direction = one(
+        summary,
+        generation="v5 completed final evaluation",
+        split_role="v5_final_heldout_architecture",
+        score_id="condition_score_v5_direction_axis_scaled_jvp_ratio",
+    )
+    v5_final_data_primary = one(
+        summary,
+        generation="v5 completed final evaluation",
+        split_role="v5_final_heldout_data_partition",
+        score_id="condition_score_v5_transport_normalized_amplitude_minus_direction",
+    )
     return pd.DataFrame(
         [
             {
@@ -260,8 +314,12 @@ def build_term_failure_ladder(summary: pd.DataFrame) -> pd.DataFrame:
             {
                 "ladder_step": "L5-v5-candidate-is-frozen-not-proven",
                 "term_tested": "transport_normalized_amplitude_minus_direction",
-                "evidence": f"v5 validation primary residual Spearman is {ci(v5_primary)}; transport-defect axis alone is {ci(v5_transport)}",
-                "decision": "eligible for the registered final evaluator, but completed final gates failed and P0 remains not_ready",
+                "evidence": (
+                    f"v5 validation primary residual Spearman is {ci(v5_primary)}; "
+                    f"transport-defect axis alone is {ci(v5_transport)}; completed final failures are "
+                    f"architecture direction {ci(v5_final_arch_direction)} and data residual {ci(v5_final_data_primary)}"
+                ),
+                "decision": "preserve the completed final failures as a negative boundary; any repaired score needs a new unspent protocol",
                 "blocked_overclaim": "validation success alone proves unseen architecture/data residual-risk prediction",
             },
         ]
@@ -272,6 +330,14 @@ def build_leakage_and_claim_boundary(inputs: dict[str, pd.DataFrame]) -> pd.Data
     formulas = inputs["v5_formulas"]
     if formulas["uses_spent_final_rows"].astype(str).str.contains("yes", case=False).any():
         raise AssertionError("v5 formulas unexpectedly use spent final rows")
+    final_gate_status = inputs["v5_final_gates"].set_index("gate_id")["status"].astype(str).to_dict()
+    p0_status = final_gate_status.get("v5_p0_predictive_condition_claim", "missing")
+    arch_direction_status = final_gate_status.get(
+        "v5_final_heldout_architecture_direction_threshold_accuracy", "missing"
+    )
+    data_residual_status = final_gate_status.get(
+        "v5_final_heldout_data_partition_residual_spearman", "missing"
+    )
     return pd.DataFrame(
         [
             {
@@ -290,17 +356,20 @@ def build_leakage_and_claim_boundary(inputs: dict[str, pd.DataFrame]) -> pd.Data
             },
             {
                 "boundary_id": "B3-v5-finals",
-                "allowed_input": "pending ResNeXt50-32x4d and CIFAR-10 cross-partition final outputs",
-                "allowed_use": "one-shot frozen-score evaluation after Slurm outputs land",
+                "allowed_input": "completed ResNeXt50-32x4d and CIFAR-10 cross-partition final outputs",
+                "allowed_use": (
+                    "one-shot frozen-score negative boundary: "
+                    f"architecture_direction={arch_direction_status}; data_residual={data_residual_status}; P0={p0_status}"
+                ),
                 "forbidden_use": "changing coefficients, dropping a failed split, or lowering gates",
-                "claim_status": "not_ready",
+                "claim_status": "completed_final_failed_boundary",
             },
             {
                 "boundary_id": "B4-paper-wording",
                 "allowed_input": "score ablation plus v5 final evaluator",
-                "allowed_use": "state why the paper keeps predictive-condition wording pending",
+                "allowed_use": "state why the paper treats v5 as a completed negative predictive-condition boundary",
                 "forbidden_use": "turning a validation or direction guardrail into a benchmark or global theorem claim",
-                "claim_status": "local_mechanism_only_until_finals_pass",
+                "claim_status": "local_mechanism_only_after_final_failure",
             },
         ]
     )
@@ -335,6 +404,18 @@ def write_discussion(
         score_id="condition_score_v5_transport_normalized_amplitude_minus_direction",
     )
     v5_early = one(summary, generation="v5 validation freeze", score_id="early_layer_prior")
+    v5_final_arch_direction = one(
+        summary,
+        generation="v5 completed final evaluation",
+        split_role="v5_final_heldout_architecture",
+        score_id="condition_score_v5_direction_axis_scaled_jvp_ratio",
+    )
+    v5_final_data_primary = one(
+        summary,
+        generation="v5 completed final evaluation",
+        split_role="v5_final_heldout_data_partition",
+        score_id="condition_score_v5_transport_normalized_amplitude_minus_direction",
+    )
     text = f"""# E11 Condition-Score Ablation Audit
 
 This generated audit is a CPU-only theory-to-score ablation over already
@@ -350,8 +431,10 @@ fails at {ci(v4_data_primary)}. Thus direction success is not enough for
 residual-risk prediction. The v5 validation split freezes the transport-normalized
 candidate at {ci(v5_primary)}, above the early-layer baseline at {ci(v5_early)},
 but the completed final architecture and data splits failed the registered P0
-gate family, so any repaired predictive-condition wording needs a new unspent
-protocol.
+gate family: the ResNeXt50 direction-threshold axis fails at
+{ci(v5_final_arch_direction)}, and the CIFAR-10 cross-partition residual score
+reverses at {ci(v5_final_data_primary)}. Any repaired predictive-condition
+wording therefore needs a new unspent protocol.
 
 ## Score-Axis Summary
 
@@ -368,8 +451,8 @@ protocol.
 ## Boundary
 
 Allowed now: cite this ablation as spent-evidence failure localization and as
-the reason the v5 final evaluator must report direction, residual ranking,
-baseline dominance, and transport status separately.
+the reason the completed v5 final evaluator must report direction, residual
+ranking, baseline dominance, and transport status separately.
 
 Blocked now: using any v2/v3/v4 final row to fit or reselect the v5 score;
 claiming that the v5 validation result proves unseen natural-task residual-risk
@@ -400,7 +483,7 @@ def main() -> None:
                 "artifact": "condition_score_ablation",
                 "uses_new_gpu_results": False,
                 "uses_spent_final_rows_for_tuning": False,
-                "claim_status": "diagnostic_only_until_v5_finals_pass",
+                "claim_status": "completed_final_failed_boundary",
                 "discussion": DISCUSSION_PATH.as_posix(),
             },
             indent=2,

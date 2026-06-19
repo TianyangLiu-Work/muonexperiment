@@ -4665,14 +4665,38 @@ def main() -> None:
             "condition_score_v5_direction_axis_scaled_jvp_ratio",
         )
     ]
+    v5_final_data_primary = score_ablation_lookup.loc[
+        (
+            "v5 completed final evaluation",
+            "v5_final_heldout_data_partition",
+            "condition_score_v5_transport_normalized_amplitude_minus_direction",
+        )
+    ]
+    v5_final_arch_direction = score_ablation_lookup.loc[
+        (
+            "v5 completed final evaluation",
+            "v5_final_heldout_architecture",
+            "condition_score_v5_direction_axis_scaled_jvp_ratio",
+        )
+    ]
+    score_ablation_boundary_status = score_ablation_leakage.set_index("boundary_id")["claim_status"].to_dict()
     if not (
         set(score_ablation_ladder["ladder_step"]) == expected_ablation_steps
         and set(score_ablation_leakage["boundary_id"]) == expected_ablation_boundaries
         and score_ablation_config["uses_new_gpu_results"] is False
         and score_ablation_config["uses_spent_final_rows_for_tuning"] is False
+        and score_ablation_config["claim_status"] == "completed_final_failed_boundary"
         and score_ablation_summary["leakage_status"]
-        .isin({"spent_final_row_diagnostic_only", "validation_only_no_final_rows"})
+        .isin(
+            {
+                "spent_final_row_diagnostic_only",
+                "validation_only_no_final_rows",
+                "completed_final_row_diagnostic_only",
+            }
+        )
         .all()
+        and score_ablation_boundary_status["B3-v5-finals"] == "completed_final_failed_boundary"
+        and score_ablation_boundary_status["B4-paper-wording"] == "local_mechanism_only_after_final_failure"
         and 0.60 <= float(v4_data_direction["residual_spearman"]) <= 0.62
         and float(v4_data_direction["spearman_ci95_low"]) > 0.58
         and -0.69 <= float(v4_data_amplitude["residual_spearman"]) <= -0.66
@@ -4682,10 +4706,13 @@ def main() -> None:
         and 0.63 <= float(v5_primary["residual_spearman"]) <= 0.66
         and float(v5_primary["spearman_ci95_low"]) > 0.58
         and float(v5_direction["threshold_accuracy"]) == 1.0
+        and float(v5_final_data_primary["spearman_ci95_high"]) < -0.65
+        and float(v5_final_arch_direction["threshold_accuracy"]) < 0.85
+        and str(v5_final_arch_direction["claim_use"]).startswith("completed direction readout")
         and score_ablation_leakage["forbidden_use"].astype(str).str.contains("fitting|changing|turning", regex=True).any()
     ):
         raise AssertionError(
-            "condition-score ablation audit must preserve the v4 direction/amplitude reversal, v5 validation freeze, and no-final-row-tuning boundary"
+            "condition-score ablation audit must preserve the v4 direction/amplitude reversal, v5 validation freeze, completed final failures, and no-final-row-tuning boundary"
         )
     score_ablation_text = Path("discussion/e11_condition_score_ablation.md").read_text(
         encoding="utf-8"
@@ -4702,6 +4729,9 @@ def main() -> None:
             "direction axis positive",
             "raw amplitude",
             "transport-normalized",
+            "completed v5 final evaluator",
+            "completed final failures",
+            "completed_final_failed_boundary",
             "Score-Axis Summary",
             "Term Failure Ladder",
             "Leakage and Claim Boundary",

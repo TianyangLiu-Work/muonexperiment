@@ -1,5 +1,5 @@
 boundary_id,allowed_input,allowed_use,forbidden_use,claim_status
 B1-spent-v2-v3-v4,v2/v3/v4 final summaries,"diagnostic obstruction, failure localization, and reviewer caveat","fitting, selecting, thresholding, or reweighting v5 scores",diagnostic_only
 B2-v5-validation,v5 validation-only mod-4 split,freeze or reject the registered v5 residual candidate,claiming final held-out prediction before final outputs exist,validation_frozen
-B3-v5-finals,pending ResNeXt50-32x4d and CIFAR-10 cross-partition final outputs,one-shot frozen-score evaluation after Slurm outputs land,"changing coefficients, dropping a failed split, or lowering gates",not_ready
-B4-paper-wording,score ablation plus v5 final evaluator,state why the paper keeps predictive-condition wording pending,turning a validation or direction guardrail into a benchmark or global theorem claim,local_mechanism_only_until_finals_pass
+B3-v5-finals,completed ResNeXt50-32x4d and CIFAR-10 cross-partition final outputs,one-shot frozen-score negative boundary: architecture_direction=fail; data_residual=fail; P0=not_ready,"changing coefficients, dropping a failed split, or lowering gates",completed_final_failed_boundary
+B4-paper-wording,score ablation plus v5 final evaluator,state why the paper treats v5 as a completed negative predictive-condition boundary,turning a validation or direction guardrail into a benchmark or global theorem claim,local_mechanism_only_after_final_failure

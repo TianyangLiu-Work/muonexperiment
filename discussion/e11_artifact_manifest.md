@@ -171,9 +171,9 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_condition_score_v5_theory_to_score_map/falsifiable_predictions.csv                             |      5 | 1.6 KB    |
 | results/e11_condition_score_v5_theory_to_score_map/ablation_matrix.csv                                     |      5 | 1.4 KB    |
 | results/e11_condition_score_v5_theory_to_score_map/claim_readiness_ledger.csv                              |      6 | 898 B     |
-| results/e11_condition_score_ablation/score_ablation_summary.csv                                            |     32 | 10.2 KB   |
-| results/e11_condition_score_ablation/term_failure_ladder.csv                                               |      5 | 1.7 KB    |
-| results/e11_condition_score_ablation/leakage_and_claim_boundary.csv                                        |      4 | 894 B     |
+| results/e11_condition_score_ablation/score_ablation_summary.csv                                            |     40 | 12.9 KB   |
+| results/e11_condition_score_ablation/term_failure_ladder.csv                                               |      5 | 1.9 KB    |
+| results/e11_condition_score_ablation/leakage_and_claim_boundary.csv                                        |      4 | 986 B     |
 | results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/metrics.csv                     |   1260 | 1.2 MB    |
 | results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/paired_metrics.csv              |    630 | 209.4 KB  |
 | results/e11_condition_score_v5_protocol/validation_cifar100_mod4_partition/layer_summary.csv               |     63 | 18.2 KB   |
@@ -447,8 +447,8 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_completion_audit.md                                                          | 5.3 KB   |
 | discussion/e11_end_of_draft_self_review.md                                                  | 7.3 KB   |
 | discussion/e11_reference_audit.md                                                           | 6.1 KB   |
-| discussion/e11_submission_repro_audit.md                                                    | 8.4 KB   |
-| discussion/e11_artifact_review_packet.md                                                    | 29.5 KB  |
+| discussion/e11_submission_repro_audit.md                                                    | 8.5 KB   |
+| discussion/e11_artifact_review_packet.md                                                    | 29.6 KB  |
 | discussion/e11_camera_ready_package_audit.md                                                | 7.5 KB   |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB  |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB  |
@@ -508,7 +508,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_theory_proof_obligation_register.md                                          | 17.3 KB  |
 | discussion/e11_condition_score_v5_theory_protocol.md                                        | 17.8 KB  |
 | discussion/e11_condition_score_v5_theory_to_score_map.md                                    | 36.3 KB  |
-| discussion/e11_condition_score_ablation.md                                                  | 19.0 KB  |
+| discussion/e11_condition_score_ablation.md                                                  | 23.2 KB  |
 | discussion/e11_condition_score_v5_validation_cifar100_mod4_partition.md                     | 8.2 KB   |
 | discussion/e11_condition_score_v5_validation_freeze.md                                      | 13.0 KB  |
 | discussion/e11_condition_score_v5_final_evaluation.md                                       | 6.8 KB   |
