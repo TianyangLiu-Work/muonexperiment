@@ -1,6 +1,6 @@
 {
   "purpose": "Artifact-review response packet for the current E11 submission bundle.",
-  "git_commit": "906ec7644fbe7752e74f6f4aa8397ab6dbdcfbb2",
+  "git_commit": "e13ce93fe1947898645ddd74dc3daf45bf5a26bc",
   "git_branch": "codex/resnet-gpu-tail-results",
   "python_command": "/data/conda_envs/SpatialQuantization/bin/python",
   "strongest_local_gate": "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full",

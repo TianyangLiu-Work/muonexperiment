@@ -26,21 +26,21 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 2250754,
-      "size": "2.1 MB"
+      "size_bytes": 2255949,
+      "size": "2.2 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 292310052,
-      "size": "278.8 MB"
+      "size_bytes": 292396544,
+      "size": "278.9 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 38130774,
+      "size_bytes": 38218148,
       "size": "36.4 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833549,
+      "size_bytes": 5833550,
       "size": "5.6 MB"
     },
     {
@@ -1513,7 +1513,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
       "rows": 164,
-      "size": "82.2 KB"
+      "size": "82.4 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/family_selection.csv",
@@ -1562,8 +1562,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/validation_setting_variance.csv",
-      "rows": 204,
-      "size": "52.6 KB"
+      "rows": 208,
+      "size": "53.6 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/spent_pilot_paired_variance.csv",
@@ -1702,8 +1702,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv",
-      "rows": 51,
-      "size": "12.3 KB"
+      "rows": 52,
+      "size": "12.6 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/family_progress.csv",
@@ -1713,7 +1713,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/occupancy_interim_summary.csv",
       "rows": 6,
-      "size": "748 B"
+      "size": "749 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/partial_grid_guardrail.csv",
