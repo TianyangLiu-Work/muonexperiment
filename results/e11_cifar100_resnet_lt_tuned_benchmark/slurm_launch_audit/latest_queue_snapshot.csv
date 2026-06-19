@@ -1,1 +1,5 @@
 job_id,state,job_name,reason_or_node,source
+1359_46,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1359_47,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1359_45,R,e11-lt-tuned-val,yumingz5-linux-ml,squeue -h -r -u $USER -o %i|%t|%j|%R
+1403,R,verl-branchgrpo-qwen3-4b,yumingz5-linux-ml,squeue -h -r -u $USER -o %i|%t|%j|%R

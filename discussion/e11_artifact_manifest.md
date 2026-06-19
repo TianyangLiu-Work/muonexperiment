@@ -342,10 +342,10 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_cifar100_resnet_lt_tuned_benchmark/final_launch_audit/final_launch_history.csv                 |      2 | 633 B     |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/chunk_plan.csv                        |      6 | 2.2 KB    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/queue_policy.csv                      |      4 | 879 B     |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_launch_decision.csv               |      1 | 838 B     |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_selected_settings.csv             |     20 | 8.2 KB    |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_queue_snapshot.csv                |      0 | 44 B      |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/launch_history.csv                       |      5 | 1.7 KB    |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_launch_decision.csv               |      1 | 870 B     |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_selected_settings.csv             |     20 | 7.8 KB    |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_queue_snapshot.csv                |      4 | 383 B     |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/launch_history.csv                       |      7 | 2.4 KB    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv  |     45 | 10.9 KB   |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/family_progress.csv                |      6 | 1.4 KB    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/occupancy_interim_summary.csv      |      6 | 706 B     |
@@ -525,7 +525,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md                               | 14.8 KB  |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md                              | 75.1 KB  |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md                          | 12.3 KB  |
-| discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md                          | 6.8 KB   |
+| discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md                          | 7.1 KB   |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md                       | 5.9 KB   |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md                          | 12.3 KB  |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_fairness_audit.md                         | 7.9 KB   |

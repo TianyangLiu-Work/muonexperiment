@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 2225770,
+      "size_bytes": 2226076,
       "size": "2.1 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 291784127,
+      "size_bytes": 291784760,
       "size": "278.3 MB"
     },
     {
@@ -1683,22 +1683,22 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_launch_decision.csv",
       "rows": 1,
-      "size": "838 B"
+      "size": "870 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_selected_settings.csv",
       "rows": 20,
-      "size": "8.2 KB"
+      "size": "7.8 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_queue_snapshot.csv",
-      "rows": 0,
-      "size": "44 B"
+      "rows": 4,
+      "size": "383 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/launch_history.csv",
-      "rows": 5,
-      "size": "1.7 KB"
+      "rows": 7,
+      "size": "2.4 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv",
@@ -2442,7 +2442,7 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md",
-      "size": "6.8 KB"
+      "size": "7.1 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md",
