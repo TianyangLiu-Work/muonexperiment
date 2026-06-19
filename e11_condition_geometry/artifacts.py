@@ -318,6 +318,8 @@ KEY_TABLES: tuple[str, ...] = (
     "results/e11_clean_worktree_replay_audit/run_summary.csv",
     "results/e11_clean_worktree_replay_audit/gate_matrix.csv",
     "results/e11_pdf_render_boundary_audit/pdf_inspection_tool_status.csv",
+    "results/e11_pdf_render_boundary_audit/rendered_pdf_text_checks.csv",
+    "results/e11_pdf_render_boundary_audit/pdf_metadata_checks.csv",
     "results/e11_pdf_render_boundary_audit/render_boundary_gates.csv",
     "results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv",
     "results/e11_mechanism_referee_audit/theory_measurement_contract.csv",

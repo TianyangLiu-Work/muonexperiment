@@ -1,5 +1,5 @@
 gate_id,status,evidence,required_next_action
 CRG-1-current-server-package,pass,"source, rendered PDFs, claim trace, reviewer commands, local-file exclusion, and final-claim quarantine are checked",run make e11-full and record the pushed commit before sharing the current server package
-CRG-2-venue-toolchain-package,not_ready,requires CRP-6 preferred LaTeX and CRP-7 rendered text/metadata gates to pass,"rerun in a clean venue-style environment with pdflatex, bibtex, xelatex, and PDF text/metadata tools"
+CRG-2-venue-toolchain-package,not_ready,CRP-7 rendered text/metadata is pass; CRP-6 preferred LaTeX clean-checkout remains not_ready,"rerun in a clean venue-style environment with pdflatex, bibtex, xelatex, and PDF text/metadata tools"
 CRG-3-claim-boundary-package,pass,main manuscript claim anchors and blocked phrase audit agree with top-conference claim decisions,regenerate claim-decision and manuscript-trace audits after any manuscript edit
 CRG-4-local-file-exclusion,pass,serverREADME.md is local and untracked,keep serverREADME.md out of staged submission artifacts

@@ -5,14 +5,14 @@
       "path": "e11_condition_geometry",
       "role": "Source package for E11 problems, optimizers, diagnostics, reporting, and plotting.",
       "commit_policy": "commit",
-      "size_bytes": 446925,
-      "size": "436.5 KB"
+      "size_bytes": 447068,
+      "size": "436.6 KB"
     },
     {
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 3153215,
+      "size_bytes": 3166065,
       "size": "3.0 MB"
     },
     {
@@ -26,22 +26,22 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 2170319,
+      "size_bytes": 2220457,
       "size": "2.1 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 290876893,
-      "size": "277.4 MB"
+      "size_bytes": 291694001,
+      "size": "278.2 MB"
     },
     {
       "path": "figures",
       "role": "Static figures used by the paper draft and paper-facing Markdown artifacts.",
       "commit_policy": "commit static E11 figures",
-      "size_bytes": 36691769,
-      "size": "35.0 MB"
+      "size_bytes": 37505779,
+      "size": "35.8 MB"
     },
     {
       "path": "configs",
@@ -918,7 +918,7 @@
     {
       "path": "results/e11_camera_ready_package_audit/submission_gate_matrix.csv",
       "rows": 4,
-      "size": "845 B"
+      "size": "860 B"
     },
     {
       "path": "results/e11_camera_ready_package_audit/camera_ready_checklist.csv",
@@ -1363,12 +1363,22 @@
     {
       "path": "results/e11_pdf_render_boundary_audit/pdf_inspection_tool_status.csv",
       "rows": 8,
-      "size": "447 B"
+      "size": "494 B"
+    },
+    {
+      "path": "results/e11_pdf_render_boundary_audit/rendered_pdf_text_checks.csv",
+      "rows": 2,
+      "size": "451 B"
+    },
+    {
+      "path": "results/e11_pdf_render_boundary_audit/pdf_metadata_checks.csv",
+      "rows": 2,
+      "size": "450 B"
     },
     {
       "path": "results/e11_pdf_render_boundary_audit/render_boundary_gates.csv",
       "rows": 6,
-      "size": "892 B"
+      "size": "884 B"
     },
     {
       "path": "results/e11_mechanism_referee_audit/alternative_explanation_matrix.csv",
@@ -1503,7 +1513,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",
       "rows": 164,
-      "size": "79.6 KB"
+      "size": "81.1 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/family_selection.csv",
@@ -1552,8 +1562,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/validation_setting_variance.csv",
-      "rows": 140,
-      "size": "35.4 KB"
+      "rows": 176,
+      "size": "45.2 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/spent_pilot_paired_variance.csv",
@@ -1662,8 +1672,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/chunk_plan.csv",
-      "rows": 7,
-      "size": "2.5 KB"
+      "rows": 6,
+      "size": "2.2 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/queue_policy.csv",
@@ -1692,8 +1702,8 @@
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv",
-      "rows": 35,
-      "size": "8.4 KB"
+      "rows": 44,
+      "size": "10.6 KB"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/family_progress.csv",
@@ -1703,7 +1713,7 @@
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/occupancy_interim_summary.csv",
       "rows": 6,
-      "size": "703 B"
+      "size": "706 B"
     },
     {
       "path": "results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/partial_grid_guardrail.csv",
@@ -2084,7 +2094,7 @@
   "key_documents": [
     {
       "path": "README_E11.md",
-      "size": "102.6 KB"
+      "size": "102.9 KB"
     },
     {
       "path": "discussion/e11_paper_skeleton.md",
@@ -2132,15 +2142,15 @@
     },
     {
       "path": "discussion/e11_submission_repro_audit.md",
-      "size": "8.6 KB"
+      "size": "8.5 KB"
     },
     {
       "path": "discussion/e11_artifact_review_packet.md",
-      "size": "29.7 KB"
+      "size": "29.3 KB"
     },
     {
       "path": "discussion/e11_camera_ready_package_audit.md",
-      "size": "7.5 KB"
+      "size": "7.6 KB"
     },
     {
       "path": "discussion/e11_paper_readiness_audit.md",
@@ -2168,7 +2178,7 @@
     },
     {
       "path": "discussion/e11_pdf_render_boundary_audit.md",
-      "size": "3.5 KB"
+      "size": "5.9 KB"
     },
     {
       "path": "discussion/e11_mechanism_referee_audit.md",
@@ -2476,7 +2486,7 @@
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md",
-      "size": "5.9 KB"
+      "size": "5.7 KB"
     },
     {
       "path": "discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md",

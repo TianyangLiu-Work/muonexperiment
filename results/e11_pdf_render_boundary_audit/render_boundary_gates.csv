@@ -2,6 +2,6 @@ gate_id,status,evidence,claim_effect
 PRB-1-rendered-pdf-binaries,pass,main.pdf and two_page.pdf pass existing header/size checks,rendered PDF binary artifacts are present
 PRB-2-pdf-hashes-recorded,pass,sha256 recorded for every rendered PDF,reviewers can verify exact PDF bytes
 PRB-3-source-claim-trace-covered,pass,manuscript claim trace anchors and blocked-phrase audit pass on main.tex,source-level claim boundary is verified
-PRB-4-pdf-text-extraction-tool,not_ready,pdftotext/mutool/Python PDF text libraries are unavailable,rendered-PDF text-layer audit remains a venue-environment gate
-PRB-5-pdf-metadata-tool,not_ready,pdfinfo and mutool are unavailable,page-count and metadata audit remains external to this server
+PRB-4-pdf-text-extraction-tool,pass,python:pypdf extracted rendered text and verified main.pdf claim-boundary anchors,rendered-PDF text-layer claim-boundary audit
+PRB-5-pdf-metadata-tool,pass,python:pypdf read page counts and producer/creator metadata,page count and PDF metadata audit
 PRB-6-preferred-latex-toolchain,not_ready,mirrors R3-preferred-latex-toolchain from submission reproducibility audit,preferred venue-style LaTeX clean-checkout boundary

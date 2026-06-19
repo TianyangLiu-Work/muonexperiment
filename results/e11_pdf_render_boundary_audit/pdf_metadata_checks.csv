@@ -1,0 +1,3 @@
+check_id,path,tool,status,page_count,expected_page_min,expected_page_max,producer,creator,evidence
+PDFMETA-1-main,paper/specgrad_activation_paper/main.pdf,python:pypdf,pass,33,20,60,xdvipdfmx (0.1),LaTeX with hyperref,page count and producer/creator metadata are readable
+PDFMETA-2-two-page,paper/specgrad_activation_paper/two_page.pdf,python:pypdf,pass,3,2,4,xdvipdfmx (0.1),LaTeX with hyperref,page count and producer/creator metadata are readable

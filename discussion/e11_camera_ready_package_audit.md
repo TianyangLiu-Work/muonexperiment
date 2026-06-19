@@ -15,7 +15,7 @@ checklist.
 | CRP-4-reviewer-command-path           | pass      | artifact review command matrix includes e11-full, e11-paper-pdf, e11-check, and packet regeneration | reviewers have a CPU reproduction path for the current bundle                        | do not replace the strongest local gate with a narrower passing command                       |
 | CRP-5-local-attachment-excluded       | pass      | artifact review local-state contract keeps serverREADME.md outside committed evidence               | local user attachment is excluded from the submission package                        | do not stage or package serverREADME.md as reproducibility evidence                           |
 | CRP-6-preferred-latex-boundary        | not_ready | mirrors R3-preferred-latex-toolchain from submission reproducibility audit                          | preferred venue-toolchain claim remains explicit                                     | do not claim pdflatex/bibtex/xelatex clean-checkout reproducibility from Tectonic evidence    |
-| CRP-7-rendered-text-metadata-boundary | not_ready | PRB-4-pdf-text-extraction-tool=not_ready; PRB-5-pdf-metadata-tool=not_ready                         | rendered text-layer and page metadata gate is explicit                               | do not claim rendered-PDF text-layer or metadata verification until PRB-4/PRB-5 pass          |
+| CRP-7-rendered-text-metadata-boundary | pass      | PRB-4-pdf-text-extraction-tool=pass; PRB-5-pdf-metadata-tool=pass                                   | rendered text-layer and page metadata are verified on the current server             | do not use pypdf text/metadata inspection as preferred LaTeX clean-checkout evidence          |
 | CRP-8-final-claim-quarantine          | pass      | TCD-3 is a completed failed boundary and TCD-5 is protocol-pending                                  | camera-ready package cannot imply predictive-score or optimizer-performance upgrades | do not add benchmark-performance or successful predictive-condition wording during packaging  |
 
 ## Submission Gate Matrix
@@ -23,7 +23,7 @@ checklist.
 | gate_id                       | status    | evidence                                                                                                            | required_next_action                                                                                 |
 |:------------------------------|:----------|:--------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------|
 | CRG-1-current-server-package  | pass      | source, rendered PDFs, claim trace, reviewer commands, local-file exclusion, and final-claim quarantine are checked | run make e11-full and record the pushed commit before sharing the current server package             |
-| CRG-2-venue-toolchain-package | not_ready | requires CRP-6 preferred LaTeX and CRP-7 rendered text/metadata gates to pass                                       | rerun in a clean venue-style environment with pdflatex, bibtex, xelatex, and PDF text/metadata tools |
+| CRG-2-venue-toolchain-package | not_ready | CRP-7 rendered text/metadata is pass; CRP-6 preferred LaTeX clean-checkout remains not_ready                        | rerun in a clean venue-style environment with pdflatex, bibtex, xelatex, and PDF text/metadata tools |
 | CRG-3-claim-boundary-package  | pass      | main manuscript claim anchors and blocked phrase audit agree with top-conference claim decisions                    | regenerate claim-decision and manuscript-trace audits after any manuscript edit                      |
 | CRG-4-local-file-exclusion    | pass      | serverREADME.md is local and untracked                                                                              | keep serverREADME.md out of staged submission artifacts                                              |
 
@@ -40,11 +40,11 @@ checklist.
 
 Allowed now: share the current server evidence package only when
 `CRG-1-current-server-package` passes and the final run summary records
-`make e11-full`.
+`make e11-full`. Rendered-PDF text-layer and metadata verification pass on the current server through the PDF render boundary audit.
 
 Blocked now: claiming full venue-toolchain clean-checkout reproducibility,
-rendered-PDF text-layer or metadata verification, or stronger benchmark and
-predictive-condition wording unless the corresponding gates pass.
+or stronger benchmark and predictive-condition wording unless the corresponding
+gates pass.
 
 Artifacts:
 - [package_item_matrix.csv](../results/e11_camera_ready_package_audit/package_item_matrix.csv)

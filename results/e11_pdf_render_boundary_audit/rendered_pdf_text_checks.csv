@@ -1,0 +1,3 @@
+check_id,path,tool,status,page_count,text_character_count,required_anchor_count,found_anchor_count,missing_anchors,evidence
+PDFTXT-1-main-claim-boundary,paper/specgrad_activation_paper/main.pdf,python:pypdf,pass,33,91208,18,18,none,rendered main.pdf text layer contains claim-boundary anchors
+PDFTXT-2-two-page-extractable,paper/specgrad_activation_paper/two_page.pdf,python:pypdf,pass,3,9735,0,0,not_applicable,two_page.pdf text layer is extractable

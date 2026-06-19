@@ -14,3 +14,4 @@ dependencies:
       - nbconvert==7.17.1
       - tqdm==4.67.3
       - joblib==1.4.2
+      - pypdf==6.13.3

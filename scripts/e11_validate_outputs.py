@@ -1498,6 +1498,8 @@ def main() -> None:
         Path("scripts/e11_write_clean_worktree_replay_audit.py"),
         Path("discussion/e11_pdf_render_boundary_audit.md"),
         Path("results/e11_pdf_render_boundary_audit") / "pdf_inspection_tool_status.csv",
+        Path("results/e11_pdf_render_boundary_audit") / "rendered_pdf_text_checks.csv",
+        Path("results/e11_pdf_render_boundary_audit") / "pdf_metadata_checks.csv",
         Path("results/e11_pdf_render_boundary_audit") / "render_boundary_gates.csv",
         Path("results/e11_pdf_render_boundary_audit") / "config.json",
         Path("scripts/e11_write_pdf_render_boundary_audit.py"),
@@ -1979,6 +1981,8 @@ def main() -> None:
         "scripts/e11_write_clean_worktree_replay_audit.py",
         "discussion/e11_pdf_render_boundary_audit.md",
         "results/e11_pdf_render_boundary_audit/pdf_inspection_tool_status.csv",
+        "results/e11_pdf_render_boundary_audit/rendered_pdf_text_checks.csv",
+        "results/e11_pdf_render_boundary_audit/pdf_metadata_checks.csv",
         "results/e11_pdf_render_boundary_audit/render_boundary_gates.csv",
         "scripts/e11_write_pdf_render_boundary_audit.py",
         "discussion/e11_mechanism_referee_audit.md",
@@ -9354,6 +9358,8 @@ def main() -> None:
     )
     pdf_render_dir = Path("results/e11_pdf_render_boundary_audit")
     pdf_tool_status = pd.read_csv(pdf_render_dir / "pdf_inspection_tool_status.csv")
+    pdf_text_checks = pd.read_csv(pdf_render_dir / "rendered_pdf_text_checks.csv")
+    pdf_metadata_checks = pd.read_csv(pdf_render_dir / "pdf_metadata_checks.csv")
     pdf_render_gates = pd.read_csv(pdf_render_dir / "render_boundary_gates.csv")
     pdf_render_config = json.loads((pdf_render_dir / "config.json").read_text(encoding="utf-8"))
     expected_pdf_tools = {
@@ -9374,22 +9380,46 @@ def main() -> None:
         "PRB-5-pdf-metadata-tool",
         "PRB-6-preferred-latex-toolchain",
     }
+    expected_pdf_text_checks = {
+        "PDFTXT-1-main-claim-boundary",
+        "PDFTXT-2-two-page-extractable",
+    }
+    expected_pdf_metadata_checks = {
+        "PDFMETA-1-main",
+        "PDFMETA-2-two-page",
+    }
     if set(pdf_tool_status["tool"]) != expected_pdf_tools:
         raise AssertionError("PDF render boundary audit tool-status rows changed unexpectedly")
     if set(pdf_render_gates["gate_id"]) != expected_pdf_render_gates:
         raise AssertionError("PDF render boundary audit gate IDs changed unexpectedly")
+    if set(pdf_text_checks["check_id"]) != expected_pdf_text_checks:
+        raise AssertionError("PDF render boundary audit text-check IDs changed unexpectedly")
+    if set(pdf_metadata_checks["check_id"]) != expected_pdf_metadata_checks:
+        raise AssertionError("PDF render boundary audit metadata-check IDs changed unexpectedly")
     pdf_gate_lookup = pdf_render_gates.set_index("gate_id")["status"].astype(str).to_dict()
-    if not set(pdf_gate_lookup.values()).issubset({"pass", "not_ready"}):
-        raise AssertionError("PDF render boundary gates must use only pass/not_ready statuses")
+    pdf_tool_lookup = pdf_tool_status.set_index("tool")["available"].astype(str).to_dict()
+    pdf_text_lookup = pdf_text_checks.set_index("check_id").to_dict("index")
+    pdf_metadata_lookup = pdf_metadata_checks.set_index("check_id").to_dict("index")
+    if not set(pdf_gate_lookup.values()).issubset({"pass", "not_ready", "fail"}):
+        raise AssertionError("PDF render boundary gates must use only pass/not_ready/fail statuses")
     if not (
         pdf_gate_lookup["PRB-1-rendered-pdf-binaries"] == "pass"
         and pdf_gate_lookup["PRB-2-pdf-hashes-recorded"] == "pass"
         and pdf_gate_lookup["PRB-3-source-claim-trace-covered"] == "pass"
-        and pdf_gate_lookup["PRB-4-pdf-text-extraction-tool"] in {"pass", "not_ready"}
-        and pdf_gate_lookup["PRB-5-pdf-metadata-tool"] in {"pass", "not_ready"}
+        and pdf_gate_lookup["PRB-4-pdf-text-extraction-tool"] == "pass"
+        and pdf_gate_lookup["PRB-5-pdf-metadata-tool"] == "pass"
         and pdf_gate_lookup["PRB-6-preferred-latex-toolchain"] in {"pass", "not_ready"}
+        and pdf_tool_lookup.get("python:pypdf") == "yes"
+        and pdf_text_checks["status"].astype(str).eq("pass").all()
+        and pdf_metadata_checks["status"].astype(str).eq("pass").all()
+        and str(pdf_text_lookup["PDFTXT-1-main-claim-boundary"]["missing_anchors"]) == "none"
+        and int(pdf_text_lookup["PDFTXT-1-main-claim-boundary"]["required_anchor_count"]) >= 18
+        and int(pdf_text_lookup["PDFTXT-1-main-claim-boundary"]["text_character_count"]) > 50000
+        and int(pdf_text_lookup["PDFTXT-2-two-page-extractable"]["text_character_count"]) > 1000
+        and int(pdf_metadata_lookup["PDFMETA-1-main"]["page_count"]) >= 20
+        and int(pdf_metadata_lookup["PDFMETA-2-two-page"]["page_count"]) >= 2
     ):
-        raise AssertionError("PDF render boundary audit must keep binary/hash/source gates passing and tool gates explicit")
+        raise AssertionError("PDF render boundary audit must verify text-layer anchors and PDF page metadata via pypdf")
     if pdf_render_config.get("purpose") != "rendered PDF inspection boundary audit":
         raise AssertionError("PDF render boundary audit config purpose changed unexpectedly")
     pdf_render_text = Path("discussion/e11_pdf_render_boundary_audit.md").read_text(encoding="utf-8")
@@ -9399,12 +9429,14 @@ def main() -> None:
         [
             "E11 PDF Render Boundary Audit",
             "PDF Inspection Tool Status",
+            "Rendered PDF Text Checks",
+            "PDF Metadata Checks",
             "Render Boundary Gates",
             "PRB-1-rendered-pdf-binaries",
             "PRB-4-pdf-text-extraction-tool",
             "PRB-5-pdf-metadata-tool",
-            "Allowed now: cite rendered PDF byte hashes",
-            "Blocked now: claiming rendered-PDF text-layer or page-metadata verification",
+            "rendered-PDF text-layer anchor checks",
+            "preferred venue-toolchain clean-checkout reproducibility",
         ],
     )
     heldout_generality_dir = Path("results/e11_heldout_generality_audit")
@@ -9644,6 +9676,8 @@ def main() -> None:
         "results/e11_muon_state_distribution_contract/state_distribution_terms.csv",
         "results/e11_muon_state_distribution_contract/falsification_tests.csv",
         "results/e11_pdf_render_boundary_audit/pdf_inspection_tool_status.csv",
+        "results/e11_pdf_render_boundary_audit/rendered_pdf_text_checks.csv",
+        "results/e11_pdf_render_boundary_audit/pdf_metadata_checks.csv",
         "results/e11_pdf_render_boundary_audit/render_boundary_gates.csv",
         "results/e11_camera_ready_package_audit/package_item_matrix.csv",
         "results/e11_camera_ready_package_audit/submission_gate_matrix.csv",
@@ -9893,7 +9927,7 @@ def main() -> None:
         and camera_item_status["CRP-4-reviewer-command-path"] == "pass"
         and camera_item_status["CRP-5-local-attachment-excluded"] == "pass"
         and camera_item_status["CRP-6-preferred-latex-boundary"] in {"pass", "not_ready"}
-        and camera_item_status["CRP-7-rendered-text-metadata-boundary"] in {"pass", "not_ready"}
+        and camera_item_status["CRP-7-rendered-text-metadata-boundary"] == "pass"
         and camera_item_status["CRP-8-final-claim-quarantine"] == "pass"
         and camera_gate_status["CRG-1-current-server-package"] == "pass"
         and camera_gate_status["CRG-2-venue-toolchain-package"] in {"pass", "not_ready"}
@@ -9911,7 +9945,7 @@ def main() -> None:
         "claim_trace.csv anchors are present",
         "blocked_phrase_audit.csv has no hits",
         "pdflatex/bibtex/xelatex clean-checkout reproducibility",
-        "rendered-PDF text-layer or metadata verification",
+        "pypdf text/metadata inspection",
         "final-claim quarantine",
         "make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full",
         "no new benchmark, predictive-score, or natural-counterexample wording",
@@ -9930,6 +9964,7 @@ def main() -> None:
             "Camera-Ready Checklist",
             "CRG-1-current-server-package",
             "CRG-2-venue-toolchain-package",
+            "Rendered-PDF text-layer and metadata verification pass on the current server",
             "Blocked now: claiming full venue-toolchain clean-checkout reproducibility",
             "stronger benchmark and",
         ],

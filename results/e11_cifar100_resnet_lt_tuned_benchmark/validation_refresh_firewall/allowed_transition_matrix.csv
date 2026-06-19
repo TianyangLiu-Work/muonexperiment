@@ -1,5 +1,5 @@
 transition_id,status,trigger,required_commands,allowed_output
-VRF-A1-prefix-result-refresh,pass,new validation summary and occupancy trace for array index 35,"rerun selection, interim audit, leakage audit, and refresh firewall",updated progress accounting with no selection-authority change
+VRF-A1-prefix-result-refresh,pass,new validation summary and occupancy trace for array index 44,"rerun selection, interim audit, leakage audit, and refresh firewall",updated progress accounting with no selection-authority change
 VRF-A2-nonprefix-result-quarantine,not_ready,a completed validation row appears beyond the current contiguous prefix,audit Slurm launch history and keep the row out of selection until order is explained,diagnostic anomaly report only
 VRF-A3-full-validation-refresh,not_ready,TVS-1 and TVS-5 pass with leakage guards still passing,"rerun selection, power, variance-prior, final-analysis, final-execution, final-eval, and final-launch audits","complete-family selection and final-gate refresh, not final results"
 VRF-A4-final-submit-handoff,not_ready,"TVS-1, TVS-2, TVS-5, leakage guards, FEP, TFE, and FLA all pass",submit final_claim jobs only through the final-safe-submit path,untouched final seed execution under seed set 20..29

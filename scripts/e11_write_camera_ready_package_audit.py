@@ -151,8 +151,12 @@ def build_package_item_matrix(
                     + "; PRB-5-pdf-metadata-tool="
                     + render_status.get("PRB-5-pdf-metadata-tool", "missing")
                 ),
-                "camera_ready_effect": "rendered text-layer and page metadata gate is explicit",
-                "blocked_claim": "do not claim rendered-PDF text-layer or metadata verification until PRB-4/PRB-5 pass",
+                "camera_ready_effect": "rendered text-layer and page metadata are verified on the current server"
+                if text_metadata_ready
+                else "rendered text-layer and page metadata gate is explicit",
+                "blocked_claim": "do not use pypdf text/metadata inspection as preferred LaTeX clean-checkout evidence"
+                if text_metadata_ready
+                else "do not claim rendered-PDF text-layer or metadata verification until PRB-4/PRB-5 pass",
             },
             {
                 "item_id": "CRP-8-final-claim-quarantine",
@@ -178,9 +182,21 @@ def build_submission_gate_matrix(items: pd.DataFrame) -> pd.DataFrame:
             "CRP-8-final-claim-quarantine",
         ]
     )
-    venue_ready = (
-        item_status.get("CRP-6-preferred-latex-boundary") == "pass"
-        and item_status.get("CRP-7-rendered-text-metadata-boundary") == "pass"
+    preferred_latex_ready = item_status.get("CRP-6-preferred-latex-boundary") == "pass"
+    rendered_pdf_ready = item_status.get("CRP-7-rendered-text-metadata-boundary") == "pass"
+    venue_ready = preferred_latex_ready and rendered_pdf_ready
+    if venue_ready:
+        venue_evidence = "CRP-6 preferred LaTeX is pass and CRP-7 rendered text/metadata is pass"
+    elif rendered_pdf_ready:
+        venue_evidence = "CRP-7 rendered text/metadata is pass; CRP-6 preferred LaTeX clean-checkout remains not_ready"
+    elif preferred_latex_ready:
+        venue_evidence = "CRP-6 preferred LaTeX is pass; CRP-7 rendered text/metadata remains not_ready"
+    else:
+        venue_evidence = "requires CRP-6 preferred LaTeX and CRP-7 rendered text/metadata gates to pass"
+    venue_next_action = (
+        "record the clean venue-toolchain command output before claiming venue reproducibility"
+        if venue_ready
+        else "rerun in a clean venue-style environment with pdflatex, bibtex, xelatex, and PDF text/metadata tools"
     )
     return pd.DataFrame(
         [
@@ -193,8 +209,8 @@ def build_submission_gate_matrix(items: pd.DataFrame) -> pd.DataFrame:
             {
                 "gate_id": "CRG-2-venue-toolchain-package",
                 "status": "pass" if venue_ready else "not_ready",
-                "evidence": "requires CRP-6 preferred LaTeX and CRP-7 rendered text/metadata gates to pass",
-                "required_next_action": "rerun in a clean venue-style environment with pdflatex, bibtex, xelatex, and PDF text/metadata tools",
+                "evidence": venue_evidence,
+                "required_next_action": venue_next_action,
             },
             {
                 "gate_id": "CRG-3-claim-boundary-package",
@@ -258,6 +274,12 @@ def write_outputs(items: pd.DataFrame, gates: pd.DataFrame, checklist: pd.DataFr
         "venue_toolchain_gate": "CRG-2-venue-toolchain-package",
     }
     (OUTPUT_DIR / "config.json").write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+    crp7_status = status_lookup(items, "item_id", "status").get("CRP-7-rendered-text-metadata-boundary", "missing")
+    rendered_boundary = (
+        "Rendered-PDF text-layer and metadata verification pass on the current server through the PDF render boundary audit."
+        if crp7_status == "pass"
+        else "Rendered-PDF text-layer and metadata verification remain blocked until PRB-4/PRB-5 pass."
+    )
     text = f"""# E11 Camera-Ready Package Audit
 
 This generated audit is a package-readiness boundary, not a new empirical result.
@@ -281,11 +303,11 @@ checklist.
 
 Allowed now: share the current server evidence package only when
 `CRG-1-current-server-package` passes and the final run summary records
-`make e11-full`.
+`make e11-full`. {rendered_boundary}
 
 Blocked now: claiming full venue-toolchain clean-checkout reproducibility,
-rendered-PDF text-layer or metadata verification, or stronger benchmark and
-predictive-condition wording unless the corresponding gates pass.
+or stronger benchmark and predictive-condition wording unless the corresponding
+gates pass.
 
 Artifacts:
 - [package_item_matrix.csv](../results/e11_camera_ready_package_audit/package_item_matrix.csv)
