@@ -12,7 +12,7 @@
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 3130864,
+      "size_bytes": 3135711,
       "size": "3.0 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 2158327,
+      "size_bytes": 2160972,
       "size": "2.1 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 290871293,
+      "size_bytes": 290871780,
       "size": "277.4 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833537,
+      "size_bytes": 5833551,
       "size": "5.6 MB"
     },
     {
@@ -1252,8 +1252,8 @@
     },
     {
       "path": "results/e11_natural_negative_search_protocol/phase2_power_audit/outcome_state_machine.csv",
-      "rows": 6,
-      "size": "1.1 KB"
+      "rows": 7,
+      "size": "1.6 KB"
     },
     {
       "path": "results/e11_heldout_generality_audit/generality_evidence_matrix.csv",
@@ -2215,7 +2215,7 @@
     },
     {
       "path": "discussion/e11_natural_negative_search_phase2_power_audit.md",
-      "size": "8.0 KB"
+      "size": "10.6 KB"
     },
     {
       "path": "discussion/e11_heldout_generality_audit.md",

@@ -23,6 +23,7 @@ from scripts.e11_write_natural_negative_power_audit import (
 
 OUTPUT_DIR = Path("results/e11_natural_negative_search_protocol/phase2_power_audit")
 DISCUSSION_PATH = Path("discussion/e11_natural_negative_search_phase2_power_audit.md")
+PHASE2_EVAL_DIR = Path("results/e11_natural_negative_search_protocol/phase2_multiplicity_evaluation")
 SEED_COUNT = 3
 FAMILY_SIZE = 8
 
@@ -140,45 +141,119 @@ def build_interpretation_ladder() -> pd.DataFrame:
     )
 
 
-def build_outcome_state_machine() -> pd.DataFrame:
+def phase2_current_context() -> dict[str, object]:
+    decisions_path = PHASE2_EVAL_DIR / "primary_decisions.csv"
+    gates_path = PHASE2_EVAL_DIR / "gate_report.csv"
+    if not decisions_path.exists() or not gates_path.exists():
+        return {
+            "current_state_id": "P2-S1-not-run",
+            "observed_count": 0,
+            "adjusted_worse_count": 0,
+            "head_gain_fail_count": 0,
+            "tail_quality_pass_count": 0,
+            "gate_status": "not_ready",
+            "current_evidence": "phase2 multiplicity evaluation outputs are absent",
+        }
+
+    decisions = pd.read_csv(decisions_path)
+    gates = pd.read_csv(gates_path)
+    gate_status = gates.set_index("gate_id")["status"].astype(str).to_dict()
+    observed_count = int(decisions["output_status"].astype(str).eq("observed").sum())
+    adjusted_worse_count = int(
+        decisions["adjusted_primary_decision"].astype(str).eq("primary_worse_adjusted").sum()
+    )
+    head_gain_fail_count = int(decisions["head_gain_gate"].astype(str).str.lower().eq("false").sum())
+    tail_quality_pass_count = int(decisions["tail_quality_gate"].astype(str).str.lower().eq("true").sum())
+    quality_pass_adjusted = int(
+        decisions[
+            decisions["adjusted_primary_decision"].astype(str).eq("primary_worse_adjusted")
+            & decisions["quality_gate"].astype(str).str.lower().eq("true")
+        ].shape[0]
+    )
+
+    if observed_count == 0:
+        current_state_id = "P2-S1-not-run"
+    elif observed_count < FAMILY_SIZE:
+        current_state_id = "P2-S2-partial"
+    elif adjusted_worse_count and quality_pass_adjusted:
+        current_state_id = "P2-S3-adjusted-positive"
+    elif adjusted_worse_count:
+        current_state_id = "P2-S6-quality-failure"
+    elif head_gain_fail_count == FAMILY_SIZE and tail_quality_pass_count == FAMILY_SIZE:
+        current_state_id = "P2-S7-complete-null-head-gain-caveat"
+    else:
+        current_state_id = "P2-S4-complete-null-above-mde"
+
+    return {
+        "current_state_id": current_state_id,
+        "observed_count": observed_count,
+        "adjusted_worse_count": adjusted_worse_count,
+        "head_gain_fail_count": head_gain_fail_count,
+        "tail_quality_pass_count": tail_quality_pass_count,
+        "gate_status": gate_status.get("NNS-P2-E4-heldout-architecture-claim", "missing"),
+        "current_evidence": (
+            f"{observed_count}/{FAMILY_SIZE} observed; adjusted_worse_rows={adjusted_worse_count}; "
+            f"head_gain_gate_fail_rows={head_gain_fail_count}; tail_quality_gate_pass_rows={tail_quality_pass_count}; "
+            f"NNS-P2-E4={gate_status.get('NNS-P2-E4-heldout-architecture-claim', 'missing')}"
+        ),
+    }
+
+
+def build_outcome_state_machine(context: dict[str, object]) -> pd.DataFrame:
+    current_state_id = str(context["current_state_id"])
+    current_evidence = str(context["current_evidence"])
+    rows = [
+        {
+            "state_id": "P2-S1-not-run",
+            "trigger": "0/8 phase2 primary metric rows",
+            "claim_state": "not_ready",
+            "required_action": "wait for Slurm outputs; do not inspect partial settings for claims",
+        },
+        {
+            "state_id": "P2-S2-partial",
+            "trigger": "1-7/8 phase2 primary metric rows",
+            "claim_state": "not_ready_partial_family",
+            "required_action": "report partial rows only as progress; keep claim gate closed",
+        },
+        {
+            "state_id": "P2-S3-adjusted-positive",
+            "trigger": "8/8 rows; at least one Holm-adjusted primary worse row passes quality gates",
+            "claim_state": "heldout_architecture_boundary_candidate",
+            "required_action": "run mechanism analysis and forbid broad optimizer-performance wording",
+        },
+        {
+            "state_id": "P2-S4-complete-null-above-mde",
+            "trigger": "8/8 rows; no adjusted positive; target effect is above phase2 MDE",
+            "claim_state": "finite_phase2_null_candidate_with_detectable_effect_caveat",
+            "required_action": "state effect-size floor and keep claim within ResNet34 registered family",
+        },
+        {
+            "state_id": "P2-S5-complete-null-below-mde",
+            "trigger": "8/8 rows; no adjusted positive; target effect is below phase2 MDE",
+            "claim_state": "underpowered_phase2_null",
+            "required_action": "do not use as strong held-out null; add seeds or larger search family",
+        },
+        {
+            "state_id": "P2-S6-quality-failure",
+            "trigger": "adjusted positive exists only in rows failing head-gain or tail-quality gates",
+            "claim_state": "quality_caveated_boundary",
+            "required_action": "treat as diagnostic failure mode, not as primary natural counterexample",
+        },
+        {
+            "state_id": "P2-S7-complete-null-head-gain-caveat",
+            "trigger": "8/8 rows; no adjusted positive; all rows fail head-gain while tail-quality passes",
+            "claim_state": "finite_phase2_null_candidate_with_head_gain_and_detectable_effect_caveats",
+            "required_action": "report a bounded ResNet34 finite-null candidate, not mechanism validation or a universal natural null",
+        },
+    ]
     return pd.DataFrame(
         [
             {
-                "state_id": "P2-S1-not-run",
-                "trigger": "0/8 phase2 primary metric rows",
-                "claim_state": "not_ready",
-                "required_action": "wait for Slurm outputs; do not inspect partial settings for claims",
-            },
-            {
-                "state_id": "P2-S2-partial",
-                "trigger": "1-7/8 phase2 primary metric rows",
-                "claim_state": "not_ready_partial_family",
-                "required_action": "report partial rows only as progress; keep claim gate closed",
-            },
-            {
-                "state_id": "P2-S3-adjusted-positive",
-                "trigger": "8/8 rows; at least one Holm-adjusted primary worse row passes quality gates",
-                "claim_state": "heldout_architecture_boundary_candidate",
-                "required_action": "run mechanism analysis and forbid broad optimizer-performance wording",
-            },
-            {
-                "state_id": "P2-S4-complete-null-above-mde",
-                "trigger": "8/8 rows; no adjusted positive; target effect is above phase2 MDE",
-                "claim_state": "finite_phase2_null_candidate_with_detectable_effect_caveat",
-                "required_action": "state effect-size floor and keep claim within ResNet34 registered family",
-            },
-            {
-                "state_id": "P2-S5-complete-null-below-mde",
-                "trigger": "8/8 rows; no adjusted positive; target effect is below phase2 MDE",
-                "claim_state": "underpowered_phase2_null",
-                "required_action": "do not use as strong held-out null; add seeds or larger search family",
-            },
-            {
-                "state_id": "P2-S6-quality-failure",
-                "trigger": "adjusted positive exists only in rows failing head-gain or tail-quality gates",
-                "claim_state": "quality_caveated_boundary",
-                "required_action": "treat as diagnostic failure mode, not as primary natural counterexample",
-            },
+                **row,
+                "current_match": "yes" if row["state_id"] == current_state_id else "no",
+                "current_evidence": current_evidence if row["state_id"] == current_state_id else "",
+            }
+            for row in rows
         ]
     )
 
@@ -188,6 +263,7 @@ def write_discussion(
     mde_table: pd.DataFrame,
     ladder: pd.DataFrame,
     state_machine: pd.DataFrame,
+    context: dict[str, object],
 ) -> None:
     adjusted_mde = mde_table[
         (mde_table["alpha_scope"] == "holm_bonferroni_worst_case")
@@ -203,8 +279,9 @@ def write_discussion(
 
 This generated audit records the detectable-effect and interpretation boundary
 for the registered 8-setting ResNet34 held-out architecture phase2 family. It is
-a pre-output design audit: it is written before phase2 metric rows exist and
-must not be tuned after inspecting phase2 outcomes.
+a frozen design audit plus post-output readout: the detectable-effect grid and
+state machine were fixed before phase2 outcomes, and the current row now reads
+the completed multiplicity evaluator without changing thresholds or claims.
 
 The primary test is the paired across-seed log ratio for
 `tail_output_drift_sq_ratio_spectral_over_fro`, with a one-sided worse-than-one
@@ -212,6 +289,14 @@ alternative and Holm-adjusted phase-family decision. With only 3 seeds per
 setting, the phase2 family is mainly a held-out architecture stress test for
 large effects; null results below the audited MDE are explicitly underpowered.
 The registered seed count is 3 seeds per setting.
+
+## Current Post-Output Reading
+
+Current state: `{context["current_state_id"]}`. Evidence:
+{context["current_evidence"]}. This supports only a bounded ResNet34
+held-out-architecture finite-null candidate with detectable-effect and head-gain
+caveats; it is not a natural counterexample, mechanism validation, or universal
+natural finite null.
 
 ## Adjusted Minimum Detectable Ratio
 
@@ -227,7 +312,7 @@ The registered seed count is 3 seeds per setting.
 
 ## Outcome State Machine
 
-{markdown_table(state_machine, ["state_id", "trigger", "claim_state", "required_action"])}
+{markdown_table(state_machine, ["state_id", "trigger", "claim_state", "required_action", "current_match", "current_evidence"])}
 
 Generated tables:
 
@@ -244,12 +329,13 @@ def main() -> None:
     power_grid = build_power_grid()
     mde_table = build_mde_table()
     ladder = build_interpretation_ladder()
-    state_machine = build_outcome_state_machine()
+    context = phase2_current_context()
+    state_machine = build_outcome_state_machine(context)
     power_grid.to_csv(OUTPUT_DIR / "power_grid.csv", index=False)
     mde_table.to_csv(OUTPUT_DIR / "minimum_detectable_effect.csv", index=False)
     ladder.to_csv(OUTPUT_DIR / "interpretation_ladder.csv", index=False)
     state_machine.to_csv(OUTPUT_DIR / "outcome_state_machine.csv", index=False)
-    write_discussion(power_grid, mde_table, ladder, state_machine)
+    write_discussion(power_grid, mde_table, ladder, state_machine, context)
     print(f"saved natural negative-search phase2 power audit to {OUTPUT_DIR} and {DISCUSSION_PATH}")
 
 

@@ -2,8 +2,9 @@
 
 This generated audit records the detectable-effect and interpretation boundary
 for the registered 8-setting ResNet34 held-out architecture phase2 family. It is
-a pre-output design audit: it is written before phase2 metric rows exist and
-must not be tuned after inspecting phase2 outcomes.
+a frozen design audit plus post-output readout: the detectable-effect grid and
+state machine were fixed before phase2 outcomes, and the current row now reads
+the completed multiplicity evaluator without changing thresholds or claims.
 
 The primary test is the paired across-seed log ratio for
 `tail_output_drift_sq_ratio_spectral_over_fro`, with a one-sided worse-than-one
@@ -11,6 +12,14 @@ alternative and Holm-adjusted phase-family decision. With only 3 seeds per
 setting, the phase2 family is mainly a held-out architecture stress test for
 large effects; null results below the audited MDE are explicitly underpowered.
 The registered seed count is 3 seeds per setting.
+
+## Current Post-Output Reading
+
+Current state: `P2-S7-complete-null-head-gain-caveat`. Evidence:
+8/8 observed; adjusted_worse_rows=0; head_gain_gate_fail_rows=8; tail_quality_gate_pass_rows=8; NNS-P2-E4=finite_null_candidate. This supports only a bounded ResNet34
+held-out-architecture finite-null candidate with detectable-effect and head-gain
+caveats; it is not a natural counterexample, mechanism validation, or universal
+natural finite null.
 
 ## Adjusted Minimum Detectable Ratio
 
@@ -54,14 +63,15 @@ The registered seed count is 3 seeds per setting.
 
 ## Outcome State Machine
 
-| state_id                      | trigger                                                                       | claim_state                                                | required_action                                                          |
-|:------------------------------|:------------------------------------------------------------------------------|:-----------------------------------------------------------|:-------------------------------------------------------------------------|
-| P2-S1-not-run                 | 0/8 phase2 primary metric rows                                                | not_ready                                                  | wait for Slurm outputs; do not inspect partial settings for claims       |
-| P2-S2-partial                 | 1-7/8 phase2 primary metric rows                                              | not_ready_partial_family                                   | report partial rows only as progress; keep claim gate closed             |
-| P2-S3-adjusted-positive       | 8/8 rows; at least one Holm-adjusted primary worse row passes quality gates   | heldout_architecture_boundary_candidate                    | run mechanism analysis and forbid broad optimizer-performance wording    |
-| P2-S4-complete-null-above-mde | 8/8 rows; no adjusted positive; target effect is above phase2 MDE             | finite_phase2_null_candidate_with_detectable_effect_caveat | state effect-size floor and keep claim within ResNet34 registered family |
-| P2-S5-complete-null-below-mde | 8/8 rows; no adjusted positive; target effect is below phase2 MDE             | underpowered_phase2_null                                   | do not use as strong held-out null; add seeds or larger search family    |
-| P2-S6-quality-failure         | adjusted positive exists only in rows failing head-gain or tail-quality gates | quality_caveated_boundary                                  | treat as diagnostic failure mode, not as primary natural counterexample  |
+| state_id                             | trigger                                                                           | claim_state                                                               | required_action                                                                                       | current_match   | current_evidence                                                                                                                |
+|:-------------------------------------|:----------------------------------------------------------------------------------|:--------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------|:----------------|:--------------------------------------------------------------------------------------------------------------------------------|
+| P2-S1-not-run                        | 0/8 phase2 primary metric rows                                                    | not_ready                                                                 | wait for Slurm outputs; do not inspect partial settings for claims                                    | no              |                                                                                                                                 |
+| P2-S2-partial                        | 1-7/8 phase2 primary metric rows                                                  | not_ready_partial_family                                                  | report partial rows only as progress; keep claim gate closed                                          | no              |                                                                                                                                 |
+| P2-S3-adjusted-positive              | 8/8 rows; at least one Holm-adjusted primary worse row passes quality gates       | heldout_architecture_boundary_candidate                                   | run mechanism analysis and forbid broad optimizer-performance wording                                 | no              |                                                                                                                                 |
+| P2-S4-complete-null-above-mde        | 8/8 rows; no adjusted positive; target effect is above phase2 MDE                 | finite_phase2_null_candidate_with_detectable_effect_caveat                | state effect-size floor and keep claim within ResNet34 registered family                              | no              |                                                                                                                                 |
+| P2-S5-complete-null-below-mde        | 8/8 rows; no adjusted positive; target effect is below phase2 MDE                 | underpowered_phase2_null                                                  | do not use as strong held-out null; add seeds or larger search family                                 | no              |                                                                                                                                 |
+| P2-S6-quality-failure                | adjusted positive exists only in rows failing head-gain or tail-quality gates     | quality_caveated_boundary                                                 | treat as diagnostic failure mode, not as primary natural counterexample                               | no              |                                                                                                                                 |
+| P2-S7-complete-null-head-gain-caveat | 8/8 rows; no adjusted positive; all rows fail head-gain while tail-quality passes | finite_phase2_null_candidate_with_head_gain_and_detectable_effect_caveats | report a bounded ResNet34 finite-null candidate, not mechanism validation or a universal natural null | yes             | 8/8 observed; adjusted_worse_rows=0; head_gain_gate_fail_rows=8; tail_quality_gate_pass_rows=8; NNS-P2-E4=finite_null_candidate |
 
 Generated tables:
 

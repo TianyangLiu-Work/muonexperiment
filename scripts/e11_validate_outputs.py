@@ -5594,7 +5594,18 @@ def main() -> None:
             "P2-S4-complete-null-above-mde",
             "P2-S5-complete-null-below-mde",
             "P2-S6-quality-failure",
+            "P2-S7-complete-null-head-gain-caveat",
         },
+        "phase2_current_state": natural_phase2_outcome_state[
+            natural_phase2_outcome_state["current_match"].astype(str).eq("yes")
+        ]["state_id"].tolist()
+        == ["P2-S7-complete-null-head-gain-caveat"],
+        "phase2_current_evidence": natural_phase2_outcome_state[
+            natural_phase2_outcome_state["current_match"].astype(str).eq("yes")
+        ]["current_evidence"].astype(str).str.contains(
+            "8/8 observed; adjusted_worse_rows=0; head_gain_gate_fail_rows=8; tail_quality_gate_pass_rows=8",
+            regex=False,
+        ).all(),
         "phase2_adjusted_mde_above_one": natural_phase2_mde[
             natural_phase2_mde["alpha_scope"].eq("holm_bonferroni_worst_case")
         ]["minimum_detectable_ratio"].gt(1.0).all(),
@@ -5660,6 +5671,9 @@ def main() -> None:
             "detectable-effect and interpretation boundary",
             "8-setting ResNet34 held-out architecture phase2 family",
             "3 seeds per setting",
+            "Current Post-Output Reading",
+            "P2-S7-complete-null-head-gain-caveat",
+            "head-gain",
             "Adjusted Minimum Detectable Ratio",
             "Outcome State Machine",
             "underpowered",

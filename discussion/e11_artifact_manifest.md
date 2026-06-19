@@ -256,7 +256,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_natural_negative_search_protocol/phase2_power_audit/power_grid.csv                             |     72 | 5.8 KB    |
 | results/e11_natural_negative_search_protocol/phase2_power_audit/minimum_detectable_effect.csv              |     36 | 8.3 KB    |
 | results/e11_natural_negative_search_protocol/phase2_power_audit/interpretation_ladder.csv                  |      5 | 1.2 KB    |
-| results/e11_natural_negative_search_protocol/phase2_power_audit/outcome_state_machine.csv                  |      6 | 1.1 KB    |
+| results/e11_natural_negative_search_protocol/phase2_power_audit/outcome_state_machine.csv                  |      7 | 1.6 KB    |
 | results/e11_heldout_generality_audit/generality_evidence_matrix.csv                                        |      7 | 5.3 KB    |
 | results/e11_heldout_generality_audit/generality_claim_gate.csv                                             |      5 | 1.1 KB    |
 | results/e11_bold_conjecture_register/conjecture_register.csv                                               |      5 | 4.2 KB    |
@@ -469,7 +469,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_natural_negative_search_phase1_interim_synthesis.md                          | 6.2 KB   |
 | discussion/e11_natural_negative_search_phase2_NNS-P2-heldout-architecture-boundary.md       | 8.9 KB   |
 | discussion/e11_natural_negative_search_phase2_evaluation.md                                 | 5.7 KB   |
-| discussion/e11_natural_negative_search_phase2_power_audit.md                                | 8.0 KB   |
+| discussion/e11_natural_negative_search_phase2_power_audit.md                                | 10.6 KB  |
 | discussion/e11_heldout_generality_audit.md                                                  | 10.8 KB  |
 | discussion/e11_evidence_index.md                                                            | 29.3 KB  |
 | discussion/e11_research_synthesis.md                                                        | 7.8 KB   |
