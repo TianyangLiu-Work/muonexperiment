@@ -1,7 +1,7 @@
 {
   "array_concurrency": 1,
   "chunk_size": 20,
-  "max_new_elements": 20,
+  "max_new_elements": 1,
   "max_submit_jobs_per_user": 30,
   "reserved_submit_slots": 6,
   "run_registry": "results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv",

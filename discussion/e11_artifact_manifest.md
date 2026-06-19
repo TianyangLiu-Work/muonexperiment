@@ -308,7 +308,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_cifar100_resnet_lt_tuned_benchmark_protocol/acceptance_gates.csv                               |      7 | 1.8 KB    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/settings_registry.csv                                       |    164 | 122.2 KB  |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/execution_status.csv                                        |      1 | 189 B     |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv                       |    164 | 81.3 KB   |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/run_registry.csv                       |    164 | 81.4 KB   |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/family_selection.csv                   |      6 | 1021 B    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/final_claim_plan.csv                   |      6 | 682 B     |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_selection/gate_report.csv                        |      5 | 491 B     |
@@ -318,7 +318,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit/all_class_guardrail_mde.csv               |     12 | 2.9 KB    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit/interpretation_ladder.csv                 |      6 | 1.4 KB    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/final_power_audit/outcome_state_machine.csv                 |      5 | 1.0 KB    |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/validation_setting_variance.csv        |    180 | 46.3 KB   |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/validation_setting_variance.csv        |    184 | 47.4 KB   |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/spent_pilot_paired_variance.csv        |     16 | 3.6 KB    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/variance_prior_summary.csv             |      8 | 1.6 KB    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/variance_prior_audit/mde_sensitivity_from_empirical_sd.csv  |     40 | 9.6 KB    |
@@ -342,17 +342,17 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_cifar100_resnet_lt_tuned_benchmark/final_launch_audit/final_launch_history.csv                 |      2 | 633 B     |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/chunk_plan.csv                        |      6 | 2.2 KB    |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_submission_plan/queue_policy.csv                      |      4 | 879 B     |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_launch_decision.csv               |      1 | 870 B     |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_selected_settings.csv             |     20 | 7.8 KB    |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_queue_snapshot.csv                |      4 | 383 B     |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/launch_history.csv                       |      7 | 2.4 KB    |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv  |     45 | 10.9 KB   |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_launch_decision.csv               |      1 | 838 B     |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_selected_settings.csv             |      1 | 511 B     |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/latest_queue_snapshot.csv                |     23 | 1.9 KB    |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/slurm_launch_audit/launch_history.csv                       |      9 | 3.0 KB    |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/completed_setting_leaderboard.csv  |     46 | 11.1 KB   |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/family_progress.csv                |      6 | 1.4 KB    |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/occupancy_interim_summary.csv      |      6 | 706 B     |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/occupancy_interim_summary.csv      |      6 | 704 B     |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/partial_grid_guardrail.csv         |      5 | 955 B     |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/interim_validation_audit/claim_boundary_gates.csv           |      5 | 832 B     |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv           |      6 | 1.4 KB    |
-| results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/observed_surface.csv               |      3 | 552 B     |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/leakage_guard_matrix.csv           |      6 | 1.3 KB    |
+| results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/observed_surface.csv               |      3 | 553 B     |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_leakage_audit/immutability_contract.csv          |      4 | 821 B     |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/refresh_state.csv               |      1 | 398 B     |
 | results/e11_cifar100_resnet_lt_tuned_benchmark/validation_refresh_firewall/allowed_transition_matrix.csv   |      5 | 1.2 KB    |
@@ -450,8 +450,8 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_completion_audit.md                                                          | 5.3 KB   |
 | discussion/e11_end_of_draft_self_review.md                                                  | 7.3 KB   |
 | discussion/e11_reference_audit.md                                                           | 6.1 KB   |
-| discussion/e11_submission_repro_audit.md                                                    | 8.5 KB   |
-| discussion/e11_artifact_review_packet.md                                                    | 29.3 KB  |
+| discussion/e11_submission_repro_audit.md                                                    | 8.6 KB   |
+| discussion/e11_artifact_review_packet.md                                                    | 29.4 KB  |
 | discussion/e11_camera_ready_package_audit.md                                                | 7.6 KB   |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB  |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB  |
@@ -525,7 +525,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol.md                               | 14.8 KB  |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_selection.md                              | 75.1 KB  |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_interim_audit.md                          | 12.3 KB  |
-| discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md                          | 7.1 KB   |
+| discussion/e11_cifar100_resnet_lt_tuned_benchmark_leakage_audit.md                          | 6.2 KB   |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_refresh_firewall.md                       | 5.9 KB   |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_protocol_seal.md                          | 12.3 KB  |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_fairness_audit.md                         | 7.9 KB   |
@@ -537,7 +537,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_evaluation.md                       | 7.2 KB   |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_final_launch_audit.md                     | 7.4 KB   |
 | discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_plan.md                             | 5.7 KB   |
-| discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md                     | 12.3 KB  |
+| discussion/e11_cifar100_resnet_lt_tuned_benchmark_slurm_launch_audit.md                     | 5.5 KB   |
 | discussion/e11_cifar100_resnet_practical_muon_bridge.md                                     | 5.7 KB   |
 
 ## Ignored Local Artifacts

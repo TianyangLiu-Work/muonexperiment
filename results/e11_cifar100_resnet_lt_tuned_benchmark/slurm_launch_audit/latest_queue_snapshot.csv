@@ -1,5 +1,24 @@
 job_id,state,job_name,reason_or_node,source
-1359_46,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
 1359_47,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
-1359_45,R,e11-lt-tuned-val,yumingz5-linux-ml,squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_49,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_50,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_51,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_52,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_53,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_54,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_55,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_56,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_57,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_58,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_59,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_60,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_61,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_62,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_63,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_64,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_65,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_66,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_67,PD,e11-lt-tuned-val,(JobArrayTaskLimit),squeue -h -r -u $USER -o %i|%t|%j|%R
+1359_46,R,e11-lt-tuned-val,yumingz5-linux-ml,squeue -h -r -u $USER -o %i|%t|%j|%R
+1404_48,R,e11-lt-tuned-val,yumingz5-linux-ml,squeue -h -r -u $USER -o %i|%t|%j|%R
 1403,R,verl-branchgrpo-qwen3-4b,yumingz5-linux-ml,squeue -h -r -u $USER -o %i|%t|%j|%R
