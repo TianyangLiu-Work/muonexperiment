@@ -1,6 +1,6 @@
 recipe_family,expected_settings,complete_settings,complete_fraction,family_status,best_completed_setting_id,best_completed_recipe_name,best_completed_few_balanced_accuracy,best_completed_few_ci95_low,best_completed_few_ci95_high,best_completed_all_balanced_accuracy,ci_relation_to_current_global_best,selection_status
 adamw_cb_loss_tuned,24,24,1.0,complete,TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd1e-4-warm500,adamw_cb_loss_tuned_beta0p9999_lr1e-3_wd1e-4_warm500,0.0934666666666666,0.0833065235215683,0.103626809811765,0.35822,current_global_best_ci_low_above_family_best_ci_high,eligible_family_complete
-adamw_cb_sampler_tuned,8,0,0.0,not_started,,,,,,,not_observed,not_allowed_partial_family
+adamw_cb_sampler_tuned,8,1,0.125,partial,TBV-adamw_cb_sampler_tuned-lr1e-4-wd1e-4-warm0,adamw_cb_sampler_tuned_lr1e-4_wd1e-4_warm0,0.0569333333333333,0.0488061880326894,0.0650604786339772,0.2766,current_global_best_ci_low_above_family_best_ci_high,not_allowed_partial_family
 adamw_ce_tuned,12,12,1.0,complete,TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0,adamw_ce_tuned_lr1e-3_wd5e-4_warm0,0.1121333333333333,0.1039578680148738,0.1203087986517927,0.4150600000000001,few_ci_intervals_overlap_or_family_is_global_best,eligible_family_complete
 ns_muon_cb_tuned,36,0,0.0,not_started,,,,,,,not_observed,not_allowed_partial_family
 ns_muon_matrix_tuned,72,0,0.0,not_started,,,,,,,not_observed,not_allowed_partial_family

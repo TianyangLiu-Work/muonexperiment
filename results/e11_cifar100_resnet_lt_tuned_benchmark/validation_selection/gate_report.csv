@@ -1,6 +1,6 @@
 gate_id,status,evidence,blocks_final_claim
-TVS-1-validation-grid-complete,not_ready,48/164 validation settings complete,yes
+TVS-1-validation-grid-complete,not_ready,49/164 validation settings complete,yes
 TVS-2-family-selection,not_ready,3/6 recipe families selected,yes
-TVS-5-occupancy-logging-complete,not_ready,48/164 occupancy traces complete,yes
+TVS-5-occupancy-logging-complete,not_ready,49/164 occupancy traces complete,yes
 TVS-3-final-seed-quarantine,pass,no final_claim outputs exist before validation selection,yes
 TVS-4-final-run-plan,not_ready,final seed set 20..29 assigned only after validation family selection and occupancy logging,yes
