@@ -3,4 +3,4 @@ TPS-1-hash-manifest-complete,pass,18/18 sealed artifacts hashed,untracked protoc
 TPS-2-validation-registry-sealed,pass,164 registry rows; seed sets=10..14,post-exposure grid or array-order drift
 TPS-3-selection-rule-sealed,pass,primary objective anchor present,metric-dependent selection objective rewrite
 TPS-4-final-seed-quarantine-sealed,pass,final_claim seed_set 20..29 tuning_allowed=no; no final_claim outputs exist,final-seed unblinding before TVS/FEP/TFE/FLA gates
-TPS-5-post-exposure-claim-authority,pass,49/164 validation settings exposed,benchmark wording from partial validation exposure
+TPS-5-post-exposure-claim-authority,pass,50/164 validation settings exposed,benchmark wording from partial validation exposure
