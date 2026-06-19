@@ -12,7 +12,7 @@
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 3151637,
+      "size_bytes": 3152146,
       "size": "3.0 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 2169319,
+      "size_bytes": 2170115,
       "size": "2.1 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 290876651,
+      "size_bytes": 290876780,
       "size": "277.4 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833551,
+      "size_bytes": 5833548,
       "size": "5.6 MB"
     },
     {
@@ -1378,7 +1378,7 @@
     {
       "path": "results/e11_mechanism_referee_audit/theory_measurement_contract.csv",
       "rows": 6,
-      "size": "3.4 KB"
+      "size": "3.5 KB"
     },
     {
       "path": "results/e11_mechanism_referee_audit/falsification_trigger_matrix.csv",
@@ -2104,7 +2104,7 @@
     },
     {
       "path": "discussion/e11_quantitative_claim_ledger.md",
-      "size": "21.7 KB"
+      "size": "22.1 KB"
     },
     {
       "path": "discussion/e11_reproduction_checklist.md",
@@ -2172,7 +2172,7 @@
     },
     {
       "path": "discussion/e11_mechanism_referee_audit.md",
-      "size": "30.5 KB"
+      "size": "30.8 KB"
     },
     {
       "path": "discussion/e11_bold_conjecture_register.md",

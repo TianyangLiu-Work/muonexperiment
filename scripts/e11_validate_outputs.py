@@ -9965,11 +9965,15 @@ def main() -> None:
     if set(theory_contract["contract_id"]) != expected_contract_ids:
         raise AssertionError("mechanism referee audit must preserve the fixed theory-measurement contract set")
     contract_text = " ".join(theory_contract.astype(str).agg(" ".join, axis=1).tolist())
+    if "pre-output reviewer failure response" in contract_text:
+        raise AssertionError("mechanism referee theory contract contains stale pre-output reviewer failure response wording")
     for phrase in [
         "first-order tail-logit response",
         "head-gain-normalized comparison",
         "nrank(G_H)>ssrank(B_T,A_T)",
         "source-standardized transport residual",
+        "completed negative final boundary",
+        "completed-final reviewer failure response",
         "finite natural boundary search",
         "global trajectory or convergence theorem",
         "universal natural-null wording outside registered phase1/phase2 families",
@@ -9989,6 +9993,8 @@ def main() -> None:
     trigger_text = " ".join(falsification_triggers.astype(str).agg(" ".join, axis=1).tolist())
     for phrase in [
         "Downgrade predictive-condition wording",
+        "completed-final reviewer failure response",
+        "completed final negative boundary",
         "Allow only finite registered phase1/phase2 null-candidate wording",
         "finite phase1/phase2 null candidates with detectable-effect, head-gain, and quality caveats",
         "matched-head-gain local mechanism only",
