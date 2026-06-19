@@ -12,7 +12,7 @@
       "path": "scripts",
       "role": "Experiment runners, artifact writers, and validation scripts.",
       "commit_policy": "commit E11 scripts",
-      "size_bytes": 3149858,
+      "size_bytes": 3151637,
       "size": "3.0 MB"
     },
     {
@@ -26,14 +26,14 @@
       "path": "discussion",
       "role": "Generated head-to-tail paper evidence plus legacy condition-geometry guardrail notes.",
       "commit_policy": "commit",
-      "size_bytes": 2167430,
+      "size_bytes": 2169319,
       "size": "2.1 MB"
     },
     {
       "path": "results",
       "role": "Generated CSV evidence used by the paper table, discussion artifacts, and validator.",
       "commit_policy": "commit current E11 evidence set",
-      "size_bytes": 290875878,
+      "size_bytes": 290876651,
       "size": "277.4 MB"
     },
     {
@@ -54,7 +54,7 @@
       "path": "paper",
       "role": "Head-to-tail LaTeX paper draft, generated paper table, and experiment triage notes.",
       "commit_policy": "commit source and selected rendered PDFs",
-      "size_bytes": 5833552,
+      "size_bytes": 5833551,
       "size": "5.6 MB"
     },
     {
@@ -1007,8 +1007,8 @@
     },
     {
       "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/active_failure_modes.csv",
-      "rows": 3,
-      "size": "983 B"
+      "rows": 4,
+      "size": "1.5 KB"
     },
     {
       "path": "results/e11_condition_score_v5_protocol/reviewer_failure_response/failure_mode_register.csv",
@@ -2400,7 +2400,7 @@
     },
     {
       "path": "discussion/e11_condition_score_v5_reviewer_failure_response.md",
-      "size": "19.6 KB"
+      "size": "21.3 KB"
     },
     {
       "path": "discussion/e11_condition_score_v5_direction_guardrail_failure_audit.md",

@@ -1,5 +1,5 @@
 priority,evidence_item,resolves_failure_modes,command_or_protocol,claim_unlocked,depends_on_final_outputs
-P0,preserve the completed v5 final failures in the main ledger,V5-RFR-2-data-transport-boundary; V5-RFR-4-direction-guardrail-failure; V5-RFR-current-p0-not-ready,make e11-cifar-resnet-condition-score-v5-reviewer-failure-response,"reviewer-safe negative boundary wording, not P0 eligibility",no
+P0,preserve the completed v5 final failures in the main ledger,V5-RFR-2-data-transport-boundary; V5-RFR-4-direction-guardrail-failure; V5-RFR-7-both-final-splits-fail; V5-RFR-current-p0-not-ready,make e11-cifar-resnet-condition-score-v5-reviewer-failure-response,"reviewer-safe negative boundary wording, not P0 eligibility",no
 P0,open a new score protocol before any repair,V5-RFR-1 through V5-RFR-7,new preregistered validation/final split family with unspent rows,"future P0 attempt only, under a different protocol",no
 P1,registered larger-dataset matched-head-gain diagnostic,data and architecture transport-boundary concerns,new preregistered protocol with unspent validation/final splits,broader mechanism generality,no
 P1,tuned long-horizon optimizer benchmark,mechanism-vs-performance objection,"run tuned benchmark validation grid, selection, then final paired seeds",optimizer-performance claim if positive,no

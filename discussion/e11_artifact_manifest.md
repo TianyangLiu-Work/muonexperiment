@@ -207,7 +207,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_condition_score_v5_protocol/final_interpretation_plan/leakage_lock.csv                         |      5 | 998 B     |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/final_split_output_status.csv            |      2 | 773 B     |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/current_gate_snapshot.csv                |      9 | 1.6 KB    |
-| results/e11_condition_score_v5_protocol/reviewer_failure_response/active_failure_modes.csv                 |      3 | 983 B     |
+| results/e11_condition_score_v5_protocol/reviewer_failure_response/active_failure_modes.csv                 |      4 | 1.5 KB    |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/failure_mode_register.csv                |      9 | 4.5 KB    |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/reviewer_objection_map.csv               |      5 | 1.2 KB    |
 | results/e11_condition_score_v5_protocol/reviewer_failure_response/claim_downgrade_actions.csv              |      6 | 2.0 KB    |
@@ -515,7 +515,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_condition_score_v5_final_evaluation.md                                       | 6.8 KB   |
 | discussion/e11_condition_score_v5_final_power_audit.md                                      | 10.3 KB  |
 | discussion/e11_condition_score_v5_final_interpretation_plan.md                              | 10.9 KB  |
-| discussion/e11_condition_score_v5_reviewer_failure_response.md                              | 19.6 KB  |
+| discussion/e11_condition_score_v5_reviewer_failure_response.md                              | 21.3 KB  |
 | discussion/e11_condition_score_v5_direction_guardrail_failure_audit.md                      | 14.5 KB  |
 | discussion/e11_cifar100_resnet_lt_standard_eval.md                                          | 3.3 KB   |
 | discussion/e11_cifar100_resnet_lt_recipe_benchmark.md                                       | 6.6 KB   |

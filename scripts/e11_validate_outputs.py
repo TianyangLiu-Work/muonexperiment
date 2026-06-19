@@ -5168,9 +5168,20 @@ def main() -> None:
         and v5_response_objections["remaining_evidence"].astype(str).str.len().gt(25).all()
         and set(v5_response_next["priority"]).issuperset({"P0", "P1"})
         and set(v5_response_gate_snapshot["gate_id"]) == set(v5_final_gates["gate_id"])
-        and {"V5-RFR-2-data-transport-boundary", "V5-RFR-4-direction-guardrail-failure", "V5-RFR-current-p0-not-ready"}.issubset(
+        and {
+            "V5-RFR-2-data-transport-boundary",
+            "V5-RFR-4-direction-guardrail-failure",
+            "V5-RFR-7-both-final-splits-fail",
+            "V5-RFR-current-p0-not-ready",
+        }.issubset(
             set(v5_response_active["active_failure_mode_id"])
         )
+        and v5_response_active[
+            v5_response_active["active_failure_mode_id"].eq("V5-RFR-7-both-final-splits-fail")
+        ]["allowed_current_wording"]
+        .astype(str)
+        .str.contains("completed final negative boundary")
+        .all()
         and v5_response_active["forbidden_current_wording"].astype(str).str.len().gt(25).all()
         and v5_response_config["primary_score"]
         == "condition_score_v5_transport_normalized_amplitude_minus_direction"
@@ -5191,6 +5202,7 @@ def main() -> None:
             "Current Final Gate Snapshot",
             "Current Active Failure Modes",
             "V5-RFR-4-direction-guardrail-failure",
+            "V5-RFR-7-both-final-splits-fail",
             "Failure Mode Register",
             "Reviewer Objection Map",
             "Claim Downgrade Actions",

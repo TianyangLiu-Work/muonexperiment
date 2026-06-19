@@ -252,7 +252,7 @@ def build_next_evidence_queue() -> pd.DataFrame:
             {
                 "priority": "P0",
                 "evidence_item": "preserve the completed v5 final failures in the main ledger",
-                "resolves_failure_modes": "V5-RFR-2-data-transport-boundary; V5-RFR-4-direction-guardrail-failure; V5-RFR-current-p0-not-ready",
+                "resolves_failure_modes": "V5-RFR-2-data-transport-boundary; V5-RFR-4-direction-guardrail-failure; V5-RFR-7-both-final-splits-fail; V5-RFR-current-p0-not-ready",
                 "command_or_protocol": "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response",
                 "claim_unlocked": "reviewer-safe negative boundary wording, not P0 eligibility",
                 "depends_on_final_outputs": "no",
@@ -384,6 +384,32 @@ def build_active_failure_modes(split_status: pd.DataFrame, gates: pd.DataFrame) 
                 "current_evidence": str(row.evidence),
                 "allowed_current_wording": "incomplete final reporting state",
                 "forbidden_current_wording": "any final-score conclusion from a partial control table",
+            }
+        )
+
+    split_gate_failures = {
+        "architecture": gates[
+            gates["status"].eq("fail") & gates["gate_id"].astype(str).str.startswith("v5_final_heldout_architecture_")
+        ],
+        "data_partition": gates[
+            gates["status"].eq("fail") & gates["gate_id"].astype(str).str.startswith("v5_final_heldout_data_partition_")
+        ],
+    }
+    if generated_count == len(split_status) and all(not frame.empty for frame in split_gate_failures.values()):
+        support_ids = []
+        evidence = []
+        for frame in split_gate_failures.values():
+            for row in frame.itertuples(index=False):
+                support_ids.append(str(row.gate_id))
+                evidence.append(f"{row.gate_id}={row.status} ({row.evidence})")
+        rows.append(
+            {
+                "active_failure_mode_id": "V5-RFR-7-both-final-splits-fail",
+                "supporting_gate_id": "; ".join(support_ids),
+                "current_status": "active",
+                "current_evidence": "; ".join(evidence),
+                "allowed_current_wording": "completed final negative boundary; local mechanism plus falsification evidence only",
+                "forbidden_current_wording": "the v5 frozen score is an unseen-task predictive condition",
             }
         )
 

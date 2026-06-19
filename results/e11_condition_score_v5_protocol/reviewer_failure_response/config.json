@@ -4,6 +4,6 @@
   "final_evaluator_config": "results/e11_condition_score_v5_protocol/final_score_evaluation/config.json",
   "interpretation_plan_dir": "results/e11_condition_score_v5_protocol/final_interpretation_plan",
   "final_outputs_generated": 2,
-  "active_failure_modes": 3,
+  "active_failure_modes": 4,
   "analysis_scope": "completed-final reviewer failure response; no final-row tuning"
 }
