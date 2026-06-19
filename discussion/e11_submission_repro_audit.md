@@ -21,8 +21,8 @@ gate remains `not_ready` when those tools are absent on the server.
 
 | path                                         | exists   |   size_bytes | sha256                                                           | header_is_pdf   | audit_status   |
 |:---------------------------------------------|:---------|-------------:|:-----------------------------------------------------------------|:----------------|:---------------|
-| paper/specgrad_activation_paper/main.pdf     | yes      |      2597208 | 045fd72cea492bf493490401ec02b7201b72eb899ed65454cd4ead7cf04624bd | yes             | pass           |
-| paper/specgrad_activation_paper/two_page.pdf | yes      |        62048 | ae874219cab765f8c2a5c7717ab17c0bd11c98c2d46b57342f6d61b229a3b934 | yes             | pass           |
+| paper/specgrad_activation_paper/main.pdf     | yes      |      2597208 | 8717679c8bf6b98ef5d25ea941f7eba03f7990bf43a5508dd7ed5dcb4a1b8c5f | yes             | pass           |
+| paper/specgrad_activation_paper/two_page.pdf | yes      |        62048 | 8bbd8319d21d562168e3f41682390237773e9117e17aef57317040740c5bc407 | yes             | pass           |
 
 ## Source Package Manifest
 
@@ -49,7 +49,7 @@ gate remains `not_ready` when those tools are absent on the server.
 | R3-preferred-latex-toolchain   | not_ready | pdflatex/bibtex/xelatex not all available                                                                                                        | run a clean checkout with pdflatex/bibtex/xelatex before claiming full venue-toolchain reproducibility |
 | R4-tectonic-fallback-toolchain | pass      | tectonic available                                                                                                                               | use make e11-paper-pdf or paper/specgrad_activation_paper make tectonic on this server                 |
 | R5-rendered-pdfs               | pass      | main.pdf and two_page.pdf have PDF headers and expected sizes                                                                                    | rebuild paper PDFs if either rendered artifact fails                                                   |
-| R6-full-artifact-validation    | pass      | make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full passed after 47-validation refresh under guarded parallel validation launch | record the make e11-full result in the commit/push summary                                             |
+| R6-full-artifact-validation    | pass      | make PYTHON=/data/conda_envs/SpatialQuantization/bin/python e11-full passed after 48-validation refresh under guarded parallel validation launch | record the make e11-full result in the commit/push summary                                             |
 
 ## Boundary
 

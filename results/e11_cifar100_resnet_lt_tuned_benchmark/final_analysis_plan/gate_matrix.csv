@@ -1,6 +1,6 @@
 gate_id,status,evidence,claim_effect
 FAP-1-final-quarantine,pass,no final_claim files exist,analysis plan remains pre-final
-FAP-2-family-selection-readiness,not_ready,2/6 families ready for final run,final analysis cannot run until one recipe per family is selected
+FAP-2-family-selection-readiness,not_ready,3/6 families ready for final run,final analysis cannot run until one recipe per family is selected
 FAP-3-power-audit-linked,pass,final power audit locks 10 final paired seeds,final analysis uses the pre-output MDE contract
 FAP-4-variance-prior-linked,pass,variance-prior audit is pre-final and does not inspect final seed outputs,MDE sensitivity remains separated from final outcomes
 FAP-5-primary-family-fixed,pass,four Muon-vs-baseline primary comparisons are fixed before final outputs,blocks cherry-picked final comparison wording

@@ -7,7 +7,7 @@ not inspect final seed outputs. Its purpose is to fix the paired-seed power,
 Holm family, all-class-collapse guardrail, and final claim ladder before any
 tuned benchmark final rows exist.
 
-Current validation-selected families: 2/6.
+Current validation-selected families: 3/6.
 The registered final split has 10 paired seeds and the primary
 few-class improvement family has 4 Holm-adjusted Muon-vs-baseline
 comparisons. With paired-diff SD 0.03, the Holm worst-case detectable few-class
@@ -22,7 +22,7 @@ SD before a clean benchmark win can be claimed.
 |:-----------------------|:------------|:------------------------------|:--------------------|:-----------------|-------------------:|:----------------------|
 | adamw_ce_tuned         | adamw       | selected                      | ready_for_final_run | 20..29           |                 10 | absent                |
 | sgd_momentum_ce_tuned  | sgd         | selected                      | ready_for_final_run | 20..29           |                 10 | absent                |
-| adamw_cb_loss_tuned    | adamw       | not_ready                     | not_ready           | 20..29           |                 10 | absent                |
+| adamw_cb_loss_tuned    | adamw       | selected                      | ready_for_final_run | 20..29           |                 10 | absent                |
 | adamw_cb_sampler_tuned | adamw       | not_ready                     | not_ready           | 20..29           |                 10 | absent                |
 | ns_muon_matrix_tuned   | ns_muon     | not_ready                     | not_ready           | 20..29           |                 10 | absent                |
 | ns_muon_cb_tuned       | ns_muon     | not_ready                     | not_ready           | 20..29           |                 10 | absent                |

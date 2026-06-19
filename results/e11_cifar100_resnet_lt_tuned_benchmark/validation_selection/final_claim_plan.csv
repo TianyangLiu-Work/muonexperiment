@@ -1,5 +1,5 @@
 recipe_family,final_status,selected_setting_id,selected_recipe_name,final_seed_set,planned_output_dir,tuning_allowed
-adamw_cb_loss_tuned,not_ready,,,,,no
+adamw_cb_loss_tuned,ready_for_final_run,TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd1e-4-warm500,adamw_cb_loss_tuned_beta0p9999_lr1e-3_wd1e-4_warm500,20..29,results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim/adamw_cb_loss_tuned,no
 adamw_cb_sampler_tuned,not_ready,,,,,no
 adamw_ce_tuned,ready_for_final_run,TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0,adamw_ce_tuned_lr1e-3_wd5e-4_warm0,20..29,results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim/adamw_ce_tuned,no
 ns_muon_cb_tuned,not_ready,,,,,no

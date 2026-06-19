@@ -1,6 +1,6 @@
 gate_id,status,evidence,claim_effect
 EVPA-1-final-seed-quarantine,pass,no files under results/e11_cifar100_resnet_lt_tuned_benchmark/final_claim,variance prior remains pre-final and cannot inspect final seeds
-EVPA-2-validation-sd-surface,pass,188 validation frequency-group variance rows,completed validation settings provide within-setting seed variability
+EVPA-2-validation-sd-surface,pass,192 validation frequency-group variance rows,completed validation settings provide within-setting seed variability
 EVPA-3-spent-pilot-paired-sd-surface,pass,16 spent-pilot paired-diff variance rows,paired-diff SD prior is anchored to pre-final spent pilot context
 EVPA-4-primary-few-sd-anchor,pass,few-class spent-pilot paired-diff SD p80=0.00933,primary few-class MDE can be compared with empirical pre-final variability
 EVPA-5-mde-sensitivity-grid,pass,MDE grid includes empirical p50/p80/p95/max and assumed_0p03 references,reviewers can see how final detectability changes under empirical variance priors
