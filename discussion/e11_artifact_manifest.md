@@ -96,7 +96,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | results/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation/heldout_score_summary.csv        |     10 | 3.6 KB    |
 | results/e11_cifar100_resnet_condition_score_next/heldout_score_evaluation/heldout_gate_report.csv          |      9 | 1.4 KB    |
 | results/e11_condition_score_theory_bridge/score_target_register.csv                                        |      4 | 1.9 KB    |
-| results/e11_condition_score_theory_bridge/fresh_protocol_requirements.csv                                  |      6 | 2.0 KB    |
+| results/e11_condition_score_theory_bridge/fresh_protocol_requirements.csv                                  |      6 | 3.3 KB    |
 | results/e11_condition_score_fresh_protocol/quarantine_register.csv                                         |      2 | 846 B     |
 | results/e11_condition_score_fresh_protocol/score_freeze_registry.csv                                       |      4 | 1.5 KB    |
 | results/e11_condition_score_fresh_protocol/fresh_split_registry.csv                                        |      4 | 1.3 KB    |
@@ -447,8 +447,8 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_completion_audit.md                                                          | 5.3 KB   |
 | discussion/e11_end_of_draft_self_review.md                                                  | 7.3 KB   |
 | discussion/e11_reference_audit.md                                                           | 6.1 KB   |
-| discussion/e11_submission_repro_audit.md                                                    | 8.3 KB   |
-| discussion/e11_artifact_review_packet.md                                                    | 29.4 KB  |
+| discussion/e11_submission_repro_audit.md                                                    | 8.4 KB   |
+| discussion/e11_artifact_review_packet.md                                                    | 29.5 KB  |
 | discussion/e11_camera_ready_package_audit.md                                                | 7.5 KB   |
 | discussion/e11_paper_readiness_audit.md                                                     | 34.9 KB  |
 | discussion/e11_top_conference_plan.md                                                       | 14.1 KB  |
@@ -492,7 +492,7 @@ This generated manifest documents the current reproducibility boundary for E11. 
 | discussion/e11_cifar100_resnet_condition_score_next_heldout_data.md                         | 8.1 KB   |
 | discussion/e11_cifar100_resnet_condition_score_next_heldout_evaluation.md                   | 7.2 KB   |
 | discussion/e11_condition_score_heldout_failure_theory_note.md                               | 2.8 KB   |
-| discussion/e11_condition_score_theory_bridge.md                                             | 10.6 KB  |
+| discussion/e11_condition_score_theory_bridge.md                                             | 14.9 KB  |
 | discussion/e11_condition_score_fresh_protocol.md                                            | 13.1 KB  |
 | discussion/e11_condition_score_fresh_evaluation.md                                          | 6.7 KB   |
 | discussion/e11_condition_score_failure_mechanism_audit.md                                   | 13.9 KB  |

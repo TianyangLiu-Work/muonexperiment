@@ -3672,13 +3672,15 @@ def main() -> None:
         and score_target_status.get("residual_layer_ranking") == "blocked_by_heldout_failure"
         and score_target_status.get("source_observed_transfer_control") == "architecture_transfer_only"
         and score_target_status.get("legacy_jvp_counterexample") == "v2_not_uniformly_better"
-        and requirement_status.get("R2-heldout-quarantine") == "required_for_next_protocol"
-        and requirement_status.get("R3-theory-derived-score") == "missing"
-        and requirement_status.get("R4-nested-calibration") == "missing"
-        and requirement_status.get("R5-fresh-heldout-gates") == "missing"
+        and requirement_status.get("R2-heldout-quarantine") == "satisfied_by_quarantine_register"
+        and requirement_status.get("R3-theory-derived-score")
+        == "satisfied_by_fresh_registry_and_v5_freeze"
+        and requirement_status.get("R4-nested-calibration")
+        == "satisfied_by_zero_fit_primary_and_validation_freeze"
+        and requirement_status.get("R5-fresh-heldout-gates") == "evaluated_failed_boundary"
     ):
         raise AssertionError(
-            "condition-score theory bridge must keep the failed held-outs quarantined and the next score/fresh-heldout work open"
+            "condition-score theory bridge must keep spent held-outs quarantined, record the later frozen-score protocol, and preserve the evaluated failed boundary"
         )
     fresh_protocol_dir = Path("results/e11_condition_score_fresh_protocol")
     quarantine_register = pd.read_csv(fresh_protocol_dir / "quarantine_register.csv")
@@ -8611,7 +8613,10 @@ def main() -> None:
         "blocked_by_heldout_failure",
         "These held-out splits are now spent",
         "fresh P0 predictive-condition attempt",
-        "does not support a claim that `condition_score_v2_calibrated_residual` predicts held-out residual layer-risk ranking",
+        "Post-Fresh Protocol Reading",
+        "evaluated failed boundary",
+        "later frozen v5 transport-normalized score",
+        "does not support a claim that `condition_score_v2_calibrated_residual` or the later frozen v5 transport-normalized score predicts held-out residual layer-risk ranking",
     ]
     assert_required_phrases(
         "condition-score theory bridge",

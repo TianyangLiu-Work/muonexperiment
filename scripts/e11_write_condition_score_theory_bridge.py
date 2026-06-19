@@ -23,6 +23,12 @@ OUTPUT_DIR = Path("results/e11_condition_score_theory_bridge")
 TARGET_REGISTER_PATH = OUTPUT_DIR / "score_target_register.csv"
 PROTOCOL_REQUIREMENTS_PATH = OUTPUT_DIR / "fresh_protocol_requirements.csv"
 OUTPUT_PATH = Path("discussion/e11_condition_score_theory_bridge.md")
+FRESH_PROTOCOL_STATUS_PATH = Path("results/e11_condition_score_fresh_protocol/protocol_status.csv")
+V5_FREEZE_STATUS_PATH = Path("results/e11_condition_score_v5_protocol/validation_score_freeze/freeze_status.csv")
+V5_FINAL_GATE_REPORT_PATH = Path(
+    "results/e11_condition_score_v5_protocol/final_score_evaluation/final_gate_report.csv"
+)
+V5_CLAIM_READINESS_PATH = Path("results/e11_condition_score_v5_theory_to_score_map/claim_readiness_ledger.csv")
 
 
 def _row(summary: pd.DataFrame, split_role: str, score: str) -> pd.Series:
@@ -38,6 +44,112 @@ def _score_line(row: pd.Series) -> str:
         f"CI=[{fmt(row['spearman_ci95_low'])}, {fmt(row['spearman_ci95_high'])}], "
         f"threshold={fmt(row['mean_threshold_below_one_accuracy'])}"
     )
+
+
+def _optional_csv(path: Path) -> pd.DataFrame:
+    if path.exists():
+        return pd.read_csv(path)
+    return pd.DataFrame()
+
+
+def _lookup(frame: pd.DataFrame, key_column: str, value_column: str) -> dict[str, str]:
+    if frame.empty or key_column not in frame.columns or value_column not in frame.columns:
+        return {}
+    return frame.set_index(key_column)[value_column].astype(str).to_dict()
+
+
+def _status_evidence(status: dict[str, str], evidence: dict[str, str], key: str) -> str:
+    key_status = status.get(key, "missing")
+    key_evidence = evidence.get(key, "no committed evidence yet")
+    return f"{key}={key_status}; {key_evidence}"
+
+
+def _post_protocol_status() -> dict[str, str]:
+    fresh_status = _optional_csv(FRESH_PROTOCOL_STATUS_PATH)
+    v5_freeze = _optional_csv(V5_FREEZE_STATUS_PATH)
+    v5_final_gates = _optional_csv(V5_FINAL_GATE_REPORT_PATH)
+    v5_readiness = _optional_csv(V5_CLAIM_READINESS_PATH)
+
+    fresh_status_by_item = _lookup(fresh_status, "item", "status")
+    fresh_evidence_by_item = _lookup(fresh_status, "item", "evidence")
+    v5_freeze_by_item = _lookup(v5_freeze, "item", "status")
+    v5_freeze_evidence_by_item = _lookup(v5_freeze, "item", "evidence")
+    v5_gate_by_id = _lookup(v5_final_gates, "gate_id", "status")
+    v5_gate_evidence_by_id = _lookup(v5_final_gates, "gate_id", "evidence")
+    v5_readiness_by_item = _lookup(v5_readiness, "item", "status")
+    v5_readiness_evidence_by_item = _lookup(v5_readiness, "item", "evidence")
+
+    quarantine_registered = fresh_status_by_item.get("spent-heldout quarantine") == "registered"
+    score_registry_registered = (
+        fresh_status_by_item.get("theory-derived score freeze registry") == "registered"
+    )
+    v5_score_frozen = v5_freeze_by_item.get("v5 transport-normalized residual score") == "frozen"
+    v5_final_completed = (
+        v5_readiness_by_item.get("v5 final gate family") == "completed_failed_boundary"
+    )
+    p0_not_ready = v5_gate_by_id.get("v5_p0_predictive_condition_claim") == "not_ready"
+
+    return {
+        "quarantine_status": (
+            "satisfied_by_quarantine_register" if quarantine_registered else "required_for_next_protocol"
+        ),
+        "quarantine_evidence": _status_evidence(
+            fresh_status_by_item, fresh_evidence_by_item, "spent-heldout quarantine"
+        ),
+        "score_freeze_status": (
+            "satisfied_by_fresh_registry_and_v5_freeze"
+            if score_registry_registered and v5_score_frozen
+            else "missing"
+        ),
+        "score_freeze_evidence": (
+            _status_evidence(
+                fresh_status_by_item,
+                fresh_evidence_by_item,
+                "theory-derived score freeze registry",
+            )
+            + "; "
+            + _status_evidence(
+                v5_freeze_by_item,
+                v5_freeze_evidence_by_item,
+                "v5 transport-normalized residual score",
+            )
+        ),
+        "nested_calibration_status": (
+            "satisfied_by_zero_fit_primary_and_validation_freeze"
+            if score_registry_registered and v5_score_frozen
+            else "missing"
+        ),
+        "nested_calibration_evidence": (
+            "zero-fit primary and nested secondary candidates are registered; "
+            + _status_evidence(
+                v5_freeze_by_item,
+                v5_freeze_evidence_by_item,
+                "v5 transport-normalized residual score",
+            )
+        ),
+        "fresh_gate_status": (
+            "evaluated_failed_boundary" if v5_final_completed and p0_not_ready else "missing"
+        ),
+        "fresh_gate_evidence": (
+            _status_evidence(
+                v5_gate_by_id,
+                v5_gate_evidence_by_id,
+                "v5_final_heldout_architecture_direction_threshold_accuracy",
+            )
+            + "; "
+            + _status_evidence(
+                v5_gate_by_id,
+                v5_gate_evidence_by_id,
+                "v5_final_heldout_data_partition_residual_spearman",
+            )
+            + "; "
+            + _status_evidence(
+                v5_readiness_by_item,
+                v5_readiness_evidence_by_item,
+                "predictive-condition claim",
+            )
+        ),
+    }
 
 
 def build_target_register(heldout: pd.DataFrame, retrospective: pd.DataFrame) -> pd.DataFrame:
@@ -109,6 +221,7 @@ def build_target_register(heldout: pd.DataFrame, retrospective: pd.DataFrame) ->
 
 
 def build_protocol_requirements() -> pd.DataFrame:
+    post_status = _post_protocol_status()
     return pd.DataFrame(
         [
             {
@@ -117,34 +230,39 @@ def build_protocol_requirements() -> pd.DataFrame:
                 "why_required": "The current held-outs pass threshold direction while failing residual ranking.",
                 "acceptance_evidence": "A future report has separate rows, gates, and claims for threshold accuracy and residual Spearman.",
                 "current_status": "satisfied_for_reporting",
+                "current_evidence": "held-out gate report and v5 final evaluator keep residual Spearman and direction-threshold gates separate",
             },
             {
                 "requirement_id": "R2-heldout-quarantine",
                 "requirement": "Do not use the failed ResNet34/CIFAR-100-LT or ResNet18/CIFAR-10-LT held-outs to fit, select, or tune the next score.",
                 "why_required": "These splits have already diagnosed v2 failure and are no longer clean final held-outs.",
                 "acceptance_evidence": "The next protocol states that these splits are diagnostic-only and records fresh final held-out split IDs.",
-                "current_status": "required_for_next_protocol",
+                "current_status": post_status["quarantine_status"],
+                "current_evidence": post_status["quarantine_evidence"],
             },
             {
                 "requirement_id": "R3-theory-derived-score",
                 "requirement": "Define the next score from theorem quantities before looking at fresh held-out targets.",
                 "why_required": "A top-tier predictive condition must not be a post-hoc regression on failed held-outs.",
                 "acceptance_evidence": "A frozen score registry names the mathematical terms, signs, transforms, and any coefficients before final evaluation.",
-                "current_status": "missing",
+                "current_status": post_status["score_freeze_status"],
+                "current_evidence": post_status["score_freeze_evidence"],
             },
             {
                 "requirement_id": "R4-nested-calibration",
                 "requirement": "If coefficients are learned, learn them only on calibration families with a nested validation split.",
                 "why_required": "Retrospective checkpoint success did not survive architecture/data transfer.",
                 "acceptance_evidence": "Calibration, validation, and final held-out split roles are disjoint and recorded in CSV.",
-                "current_status": "missing",
+                "current_status": post_status["nested_calibration_status"],
+                "current_evidence": post_status["nested_calibration_evidence"],
             },
             {
                 "requirement_id": "R5-fresh-heldout-gates",
                 "requirement": "Evaluate fresh architecture and data held-outs with CI lower endpoint above zero for residual Spearman and threshold accuracy above 0.8.",
                 "why_required": "The current P0 claim failed exactly these held-out residual-ranking gates.",
                 "acceptance_evidence": "Both fresh split gate rows pass, with early-layer, source-observed, and legacy scaled-JVP comparisons reported.",
-                "current_status": "missing",
+                "current_status": post_status["fresh_gate_status"],
+                "current_evidence": post_status["fresh_gate_evidence"],
             },
             {
                 "requirement_id": "R6-negative-outcome-reporting",
@@ -152,6 +270,7 @@ def build_protocol_requirements() -> pd.DataFrame:
                 "why_required": "The CIFAR-10-LT data split shows a baseline dominating the calibrated v2 score.",
                 "acceptance_evidence": "The claim ledger and gate report preserve failed gates and baseline wins.",
                 "current_status": "satisfied_for_current_failure",
+                "current_evidence": "v2, fresh, v4, and v5 evaluators keep failed final gates visible and block the P0 predictive-condition claim",
             },
         ]
     )
@@ -182,17 +301,21 @@ This generated bridge turns the held-out condition-score failure into a theory-f
 
 ## Fresh Protocol Requirements
 
-{markdown_table(protocol_requirements, ["requirement_id", "requirement", "why_required", "acceptance_evidence", "current_status"])}
+{markdown_table(protocol_requirements, ["requirement_id", "requirement", "why_required", "acceptance_evidence", "current_status", "current_evidence"])}
 
 ## Theory Consequence
 
-The current theorem-to-score bridge is not a scalar success story. A below-one drift-threshold guardrail survived both held-outs, but the residual-ranking target failed on both registered final splits. These held-out splits are now spent: they may define the obstruction and motivate a new theory-derived score, but they cannot be used to tune that score and then serve as clean P0 evidence.
+The current theorem-to-score bridge is not a scalar success story. A below-one drift-threshold guardrail survived both v2 held-outs, but the residual-ranking target failed on both registered final splits. These held-out splits are now spent: they may define the obstruction and motivate a new theory-derived score, but they cannot be used to tune that score and then serve as clean P0 evidence.
+
+## Post-Fresh Protocol Reading
+
+The later fresh/v4/v5 protocols executed the missing next-step work without converting it into a positive predictive-condition claim. The fresh score registry and v5 validation-freeze artifacts satisfy the protocol-freezing requirements, while the completed v5 final gate family is an evaluated failed boundary: ResNeXt50-32x4d fails the direction-threshold gate and CIFAR-10-LT cross-partition reverses residual ranking. The correct top-conference posture is therefore stronger than a pending-work caveat but still negative: the work has a frozen theory-to-score attempt and a falsifying held-out boundary, not an unseen-task predictor.
 
 ## Paper Claim Boundary
 
 Allowed: the present condition-score evidence supports a local matched-head-gain drift mechanism and a direction-threshold guardrail.
 
-Blocked: the present condition-score evidence does not support a claim that `condition_score_v2_calibrated_residual` predicts held-out residual layer-risk ranking across architecture and data families.
+Blocked: the present condition-score evidence does not support a claim that `condition_score_v2_calibrated_residual` or the later frozen v5 transport-normalized score predicts held-out residual layer-risk ranking across architecture and data families.
 
 Artifacts:
 - [score_target_register.csv](../{TARGET_REGISTER_PATH.as_posix()})
