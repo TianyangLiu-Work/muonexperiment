@@ -4342,6 +4342,21 @@ def main() -> None:
     ):
         raise AssertionError("theory proof-obligation register must preserve obligations, assumptions, claim boundaries, and queue")
     proof_text = Path("discussion/e11_theory_proof_obligation_register.md").read_text(encoding="utf-8")
+    theorem_queue_text = " ".join(theorem_queue.astype(str).agg(" ".join, axis=1).tolist())
+    for stale_phrase in [
+        "pre-output detectable-effect scale",
+        "rerun v5 reviewer failure response after final outputs",
+    ]:
+        if stale_phrase in theorem_queue_text:
+            raise AssertionError(f"theory proof-obligation queue contains stale v5 final wording: {stale_phrase}")
+    for phrase in [
+        "completed v5 final power audit",
+        "negative-transport boundary evidence",
+        "completed-final v5 reviewer failure response",
+        "new unspent-protocol requirement",
+    ]:
+        if phrase not in theorem_queue_text:
+            raise AssertionError(f"theory proof-obligation queue missing completed-final v5 phrase: {phrase}")
     assert_required_phrases(
         "theory proof-obligation register",
         proof_text,
@@ -5002,6 +5017,8 @@ def main() -> None:
         and v5_power_config["primary_score"]
         == "condition_score_v5_transport_normalized_amplitude_minus_direction"
         and "no final-row tuning" in str(v5_power_config["analysis_scope"])
+        and "post-output" in str(v5_power_config["analysis_scope"])
+        and "score repair" in str(v5_power_config["analysis_scope"])
         and set(v5_power_ladder["case_id"]) == expected_v5_power_cases
         and set(v5_power_states["state_id"]) == expected_v5_power_states
         and 0.42
@@ -5020,7 +5037,8 @@ def main() -> None:
         v5_power_text,
         [
             "E11 Condition-Score V5 Final Power Audit",
-            "pre-output detectable-effect contract",
+            "completed-final detectable-effect audit",
+            "without score repair",
             "Fisher-z resolution",
             "mean-Spearman MDE",
             "underpowered",
@@ -8868,7 +8886,8 @@ def main() -> None:
     ).read_text(encoding="utf-8")
     required_condition_score_v5_power_phrases = [
         "Condition-Score V5 Final Power Audit",
-        "pre-output detectable-effect contract",
+        "completed-final detectable-effect audit",
+        "without score repair",
         "Fisher-z resolution",
         "mean-Spearman MDE",
         "underpowered",

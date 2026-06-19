@@ -76,7 +76,7 @@ def build_split_power_design(config: dict[str, object], design: dict[str, int]) 
                 "reference_points_per_transfer": design["reference_points_per_transfer"],
                 "reference_transfer_pairs": design["reference_transfer_pairs"],
                 "primary_residual_gate": "mean Spearman CI lower endpoint above zero",
-                "power_boundary": "pre-output reference only; actual final evaluator reports observed mean_points",
+                "power_boundary": "registered reference design; final evaluator reports observed mean_points",
             }
         )
     return pd.DataFrame(rows)
@@ -220,14 +220,14 @@ def write_discussion(
     ].iloc[0]
     text = f"""# E11 Condition-Score V5 Final Power Audit
 
-This generated audit is a pre-output detectable-effect contract for the v5
-final condition-score test. It reads the validation-frozen score `{score}` and
-the registered final split paths, but it does not inspect, refit, reselect, or
-retune on final rows. Its purpose is to define how much residual-Spearman signal
-the submitted ResNeXt50-32x4d and CIFAR-10 cross-partition final splits can
-resolve before their outputs exist. The audit records Fisher-z resolution,
-mean-Spearman MDE, and negative transport boundary wording before either final
-split is interpreted.
+This generated audit is a completed-final detectable-effect audit for the v5
+final condition-score test. It reads the validation-frozen score `{score}`, the
+registered final split paths, and output-completeness state, but it does not
+refit, reselect, repair, or retune on final rows. Its purpose is to preserve the
+detectable-effect scale registered before final outputs and apply it after the
+outputs exist without score repair. The audit records Fisher-z resolution,
+mean-Spearman MDE, and negative transport boundary wording for the completed
+final family.
 
 Current final split outputs generated: {generated}/{len(split_design)}.
 
@@ -303,7 +303,7 @@ def main() -> None:
                 "reference_points_per_transfer": design["reference_points_per_transfer"],
                 "reference_transfer_pairs": design["reference_transfer_pairs"],
                 "final_outputs_generated": int(split_design["current_output_status"].eq("generated").sum()),
-                "analysis_scope": "pre-output v5 final detectable-effect audit; no final-row tuning",
+                "analysis_scope": "post-output v5 final detectable-effect audit; no final-row tuning or score repair",
             },
             indent=2,
         )

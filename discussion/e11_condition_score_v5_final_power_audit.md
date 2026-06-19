@@ -1,13 +1,13 @@
 # E11 Condition-Score V5 Final Power Audit
 
-This generated audit is a pre-output detectable-effect contract for the v5
-final condition-score test. It reads the validation-frozen score `condition_score_v5_transport_normalized_amplitude_minus_direction` and
-the registered final split paths, but it does not inspect, refit, reselect, or
-retune on final rows. Its purpose is to define how much residual-Spearman signal
-the submitted ResNeXt50-32x4d and CIFAR-10 cross-partition final splits can
-resolve before their outputs exist. The audit records Fisher-z resolution,
-mean-Spearman MDE, and negative transport boundary wording before either final
-split is interpreted.
+This generated audit is a completed-final detectable-effect audit for the v5
+final condition-score test. It reads the validation-frozen score `condition_score_v5_transport_normalized_amplitude_minus_direction`, the
+registered final split paths, and output-completeness state, but it does not
+refit, reselect, repair, or retune on final rows. Its purpose is to preserve the
+detectable-effect scale registered before final outputs and apply it after the
+outputs exist without score repair. The audit records Fisher-z resolution,
+mean-Spearman MDE, and negative transport boundary wording for the completed
+final family.
 
 Current final split outputs generated: 2/2.
 

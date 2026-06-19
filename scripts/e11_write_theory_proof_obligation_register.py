@@ -298,17 +298,17 @@ def build_theorem_to_experiment_queue() -> pd.DataFrame:
             },
             {
                 "priority": "P0",
-                "task": "classify v5 final positive/null/negative outcomes against the pre-output detectable-effect scale",
+                "task": "preserve the completed v5 final power audit as negative-transport boundary evidence",
                 "artifact_or_command": "make e11-cifar-resnet-condition-score-v5-final-power-audit",
-                "unblocks": "underpowered-null versus negative-transport wording for final residual-Spearman gates",
-                "dependency": "v5 final evaluator refreshed",
+                "unblocks": "completed-final negative-versus-underpowered wording for failed residual-Spearman gates",
+                "dependency": "completed v5 final evaluator and final power audit",
             },
             {
                 "priority": "P0",
-                "task": "rerun v5 reviewer failure response after final outputs",
+                "task": "preserve the completed-final v5 reviewer failure response and claim downgrades",
                 "artifact_or_command": "make e11-cifar-resnet-condition-score-v5-reviewer-failure-response",
-                "unblocks": "claim downgrade wording for positive or negative finals",
-                "dependency": "v5 final evaluator refreshed",
+                "unblocks": "no-repair negative boundary wording and new unspent-protocol requirement",
+                "dependency": "completed v5 final evaluator and reviewer failure response",
             },
             {
                 "priority": "P1",
