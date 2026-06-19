@@ -1,6 +1,6 @@
 recipe_family,selection_status,expected_settings,complete_settings,selected_setting_id,selected_recipe_name,primary_few_balanced_accuracy,tie_break_all_balanced_accuracy,selection_rule
 adamw_cb_loss_tuned,selected,24,24,TBV-adamw_cb_loss_tuned-beta0p9999-lr1e-3-wd1e-4-warm500,adamw_cb_loss_tuned_beta0p9999_lr1e-3_wd1e-4_warm500,0.0934666666666666,0.35822,"maximize validation few balanced accuracy, tie-break by all balanced accuracy"
-adamw_cb_sampler_tuned,not_ready,8,2,,,,,wait for every registered validation setting in the family
+adamw_cb_sampler_tuned,not_ready,8,3,,,,,wait for every registered validation setting in the family
 adamw_ce_tuned,selected,12,12,TBV-adamw_ce_tuned-lr1e-3-wd5e-4-warm0,adamw_ce_tuned_lr1e-3_wd5e-4_warm0,0.1121333333333333,0.4150600000000001,"maximize validation few balanced accuracy, tie-break by all balanced accuracy"
 ns_muon_cb_tuned,not_ready,36,0,,,,,wait for every registered validation setting in the family
 ns_muon_matrix_tuned,not_ready,72,0,,,,,wait for every registered validation setting in the family
